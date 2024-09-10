@@ -24,21 +24,25 @@
 }
 
 .gradient-form {
-    /* 确保背景图覆盖整个页面 */
-    background-image: url('../../assets/images/logos/background.png');
-    background-size: cover; /* 确保背景图覆盖整个容器 */
-    background-position: center; /* 居中显示背景图 */
-    background-repeat: no-repeat; /* 防止背景图重复 */
-    height: 100vh; /* 使背景图覆盖整个视口高度 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-.card {
-background-color: rgba(255, 255, 255, 0.9); /* 使卡片有点透明，背景图能隐约可见 */
+  /* 确保背景图覆盖整个页面 */
+  background-image: url("../../assets/images/logos/background.png");
+  background-size: cover; /* 确保背景图覆盖整个容器 */
+  background-position: center; /* 居中显示背景图 */
+  background-repeat: no-repeat; /* 防止背景图重复 */
+  height: 100vh; /* 使背景图覆盖整个视口高度 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-  
+
+.card {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.9
+  ); /* 使卡片有点透明，背景图能隐约可见 */
+}
 
 @media (min-width: 768px) {
   .gradient-form {
@@ -93,9 +97,9 @@ background-color: rgba(255, 255, 255, 0.9); /* 使卡片有点透明，背景图
 }
 
 .login-button {
-    padding: 10px 20px; /* 调整内边距 */
-    font-size: 16px; /* 调整字体大小 */
-    border-radius: 5px; /* 适当调整圆角 */
-    width: 100%; /* 确保按钮占满可用空间 */
-    box-sizing: border-box; /* 确保内边距不会影响元素的宽度 */
-  }
+  padding: 10px 20px; /* 调整内边距 */
+  font-size: 16px; /* 调整字体大小 */
+  border-radius: 5px; /* 适当调整圆角 */
+  width: 100%; /* 确保按钮占满可用空间 */
+  box-sizing: border-box; /* 确保内边距不会影响元素的宽度 */
+}

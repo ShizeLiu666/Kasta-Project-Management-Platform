@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Alert from "@mui/material/Alert";
+import { Form, FormGroup, Input, Button, Label } from "reactstrap";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons"; // 导入眼睛图标
-import Alert from "@mui/material/Alert"; // 导入 Alert 组件
 import "./LoginPage.css";
 import kastaLogo from "../../assets/images/logos/kasta_logo.png";
+import CreateAccountModal from "./CreateAccountModal"; // 引入 CreateAccountModal 组件
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 控制显示/隐藏密码
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [alert, setAlert] = useState({
     severity: "",
     message: "",
     open: false,
   });
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false); // 用于控制显示注册表单
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,48 +36,40 @@ const LoginPage = () => {
 
       if (response.data && response.data.success) {
         const token = response.data.data.token;
+        if (rememberMe) {
+          localStorage.setItem("authToken", token);
+        } else {
+          sessionStorage.setItem("authToken", token);
+        }
 
-        // 将 token 和用户名存储在 localStorage 中
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("username", username); // 存储用户名
-        console.log("Received token:", token);
-
-        // 设置成功提示
         setAlert({
           severity: "success",
           message: "Login successful! Redirecting...",
           open: true,
         });
 
-        // 跳转到管理员项目页面并关闭提示框
         setTimeout(() => {
           setAlert({ open: false });
           navigate("/admin/projects");
         }, 1000);
       } else {
-        // 设置错误提示
         setAlert({
           severity: "error",
           message: response.data.errorMsg || "Login failed. Please try again.",
           open: true,
         });
 
-        // 3秒后关闭提示框
         setTimeout(() => {
           setAlert({ open: false });
         }, 3000);
       }
     } catch (error) {
-      console.error("Error during login:", error);
-
-      // 设置请求失败提示
       setAlert({
         severity: "error",
         message: "There was an error logging in. Please try again.",
         open: true,
       });
 
-      // 3秒后关闭提示框
       setTimeout(() => {
         setAlert({ open: false });
       }, 3000);
@@ -81,7 +77,11 @@ const LoginPage = () => {
   };
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword); // 切换显示/隐藏状态
+    setShowPassword(!showPassword);
+  };
+
+  const handleCreateAccountClick = () => {
+    setIsCreatingAccount(true); // 切换到创建账号表单
   };
 
   return (
@@ -91,6 +91,7 @@ const LoginPage = () => {
           <div className="col-xl-10">
             <div className="card rounded-3 text-black">
               <div className="row g-0">
+                {/* 左半边 */}
                 <div className="col-lg-6">
                   <div className="card-body p-md-5 mx-md-4">
                     <div className="text-center">
@@ -105,7 +106,6 @@ const LoginPage = () => {
                       </h4>
                     </div>
 
-                    {/* Alert 弹窗提示 */}
                     {alert.open && (
                       <Alert
                         severity={alert.severity}
@@ -121,72 +121,120 @@ const LoginPage = () => {
                       </Alert>
                     )}
 
-                    <div className="form-container">
-                      <form onSubmit={(e) => e.preventDefault()}>
-                        <div className="form-outline mb-4">
-                          <input
-                            type="text"
-                            id="username"
-                            className="form-control"
-                            placeholder="Username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            autoComplete="off"
-                          />
-                        </div>
-
-                        <div className="form-outline mb-4 position-relative">
-                          <input
-                            type={showPassword ? "text" : "password"} // 切换密码输入框的类型
-                            id="password"
-                            className="form-control"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            autoComplete="new-password"
-                          />
-                          <span
-                            className="password-toggle-icon"
-                            onClick={togglePasswordVisibility}
-                            style={{
-                              position: "absolute",
-                              right: "10px",
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <FontAwesomeIcon
-                              icon={showPassword ? faEyeSlash : faEye} // 根据状态切换图标
-                              style={{ color: "#525455" }} // 设置图标颜色为灰色
+                    {/* 这里根据 isCreatingAccount 的值决定显示登录表单还是注册表单 */}
+                    {isCreatingAccount ? (
+                      <CreateAccountModal />
+                    ) : (
+                      <div className="form-container">
+                        <Form onSubmit={(e) => e.preventDefault()}>
+                          <FormGroup className="mb-4">
+                            <Input
+                              type="text"
+                              id="username"
+                              name="username"
+                              placeholder="Username"
+                              value={username}
+                              onChange={(e) => setUsername(e.target.value)}
+                              autoComplete="off"
+                              required
                             />
-                          </span>
-                        </div>
+                          </FormGroup>
 
-                        <div className="text-center pt-1 mb-5 pb-1 move-down">
-                          <button
-                            className="btn btn-block fa-lg mb-3 login-button"
-                            style={{ backgroundColor: "#fbcd0b" }}
-                            type="submit"
-                            onClick={handleLogin}
+                          <FormGroup
+                            className="mb-4"
+                            style={{ position: "relative" }}
                           >
-                            Log in
-                          </button>
-                          <a className="text-muted" href="#!">
-                            Forgot password?
-                          </a>
-                        </div>
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              id="password"
+                              name="password"
+                              placeholder="Password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              autoComplete="new-password"
+                              required
+                            />
+                            <span
+                              onClick={togglePasswordVisibility}
+                              style={{
+                                position: "absolute",
+                                right: "10px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <FontAwesomeIcon
+                                icon={showPassword ? faEyeSlash : faEye}
+                                style={{ color: "#68696a" }}
+                              />
+                            </span>
+                          </FormGroup>
 
-                        <div className="d-flex align-items-center justify-content-center pb-4 move-down">
-                          <p className="mb-0 me-2">Don't have an account?</p>
-                          <a className="text-muted" href="#!">
-                            Create new
-                          </a>
-                        </div>
-                      </form>
-                    </div>
+                          <FormGroup className="d-flex justify-content-between align-items-center mb-4">
+                            <Label check className="text-dark">
+                              <Input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={() => setRememberMe(!rememberMe)}
+                                style={{
+                                  backgroundColor: rememberMe
+                                    ? "#fbcd0b"
+                                    : "white",
+                                  border: "none",
+                                }}
+                              />{" "}
+                              Remember Me
+                            </Label>
+                            <botton
+                              className="text-primary"
+                              style={{
+                                border: "none",
+                                background: "transparent",
+                              }}
+                            >
+                              Forgot Password?
+                            </botton>
+                          </FormGroup>
+
+                          <div className="text-center pt-1 mb-2 pb-0 move-down">
+                            <Button
+                              className="btn-block fa-lg mb-3 login-button"
+                              style={{
+                                backgroundColor: "#fbcd0b",
+                                borderColor: "#fbcd0b",
+                                fontWeight: "bold",
+                              }}
+                              type="submit"
+                              onClick={handleLogin}
+                            >
+                              Log in
+                            </Button>
+                          </div>
+
+                          <div className="d-flex justify-content-center align-items-center mb-2">
+                            <p className="mb-0">New Member?</p>
+                            <button
+                              className="text-primary ms-1" // 减少 margin-left 的值，保持适当的间距
+                              onClick={handleCreateAccountClick}
+                              style={{
+                                display: "inline-block",
+                                textDecoration: "none",
+                                fontSize: "1rem",
+                                border: "none",
+                                background: "transparent",
+                              }}
+                            >
+                              Create an account
+                            </button>
+                          </div>
+                        </Form>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {/* 右半边不动 */}
                 <div className="col-lg-6 d-flex align-items-center gradient-custom-2">
                   <div className="text-gradient">
                     <h4 className="mb-4">Living Enhanced</h4>
