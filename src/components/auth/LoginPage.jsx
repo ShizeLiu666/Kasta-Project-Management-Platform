@@ -84,6 +84,10 @@ const LoginPage = () => {
     setIsCreatingAccount(true); // 切换到创建账号表单
   };
 
+  const handleBackToLogin = () => {
+    setIsCreatingAccount(false); // 切换回登录表单
+  };
+
   return (
     <section className="h-100 gradient-form">
       <div className="container py-5 h-100">
@@ -101,7 +105,7 @@ const LoginPage = () => {
                         style={{ width: "150px" }}
                         alt="logo"
                       />
-                      <h4 className="mt-1 mb-5 pb-1 custom-title">
+                      <h4 className="mt-1 mb-4 pb-1 custom-title">
                         Project Management Platform
                       </h4>
                     </div>
@@ -123,7 +127,9 @@ const LoginPage = () => {
 
                     {/* 这里根据 isCreatingAccount 的值决定显示登录表单还是注册表单 */}
                     {isCreatingAccount ? (
-                      <CreateAccountModal />
+                      <CreateAccountModal
+                        handleBackToLogin={handleBackToLogin}
+                      /> // 传递 handleBackToLogin 函数
                     ) : (
                       <div className="form-container">
                         <Form onSubmit={(e) => e.preventDefault()}>
@@ -187,8 +193,11 @@ const LoginPage = () => {
                               Remember Me
                             </Label>
                             <botton
-                              className="text-primary"
+                              className="text-primary btn btn-link p-0"
                               style={{
+                                display: "inline-block",
+                                textDecoration: "none",
+                                fontSize: "0.9rem",
                                 border: "none",
                                 background: "transparent",
                               }}
@@ -197,9 +206,9 @@ const LoginPage = () => {
                             </botton>
                           </FormGroup>
 
-                          <div className="text-center pt-1 mb-2 pb-0 move-down">
+                          <div className="text-center pt-1 mb-1 pb-0 move-down">
                             <Button
-                              className="btn-block fa-lg mb-3 login-button"
+                              className="btn-block fa-lg mb-2 login-button"
                               style={{
                                 backgroundColor: "#fbcd0b",
                                 borderColor: "#fbcd0b",
@@ -212,18 +221,20 @@ const LoginPage = () => {
                             </Button>
                           </div>
 
-                          <div className="d-flex justify-content-center align-items-center mb-2">
+                          <div className="d-flex justify-content-center align-items-center mb-1">
                             <p className="mb-0">New Member?</p>
                             <button
-                              className="text-primary ms-1" // 减少 margin-left 的值，保持适当的间距
-                              onClick={handleCreateAccountClick}
+                              className="text-primary btn btn-link p-0"
                               style={{
                                 display: "inline-block",
                                 textDecoration: "none",
                                 fontSize: "1rem",
                                 border: "none",
                                 background: "transparent",
+                                marginLeft: "10px",
+                                // marginTop: "1px",
                               }}
+                              onClick={handleCreateAccountClick}
                             >
                               Create an account
                             </button>

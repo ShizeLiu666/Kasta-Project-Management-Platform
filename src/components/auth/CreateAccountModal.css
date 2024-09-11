@@ -12,3 +12,8 @@
 .swipe-right {
   transform: translateX(0);
 }
+
+.error-message {
+  color: red;
+  font-size: 14px; /* 设置你想要的字体大小 */
+}

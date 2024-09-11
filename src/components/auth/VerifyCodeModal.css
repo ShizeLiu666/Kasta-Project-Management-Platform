@@ -1,0 +1,20 @@
+
+/* Centered Text Styling */
+.text-center p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #333; /* 文本颜色 */
+}
+
+/* Resend link styling */
+.text-muted {
+  font-size: 14px;
+}
+
+.text-muted a {
+  color: #007bff; /* 超链接颜色 */
+}
+
+.text-muted a:hover {
+  text-decoration: underline; /* 悬停时下划线 */
+}
