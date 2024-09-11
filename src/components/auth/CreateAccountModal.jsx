@@ -7,12 +7,18 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axios from "axios"; // For sending HTTP requests
 import "./CreateAccountModal.css";
+import CountryCodeSelect from "./CountryCodeSelect"; // 引入新的 CountryCodeSelect 组件
 
 const CreateAccountModal = ({ handleBackToLogin }) => {
+  const [username, setUsername] = useState(""); // 新增 User Name
   const [email, setEmail] = useState("");
+  const [countryCode, setCountryCode] = useState(null); // State for country code
+  const [countryCodeError, setCountryCodeError] = useState(""); // 定义 countryCodeError 状态
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [usernameError, setUsernameError] = useState(""); // 新增 User Name 错误
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
@@ -24,6 +30,8 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   const [loading, setLoading] = useState(false); // 添加loading状态
 
   useEffect(() => {
+    setUsername(""); // 清空 User Name
+    setCountryCode(null); // 清空 Country Code
     setEmail("");
     setPassword("");
     setConfirmPassword("");
@@ -39,6 +47,12 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     }, 3000);
   };
 
+  // User Name validation
+  const validateUsername = (username) => {
+    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]{3,19}$/; // 字母开头，长度4-20，允许字母、数字和下划线
+    return usernameRegex.test(username);
+  };
+
   // Email validation
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -49,6 +63,21 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   const validatePassword = (password) => {
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Minimum 8 characters, with letters and numbers
     return passwordRegex.test(password);
+  };
+
+  // Real-time username validation
+  const handleUsernameChange = (e) => {
+    const value = e.target.value;
+    setUsername(value);
+    if (value === "") {
+      setUsernameError(""); // No error message if empty
+    } else if (!validateUsername(value)) {
+      setUsernameError(
+        "* Username must be 4-20 characters long, start with a letter, and can only contain letters, numbers, and underscores"
+      );
+    } else {
+      setUsernameError(""); // Clear error
+    }
   };
 
   // Real-time email validation
@@ -92,6 +121,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   // Check if the form is valid
   const isFormValid = () => {
     return (
+      validateUsername(username) && // Validate User Name
       validateEmail(email) &&
       validatePassword(password) &&
       password === confirmPassword
@@ -102,7 +132,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     setLoading(true); // 显示加载动画
     try {
       const response = await axios.post(`/api/users/send-verification-code?email=${encodeURIComponent(email)}`);
-  
+
       if (response.data.success) {
         setShowVerifyModal(true); // 显示验证码弹窗
         showAlert("success", "Verification code sent!");
@@ -115,7 +145,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
       setLoading(false); // 停止加载动画
     }
   };
-  
+
   const sendVerificationCodeWithoutFeedback = async (email) => {
     try {
       await axios.post(`/api/users/send-verification-code?email=${encodeURIComponent(email)}`);
@@ -123,18 +153,19 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
       console.log("Error sending verification code:", error);
     }
   };
-  
+
   // Handle sending verification code
   const handleSendVerificationCode = async (e) => {
     e.preventDefault();
+    setUsernameError(""); // Clear username error
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
-  
+
     if (!isFormValid()) return;
-  
+
     await sendVerificationCodeWithFeedback(email);
-  };  
+  };
 
   const handleVerifyCodeSubmit = (code) => {
     console.log("Received verification code:", code);
@@ -163,6 +194,20 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
         </Alert>
       )}
       <Form autoComplete="off">
+        {/* 新增 User Name 输入框 */}
+        <FormGroup className="mb-3">
+          <Label for="username">User Name</Label>
+          <Input
+            type="text"
+            id="username"
+            placeholder="User Name"
+            value={username}
+            onChange={handleUsernameChange}
+            autoComplete="off"
+          />
+          {usernameError && <p className="error-message">{usernameError}</p>}
+        </FormGroup>
+
         <FormGroup className="mb-3">
           <Label for="email">Email Address</Label>
           <Input
@@ -175,6 +220,15 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
           />
           {emailError && <p className="error-message">{emailError}</p>}
         </FormGroup>
+
+        <FormGroup className="mb-3">
+        <Label for="countryCode">Country Code</Label>
+        <CountryCodeSelect
+          value={countryCode}
+          onChange={setCountryCode}
+        />
+        {countryCodeError && <p className="error-message">{countryCodeError}</p>}
+      </FormGroup>
 
         <FormGroup className="mb-3">
           <Label for="password">Password</Label>
