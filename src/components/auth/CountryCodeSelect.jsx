@@ -3,6 +3,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import { FormGroup, Label } from "reactstrap"; // Import FormGroup and Label for consistent styling
+import './CountryCodeSelect.css'; // Import the custom CSS
 
 const countryOptions = [
   { en: "Australia", zh: "澳大利亚", locale: "AU", code: "61" },
@@ -26,7 +27,7 @@ const countryOptions = [
 
 const CountryCodeSelect = ({ value, onChange }) => {
   return (
-    <FormGroup className="mb-3"> {/* Maintain consistent margin with other fields */}
+    <FormGroup className="mb-3">
       <Label for="countryCode">Country Code</Label>
       <Autocomplete
         id="country-code-select"
@@ -52,15 +53,8 @@ const CountryCodeSelect = ({ value, onChange }) => {
             variant="outlined"
             placeholder="Choose a country"
             fullWidth
-            InputLabelProps={{ shrink: true }} // Keep label in place
-            sx={{
-              ".MuiOutlinedInput-root": {
-                borderRadius: "4px", // Add input field style
-              },
-              "& .MuiOutlinedInput-input": {
-                padding: "10px", // Adjust padding for consistency
-              },
-            }}
+            className="custom-form-control" // Apply the custom CSS class
+            InputLabelProps={{ shrink: true }}
           />
         )}
       />

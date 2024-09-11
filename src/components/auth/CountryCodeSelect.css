@@ -1,0 +1,25 @@
+.custom-form-control .MuiOutlinedInput-root {
+    height: 38px; /* Set the height to match your design */
+    font-size: 16px; /* Adjust font size inside the input */
+    background-color: #fff; /* Set background color */
+    border-radius: 0%;
+    border: none; /* Remove border */
+    box-shadow: none; /* Remove any shadows */
+}
+
+/* This targets the inner fieldset (which controls the border for the outlined input) */
+.custom-form-control .MuiOutlinedInput-notchedOutline {
+    border: none; /* Ensure the fieldset border is removed */
+}
+
+/* For hover or focus effects, make sure no borders are shown */
+.custom-form-control .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+.custom-form-control .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border: none; /* Remove hover/focus borders */
+}
+
+/* Optionally, remove the border when the dropdown is open */
+.custom-form-control .MuiAutocomplete-popupIndicator {
+    border: none;
+    box-shadow: none;
+}

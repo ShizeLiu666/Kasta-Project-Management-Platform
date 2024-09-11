@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Form, FormGroup, Input, Button, Label } from "reactstrap";
+import React, { useState, useEffect, useCallback } from "react";
+import { Form, FormGroup, Input, Button, Label, Row, Col } from "reactstrap";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import VerifyCodeModal from "./VerifyCodeModal";
 import Alert from "@mui/material/Alert";
@@ -11,9 +11,9 @@ import CountryCodeSelect from "./CountryCodeSelect"; // 引入新的 CountryCode
 
 const CreateAccountModal = ({ handleBackToLogin }) => {
   const [username, setUsername] = useState(""); // 新增 User Name
+  const [nickname, setNickname] = useState(""); // 新增 Nickname
   const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState(null); // State for country code
-  const [countryCodeError, setCountryCodeError] = useState(""); // 定义 countryCodeError 状态
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,13 +28,15 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     open: false,
   });
   const [loading, setLoading] = useState(false); // 添加loading状态
+  const [isValidForm, setIsValidForm] = useState(false); // State to track if the form is valid
 
   useEffect(() => {
-    setUsername(""); // 清空 User Name
-    setCountryCode(null); // 清空 Country Code
+    setUsername(""); // 初始化 User Name
+    setCountryCode(null); // 初始化 Country Code
     setEmail("");
     setPassword("");
     setConfirmPassword("");
+    setNickname(""); // 初始化 Nickname
   }, []);
 
   // 统一管理Alert展示时间的函数
@@ -64,6 +66,22 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Minimum 8 characters, with letters and numbers
     return passwordRegex.test(password);
   };
+
+  // 将 isFormValid 函数移到 useCallback 中，这样它可以作为 useEffect 的依赖
+  const isFormValid = useCallback(() => {
+    return (
+      validateUsername(username) &&
+      validateEmail(email) &&
+      validatePassword(password) &&
+      password === confirmPassword &&
+      countryCode
+    );
+  }, [username, email, password, confirmPassword, countryCode]);
+
+  // 更新表单是否有效的状态
+  useEffect(() => {
+    setIsValidForm(isFormValid());
+  }, [isFormValid]);
 
   // Real-time username validation
   const handleUsernameChange = (e) => {
@@ -118,26 +136,21 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     }
   };
 
-  // Check if the form is valid
-  const isFormValid = () => {
-    return (
-      validateUsername(username) && // Validate User Name
-      validateEmail(email) &&
-      validatePassword(password) &&
-      password === confirmPassword
-    );
-  };
-
   const sendVerificationCodeWithFeedback = async (email) => {
     setLoading(true); // 显示加载动画
     try {
-      const response = await axios.post(`/api/users/send-verification-code?email=${encodeURIComponent(email)}`);
+      const response = await axios.post(
+        `/api/users/send-verification-code?email=${encodeURIComponent(email)}`
+      );
 
       if (response.data.success) {
         setShowVerifyModal(true); // 显示验证码弹窗
         showAlert("success", "Verification code sent!");
       } else {
-        showAlert("error", response.data.errorMsg || "Error sending verification code");
+        showAlert(
+          "error",
+          response.data.errorMsg || "Error sending verification code"
+        );
       }
     } catch (error) {
       showAlert("error", "Error sending verification code");
@@ -148,7 +161,9 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
 
   const sendVerificationCodeWithoutFeedback = async (email) => {
     try {
-      await axios.post(`/api/users/send-verification-code?email=${encodeURIComponent(email)}`);
+      await axios.post(
+        `/api/users/send-verification-code?email=${encodeURIComponent(email)}`
+      );
     } catch (error) {
       console.log("Error sending verification code:", error);
     }
@@ -162,14 +177,25 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     setPasswordError("");
     setConfirmPasswordError("");
 
-    if (!isFormValid()) return;
+    if (!isValidForm) return;
 
     await sendVerificationCodeWithFeedback(email);
   };
 
-  const handleVerifyCodeSubmit = (code) => {
-    console.log("Received verification code:", code);
-    setShowVerifyModal(false);
+  const handleVerifyCodeSubmit = (verificationCode) => {
+    // 构建提交的表单数据
+    const userData = {
+      username,
+      password,
+      verificationCode,
+      nickName: nickname,
+      countryCode: countryCode?.code, // 假设countryCode是一个对象
+      userType: 0, // 假设默认userType为0
+      email,
+    };
+
+    // 打印数据以供后续调试使用
+    console.log("User Data to be submitted:", userData);
   };
 
   const handleBack = (e) => {
@@ -194,18 +220,35 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
         </Alert>
       )}
       <Form autoComplete="off">
-        {/* 新增 User Name 输入框 */}
+        {/* 将 User Name 和 Nickname 放在一行 */}
         <FormGroup className="mb-3">
-          <Label for="username">User Name</Label>
-          <Input
-            type="text"
-            id="username"
-            placeholder="User Name"
-            value={username}
-            onChange={handleUsernameChange}
-            autoComplete="off"
-          />
-          {usernameError && <p className="error-message">{usernameError}</p>}
+          <Row>
+            <Col md={6}>
+              <Label for="username">User Name</Label>
+              <Input
+                type="text"
+                id="username"
+                placeholder="User Name"
+                value={username}
+                onChange={handleUsernameChange}
+                autoComplete="off"
+              />
+              {usernameError && (
+                <p className="error-message">{usernameError}</p>
+              )}
+            </Col>
+            <Col md={6}>
+              <Label for="nickname">Nickname</Label>
+              <Input
+                type="text"
+                id="nickname"
+                placeholder="(Optional)"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)} // Handle Nickname input
+                autoComplete="off"
+              />
+            </Col>
+          </Row>
         </FormGroup>
 
         <FormGroup className="mb-3">
@@ -222,13 +265,8 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
         </FormGroup>
 
         <FormGroup className="mb-3">
-        <Label for="countryCode">Country Code</Label>
-        <CountryCodeSelect
-          value={countryCode}
-          onChange={setCountryCode}
-        />
-        {countryCodeError && <p className="error-message">{countryCodeError}</p>}
-      </FormGroup>
+          <CountryCodeSelect value={countryCode} onChange={setCountryCode} />
+        </FormGroup>
 
         <FormGroup className="mb-3">
           <Label for="password">Password</Label>
@@ -291,7 +329,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
               }}
               className="btn-block"
               onClick={handleSendVerificationCode}
-              disabled={!isFormValid()} // Button is disabled if form is not valid
+              disabled={!isValidForm} // Button is disabled if form is not valid
             >
               Send Verification Code
             </Button>
