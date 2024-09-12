@@ -183,7 +183,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
         {/* Email input field with Send Verification Code button */}
         <FormGroup className="mb-2">
           <Row className="g-2">
-            <Col md={9}>
+            <Col md={8}>
               <Label for="email">Email Address</Label>
               <Input
                 type="email"
@@ -199,14 +199,14 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
                 </p>
               )}
             </Col>
-            <Col md={3}>
+            <Col md={4}>
               <Button
                 style={{
                   backgroundColor: "#fbcd0b",
-                  borderColor: "#fbcd0b",
+                  border: "none",
                   marginTop: "32px",
                   width: "100%",
-                  fontSize: "13px",
+                  fontSize: "14px",
                   fontWeight: "bold",
                   height: "37px",
                 }}
@@ -256,7 +256,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
             value={code}
             onChange={handleCodeChange}
             placeholder="Enter 6-digit code"
-            className="text-center"
+            className="text-left"
           />
         </FormGroup>
 
