@@ -12,6 +12,7 @@ const VerifyCodeModal = ({
   const [code, setCode] = useState("");
   const [countdown, setCountdown] = useState(60);
   const [canRequestAgain, setCanRequestAgain] = useState(false);
+  const [loading, setLoading] = useState(false); // 新增 loading 状态
 
   useEffect(() => {
     if (isOpen) {
@@ -26,7 +27,7 @@ const VerifyCodeModal = ({
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer); // 清理定时器
     } else {
-      setCanRequestAgain(true);
+      setCanRequestAgain(true); // 倒计时结束后，允许再次请求
     }
   }, [countdown, canRequestAgain]);
 
@@ -37,10 +38,12 @@ const VerifyCodeModal = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (code.length === 6) {
-      onSubmit(code); // 只有在 6 位数字输入完成时才允许提交
+    if (code.length === 6 && !loading) {
+      setLoading(true); // 开始提交时启用 loading 状态
+      await onSubmit(code); // 只有在 6 位数字输入完成时才允许提交
+      setLoading(false); // 完成后恢复按钮状态
     }
   };
 
@@ -91,11 +94,11 @@ const VerifyCodeModal = ({
               margin: "0 auto", // 让按钮水平居中
             }}
             className="btn-block"
-            disabled={code.length !== 6} // 只有在输入满 6 位时才能点击
+            disabled={code.length !== 6 || loading} // 只有在输入满 6 位且没有 loading 时才能点击
           >
-            Verify
+            {loading ? "Verifying..." : "Verify"}
           </Button>
-          
+
           <p className="text-muted text-center mt-3">
             Didn't receive the code?{" "}
             <button

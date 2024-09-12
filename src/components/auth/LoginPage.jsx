@@ -7,7 +7,8 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./LoginPage.css";
 import kastaLogo from "../../assets/images/logos/kasta_logo.png";
-import CreateAccountModal from "./CreateAccountModal"; // 引入 CreateAccountModal 组件
+import CreateAccountModal from "./CreateAccountModal";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -19,7 +20,9 @@ const LoginPage = () => {
     message: "",
     open: false,
   });
-  const [isCreatingAccount, setIsCreatingAccount] = useState(false); // 用于控制显示注册表单
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false); // Toggle Create Account form
+  const [isForgotPassword, setIsForgotPassword] = useState(false); // Toggle Forgot Password form
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -81,11 +84,18 @@ const LoginPage = () => {
   };
 
   const handleCreateAccountClick = () => {
-    setIsCreatingAccount(true); // 切换到创建账号表单
+    setIsCreatingAccount(true);
+    setIsForgotPassword(false); // Ensure Forgot Password is hidden
+  };
+
+  const handleForgotPasswordClick = () => {
+    setIsForgotPassword(true); // Show Forgot Password modal
+    setIsCreatingAccount(false); // Ensure Create Account is hidden
   };
 
   const handleBackToLogin = () => {
-    setIsCreatingAccount(false); // 切换回登录表单
+    setIsCreatingAccount(false);
+    setIsForgotPassword(false); // Show Login Form
   };
 
   return (
@@ -95,7 +105,7 @@ const LoginPage = () => {
           <div className="col-xl-10">
             <div className="card rounded-3 text-black">
               <div className="row g-0">
-                {/* 左半边 */}
+                {/* Left Panel */}
                 <div className="col-lg-6">
                   <div className="card-body p-md-5 mx-md-4">
                     <div className="text-center">
@@ -105,7 +115,8 @@ const LoginPage = () => {
                         style={{ width: "150px" }}
                         alt="logo"
                       />
-                      <h4 className="mt-1 mb-4 pb-1 custom-title">
+                      <h4 className="mt-1 mb-4 pb-1 custom-title"
+                      >
                         Project Management Platform
                       </h4>
                     </div>
@@ -125,11 +136,15 @@ const LoginPage = () => {
                       </Alert>
                     )}
 
-                    {/* 这里根据 isCreatingAccount 的值决定显示登录表单还是注册表单 */}
+                    {/* Conditionally Render: Login, Create Account, or Forgot Password */}
                     {isCreatingAccount ? (
                       <CreateAccountModal
                         handleBackToLogin={handleBackToLogin}
-                      /> // 传递 handleBackToLogin 函数
+                      />
+                    ) : isForgotPassword ? (
+                      <ForgotPasswordModal
+                        handleBackToLogin={handleBackToLogin}
+                      />
                     ) : (
                       <div className="form-container">
                         <Form onSubmit={(e) => e.preventDefault()}>
@@ -192,7 +207,7 @@ const LoginPage = () => {
                               />{" "}
                               Remember Me
                             </Label>
-                            <botton
+                            <button
                               className="text-primary btn btn-link p-0"
                               style={{
                                 display: "inline-block",
@@ -201,9 +216,10 @@ const LoginPage = () => {
                                 border: "none",
                                 background: "transparent",
                               }}
+                              onClick={handleForgotPasswordClick} // Switch to Forgot Password modal
                             >
                               Forgot Password?
-                            </botton>
+                            </button>
                           </FormGroup>
 
                           <div className="text-center pt-1 mb-1 pb-0 move-down">
@@ -232,9 +248,8 @@ const LoginPage = () => {
                                 border: "none",
                                 background: "transparent",
                                 marginLeft: "10px",
-                                // marginTop: "1px",
                               }}
-                              onClick={handleCreateAccountClick}
+                              onClick={handleCreateAccountClick} // Switch to Create Account modal
                             >
                               Create an account
                             </button>
@@ -245,7 +260,7 @@ const LoginPage = () => {
                   </div>
                 </div>
 
-                {/* 右半边不动 */}
+                {/* Right Panel */}
                 <div className="col-lg-6 d-flex align-items-center gradient-custom-2">
                   <div className="text-gradient">
                     <h4 className="mb-4">Living Enhanced</h4>
