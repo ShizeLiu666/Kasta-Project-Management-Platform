@@ -4,17 +4,17 @@ import RoomElement from "./RoomElement";
 import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
-// import axiosInstance, { API_development_environment } from "../../../config";
 import { Typography, CircularProgress, Button } from "@mui/material";
+import SearchComponent from "../ProjectList/SearchComponent"; // Ensure to import the SearchComponent
 
 const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
-  // console.log("projectId:", projectId);
   const [roomTypes, setRoomTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // State for search input
 
   useEffect(() => {
     const fetchRoomTypes = async () => {
@@ -25,16 +25,14 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           return;
         }
 
-        const response = await axios.get(
-          `/api/project-rooms/${projectId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`/api/project-rooms/${projectId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (response.data.success) {
-          setRoomTypes(response.data.data); // 直接从 data 里获取房间类型
+          setRoomTypes(response.data.data); // Populate room types
         } else {
           console.error("Error fetching room types:", response.data.errorMsg);
         }
@@ -48,16 +46,20 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
     fetchRoomTypes();
   }, [projectId]);
 
+  // Filter room types by search term
+  const filteredRoomTypes = roomTypes.filter((roomType) =>
+    roomType.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleCreateRoomType = async ({ name, typeCode, des, iconUrl }) => {
     const token = localStorage.getItem("authToken");
 
-    // 打印出即将发送的表单数据
     console.log("Form data being sent to backend:", {
-        projectId,
-        name,
-        typeCode,
-        des,
-        iconUrl,
+      projectId,
+      name,
+      typeCode,
+      des,
+      iconUrl,
     });
 
     try {
@@ -77,41 +79,43 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
         }
       );
       if (response.data.success) {
-        setRoomTypes([...roomTypes, response.data.data]); // 将新创建的房间类型添加到现有列表中
+        setRoomTypes([...roomTypes, response.data.data]); // Add new room type
       } else {
         console.error("Error creating room type:", response.data.errorMsg);
       }
     } catch (error) {
-      throw error; // 将错误抛出给调用函数
+      throw error;
     }
   };
 
   const handleDeleteRoomType = async () => {
     try {
       const token = localStorage.getItem("authToken");
-  
-      // 使用 projectRoomId 进行删除请求
-      await axios.delete(`/api/project-rooms/${selectedRoomType.projectRoomId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      // 从 roomTypes 列表中删除该房型
+
+      await axios.delete(
+        `/api/project-rooms/${selectedRoomType.projectRoomId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       setRoomTypes((prevRoomTypes) =>
         prevRoomTypes.filter(
-          (roomType) => roomType.projectRoomId !== selectedRoomType.projectRoomId
+          (roomType) =>
+            roomType.projectRoomId !== selectedRoomType.projectRoomId
         )
       );
-      setDeleteModalOpen(false);  // 关闭删除模态框
+      setDeleteModalOpen(false); // Close delete modal
     } catch (error) {
       console.error("Error deleting room type:", error);
     }
-  };  
+  };
 
   const handleEditRoomType = (roomType) => {
-    // setSelectedRoomType(roomType);
-    // setEditModalOpen(true);
+    setSelectedRoomType(roomType);
+    setEditModalOpen(true); // Open edit modal
   };
 
   const handleSaveRoomType = async (newName) => {
@@ -139,19 +143,17 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
 
   const handleDeleteClick = (roomType) => {
     setSelectedRoomType(roomType);
-    setDeleteModalOpen(true);
+    setDeleteModalOpen(true); // Open delete modal
   };
 
   const handleRoomTypeClick = (roomType) => {
-    console.log("Selected roomType:", roomType);  // 确保 projectRoomId 正确
-    console.log("Selected roomType id:", roomType.projectRoomId);  // 确保 projectRoomId 正确
     onNavigate(
       ["Project List", "Room Types", "Room Configurations"],
       roomType.projectRoomId,
       roomType.name
     );
   };
-  
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -163,11 +165,26 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          width: "100%",
+          marginBottom: "10px", // 设置较大的底部外边距，根据需要调整数值
         }}
       >
-        <Typography variant="h5" gutterBottom>
-          {projectName}
-        </Typography>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <Typography variant="h5" gutterBottom>
+            {projectName}
+          </Typography>
+          <SearchComponent
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            placeholder="Search Room Types..."
+          />
+        </div>
         <Button
           color="primary"
           onClick={() => setCreateModalOpen(true)}
@@ -175,21 +192,21 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
             backgroundColor: "#fbcd0b",
             color: "#fff",
             fontWeight: "bold",
-            marginBottom: "5px",
-            textTransform: "none", // 确保文字不变为大写
+            textTransform: "none",
           }}
         >
           Create Room Type
         </Button>
       </div>
-      {roomTypes.map((roomType) => (
+
+      {filteredRoomTypes.map((roomType) => (
         <RoomElement
           key={roomType.projectRoomId}
           primaryText={`${roomType.typeCode}`}
           secondaryText={roomType.name}
           onDelete={() => handleDeleteClick(roomType)}
           onEdit={() => handleEditRoomType(roomType)}
-          onClick={() => handleRoomTypeClick(roomType)} // 处理房型点击事件
+          onClick={() => handleRoomTypeClick(roomType)} // Handle room type click event
         />
       ))}
       {selectedRoomType && (
@@ -198,7 +215,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
             isOpen={editModalOpen}
             toggle={() => setEditModalOpen(!editModalOpen)}
             currentName={selectedRoomType.name}
-            onSave={handleSaveRoomType} // 使用定义的handleSaveRoomType
+            onSave={handleSaveRoomType} // Call handleSaveRoomType
           />
           <DeleteRoomTypeModal
             isOpen={deleteModalOpen}

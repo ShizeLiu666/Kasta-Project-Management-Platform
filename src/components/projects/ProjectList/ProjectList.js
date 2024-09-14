@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Breadcrumb, BreadcrumbItem} from "reactstrap";
+import { Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import axios from "axios";
 import ProjectCard from "./ProjectCard";
 import PasswordModal from "./PasswordModal";
@@ -7,7 +7,9 @@ import RoomTypeList from "../RoomTypeList/RoomTypeList";
 import RoomConfigList from "../RoomConfigurations/RoomConfigList";
 import default_image from "../../../assets/images/projects/default_image.jpg";
 import Alert from "@mui/material/Alert";
-// import CreateProjectModal from "./CreateProjectModal"; // Import the new CreateProjectModal
+import Button from "@mui/material/Button";
+import CreateProjectModal from "./CreateProjectModal";
+import SearchComponent from "./SearchComponent"; // Make sure this path matches your file structure
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
@@ -21,7 +23,9 @@ const ProjectList = () => {
   });
   const [breadcrumbPath, setBreadcrumbPath] = useState(["Project List"]);
   const [showRoomTypes, setShowRoomTypes] = useState(false);
-  // const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false); // Track the Create Project Modal
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // State to track the search term
 
   useEffect(() => {
     const fetchProjectList = async () => {
@@ -63,13 +67,15 @@ const ProjectList = () => {
     setModalOpen(!modalOpen);
   };
 
-  // const toggleCreateProjectModal = () => {
-  //   setCreateProjectModalOpen(!createProjectModalOpen); // Toggle Create Project Modal
-  // };
+  const toggleCreateProjectModal = () => {
+    setCreateProjectModalOpen(!createProjectModalOpen);
+  };
 
-  const handleCardClick = (project) => {
-    setSelectedProject(project);
-    toggleModal();
+  const handleCardClick = (event, project) => {
+    if (!event.defaultPrevented && !menuOpen) {
+      setSelectedProject(project);
+      toggleModal();
+    }
   };
 
   const handlePasswordSubmit = async (password) => {
@@ -116,6 +122,10 @@ const ProjectList = () => {
     setBreadcrumbPath(newPath);
     setSelectedRoomType({ id: roomTypeId, name: roomTypeName });
   };
+
+  const filteredProjects = projects.filter((project) =>
+    project.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -186,29 +196,46 @@ const ProjectList = () => {
         </Col>
       </Row>
 
-      {/* Add a button to open Create Project Modal */}
-      {/* <Button
-        style={{
-          backgroundColor: "#fbcd0b",
-          color: "#fff",
-          fontWeight: "bold",
-          marginBottom: "10px",
-        }}
-        onClick={toggleCreateProjectModal}
-      >
-        Create New Project
-      </Button> */}
+      {breadcrumbPath.length === 1 && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "10px",
+            width: "100%",
+          }}
+        >
+          <SearchComponent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
+          <Button
+            color="primary"
+            onClick={toggleCreateProjectModal}
+            style={{
+              backgroundColor: "#fbcd0b",
+              color: "#fff",
+              fontWeight: "bold",
+              textTransform: "none",
+            }}
+          >
+            Create New Project
+          </Button>
+        </div>
+      )}
 
       {!showRoomTypes && (
         <Row>
-          {projects.map((project, index) => (
+          {filteredProjects.map((project, index) => (
             <Col sm="6" lg="6" xl="4" key={index}>
-              <div onClick={() => handleCardClick(project)}>
+              <div>
                 <ProjectCard
                   image={project.iconUrl ? project.iconUrl : default_image}
                   title={project.name}
                   subtitle={project.address}
-                  color="primary"
+                  onCardClick={(event) => handleCardClick(event, project)}
+                  onEdit={() => console.log("Edit project")}
+                  onRemove={() => console.log("Delete project")}
+                  setMenuOpen={setMenuOpen}
                 />
               </div>
             </Col>
@@ -240,12 +267,11 @@ const ProjectList = () => {
         />
       )}
 
-      {/* Add Create Project Modal */}
-      {/* <CreateProjectModal
+      <CreateProjectModal
         isOpen={createProjectModalOpen}
         toggle={toggleCreateProjectModal}
         // Handle project creation here
-      /> */}
+      />
     </div>
   );
 };

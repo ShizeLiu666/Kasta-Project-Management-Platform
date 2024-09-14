@@ -18,19 +18,19 @@ import {
 import kasta_logo from "../assets/images/logos/kasta_logo.png";
 import user1 from "../assets/images/users/normal_user.jpg";
 import '../assets/scss/loader/Header.css';
-import { useExcelConverter } from '../components/fileConverter/ExcelConverterContext'; // 正确导入 useExcelConverter
+import { useExcelConverter } from '../components/fileConverter/ExcelConverterContext';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [username, setUsername] = useState(""); // 用于存储用户名
+  const [username, setUsername] = useState(""); // Used to store username
   const navigate = useNavigate();
-  const { resetState } = useExcelConverter(); // 从 useExcelConverter 解构 resetState
+  const { resetState } = useExcelConverter();
 
-  // 在组件加载时从 localStorage 中获取用户名
+  // On component load, retrieve the username from either localStorage or sessionStorage
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
+    const storedUsername = localStorage.getItem("username") || sessionStorage.getItem("username");
     if (storedUsername) {
       setUsername(storedUsername);
     }
@@ -43,9 +43,10 @@ const Header = () => {
 
   const handleLogout = () => {
     console.log("Logout button clicked");
-    localStorage.clear(); // 清空 localStorage
-    resetState(); // 调用 resetState 重置状态
-    navigate("/login"); // 重定向到登录页面
+    localStorage.clear(); // Clear localStorage
+    sessionStorage.clear(); // Clear sessionStorage
+    resetState(); // Reset any app state
+    navigate("/login"); // Redirect to login page
   };
 
   return (
@@ -78,11 +79,11 @@ const Header = () => {
       </div>
       <Collapse navbar isOpen={isOpen}>
         <Nav className="me-auto" navbar>
-          {/* 你可以在这里添加更多导航项目 */}
+          {/* Add more navigation items if needed */}
         </Nav>
         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
           <DropdownToggle color="transparent" className="d-flex align-items-center">
-            {/* 使用 state 中的 username 动态显示用户名 */}
+            {/* Dynamically display the username */}
             <span className="me-2" style={{ color: 'black', fontSize: '20px' }}>
               {username ? `Hi, ${username}` : "Hi, User"}
             </span>
@@ -113,8 +114,7 @@ const Header = () => {
           <Button 
             onClick={handleLogout}
             size="sm"
-            style={{ backgroundColor: "#fbcd0b", borderColor: "#fbcd0b", fontWeight: "bold" }
-          }
+            style={{ backgroundColor: "#fbcd0b", borderColor: "#fbcd0b", fontWeight: "bold" }}
           >
             Yes, Logout
           </Button>{' '}

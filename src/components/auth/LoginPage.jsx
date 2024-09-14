@@ -36,24 +36,31 @@ const LoginPage = () => {
         username,
         password,
       });
-
+  
       if (response.data && response.data.success) {
         const token = response.data.data.token;
-        if (rememberMe) {
-          localStorage.setItem("authToken", token);
-        } else {
-          sessionStorage.setItem("authToken", token);
-        }
+        const loggedInUsername = response.data.data.username; // Assuming the backend also returns the username
+  
+        // if (rememberMe) {
+        //   localStorage.setItem("authToken", token);
+        //   localStorage.setItem("username", loggedInUsername); // Store the username
+        // } else {
+        //   sessionStorage.setItem("authToken", token);
+        //   sessionStorage.setItem("username", loggedInUsername); // Store the username
+        // }
 
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("username", loggedInUsername); // Store the username
+  
         setAlert({
           severity: "success",
           message: "Login successful! Redirecting...",
           open: true,
         });
-
+  
         setTimeout(() => {
           setAlert({ open: false });
-          navigate("/admin/projects");
+          navigate("/admin/projects"); // Navigate to the project list
         }, 1000);
       } else {
         setAlert({
@@ -61,7 +68,7 @@ const LoginPage = () => {
           message: response.data.errorMsg || "Login failed. Please try again.",
           open: true,
         });
-
+  
         setTimeout(() => {
           setAlert({ open: false });
         }, 3000);
@@ -72,12 +79,13 @@ const LoginPage = () => {
         message: "There was an error logging in. Please try again.",
         open: true,
       });
-
+  
       setTimeout(() => {
         setAlert({ open: false });
       }, 3000);
     }
   };
+  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

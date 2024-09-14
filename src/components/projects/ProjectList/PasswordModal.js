@@ -58,7 +58,7 @@ const PasswordModal = ({ isOpen, toggle, projectName, onSubmit }) => {
                   cursor: "pointer",
                 }}
               >
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} style={{ color: "#68696a" }} />
               </span>
             </div>
           </FormGroup>

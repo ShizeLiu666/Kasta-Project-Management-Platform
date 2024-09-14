@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Form, FormGroup, Input, Button, Label, Row, Col } from "reactstrap";
 import axios from "axios";
 import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import rotateLockIcon from "../../assets/icons/rotate-lock.png";
 
@@ -21,6 +22,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   });
   const [countdown, setCountdown] = useState(60);
   const [canRequestAgain, setCanRequestAgain] = useState(true);
+  const [loading, setLoading] = useState(false); // Add loading state
 
   // Email validation
   const validateEmail = (email) => {
@@ -89,7 +91,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
     setAlert({ severity, message, open: true });
     setTimeout(() => {
       setAlert({ severity: "", message: "", open: false });
-    }, 3000); // Alert closes after 3 seconds
+    }, 1000); // Alert closes after 1 seconds
   };
 
   // Function to check form validity
@@ -105,8 +107,19 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
     setIsValidForm(isFormValid());
   }, [isFormValid]);
 
+  useEffect(() => {
+    if (!canRequestAgain && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0) {
+      setCanRequestAgain(true);
+    }
+  }, [countdown, canRequestAgain]);
+
   const handleSendVerificationCode = async () => {
     if (!isValidForm) return;
+
+    setLoading(true); // Start loading
 
     try {
       const response = await axios.post(
@@ -128,17 +141,47 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
         "error",
         "Failed to send verification code. Please try again."
       );
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
-  const handleResetPassword = () => {
-    console.log({
-      email,
+  const handleResetPassword = async () => {
+    const userData = {
       username,
-      newPassword,
-      code,
-    });
-  };
+      password: newPassword, // Use the new password from the state
+      verificationCode: code, // Verification code from the user input
+    };
+  
+    console.log("Reset Password Data to be submitted:", userData);
+  
+    setLoading(true); // Set loading state to true while the request is being made
+  
+    try {
+      // Send the POST request to the reset password endpoint
+      const response = await axios.post("/api/users/modify/pwd", userData);
+  
+      // Check the 'success' field in the response
+      if (response.data.success) {
+        // Password reset was successful, show a success message
+        showAlertWithTimeout("success", "Password reset successful!");
+  
+        // Wait for 3 seconds, then go back to the login interface
+        setTimeout(() => {
+          handleBackToLogin(); // Navigate back to login
+        }, 3000);
+      } else {
+        // Password reset failed, show the error message from the response
+        showAlertWithTimeout("error", response.data.errorMsg || "Password reset failed.");
+      }
+    } catch (error) {
+      // Handle any errors that occur during the request (e.g., network issues)
+      console.error("Error during password reset:", error);
+      showAlertWithTimeout("error", "An error occurred during password reset. Please try again.");
+    } finally {
+      setLoading(false); // Reset loading state once the request completes
+    }
+  };   
 
   return (
     <div className="form-container">
@@ -209,11 +252,20 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
                   fontSize: "14px",
                   fontWeight: "bold",
                   height: "37px",
+                  display: "flex", // Add flexbox
+                  justifyContent: "center", // Center horizontally
+                  alignItems: "center", // Center vertically
                 }}
                 onClick={handleSendVerificationCode}
-                disabled={!isValidForm || !canRequestAgain}
+                disabled={!isValidForm || !canRequestAgain || loading} // Disable if loading
               >
-                {canRequestAgain ? "Send Code" : `${countdown}s`}
+                {loading ? (
+                  <CircularProgress size={15} style={{ color: "#fff" }} /> // Use size 15 and center
+                ) : canRequestAgain ? (
+                  "Send Code"
+                ) : (
+                  `${countdown}s`
+                )}
               </Button>
             </Col>
           </Row>

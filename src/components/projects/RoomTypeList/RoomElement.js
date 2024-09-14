@@ -6,8 +6,8 @@ import ListItemText from '@mui/material/ListItemText';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import FolderIcon from '@mui/icons-material/Folder';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/DeleteForever';
+import EditIcon from '@mui/icons-material/EditNote';
 
 const Demo = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -35,9 +35,9 @@ const RoomElement = ({ primaryText, secondaryText, icon, onDelete, onEdit, onCli
           secondary={secondaryText}
         />
         <IconButton edge="end" style={{ marginRight: "5px" }} aria-label="edit" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
-          <EditIcon />
+          <EditIcon fontSize="medium"/>
         </IconButton>
-        <IconButton edge="end" aria-label="delete" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+        <IconButton fontSize="medium" edge="end" aria-label="delete" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
           <DeleteIcon />
         </IconButton>
       </ListItemButton>
