@@ -34,11 +34,11 @@ const Steps = () => {
       component: <Step1 ref={step1Ref} onValidate={handleStep1Validation} />, // 使用引用传递给 Step1
     },
     { 
-      name: "Step 2", 
+      name: "2. Device Validation", 
       component: <Step2 fileContent={fileContent} /> // 通过 props 传递文件内容给 Step2
     },
-    { name: "Step 3", component: <Step3 /> },
-    { name: "Step 4", component: <Step4 /> },
+    { name: "3. Group / Scene Validation", component: <Step3 /> },
+    { name: "4. Remote Control Validation", component: <Step4 /> },
   ];
 
   return (

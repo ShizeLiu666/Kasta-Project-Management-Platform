@@ -111,3 +111,20 @@ ol.progtrckr li.progtrckr-done:hover:before {
   cursor: not-allowed !important;
   opacity: 0.6 !important;
 }
+
+.MuiTablePagination-root {
+  align-items: center;  // 确保所有元素在同一行垂直居中对齐
+  display: flex;        // 使用 flex 布局
+}
+
+.MuiTablePagination-selectRoot {
+  margin: 0 10px;  // 适当的间距，防止元素紧挨着
+}
+
+.css-pdct74-MuiTablePagination-selectLabel {
+  margin-bottom: 0px;
+}
+
+.css-levciy-MuiTablePagination-displayedRows {
+  margin-bottom: 0px;
+}
