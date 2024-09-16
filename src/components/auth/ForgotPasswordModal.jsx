@@ -231,7 +231,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
               <Input
                 type="email"
                 id="email"
-                placeholder="Email"
+                placeholder=""
                 value={email}
                 onChange={handleEmailChange}
                 autoComplete="off"
@@ -277,7 +277,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
           <Input
             type="text"
             id="username"
-            placeholder="User Name"
+            placeholder=""
             value={username}
             onChange={handleUsernameChange}
             autoComplete="off"
@@ -291,7 +291,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
           <Input
             type="password"
             id="password"
-            placeholder="New Password"
+            placeholder=""
             value={newPassword}
             onChange={handlePasswordChange}
             autoComplete="off"
@@ -301,7 +301,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
 
         {/* 6-digit code input field */}
         <FormGroup className="mb-3">
-          <Label for="code">Enter 6-digit Code</Label>
+          <Label for="code">Email Validation</Label>
           <Input
             type="text"
             maxLength="6"

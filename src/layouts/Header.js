@@ -18,7 +18,7 @@ import {
 import kasta_logo from "../assets/images/logos/kasta_logo.png";
 import user1 from "../assets/images/users/normal_user.jpg";
 import '../assets/scss/loader/Header.css';
-import { useExcelConverter } from '../components/fileConverter/ExcelConverterContext';
+// import { useExcelConverter } from '../components/fileConverter/ExcelConverterContext';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +26,7 @@ const Header = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [username, setUsername] = useState(""); // Used to store username
   const navigate = useNavigate();
-  const { resetState } = useExcelConverter();
+  // const { resetState } = useExcelConverter();
 
   // On component load, retrieve the username from either localStorage or sessionStorage
   useEffect(() => {
@@ -45,7 +45,7 @@ const Header = () => {
     console.log("Logout button clicked");
     localStorage.clear(); // Clear localStorage
     sessionStorage.clear(); // Clear sessionStorage
-    resetState(); // Reset any app state
+    // resetState(); // Reset any app state
     navigate("/login"); // Redirect to login page
   };
 

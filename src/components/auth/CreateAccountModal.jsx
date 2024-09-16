@@ -270,7 +270,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
               <Input
                 type="text"
                 id="username"
-                placeholder="User Name"
+                placeholder=""
                 value={username}
                 onChange={handleUsernameChange}
                 autoComplete="off"
@@ -297,7 +297,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
           <Input
             type="email"
             id="email"
-            placeholder="Email"
+            placeholder=""
             value={email}
             onChange={handleEmailChange}
             autoComplete="off"
@@ -314,7 +314,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
           <Input
             type="password"
             id="password"
-            placeholder="Password"
+            placeholder=""
             value={password}
             onChange={handlePasswordChange}
             autoComplete="off"
@@ -327,7 +327,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
           <Input
             type="password"
             id="confirmPassword"
-            placeholder="Confirm Password"
+            placeholder=""
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
             autoComplete="off"
