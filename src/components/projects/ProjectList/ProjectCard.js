@@ -88,7 +88,7 @@ const ProjectCard = ({
         }}
       >
         <MenuItem onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px"}}/>Edit</MenuItem>
-        <MenuItem onClick={handleRemove}><DeleteIcon style={{marginRight:"8px"}}/>Remove</MenuItem>
+        <MenuItem onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
       </Menu>
     </Card>
   );

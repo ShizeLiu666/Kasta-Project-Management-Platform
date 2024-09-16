@@ -12,19 +12,23 @@ import {
 } from "reactstrap";
 import axios from "axios";
 
-const CreateProjectModal = ({ isOpen, toggle }) => {
+const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [des, setDes] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [successAlert, setSuccessAlert] = useState(false); // Track success alert
+
+  // Check if the required fields are empty
+  const isFormValid = name && password && address;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("authToken");
     try {
       const response = await axios.post(
-        "/api/projects", // Assuming this is the correct API endpoint
+        "/api/projects",
         { name, address, des, password },
         {
           headers: {
@@ -33,19 +37,20 @@ const CreateProjectModal = ({ isOpen, toggle }) => {
         }
       );
       if (response.data.success) {
-        // Reset form fields on successful creation
-        setName("");
-        setAddress("");
-        setDes("");
-        setPassword("");
-        setError("");
-        toggle(); // Close modal on successful creation
-        // Optionally, you could call a fetch function here to refresh the project list
+        setSuccessAlert(true);
+        setError(""); // Clear any previous errors
+        setTimeout(() => {
+          setSuccessAlert(false);
+          toggle(); // Close modal after 1 second
+          fetchProjects(); // Refresh the project list after creating a new project
+        }, 1000);
       } else {
-        setError("Error creating project.");
+        setError(response.data.errorMsg || "Error creating project.");
+        setTimeout(() => setError(""), 3000); // Keep the modal open, alert for 3 seconds
       }
     } catch (err) {
       setError("An unexpected error occurred.");
+      setTimeout(() => setError(""), 3000); // Keep the modal open, alert for 3 seconds
     }
   };
 
@@ -54,6 +59,7 @@ const CreateProjectModal = ({ isOpen, toggle }) => {
       <ModalHeader toggle={toggle}>Create New Project</ModalHeader>
       <ModalBody>
         <Form onSubmit={handleSubmit}>
+          {successAlert && <Alert color="success">Project created successfully!</Alert>}
           {error && <Alert color="danger">{error}</Alert>}
           <FormGroup>
             <Label for="name">
@@ -94,6 +100,16 @@ const CreateProjectModal = ({ isOpen, toggle }) => {
               required
             />
           </FormGroup>
+          <FormGroup>
+            <Label for="des">Description:</Label>
+            <Input
+              type="textarea"
+              name="des"
+              id="des"
+              value={des}
+              onChange={(e) => setDes(e.target.value)}
+            />
+          </FormGroup>
           <Button
             color="primary"
             size="sm"
@@ -103,6 +119,7 @@ const CreateProjectModal = ({ isOpen, toggle }) => {
               borderColor: "#fbcd0b",
               fontWeight: "bold",
             }}
+            disabled={!isFormValid} // Disable the button if form is not valid
           >
             Create
           </Button>

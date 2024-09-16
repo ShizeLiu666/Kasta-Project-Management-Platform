@@ -85,7 +85,7 @@ const Header = () => {
           <DropdownToggle color="transparent" className="d-flex align-items-center">
             {/* Dynamically display the username */}
             <span className="me-2" style={{ color: 'black', fontSize: '20px' }}>
-              {username ? `Hi, ${username}` : "Hi, User"}
+              {username ? `${username}` : "Hi, User"}
             </span>
             <img
               src={user1}
