@@ -3,42 +3,165 @@ import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
+import Step5 from "./Step5";
+import Step6 from "./Step6";
 import StepZilla from "react-stepzilla";
 import "./steps.scss";
-import ComponentCard from "./ComponentCard"; // 假设这是您自定义的组件
+import ComponentCard from "./ComponentCard";
 
 const Steps = () => {
-  const step1Ref = useRef(null); // 创建 Step1 的引用
-  const [fileContent, setFileContent] = useState(null); // 新增: 用于存储文件内容
+  const step1Ref = useRef(null);
+  const step2Ref = useRef(null);
+  const step3Ref = useRef(null);
+  const step4Ref = useRef(null);
+  const step5Ref = useRef(null);
+  const step6Ref = useRef(null);
+  const [deviceData, setDeviceData] = useState(null);
+  const [groupData, setGroupData] = useState(null);
+  const [sceneData, setSceneData] = useState(null);
+  const [remoteControlData, setRemoteControlData] = useState(null);
+  const [splitData, setSplitData] = useState(null);
+  const [registeredDeviceNames, setRegisteredDeviceNames] = useState(new Set());
+  const [registeredGroupNames, setRegisteredGroupNames] = useState(new Set());
+  const [registeredSceneNames, setRegisteredSceneNames] = useState(new Set());
+  const [finalJsonData, setFinalJsonData] = useState(null);
 
-  const handleStep1Validation = (isValid, fileContent) => {
-    // 如果 Step1 验证通过，保存文件内容
-    console.log("Step 1 is valid:", isValid);
+  const handleStep1Validation = (isValid, data) => {
     if (isValid) {
-      setFileContent(fileContent); // 保存文件内容
+      setSplitData(data);
     }
   };
 
-  // 在前往下一步之前调用，用于校验
+  const handleStep2Validation = (isValid, data) => {
+    if (isValid) {
+      setDeviceData(data.deviceNameToType);
+      setRegisteredDeviceNames(new Set(Object.keys(data.deviceNameToType)));
+    }
+  };
+
+  const handleStep3Validation = (isValid, data) => {
+    if (isValid) {
+      setGroupData(data.groupData);
+      setRegisteredGroupNames(new Set(Object.keys(data.groupData)));
+    }
+  };
+
+  const handleStep4Validation = (isValid, data) => {
+    if (isValid) {
+      setSceneData(data.sceneData);
+      setRegisteredSceneNames(new Set(Object.keys(data.sceneData)));
+    }
+  };
+
+  const handleStep5Validation = (isValid, data) => {
+    if (isValid) {
+      setRemoteControlData(data.remoteControlData);
+    }
+  };
+
+  const handleStep6Validation = (isValid, data) => {
+    if (isValid) {
+      setFinalJsonData(data);
+    }
+  };
+
   const handleNextStep = (currentStep) => {
     if (currentStep === 0) {
-      // 如果当前是 Step1，调用 Step1 的 isValidated 方法
       return step1Ref.current.isValidated();
     }
-    return true; // 对于其他步骤，直接返回 true 继续
+    if (currentStep === 1) {
+      return step2Ref.current.isValidated();
+    }
+    if (currentStep === 2) {
+      return step3Ref.current.isValidated();
+    }
+    if (currentStep === 3) {
+      return step4Ref.current.isValidated();
+    }
+    if (currentStep === 4) {
+      return step5Ref.current.isValidated();
+    }
+    if (currentStep === 5) {
+      return step6Ref.current.isValidated();
+    }
+    return true;
+  };
+
+  const handlePrevStep = (currentStep) => {
+    if (currentStep === 1) {
+      setSplitData(null);
+    }
+    if (currentStep === 2) {
+      setDeviceData(null);
+      setRegisteredDeviceNames(new Set());
+    }
+    if (currentStep === 3) {
+      setGroupData(null);
+      setRegisteredGroupNames(new Set());
+    }
+    if (currentStep === 4) {
+      setSceneData(null);
+      setRegisteredSceneNames(new Set());
+    }
+    if (currentStep === 5) {
+      setRemoteControlData(null);
+    }
+    if (currentStep === 6) {
+      setFinalJsonData(null);
+    }
   };
 
   const steps = [
     {
       name: "1. Upload Excel File",
-      component: <Step1 ref={step1Ref} onValidate={handleStep1Validation} />, // 使用引用传递给 Step1
+      component: <Step1 ref={step1Ref} onValidate={handleStep1Validation} />,
     },
     { 
       name: "2. Device Validation", 
-      component: <Step2 fileContent={fileContent} /> // 通过 props 传递文件内容给 Step2
+      component: <Step2 ref={step2Ref} splitData={splitData} onValidate={handleStep2Validation} />
     },
-    { name: "3. Group / Scene Validation", component: <Step3 /> },
-    { name: "4. Remote Control Validation", component: <Step4 /> },
+    { 
+      name: "3. Group Validation", 
+      component: <Step3 
+        ref={step3Ref}
+        splitData={splitData}
+        deviceNameToType={deviceData}
+        onValidate={handleStep3Validation}
+      />
+    },
+    { 
+      name: "4. Scene Validation", 
+      component: <Step4 
+        ref={step4Ref}
+        splitData={splitData}
+        deviceNameToType={deviceData}
+        onValidate={handleStep4Validation}
+      />
+    },
+    { 
+      name: "5. Remote Control Validation", 
+      component: <Step5 
+        ref={step5Ref}
+        splitData={splitData}
+        deviceNameToType={deviceData}
+        registeredDeviceNames={registeredDeviceNames}
+        registeredGroupNames={registeredGroupNames}
+        registeredSceneNames={registeredSceneNames}
+        onValidate={handleStep5Validation}
+      />
+    },
+    {
+      name: "6. Final JSON Result",
+      component: <Step6
+        ref={step6Ref}
+        splitData={splitData}
+        deviceData={deviceData}
+        groupData={groupData}
+        sceneData={sceneData}
+        remoteControlData={remoteControlData}
+        onValidate={handleStep6Validation}
+      />
+    },
   ];
 
   return (
@@ -47,8 +170,9 @@ const Steps = () => {
         <div className="step-progress">
           <StepZilla
             steps={steps}
-            nextTextOnFinalActionStep="Save"
-            nextStepCallback={handleNextStep} // 使用 handleNextStep 进行校验
+            nextTextOnFinalActionStep="完成"
+            nextStepCallback={handleNextStep}
+            prevStepCallback={handlePrevStep}
           />
         </div>
       </div>

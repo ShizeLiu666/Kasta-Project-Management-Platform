@@ -8,58 +8,60 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
-import { validateScenes } from "../../projects/RoomConfigurations/ExcelProcessor/validation/Scenes";
+import { validateRemoteControls } from "../../projects/RoomConfigurations/ExcelProcessor/validation/RemoteControls";
 import "./steps.scss"
 
 // 格式化错误信息的函数
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
-    return errors.split('KASTA SCENE:')
+    return errors.split('KASTA REMOTE CONTROL:')
       .filter(error => error.trim())
       .map(error => error.trim().replace(/^:\s*/, '')); // 去掉可能残留的冒号和空格
   }
   return errors;
 };
 
-// Step4 function component
-const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
-  const [sceneErrors, setSceneErrors] = useState(null);
+// Step5 function component
+const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames, onValidate }, ref) => {
+  const [remoteControlErrors, setRemoteControlErrors] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [sceneData, setSceneData] = useState({});
+  const [remoteControlData, setRemoteControlData] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const hasValidated = useRef(false);
 
   useEffect(() => {
-    if (!splitData || !splitData.scenes || !deviceNameToType || hasValidated.current) {
+    if (!splitData || !splitData.remoteControls || !deviceNameToType || hasValidated.current) {
       return;
     }
 
-    const { errors, registeredSceneNames } = validateScenes(splitData.scenes, deviceNameToType);
+    const errors = validateRemoteControls(splitData.remoteControls, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames);
 
     if (errors.length > 0) {
-      setSceneErrors(formatErrors(errors));
+      setRemoteControlErrors(formatErrors(errors));
       setSuccess(false);
       onValidate(false, errors);
     } else {
-      // 创建一个对象，键是场景名，值是该场景包含的设备和操作
-      const sceneDevices = {};
-      let currentScene = null;
-      splitData.scenes.forEach(line => {
+      const remoteControlData = {};
+      let currentRemoteControl = null;
+
+      splitData.remoteControls.forEach(line => {
         if (line.startsWith('NAME:')) {
-          currentScene = line.substring(5).trim();
-          sceneDevices[currentScene] = [];
-        } else if (currentScene && line && !line.startsWith('CONTROL CONTENT')) {
-          sceneDevices[currentScene].push(line.trim());
+          currentRemoteControl = line.substring(5).trim();
+          remoteControlData[currentRemoteControl] = [];
+        } else if (currentRemoteControl && /^\d+:/.test(line)) {
+          remoteControlData[currentRemoteControl].push(line.trim());
         }
       });
-      setSceneData(sceneDevices);
+
+      console.log("Generated remoteControlData:", remoteControlData);
+      setRemoteControlData(remoteControlData);
       setSuccess(true);
-      onValidate(true, { sceneData: sceneDevices });
+      onValidate(true, { remoteControlData });
     }
 
     hasValidated.current = true;
-  }, [splitData, deviceNameToType, onValidate]);
+  }, [splitData, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames, onValidate]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -80,14 +82,14 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
   }));
 
   return (
-    <div className="step step4 mt-5">
+    <div className="step step5 mt-5">
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
-          {sceneErrors && (
+          {remoteControlErrors && (
             <Alert severity="error" style={{ marginTop: "10px" }}>
               <AlertTitle>Error</AlertTitle>
               <ul>
-                {sceneErrors.map((error, index) => (
+                {remoteControlErrors.map((error, index) => (
                   <li key={index}>{error}</li>
                 ))}
               </ul>
@@ -97,39 +99,40 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
           {success && (
             <>
               <Alert severity="success" style={{ marginTop: "10px" }}>
-                <AlertTitle>以下场景已被识别：</AlertTitle>
+                <AlertTitle>以下遥控设备已被识别：</AlertTitle>
               </Alert>
 
               <TableContainer component={Paper} style={{ marginTop: "20px" }}>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>
-                        <strong>场景名称</strong>
-                      </TableCell>
-                      <TableCell>
-                        <strong>控制的设备和操作</strong>
-                      </TableCell>
+                      <TableCell><strong>遥控设备名称</strong></TableCell>
+                      <TableCell><strong>按键</strong></TableCell>
+                      <TableCell><strong>控制内容</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(sceneData)
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map(([sceneName, devices]) => (
-                        <TableRow key={sceneName}>
-                          <TableCell>{sceneName}</TableCell>
-                          <TableCell>{devices.join(", ")}</TableCell>
-                        </TableRow>
+                    {Object.entries(remoteControlData)
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map(([remoteControlName, controls]) => (
+                        controls.map((control, index) => (
+                          <TableRow key={`${remoteControlName}-${index}`}>
+                            {index === 0 && (
+                              <TableCell rowSpan={controls.length}>
+                                {remoteControlName}
+                              </TableCell>
+                            )}
+                            <TableCell>{control.split(':')[0]}</TableCell>
+                            <TableCell>{control.split(':')[1].trim()}</TableCell>
+                          </TableRow>
+                        ))
                       ))}
                   </TableBody>
                 </Table>
 
                 <TablePagination
                   component="div"
-                  count={Object.keys(sceneData).length}
+                  count={Object.values(remoteControlData).flat().length}
                   page={page}
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
@@ -150,4 +153,4 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
   );
 });
 
-export default Step4;
+export default Step5;
