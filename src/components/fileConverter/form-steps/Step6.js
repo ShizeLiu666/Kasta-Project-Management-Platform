@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Alert, AlertTitle, Button, Box } from "@mui/material";
 import { Input, FormGroup, Label } from "reactstrap";
-import { splitJsonFile } from "../../projects/RoomConfigurations/ExcelProcessor/ExcelProcessor";
+import { 
+  processDevices, 
+  processScenes, 
+  processRemoteControls,
+  resetDeviceNameToType
+} from "../../projects/RoomConfigurations/ExcelProcessor/ExcelProcessor";
 
 const Step6 = forwardRef(({ splitData, deviceData, groupData, sceneData, remoteControlData, onValidate }, ref) => {
   const [jsonResult, setJsonResult] = useState("");
@@ -11,20 +16,26 @@ const Step6 = forwardRef(({ splitData, deviceData, groupData, sceneData, remoteC
   useEffect(() => {
     if (splitData) {
       try {
-        // 创建一个包含所有数据的对象
-        const combinedData = {
-          devices: splitData.devices,
-          groups: splitData.groups,
-          scenes: splitData.scenes,
-          remoteControls: splitData.remoteControls,
-          ...deviceData,
+        // 重置 deviceNameToType
+        resetDeviceNameToType();
+
+        // 处理设备数据
+        const devicesResult = processDevices(splitData);
+
+        // 处理场景数据
+        const scenesResult = processScenes(splitData);
+
+        // 处理遥控器数据
+        const remoteControlsResult = processRemoteControls(splitData);
+
+        // 组合所有结果
+        const result = {
+          ...devicesResult,
           ...groupData,
-          ...sceneData,
-          ...remoteControlData
+          ...scenesResult,
+          ...remoteControlsResult
         };
 
-        // 使用 splitJsonFile 函数处理组合的数据
-        const result = splitJsonFile(combinedData);
         const formattedResult = JSON.stringify(result, null, 2);
         setJsonResult(formattedResult);
         setSuccess(true);

@@ -106,11 +106,11 @@ ol.progtrckr li.progtrckr-done:hover:before {
     margin-right: 5px;
 }
 
-.btn-disabled {
-  background-color: #cccccc !important;
-  cursor: not-allowed !important;
-  opacity: 0.6 !important;
-}
+// .btn-disabled {
+//   background-color: #cccccc !important;
+//   cursor: not-allowed !important;
+//   opacity: 0.6 !important;
+// }
 
 .MuiTablePagination-root {
   align-items: center;  // 确保所有元素在同一行垂直居中对齐
@@ -127,4 +127,75 @@ ol.progtrckr li.progtrckr-done:hover:before {
 
 .css-levciy-MuiTablePagination-displayedRows {
   margin-bottom: 0px;
+}
+
+.step-progress {
+  .multi-step {
+    .footer-buttons {
+      display: flex;
+      justify-content: flex-end; // 将所有按钮靠右对齐
+      margin-top: 20px;
+
+      .custom-back-button,
+      .custom-next-button {
+        margin-left: 10px; // 给按钮之间添加一些间距
+      }
+    }
+
+    // 第一步特殊处理
+    .step:first-child .footer-buttons {
+      .custom-back-button {
+        display: none; // 完全隐藏第一步的 Previous 按钮
+      }
+    }
+
+    // 最后一步特殊处理
+    .step:last-child .custom-next-button {
+      background-color: #28a745;
+      &:hover {
+        background-color: #218838;
+      }
+    }
+  }
+}
+
+// Custom Buttons
+.custom-next-button, .custom-back-button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.custom-next-button {
+  background-color: #007bff;
+  color: white;
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+.custom-back-button {
+  background-color: #6c757d;
+  color: white;
+  &:hover {
+    background-color: #545b62;
+  }
+}
+
+// Table Pagination (if needed)
+.MuiTablePagination-root {
+  align-items: center;
+  display: flex;
+}
+
+.MuiTablePagination-selectRoot {
+  margin: 0 10px;
+}
+
+.css-pdct74-MuiTablePagination-selectLabel,
+.css-levciy-MuiTablePagination-displayedRows {
+  margin-bottom: 0;
 }

@@ -112,56 +112,12 @@ const Steps = () => {
   };
 
   const steps = [
-    {
-      name: "1. Upload Excel File",
-      component: <Step1 ref={step1Ref} onValidate={handleStep1Validation} />,
-    },
-    { 
-      name: "2. Device Validation", 
-      component: <Step2 ref={step2Ref} splitData={splitData} onValidate={handleStep2Validation} />
-    },
-    { 
-      name: "3. Group Validation", 
-      component: <Step3 
-        ref={step3Ref}
-        splitData={splitData}
-        deviceNameToType={deviceData}
-        onValidate={handleStep3Validation}
-      />
-    },
-    { 
-      name: "4. Scene Validation", 
-      component: <Step4 
-        ref={step4Ref}
-        splitData={splitData}
-        deviceNameToType={deviceData}
-        onValidate={handleStep4Validation}
-      />
-    },
-    { 
-      name: "5. Remote Control Validation", 
-      component: <Step5 
-        ref={step5Ref}
-        splitData={splitData}
-        deviceNameToType={deviceData}
-        registeredDeviceNames={registeredDeviceNames}
-        registeredGroupNames={registeredGroupNames}
-        registeredSceneNames={registeredSceneNames}
-        onValidate={handleStep5Validation}
-      />
-    },
-    {
-      name: "6. Final JSON Result",
-      component: <Step6
-        ref={step6Ref}
-        splitData={splitData}
-        deviceData={deviceData}
-        groupData={groupData}
-        sceneData={sceneData}
-        remoteControlData={remoteControlData}
-        onValidate={handleStep6Validation}
-      />
-    },
+    { name: "1. Upload", component: <Step1 ref={step1Ref} onValidate={handleStep1Validation} /> },
+    { name: "2. Devices", component: <Step2 ref={step2Ref} splitData={splitData} onValidate={handleStep2Validation} /> },
+    { name: "3. Groups", component: <Step3 ref={step3Ref} splitData={splitData} deviceNameToType={deviceData} onValidate={handleStep3Validation} /> },
+    { name: "4. Scenes", component: <Step4 ref={step4Ref} splitData={splitData} deviceNameToType={deviceData} onValidate={handleStep4Validation} /> },
+    { name: "5. Remote", component: <Step5 ref={step5Ref} splitData={splitData} deviceNameToType={deviceData} registeredDeviceNames={registeredDeviceNames} registeredGroupNames={registeredGroupNames} registeredSceneNames={registeredSceneNames} onValidate={handleStep5Validation} /> },
+    { name: "6. Convert to JSON", component: <Step6 ref={step6Ref} splitData={splitData} deviceData={deviceData} groupData={groupData} sceneData={sceneData} remoteControlData={remoteControlData} onValidate={handleStep6Validation} /> },
   ];
 
   return (
@@ -170,9 +126,16 @@ const Steps = () => {
         <div className="step-progress">
           <StepZilla
             steps={steps}
-            nextTextOnFinalActionStep="完成"
+            nextButtonText="Next"
+            backButtonText="Previous"
+            nextButtonCls="custom-next-button"
+            backButtonCls="custom-back-button"
             nextStepCallback={handleNextStep}
             prevStepCallback={handlePrevStep}
+            stepsNavigation={false}
+            showNavigation={true}
+            prevBtnOnLastStep={true} 
+            nextTextOnFinalActionStep="Done"
           />
         </div>
       </div>
