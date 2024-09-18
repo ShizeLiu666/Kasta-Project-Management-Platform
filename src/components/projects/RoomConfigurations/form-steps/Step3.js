@@ -8,47 +8,60 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
-import { validateDevices } from "../../projects/RoomConfigurations/ExcelProcessor/validation/Devices";
+import { validateGroups } from "../ExcelProcessor/validation/Groups";
 import "./steps.scss"
 
 // Function to format error messages
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
-    return errors.split('KASTA DEVICE:')
+    return errors.split('KASTA GROUP:')
       .filter(error => error.trim())
       .map(error => error.trim().replace(/^:\s*/, '')); // Remove any remaining colon and spaces
   }
   return errors;
 };
 
-// Step2 function component
-const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
-  const [deviceErrors, setDeviceErrors] = useState(null);
+// Step3 function component
+const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
+  const [groupErrors, setGroupErrors] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [deviceNameToType, setDeviceNameToType] = useState({});
+  const [groupData, setGroupData] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const hasValidated = useRef(false);
 
   useEffect(() => {
-    if (!splitData || !splitData.devices || hasValidated.current) {
+    if (!splitData || !splitData.groups || !deviceNameToType || hasValidated.current) {
       return;
     }
 
-    const { errors: deviceErrors, deviceNameToType } = validateDevices(splitData.devices);
+    const { errors, registeredGroupNames } = validateGroups(splitData.groups, deviceNameToType);
 
-    if (deviceErrors.length > 0) {
-      setDeviceErrors(formatErrors(deviceErrors));
+    if (errors.length > 0) {
+      setGroupErrors(formatErrors(errors));
       setSuccess(false);
-      onValidate(false, deviceErrors);
+      onValidate(false, errors);
     } else {
-      setDeviceNameToType(deviceNameToType);
+      // Create an object with group names as keys and device lists as values
+      const groupDevices = {};
+      splitData.groups.forEach(line => {
+        if (line.startsWith('NAME:')) {
+          const groupName = line.substring(5).trim();
+          groupDevices[groupName] = [];
+        } else if (line && !line.startsWith('DEVICE CONTROL')) {
+          const lastGroup = Object.keys(groupDevices).pop();
+          if (lastGroup) {
+            groupDevices[lastGroup].push(line.trim());
+          }
+        }
+      });
+      setGroupData(groupDevices);
       setSuccess(true);
-      onValidate(true, { deviceNameToType, groupData: splitData.groups });
+      onValidate(true, { groupData: groupDevices });
     }
 
     hasValidated.current = true;
-  }, [splitData, onValidate]);
+  }, [splitData, deviceNameToType, onValidate]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -69,14 +82,14 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
   }));
 
   return (
-    <div className="step step2 mt-5">
+    <div className="step step3 mt-5">
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
-          {deviceErrors && (
+          {groupErrors && (
             <Alert severity="error" style={{ marginTop: "10px" }}>
               <AlertTitle>Error</AlertTitle>
               <ul>
-                {deviceErrors.map((error, index) => (
+                {groupErrors.map((error, index) => (
                   <li key={index}>{error}</li>
                 ))}
               </ul>
@@ -86,7 +99,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
           {success && (
             <>
               <Alert severity="success" style={{ marginTop: "10px" }}>
-                <AlertTitle>The following devices have been identified:</AlertTitle>
+                <AlertTitle>The following groups have been identified:</AlertTitle>
               </Alert>
 
               <TableContainer component={Paper} style={{ marginTop: "20px" }}>
@@ -94,23 +107,23 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
                   <TableHead>
                     <TableRow>
                       <TableCell>
-                        <strong>Device Name</strong>
+                        <strong>Group Name</strong>
                       </TableCell>
                       <TableCell>
-                        <strong>Device Type</strong>
+                        <strong>Included Devices</strong>
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(deviceNameToType)
+                    {Object.entries(groupData)
                       .slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
                       )
-                      .map(([deviceName, deviceType]) => (
-                        <TableRow key={deviceName}>
-                          <TableCell>{deviceName}</TableCell>
-                          <TableCell>{deviceType}</TableCell>
+                      .map(([groupName, devices]) => (
+                        <TableRow key={groupName}>
+                          <TableCell>{groupName}</TableCell>
+                          <TableCell>{devices.join(", ")}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
@@ -118,7 +131,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
 
                 <TablePagination
                   component="div"
-                  count={Object.keys(deviceNameToType).length}
+                  count={Object.keys(groupData).length}
                   page={page}
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
@@ -139,4 +152,4 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
   );
 });
 
-export default Step2;
+export default Step3;

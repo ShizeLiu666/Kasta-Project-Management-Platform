@@ -7,9 +7,8 @@ import Step5 from "./Step5";
 import Step6 from "./Step6";
 import StepZilla from "react-stepzilla";
 import "./steps.scss";
-import ComponentCard from "./ComponentCard";
 
-const Steps = () => {
+const Steps = ({ projectRoomId, submitJson }) => {
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
   const step3Ref = useRef(null);
@@ -117,29 +116,37 @@ const Steps = () => {
     { name: "3. Groups", component: <Step3 ref={step3Ref} splitData={splitData} deviceNameToType={deviceData} onValidate={handleStep3Validation} /> },
     { name: "4. Scenes", component: <Step4 ref={step4Ref} splitData={splitData} deviceNameToType={deviceData} onValidate={handleStep4Validation} /> },
     { name: "5. Remote", component: <Step5 ref={step5Ref} splitData={splitData} deviceNameToType={deviceData} registeredDeviceNames={registeredDeviceNames} registeredGroupNames={registeredGroupNames} registeredSceneNames={registeredSceneNames} onValidate={handleStep5Validation} /> },
-    { name: "6. Convert to JSON", component: <Step6 ref={step6Ref} splitData={splitData} deviceData={deviceData} groupData={groupData} sceneData={sceneData} remoteControlData={remoteControlData} onValidate={handleStep6Validation} /> },
+    { name: "6. Convert to JSON", component: <Step6 
+      ref={step6Ref} 
+      splitData={splitData}
+      deviceData={deviceData}
+      groupData={groupData}
+      sceneData={sceneData}
+      remoteControlData={remoteControlData}
+      onValidate={handleStep6Validation}
+      submitJson={submitJson}
+      projectRoomId={projectRoomId}
+    /> },
   ];
 
   return (
-    <ComponentCard>
-      <div className="example">
-        <div className="step-progress">
-          <StepZilla
-            steps={steps}
-            nextButtonText="Next"
-            backButtonText="Previous"
-            nextButtonCls="custom-next-button"
-            backButtonCls="custom-back-button"
-            nextStepCallback={handleNextStep}
-            prevStepCallback={handlePrevStep}
-            stepsNavigation={false}
-            showNavigation={true}
-            prevBtnOnLastStep={true} 
-            nextTextOnFinalActionStep="Next"
-          />
-        </div>
+    <div className="example">
+      <div className="step-progress">
+        <StepZilla
+          steps={steps}
+          nextButtonText="Next"
+          backButtonText="Previous"
+          nextButtonCls="custom-next-button"
+          backButtonCls="custom-back-button"
+          nextStepCallback={handleNextStep}
+          prevStepCallback={handlePrevStep}
+          stepsNavigation={false}
+          showNavigation={true}
+          prevBtnOnLastStep={true} 
+          nextTextOnFinalActionStep="Next"
+        />
       </div>
-    </ComponentCard>
+    </div>
   );
 };
 

@@ -8,15 +8,15 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
-import { validateDevices } from "../../projects/RoomConfigurations/ExcelProcessor/validation/Devices";
+import { validateDevices } from "../ExcelProcessor/validation/Devices";
 import "./steps.scss"
 
-// Function to format error messages
+// 格式化错误信息的函数
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
     return errors.split('KASTA DEVICE:')
       .filter(error => error.trim())
-      .map(error => error.trim().replace(/^:\s*/, '')); // Remove any remaining colon and spaces
+      .map(error => error.trim().replace(/^:\s*/, '')); // 去掉可能残留的冒号和空格
   }
   return errors;
 };
@@ -93,7 +93,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>
+                    <TableCell>
                         <strong>Device Name</strong>
                       </TableCell>
                       <TableCell>

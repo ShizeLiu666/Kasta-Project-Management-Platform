@@ -8,47 +8,58 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
-import { validateDevices } from "../../projects/RoomConfigurations/ExcelProcessor/validation/Devices";
+import { validateScenes } from "../ExcelProcessor/validation/Scenes";
 import "./steps.scss"
 
-// Function to format error messages
+// 格式化错误信息的函数
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
-    return errors.split('KASTA DEVICE:')
+    return errors.split('KASTA SCENE:')
       .filter(error => error.trim())
-      .map(error => error.trim().replace(/^:\s*/, '')); // Remove any remaining colon and spaces
+      .map(error => error.trim().replace(/^:\s*/, '')); // 去掉可能残留的冒号和空格
   }
   return errors;
 };
 
-// Step2 function component
-const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
-  const [deviceErrors, setDeviceErrors] = useState(null);
+// Step4 function component
+const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
+  const [sceneErrors, setSceneErrors] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [deviceNameToType, setDeviceNameToType] = useState({});
+  const [sceneData, setSceneData] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const hasValidated = useRef(false);
 
   useEffect(() => {
-    if (!splitData || !splitData.devices || hasValidated.current) {
+    if (!splitData || !splitData.scenes || !deviceNameToType || hasValidated.current) {
       return;
     }
 
-    const { errors: deviceErrors, deviceNameToType } = validateDevices(splitData.devices);
+    const { errors, registeredSceneNames } = validateScenes(splitData.scenes, deviceNameToType);
 
-    if (deviceErrors.length > 0) {
-      setDeviceErrors(formatErrors(deviceErrors));
+    if (errors.length > 0) {
+      setSceneErrors(formatErrors(errors));
       setSuccess(false);
-      onValidate(false, deviceErrors);
+      onValidate(false, errors);
     } else {
-      setDeviceNameToType(deviceNameToType);
+      // 创建一个对象，键是场景名，值是该场景包含的设备和操作
+      const sceneDevices = {};
+      let currentScene = null;
+      splitData.scenes.forEach(line => {
+        if (line.startsWith('NAME:')) {
+          currentScene = line.substring(5).trim();
+          sceneDevices[currentScene] = [];
+        } else if (currentScene && line && !line.startsWith('CONTROL CONTENT')) {
+          sceneDevices[currentScene].push(line.trim());
+        }
+      });
+      setSceneData(sceneDevices);
       setSuccess(true);
-      onValidate(true, { deviceNameToType, groupData: splitData.groups });
+      onValidate(true, { sceneData: sceneDevices });
     }
 
     hasValidated.current = true;
-  }, [splitData, onValidate]);
+  }, [splitData, deviceNameToType, onValidate]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -69,14 +80,14 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
   }));
 
   return (
-    <div className="step step2 mt-5">
+    <div className="step step4 mt-5">
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
-          {deviceErrors && (
+          {sceneErrors && (
             <Alert severity="error" style={{ marginTop: "10px" }}>
               <AlertTitle>Error</AlertTitle>
               <ul>
-                {deviceErrors.map((error, index) => (
+                {sceneErrors.map((error, index) => (
                   <li key={index}>{error}</li>
                 ))}
               </ul>
@@ -86,7 +97,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
           {success && (
             <>
               <Alert severity="success" style={{ marginTop: "10px" }}>
-                <AlertTitle>The following devices have been identified:</AlertTitle>
+                <AlertTitle>The following scenes have been identified:</AlertTitle>
               </Alert>
 
               <TableContainer component={Paper} style={{ marginTop: "20px" }}>
@@ -94,23 +105,23 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
                   <TableHead>
                     <TableRow>
                       <TableCell>
-                        <strong>Device Name</strong>
+                        <strong>Scene Name</strong>
                       </TableCell>
                       <TableCell>
-                        <strong>Device Type</strong>
+                        <strong>Controlled Devices and Actions</strong>
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(deviceNameToType)
+                    {Object.entries(sceneData)
                       .slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
                       )
-                      .map(([deviceName, deviceType]) => (
-                        <TableRow key={deviceName}>
-                          <TableCell>{deviceName}</TableCell>
-                          <TableCell>{deviceType}</TableCell>
+                      .map(([sceneName, devices]) => (
+                        <TableRow key={sceneName}>
+                          <TableCell>{sceneName}</TableCell>
+                          <TableCell>{devices.join(", ")}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
@@ -118,7 +129,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
 
                 <TablePagination
                   component="div"
-                  count={Object.keys(deviceNameToType).length}
+                  count={Object.keys(sceneData).length}
                   page={page}
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
@@ -139,4 +150,4 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
   );
 });
 
-export default Step2;
+export default Step4;

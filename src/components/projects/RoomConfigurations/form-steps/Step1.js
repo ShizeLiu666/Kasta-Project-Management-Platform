@@ -1,7 +1,7 @@
 import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { Input, FormText } from "reactstrap";
 import * as XLSX from "xlsx"; // 导入 xlsx 库
-import exampleFile from "../../../assets/excel/example.xlsx"; // 导入示例文件
+import exampleFile from "../../../../assets/excel/example.xlsx"; // 导入示例文件
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import { Button } from "reactstrap";
