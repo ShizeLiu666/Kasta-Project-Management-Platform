@@ -35,10 +35,10 @@ const RoomElement = ({ primaryText, secondaryText, icon, onDelete, onEdit, onCli
           secondary={secondaryText}
         />
         <IconButton edge="end" style={{ marginRight: "5px" }} aria-label="edit" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
-          <EditIcon fontSize="medium"/>
+          <EditIcon fontSize="medium" sx={{ color: "#007bff" }}/>
         </IconButton>
         <IconButton fontSize="medium" edge="end" aria-label="delete" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
-          <DeleteIcon />
+          <DeleteIcon sx={{ color: "#f62d51" }}/>
         </IconButton>
       </ListItemButton>
     </Demo>

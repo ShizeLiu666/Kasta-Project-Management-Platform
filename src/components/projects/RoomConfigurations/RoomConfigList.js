@@ -13,6 +13,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteRoomConfigModal from "./DeleteRoomConfigModal";
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import Steps from "./form-steps/Steps";
 import {
   renderDevicesTable,
@@ -29,9 +30,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
     severity: "",
     message: "",
   });
-  const [showSteps, setShowSteps] = useState(false);
-  const [jsonResult, setJsonResult] = useState("");
-  const [file, setFile] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   // 获取 room 的详细信息，包括 config
   const fetchRoomDetail = useCallback(async () => {
@@ -102,6 +101,10 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          // 切换回配置显示
+          setIsEditing(false);
+
+          // 显示成功提示
           setAlert({
             severity: "success",
             message: isReplace
@@ -112,9 +115,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
 
           // Fetch updated room configuration after successful submission
           fetchRoomDetail();
-
-          // 切换回配置显示
-          setShowSteps(false);
         } else {
           setAlert({
             severity: "error",
@@ -148,10 +148,12 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
 
   // 处理 CloudUploadIcon 点击事件
   const handleCloudUploadClick = () => {
-    setShowSteps(true);
+    setIsEditing(true);
   };
 
-  // 保留其他函数，但不在此处显示它们的实现
+  const handleBackClick = () => {
+    setIsEditing(false);
+  };
 
   const handleDeleteConfig = async () => {
     try {
@@ -173,8 +175,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
           message: "Room configuration deleted successfully.",
           open: true,
         });
-        setJsonResult("");
-        setFile(null);
         if (document.getElementById("exampleFile")) {
           document.getElementById("exampleFile").value = null;
         }
@@ -245,7 +245,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
               <CardTitle tag="h5" style={{ marginBottom: 0, marginRight: "10px" }}>
                 <b>{roomTypeName}</b>
               </CardTitle>
-              {config && config !== "{}" && Object.keys(config).length > 0 && (
+              {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
                 <Button
                   color="secondary"
                   onClick={handleDownloadJson}
@@ -253,36 +253,50 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
                   style={{marginTop:"2px", marginLeft:"5px", display: "flex", alignItems: "center"}}
                 >
                   <CloudDownloadIcon style={{ marginRight: "8px" }} />
-                  <span style={{ position: "relative", top: "1px" }}>Download JSON</span>
+                  <span style={{ position: "relative", bottom: "1px"}}>Download JSON</span>
                 </Button>
               )}
             </Box>
 
             <Box display="flex" alignItems="center">
-              <Button
-                color="success"
-                onClick={handleCloudUploadClick}
-                size="sm"
-                style={{ marginRight: "10px", backgroundColor: "#007bff", borderColor: "#007bff" }}
-              >
-                <CloudUploadIcon style={{ marginRight: "8px" }} />
-                Upload / Overwrite
-              </Button>
-              {config && config !== "{}" && Object.keys(config).length > 0 && (
+              {!isEditing ? (
+                <>
+                  <Button
+                    color="success"
+                    onClick={handleCloudUploadClick}
+                    size="sm"
+                    style={{ marginRight: "10px", backgroundColor: "#007bff", borderColor: "#007bff" }}
+                  >
+                    <CloudUploadIcon style={{ marginRight: "8px" }} />
+                    <span style={{ position: "relative", top: "1px"}}>Upload / Overwrite</span>
+                  </Button>
+                  {config && config !== "{}" && Object.keys(config).length > 0 && (
+                    <Button
+                      color="danger"
+                      onClick={() => setDeleteModalOpen(true)}
+                      size="sm"
+                    >
+                      <DeleteForeverIcon style={{ marginRight: "8px" }} />
+                      <span style={{ position: "relative", top: "1px"}}>Delete</span>
+                    </Button>
+                  )}
+                </>
+              ) : (
                 <Button
-                  color="danger"
-                  onClick={() => setDeleteModalOpen(true)}
+                  color="secondary"
+                  onClick={handleBackClick}
                   size="sm"
+                  style={{ marginRight: "10px"}}
                 >
-                  <DeleteForeverIcon style={{ marginRight: "8px" }} />
-                  Delete
+                  <ArrowBackIosIcon style={{ marginRight: "4px" }} />
+                  <span style={{ position: "relative", top: "1px"}}>Back</span>
                 </Button>
               )}
             </Box>
           </Box>
 
           <CardBody>
-            {showSteps ? (
+            {isEditing ? (
               <Steps
                 projectRoomId={projectRoomId}
                 submitJson={submitJson}
@@ -291,8 +305,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
               <>
                 {config && config !== "{}" && (
                   <>
-                    {/* {console.log("config:", config)}
-                    {config.devices && console.log("Devices:", config.devices)} */}
                     {config.devices && renderDevicesTable(config.devices)}
                     {config.groups && renderGroupsTable(config.groups)}
                     {config.scenes && renderScenesTable(config.scenes)}
