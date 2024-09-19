@@ -1,22 +1,63 @@
 import React, { useState } from 'react';
-import { Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Button } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
+import axios from 'axios';
+import { getToken } from '../../auth/auth';
 
-const EditRoomTypeModal = ({ isOpen, toggle, currentName, onSave }) => {
-  const [name, setName] = useState(currentName);
+const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
+  const [name, setName] = useState(roomType.name);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(name); // 调用父组件的保存函数
-    toggle(); // 关闭模态框
+    if (!name.trim()) {
+      setError('Room Type Name cannot be empty');
+      return;
+    }
+
+    try {
+      const token = getToken();
+      if (!token) {
+        setError('No token found, please log in again.');
+        return;
+      }
+
+      const response = await axios.post(
+        '/api/project-rooms',
+        {
+          projectId: roomType.projectId,
+          name,
+          typeCode: roomType.typeCode,
+          des: roomType.des,
+          iconUrl: roomType.iconUrl,
+          projectRoomId: roomType.projectRoomId, // 添加这个字段来表示这是一个更新操作
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        onRoomTypeUpdated(response.data.data);
+        toggle();
+      } else {
+        setError('Error updating room type: ' + response.data.errorMsg);
+      }
+    } catch (error) {
+      setError('An unexpected error occurred.');
+      console.error('Error updating room type:', error);
+    }
   };
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} centered>
-      <ModalHeader toggle={toggle}>Edit Room Type Name</ModalHeader>
+      <ModalHeader toggle={toggle}>Edit Room Type</ModalHeader>
       <ModalBody>
+        {error && <Alert color="danger">{error}</Alert>}
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label for="name">Room Type Name:</Label>
+            <Label for="name">New Room Type Name:</Label>
             <Input
               type="text"
               name="name"
@@ -26,8 +67,14 @@ const EditRoomTypeModal = ({ isOpen, toggle, currentName, onSave }) => {
               required
             />
           </FormGroup>
-          <Button color="primary" size="sm" type="submit" style={{ backgroundColor: "#fbcd0b", borderColor: "#fbcd0b", fontWeight: "bold" }}>
-            Save
+          <Button 
+            color="primary" 
+            size="sm" 
+            type="submit" 
+            style={{ backgroundColor: "#fbcd0b", borderColor: "#fbcd0b", fontWeight: "bold" }}
+            disabled={!name.trim()} // 禁用按钮如果名称为空
+          >
+            Update
           </Button>
         </Form>
       </ModalBody>

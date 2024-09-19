@@ -35,7 +35,7 @@ const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
       return;
     }
 
-    const { errors, registeredGroupNames } = validateGroups(splitData.groups, deviceNameToType);
+    const { errors } = validateGroups(splitData.groups, deviceNameToType);
 
     if (errors.length > 0) {
       setGroupErrors(formatErrors(errors));
@@ -110,7 +110,7 @@ const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
                         <strong>Group Name</strong>
                       </TableCell>
                       <TableCell>
-                        <strong>Included Devices</strong>
+                        <strong>Device Control</strong>
                       </TableCell>
                     </TableRow>
                   </TableHead>

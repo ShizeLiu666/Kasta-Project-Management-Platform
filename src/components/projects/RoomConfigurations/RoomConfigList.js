@@ -21,6 +21,7 @@ import {
   renderScenesTable,
   renderRemoteControlsTable
 } from './ConfigTables';
+import { getToken } from '../../auth/auth';
 
 const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
   const [config, setConfig] = useState(null);
@@ -32,10 +33,14 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
   });
   const [isEditing, setIsEditing] = useState(false);
 
-  // 获取 room 的详细信息，包括 config
   const fetchRoomDetail = useCallback(async () => {
     try {
-      const token = localStorage.getItem("authToken");
+      const token = getToken();
+      if (!token) {
+        console.error("No token found, please log in again.");
+        return;
+      }
+
       const response = await fetch(
         `/api/project-rooms/detail/${projectRoomId}`,
         {
@@ -47,25 +52,19 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       );
   
       const data = await response.json();
-      // console.log("API response data:", data);
       
       if (data.success && data.data) {
-        // console.log("Raw config:", data.data.config);
-        // console.log("Config type:", typeof data.data.config);
-        
         let parsedConfig;
         if (typeof data.data.config === 'string') {
           try {
             parsedConfig = JSON.parse(data.data.config);
           } catch (e) {
-            // console.error("Error parsing config:", e);
             parsedConfig = data.data.config;
           }
         } else {
           parsedConfig = data.data.config;
         }
         
-        // console.log("Parsed config:", parsedConfig);
         setConfig(parsedConfig);
       } else {
         console.error(`Error fetching room details: ${data.errorMsg}`);
@@ -85,7 +84,16 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       return;
     }
     try {
-      const token = localStorage.getItem("authToken");
+      const token = getToken();
+      if (!token) {
+        setAlert({
+          severity: "error",
+          message: "No token found, please log in again.",
+          open: true,
+        });
+        return;
+      }
+
       const response = await fetch(
         `/api/project-rooms/${projectRoomId}/config`,
         {
@@ -101,10 +109,8 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // 切换回配置显示
           setIsEditing(false);
 
-          // 显示成功提示
           setAlert({
             severity: "success",
             message: isReplace
@@ -113,7 +119,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
             open: true,
           });
 
-          // Fetch updated room configuration after successful submission
           fetchRoomDetail();
         } else {
           setAlert({
@@ -146,7 +151,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
     fetchRoomDetail();
   }, [projectRoomId, fetchRoomDetail]);
 
-  // 处理 CloudUploadIcon 点击事件
   const handleCloudUploadClick = () => {
     setIsEditing(true);
   };
@@ -157,7 +161,16 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
 
   const handleDeleteConfig = async () => {
     try {
-      const token = localStorage.getItem("authToken");
+      const token = getToken();
+      if (!token) {
+        setAlert({
+          severity: "error",
+          message: "No token found, please log in again.",
+          open: true,
+        });
+        return;
+      }
+
       const response = await fetch(
         `/api/project-rooms/clear-config/${projectRoomId}`,
         {
@@ -217,7 +230,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
 
   return (
     <Row>
-      {/* Alert Component */}
       {alert.open && (
         <Alert
           severity={alert.severity}
@@ -243,7 +255,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
           >
             <Box display="flex" alignItems="center">
               <CardTitle tag="h5" style={{ marginBottom: 0, marginRight: "10px" }}>
-                <b>{roomTypeName}</b>
+                {roomTypeName}
               </CardTitle>
               {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
                 <Button

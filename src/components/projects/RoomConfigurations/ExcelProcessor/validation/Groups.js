@@ -20,6 +20,12 @@ function validateGroupName(groupName, errors, deviceNameToGroup, registeredGroup
         return false;
     }
 
+    // 检查重复的 Group Name
+    if (registeredGroupNames.has(groupName)) {
+        errors.push(`KASTA GROUP: The group name '${groupName}' is duplicated. Each group name must be unique.`);
+        return false;
+    }
+
     if (!deviceNameToGroup[groupName]) {
         deviceNameToGroup[groupName] = new Set(); // Initialize a new Set for this group
     }

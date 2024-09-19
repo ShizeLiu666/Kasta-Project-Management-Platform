@@ -105,21 +105,37 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
 
-        const hasProgrammingDetails = workbook.SheetNames.some((sheetName) =>
-          sheetName.includes("Programming Details")
+        // 查找包含 "Programming Details" 的工作表
+        const programmingDetailsSheet = workbook.SheetNames.find(sheetName => 
+          sheetName.toLowerCase().includes("programming details")
         );
 
-        if (hasProgrammingDetails) {
-          setFile(selectedFile);
-          setIsValidFile(true);
-          setHasProgrammingDetails(true);
-          setErrorMessage("");
-          setFileContent(e.target.result);
+        if (programmingDetailsSheet) {
+          // 检查是否包含所需的关键词
+          const sheet = workbook.Sheets[programmingDetailsSheet];
+          const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          const sheetText = sheetData.flat().join(" ").toLowerCase();
+          const requiredKeywords = ["kasta device", "kasta group", "kasta scene", "remote control link"];
+          const missingKeywords = requiredKeywords.filter(keyword => !sheetText.includes(keyword));
+
+          if (missingKeywords.length === 0) {
+            setFile(selectedFile);
+            setIsValidFile(true);
+            setHasProgrammingDetails(true);
+            setErrorMessage("");
+            setFileContent(e.target.result);
+          } else {
+            setFile(selectedFile);
+            setIsValidFile(true);
+            setHasProgrammingDetails(false);
+            setErrorMessage(`Excel file is missing the following required keywords: ${missingKeywords.join(", ")}`);
+            setFileContent(null);
+          }
         } else {
           setFile(selectedFile);
           setIsValidFile(true);
           setHasProgrammingDetails(false);
-          setErrorMessage("Excel file must contain a 'Programming Details' sheet");
+          setErrorMessage("Excel file must contain a sheet with 'Programming Details' in its name");
           setFileContent(null);
         }
       };
@@ -146,7 +162,9 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
           ? "No file selected"
           : !isValidFile
             ? "Only Excel files are accepted"
-            : "Excel file must contain a 'Programming Details' sheet"
+            : !hasProgrammingDetails
+              ? "Excel file must contain a 'Programming Details' sheet with all required keywords"
+              : "Failed to process Excel file"
       );
       onValidate(false, null);
       return false;
@@ -207,7 +225,16 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                 <br />
                 <span style={{ color: "red" }}>* </span>
                 Must contain a "Programming Details" sheet
-                <br />( Please refer to the{" "}
+                <br />
+                <span style={{ color: "red" }}>* </span>
+                The "Programming Details" sheet must include the following keywords:
+                <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
+                  <li style={{ marginLeft: "20px" }}>KASTA DEVICE</li>
+                  <li style={{ marginLeft: "20px" }}>KASTA GROUP</li>
+                  <li style={{ marginLeft: "20px" }}>KASTA SCENE</li>
+                  <li style={{ marginLeft: "20px" }}>REMOTE CONTROL LINK</li>
+                </ul>
+                ( Please refer to the{" "}
                 <a
                   href={exampleFile}
                   download="Example_Configuration_Details.xlsx"

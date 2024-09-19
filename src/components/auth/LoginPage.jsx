@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
@@ -9,6 +9,7 @@ import "./LoginPage.css";
 import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
+import { setToken, saveUsername } from './auth';
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -22,6 +23,8 @@ const LoginPage = () => {
   });
   const [isCreatingAccount, setIsCreatingAccount] = useState(false); // Toggle Create Account form
   const [isForgotPassword, setIsForgotPassword] = useState(false); // Toggle Forgot Password form
+  const usernameInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -36,28 +39,23 @@ const LoginPage = () => {
         username,
         password,
       });
-  
+
       if (response.data && response.data.success) {
         const token = response.data.data.token;
         const loggedInUsername = response.data.data.username; // Assuming the backend also returns the username
-  
-        // if (rememberMe) {
-        //   localStorage.setItem("authToken", token);
-        //   localStorage.setItem("username", loggedInUsername); // Store the username
-        // } else {
-        //   sessionStorage.setItem("authToken", token);
-        //   sessionStorage.setItem("username", loggedInUsername); // Store the username
-        // }
 
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("username", loggedInUsername); // Store the username
-  
+        // localStorage.setItem("authToken", token);
+        // localStorage.setItem("username", loggedInUsername); // Store the username
+
+        setToken(token, rememberMe);
+        saveUsername(loggedInUsername, rememberMe);
+
         setAlert({
           severity: "success",
           message: "Login successful! Redirecting...",
           open: true,
         });
-  
+
         setTimeout(() => {
           setAlert({ open: false });
           navigate("/admin/projects"); // Navigate to the project list
@@ -68,7 +66,7 @@ const LoginPage = () => {
           message: response.data.errorMsg || "Login failed. Please try again.",
           open: true,
         });
-  
+
         setTimeout(() => {
           setAlert({ open: false });
         }, 3000);
@@ -79,13 +77,31 @@ const LoginPage = () => {
         message: "There was an error logging in. Please try again.",
         open: true,
       });
-  
+
       setTimeout(() => {
         setAlert({ open: false });
       }, 3000);
     }
   };
-  
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); // 阻止表单默认提交行为
+    handleLogin();
+  };
+
+  const handleUsernameKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      passwordInputRef.current.focus();
+    }
+  };
+
+  const handlePasswordKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleLogin();
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -155,7 +171,7 @@ const LoginPage = () => {
                         />
                       ) : (
                         <div className="form-container">
-                          <Form onSubmit={(e) => e.preventDefault()}>
+                          <Form onSubmit={handleSubmit}>
                             <FormGroup className="mb-4">
                               <Input
                                 type="text"
@@ -164,8 +180,10 @@ const LoginPage = () => {
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
+                                onKeyDown={handleUsernameKeyDown}
                                 autoComplete="off"
                                 required
+                                ref={usernameInputRef}
                               />
                             </FormGroup>
 
@@ -180,7 +198,9 @@ const LoginPage = () => {
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                onKeyDown={handlePasswordKeyDown}
                                 autoComplete="new-password"
+                                ref={passwordInputRef}
                                 required
                               />
                               <span
@@ -248,6 +268,7 @@ const LoginPage = () => {
                             <div className="d-flex justify-content-center align-items-center mb-1">
                               <p className="mb-0">New Member?</p>
                               <button
+                                type="button" // 添加 type="button" 以防止表单提交
                                 className="text-primary btn btn-link p-0"
                                 style={{
                                   display: "inline-block",

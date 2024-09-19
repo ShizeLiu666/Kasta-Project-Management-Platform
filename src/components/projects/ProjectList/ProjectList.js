@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import axios from "axios";
 import ProjectCard from "./ProjectCard";
@@ -7,10 +7,12 @@ import RoomTypeList from "../RoomTypeList/RoomTypeList";
 import RoomConfigList from "../RoomConfigurations/RoomConfigList";
 import default_image from "../../../assets/images/projects/default_image.jpg";
 import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
+import { Button } from "reactstrap";
 import CreateProjectModal from "./CreateProjectModal";
 import DeleteProjectModal from "./DeleteProjectModal";
+import EditProjectModal from './EditProjectModal';
 import SearchComponent from "./SearchComponent";
+import { getToken } from '../../auth/auth';
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
@@ -28,22 +30,22 @@ const ProjectList = () => {
   const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
   const [deleteProjectModalOpen, setDeleteProjectModalOpen] = useState(false); // State for delete modal
   const [searchTerm, setSearchTerm] = useState(""); // State to track the search term
+  const [editProjectModalOpen, setEditProjectModalOpen] = useState(false);
 
-  // Function to fetch the project list
-  const fetchProjectList = async () => {
+  const fetchProjectList = useCallback(async () => {
     try {
-      const token = localStorage.getItem("authToken");
+      const token = getToken();
       if (!token) {
-        console.error("No token found, please log in again.");
+        window.alert("No token found, please log in again.");
         return;
       }
-
+  
       const response = await axios.get("/api/projects", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (response.data.success) {
         const projects = response.data.data.map((project) => ({
           projectId: project.projectId,
@@ -60,11 +62,11 @@ const ProjectList = () => {
     } catch (error) {
       console.error("Error fetching projects:", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchProjectList(); // Fetch the project list on component mount
-  }, []);
+    fetchProjectList();
+  }, [fetchProjectList]);
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
@@ -134,6 +136,11 @@ const ProjectList = () => {
   const filteredProjects = projects.filter((project) =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const toggleEditProjectModal = (project) => {
+    setSelectedProject(project);
+    setEditProjectModalOpen(!editProjectModalOpen);
+  };
 
   return (
     <div>
@@ -217,10 +224,11 @@ const ProjectList = () => {
           <SearchComponent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
           <Button
-            color="primary"
+            color="secondary"
             onClick={toggleCreateProjectModal}
             style={{
               backgroundColor: "#fbcd0b",
+              borderColor: "#fbcd0b",
               color: "#fff",
               fontWeight: "bold",
               textTransform: "none",
@@ -241,8 +249,8 @@ const ProjectList = () => {
                   title={project.name}
                   subtitle={project.address}
                   onCardClick={(event) => handleCardClick(event, project)}
-                  onEdit={() => console.log("Edit project")}
-                  onRemove={() => toggleDeleteProjectModal(project)} // Trigger delete modal
+                  onEdit={() => toggleEditProjectModal(project)}
+                  onRemove={() => toggleDeleteProjectModal(project)}
                   setMenuOpen={setMenuOpen}
                 />
               </div>
@@ -281,12 +289,19 @@ const ProjectList = () => {
         fetchProjects={fetchProjectList} // Pass fetchProjects as a prop to refresh the project list
       />
 
+      <EditProjectModal
+        isOpen={editProjectModalOpen}
+        toggle={() => toggleEditProjectModal(null)}
+        fetchProjects={fetchProjectList}
+        project={selectedProject}
+      />
+
       {selectedProject && (
         <DeleteProjectModal
           isOpen={deleteProjectModalOpen}
-          toggle={() => toggleDeleteProjectModal(selectedProject)}
-          projectId={selectedProject.projectId} // Pass the selected project's ID
-          onDelete={fetchProjectList} // Refresh project list after deletion
+          toggle={() => toggleDeleteProjectModal(null)}
+          project={selectedProject} 
+          onDelete={fetchProjectList}
         />
       )}
     </div>

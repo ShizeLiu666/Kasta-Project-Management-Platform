@@ -11,6 +11,7 @@ import {
   Alert,
 } from "reactstrap";
 import axios from "axios";
+import { getToken } from '../../auth/auth'; // 导入 getToken 函数
 
 const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
   const [name, setName] = useState("");
@@ -25,7 +26,11 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("authToken");
+    const token = getToken(); // 使用 getToken 函数获取 token
+    if (!token) {
+      setError("Authentication token not found, please log in again");
+      return;
+    }
     try {
       const response = await axios.post(
         "/api/projects",
@@ -59,7 +64,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
       <ModalHeader toggle={toggle}>Create New Project</ModalHeader>
       <ModalBody>
         <Form onSubmit={handleSubmit}>
-          {successAlert && <Alert color="success">Project created successfully!</Alert>}
+          {successAlert && <Alert color="success">Project created successfully</Alert>}
           {error && <Alert color="danger">{error}</Alert>}
           <FormGroup>
             <Label for="name">
@@ -103,7 +108,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
           <FormGroup>
             <Label for="des">Description:</Label>
             <Input
-              type="textarea"
+              type="text"
               name="des"
               id="des"
               value={des}
@@ -111,7 +116,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
             />
           </FormGroup>
           <Button
-            color="primary"
+            color="secondary"
             size="sm"
             type="submit"
             style={{

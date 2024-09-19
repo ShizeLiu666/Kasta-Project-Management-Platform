@@ -15,15 +15,23 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const PasswordModal = ({ isOpen, toggle, projectName, onSubmit }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordEmpty, setIsPasswordEmpty] = useState(true);
 
   useEffect(() => {
     if (!isOpen) {
       setPassword(""); // 当 modal 关闭时，重置密码
+      setIsPasswordEmpty(true);
     }
   }, [isOpen]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setIsPasswordEmpty(newPassword.trim() === "");
   };
 
   const handleSubmit = (e) => {
@@ -45,7 +53,7 @@ const PasswordModal = ({ isOpen, toggle, projectName, onSubmit }) => {
                 name="password"
                 id="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 required
               />
               <span
@@ -63,10 +71,10 @@ const PasswordModal = ({ isOpen, toggle, projectName, onSubmit }) => {
             </div>
           </FormGroup>
           <Button
-            color="primary"
-            size="sm"
+            color="secondary"
             type="submit"
             style={{ backgroundColor: "#fbcd0b", borderColor: "#fbcd0b", fontWeight: "bold" }}
+            disabled={isPasswordEmpty}
           >
             Submit
           </Button>

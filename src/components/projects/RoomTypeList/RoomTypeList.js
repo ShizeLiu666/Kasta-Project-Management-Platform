@@ -1,27 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import RoomElement from "./RoomElement";
-import EditRoomTypeModal from "./EditRoomTypeModal";
+// import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
-import { Typography, CircularProgress, Button } from "@mui/material";
-import SearchComponent from "../ProjectList/SearchComponent"; // Ensure to import the SearchComponent
+import { Typography, CircularProgress } from "@mui/material";
+import { Button } from "reactstrap";
+import SearchComponent from "../ProjectList/SearchComponent";
+import { getToken } from '../../auth/auth';
 
 const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
   const [roomTypes, setRoomTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  // const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // State for search input
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchRoomTypes = async () => {
       try {
-        const token = localStorage.getItem("authToken");
+        const token = getToken();
         if (!token) {
-          console.error("No token found, please log in again.");
+          alert("No token found, please log in again.");
           return;
         }
 
@@ -32,7 +34,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
         });
 
         if (response.data.success) {
-          setRoomTypes(response.data.data); // Populate room types
+          setRoomTypes(response.data.data);
         } else {
           console.error("Error fetching room types:", response.data.errorMsg);
         }
@@ -46,104 +48,26 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
     fetchRoomTypes();
   }, [projectId]);
 
-  // Filter room types by search term
   const filteredRoomTypes = roomTypes.filter((roomType) =>
     roomType.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCreateRoomType = async ({ name, typeCode, des, iconUrl }) => {
-    const token = localStorage.getItem("authToken");
-
-    console.log("Form data being sent to backend:", {
-      projectId,
-      name,
-      typeCode,
-      des,
-      iconUrl,
-    });
-
-    try {
-      const response = await axios.post(
-        "/api/project-rooms",
-        {
-          projectId,
-          name,
-          typeCode,
-          des,
-          iconUrl,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.data.success) {
-        setRoomTypes([...roomTypes, response.data.data]); // Add new room type
-      } else {
-        console.error("Error creating room type:", response.data.errorMsg);
-      }
-    } catch (error) {
-      throw error;
-    }
+  const handleRoomTypeCreated = (newRoomType) => {
+    setRoomTypes([...roomTypes, newRoomType]);
   };
 
-  const handleDeleteRoomType = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-
-      await axios.delete(
-        `/api/project-rooms/${selectedRoomType.projectRoomId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setRoomTypes((prevRoomTypes) =>
-        prevRoomTypes.filter(
-          (roomType) =>
-            roomType.projectRoomId !== selectedRoomType.projectRoomId
-        )
-      );
-      setDeleteModalOpen(false); // Close delete modal
-    } catch (error) {
-      console.error("Error deleting room type:", error);
-    }
+  const handleRoomTypeDeleted = (deletedRoomTypeId) => {
+    setRoomTypes(roomTypes.filter(roomType => roomType.projectRoomId !== deletedRoomTypeId));
   };
 
   const handleEditRoomType = (roomType) => {
     setSelectedRoomType(roomType);
-    setEditModalOpen(true); // Open edit modal
-  };
-
-  const handleSaveRoomType = async (newName) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.put(
-        `/api/projects/${projectId}/roomTypes/${selectedRoomType._id}`,
-        { name: newName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setRoomTypes((prevRoomTypes) =>
-        prevRoomTypes.map((roomType) =>
-          roomType._id === selectedRoomType._id ? response.data : roomType
-        )
-      );
-    } catch (error) {
-      console.error("Error updating room type:", error);
-    }
+    // setEditModalOpen(true);
   };
 
   const handleDeleteClick = (roomType) => {
     setSelectedRoomType(roomType);
-    setDeleteModalOpen(true); // Open delete modal
+    setDeleteModalOpen(true);
   };
 
   const handleRoomTypeClick = (roomType) => {
@@ -153,6 +77,12 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
       roomType.name
     );
   };
+
+  // const handleRoomTypeUpdated = (updatedRoomType) => {
+  //   setRoomTypes(roomTypes.map(roomType => 
+  //     roomType.projectRoomId === updatedRoomType.projectRoomId ? updatedRoomType : roomType
+  //   ));
+  // };
 
   if (loading) {
     return <CircularProgress />;
@@ -166,7 +96,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           justifyContent: "space-between",
           alignItems: "center",
           width: "100%",
-          marginBottom: "10px", // 设置较大的底部外边距，根据需要调整数值
+          marginBottom: "10px",
         }}
       >
         <div
@@ -186,10 +116,11 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           />
         </div>
         <Button
-          color="primary"
+          color="secondary"
           onClick={() => setCreateModalOpen(true)}
           style={{
             backgroundColor: "#fbcd0b",
+            borderColor: "#fbcd0b",
             color: "#fff",
             fontWeight: "bold",
             textTransform: "none",
@@ -206,28 +137,33 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           secondaryText={roomType.name}
           onDelete={() => handleDeleteClick(roomType)}
           onEdit={() => handleEditRoomType(roomType)}
-          onClick={() => handleRoomTypeClick(roomType)} // Handle room type click event
+          onClick={() => handleRoomTypeClick(roomType)}
         />
       ))}
       {selectedRoomType && (
         <>
-          <EditRoomTypeModal
+          {/* <EditRoomTypeModal
             isOpen={editModalOpen}
             toggle={() => setEditModalOpen(!editModalOpen)}
-            currentName={selectedRoomType.name}
-            onSave={handleSaveRoomType} // Call handleSaveRoomType
-          />
+            roomType={{
+              ...selectedRoomType,
+              projectId, // 添加 projectId
+            }}
+            onRoomTypeUpdated={handleRoomTypeUpdated}
+          /> */}
           <DeleteRoomTypeModal
             isOpen={deleteModalOpen}
             toggle={() => setDeleteModalOpen(!deleteModalOpen)}
-            onDelete={handleDeleteRoomType}
+            selectedRoomType={selectedRoomType}
+            onRoomTypeDeleted={handleRoomTypeDeleted}
           />
         </>
       )}
       <CreateRoomTypeModal
         isOpen={createModalOpen}
         toggle={() => setCreateModalOpen(!createModalOpen)}
-        onCreate={handleCreateRoomType}
+        projectId={projectId}
+        onRoomTypeCreated={handleRoomTypeCreated}
       />
     </div>
   );

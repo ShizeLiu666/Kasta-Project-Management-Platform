@@ -106,12 +106,6 @@ ol.progtrckr li.progtrckr-done:hover:before {
     margin-right: 5px;
 }
 
-// .btn-disabled {
-//   background-color: #cccccc !important;
-//   cursor: not-allowed !important;
-//   opacity: 0.6 !important;
-// }
-
 .MuiTablePagination-root {
   align-items: center;  // 确保所有元素在同一行垂直居中对齐
   display: flex;        // 使用 flex 布局
@@ -170,19 +164,13 @@ ol.progtrckr li.progtrckr-done:hover:before {
 }
 
 .custom-next-button {
-  background-color: #007bff;
+  background-color: #fbcd0b;
   color: white;
-  &:hover {
-    background-color: #0056b3;
-  }
 }
 
 .custom-back-button {
   background-color: #6c757d;
   color: white;
-  &:hover {
-    background-color: #545b62;
-  }
 }
 
 // Table Pagination (if needed)

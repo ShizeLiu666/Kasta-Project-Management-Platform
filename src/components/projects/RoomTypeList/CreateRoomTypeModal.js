@@ -10,46 +10,74 @@ import {
   Button,
   Alert,
 } from "reactstrap";
+import axios from "axios";
+import { getToken } from '../../auth/auth';
 
-const CreateRoomTypeModal = ({ isOpen, toggle, onCreate }) => {
+const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) => {
   const [name, setName] = useState("");
   const [typeCode, setTypeCode] = useState("");
   const [des, setDes] = useState("");
-  const [iconUrl, setIconUrl] = useState("");
+  // const [iconUrl, setIconUrl] = useState("");
   const [error, setError] = useState("");
-  const [isTypeCodeManuallyEdited, setIsTypeCodeManuallyEdited] =
-    useState(false);
+  const [isTypeCodeManuallyEdited, setIsTypeCodeManuallyEdited] = useState(false);
 
   // Function to generate typeCode from room type name
   const generateTypeCode = (name) => {
     const words = name
       .split(" ")
-      .filter((word) => word.toLowerCase() !== "room" && word.trim() !== ""); // Filter out "Room" and empty words
+      .filter((word) => word.toLowerCase() !== "room" && word.trim() !== "");
     const initials = words
       .slice(0, 2)
       .map((word) => word[0]?.toUpperCase() || "")
-      .join(""); // Safely get the first letter and handle undefined or empty words
+      .join("");
     return initials;
+  };
+
+  const handleCreateRoomType = async () => {
+    const token = getToken();
+    if (!token) {
+      setError("No token found, please log in again.");
+      return;
+    }
+
+    console.log("Form data being sent to backend:", {
+      projectId,
+      name,
+      typeCode,
+      des,
+      // iconUrl,
+    });
+
+    try {
+      const response = await axios.post(
+        "/api/project-rooms",
+        {
+          projectId,
+          name,
+          typeCode,
+          des,
+          // iconUrl,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.success) {
+        onRoomTypeCreated(response.data.data);
+        toggle();
+      } else {
+        setError("Error creating room type: " + response.data.errorMsg);
+      }
+    } catch (error) {
+      setError("An unexpected error occurred.");
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await onCreate({ name, typeCode, des, iconUrl });
-      setName("");
-      setTypeCode("");
-      setDes("");
-      setIconUrl("");
-      setError("");
-      setIsTypeCodeManuallyEdited(false); // Reset the manual flag on form submission
-      toggle();
-    } catch (err) {
-      if (err.response && err.response.status === 409) {
-        setError("Room type already exists.");
-      } else {
-        setError("An unexpected error occurred.");
-      }
-    }
+    await handleCreateRoomType();
   };
 
   // Automatically update typeCode when name changes, but only if it has not been manually edited
@@ -57,7 +85,8 @@ const CreateRoomTypeModal = ({ isOpen, toggle, onCreate }) => {
     if (!isTypeCodeManuallyEdited) {
       setTypeCode(generateTypeCode(name));
     }
-  }, [name, isTypeCodeManuallyEdited]); // Add isTypeCodeManuallyEdited to the dependency array
+  }, [name, isTypeCodeManuallyEdited]);
+
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -70,7 +99,7 @@ const CreateRoomTypeModal = ({ isOpen, toggle, onCreate }) => {
   // Handle manual typeCode change
   const handleTypeCodeChange = (e) => {
     setTypeCode(e.target.value);
-    setIsTypeCodeManuallyEdited(true); // Mark as manually edited
+    setIsTypeCodeManuallyEdited(true);
   };
 
   return (
@@ -101,7 +130,7 @@ const CreateRoomTypeModal = ({ isOpen, toggle, onCreate }) => {
               name="typeCode"
               id="typeCode"
               value={typeCode}
-              onChange={handleTypeCodeChange} // Handle manual changes
+              onChange={handleTypeCodeChange}
             />
           </FormGroup>
           <FormGroup>
@@ -114,16 +143,6 @@ const CreateRoomTypeModal = ({ isOpen, toggle, onCreate }) => {
               onChange={(e) => setDes(e.target.value)}
             />
           </FormGroup>
-          {/* <FormGroup>
-            <Label for="iconUrl">Icon URL:</Label>
-            <Input
-              type="text"
-              name="iconUrl"
-              id="iconUrl"
-              value={iconUrl}
-              onChange={(e) => setIconUrl(e.target.value)}
-            />
-          </FormGroup> */}
           <Button
             color="primary"
             type="submit"

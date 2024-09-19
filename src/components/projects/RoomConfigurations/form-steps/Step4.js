@@ -35,7 +35,7 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
       return;
     }
 
-    const { errors, registeredSceneNames } = validateScenes(splitData.scenes, deviceNameToType);
+    const { errors } = validateScenes(splitData.scenes, deviceNameToType);
 
     if (errors.length > 0) {
       setSceneErrors(formatErrors(errors));
@@ -121,7 +121,14 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
                       .map(([sceneName, devices]) => (
                         <TableRow key={sceneName}>
                           <TableCell>{sceneName}</TableCell>
-                          <TableCell>{devices.join(", ")}</TableCell>
+                          <TableCell>
+                            {devices.map((device, index) => (
+                              <React.Fragment key={index}>
+                                {device}
+                                {index < devices.length - 1 && <br />}
+                              </React.Fragment>
+                            ))}
+                          </TableCell>
                         </TableRow>
                       ))}
                   </TableBody>

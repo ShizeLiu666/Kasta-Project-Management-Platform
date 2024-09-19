@@ -18,6 +18,7 @@ import {
 import kasta_logo from "../assets/images/logos/kasta_logo.png";
 import user1 from "../assets/images/users/normal_user.jpg";
 import '../assets/scss/loader/Header.css';
+import { getUsername } from '../components/auth/auth';
 // import { useExcelConverter } from '../components/fileConverter/ExcelConverterContext';
 
 const Header = () => {
@@ -30,7 +31,7 @@ const Header = () => {
 
   // On component load, retrieve the username from either localStorage or sessionStorage
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username") || sessionStorage.getItem("username");
+    const storedUsername = getUsername();
     if (storedUsername) {
       setUsername(storedUsername);
     }

@@ -27,6 +27,12 @@ function validateSceneName(sceneName, errors, registeredSceneNames) {
     return false;
   }
 
+  // 检查重复的 Scene Name
+  if (registeredSceneNames.has(sceneName)) {
+    errors.push(`KASTA SCENE: The scene name '${sceneName}' is duplicated. Each scene name must be unique.`);
+    return false;
+  }
+
   registeredSceneNames.add(sceneName);
   return true;
 }
