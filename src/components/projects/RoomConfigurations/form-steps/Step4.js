@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
 import { Alert, AlertTitle } from "@mui/material";
+import { Button } from "reactstrap";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,12 +12,18 @@ import TablePagination from "@mui/material/TablePagination";
 import { validateScenes } from "../ExcelProcessor/validation/Scenes";
 import "./steps.scss"
 
-// 格式化错误信息的函数
+import dimmerFormatImage from '../../../../assets/excel/scene_format/dimmer_type.png';
+import relayFormatImage from '../../../../assets/excel/scene_format/relay_type.png';
+import curtainFormatImage from '../../../../assets/excel/scene_format/curtain_type.png';
+import fanFormatImage from '../../../../assets/excel/scene_format/fan_type.png';
+import powerpointFormatImage from '../../../../assets/excel/scene_format/powerpoint_type.png';
+
+// Format error messages function
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
     return errors.split('KASTA SCENE:')
       .filter(error => error.trim())
-      .map(error => error.trim().replace(/^:\s*/, '')); // 去掉可能残留的冒号和空格
+      .map(error => error.trim().replace(/^:\s*/, '')); // Remove any remaining colon and spaces
   }
   return errors;
 };
@@ -28,7 +35,16 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
   const [sceneData, setSceneData] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [showFormatImages, setShowFormatImages] = useState(false);
   const hasValidated = useRef(false);
+
+  const formatImages = {
+    'Dimmer': dimmerFormatImage,
+    'Relay': relayFormatImage,
+    'Curtain': curtainFormatImage,
+    'Fan': fanFormatImage,
+    'PowerPoint': powerpointFormatImage,
+  };
 
   useEffect(() => {
     if (!splitData || !splitData.scenes || !deviceNameToType || hasValidated.current) {
@@ -41,8 +57,9 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
       setSceneErrors(formatErrors(errors));
       setSuccess(false);
       onValidate(false, errors);
+      setShowFormatImages(true);
     } else {
-      // 创建一个对象，键是场景名，值是该场景包含的设备和操作
+      // Create an object with scene names as keys and devices/actions as values
       const sceneDevices = {};
       let currentScene = null;
       splitData.scenes.forEach(line => {
@@ -56,6 +73,7 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
       setSceneData(sceneDevices);
       setSuccess(true);
       onValidate(true, { sceneData: sceneDevices });
+      setShowFormatImages(false);
     }
 
     hasValidated.current = true;
@@ -88,9 +106,34 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
               <AlertTitle>Error</AlertTitle>
               <ul>
                 {sceneErrors.map((error, index) => (
-                  <li key={index}>{error}</li>
+                  <li key={index}>
+                    {Array.isArray(error) ? (
+                      error.map((line, lineIndex) => (
+                        <React.Fragment key={lineIndex}>
+                          {line}
+                          {lineIndex < error.length - 1 && <br />}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      error
+                    )}
+                  </li>
                 ))}
               </ul>
+              <Button onClick={() => setShowFormatImages(!showFormatImages)} variant="outlined" size="sm" sx={{ mt: 1 }}>
+                {showFormatImages ? "Hide Format Images" : "Show Format Images"}
+              </Button>
+              {showFormatImages && (
+                <div style={{ marginTop: "20px" }}>
+                  <h5>Correct device type formats:</h5>
+                  {Object.entries(formatImages).map(([deviceType, imageSrc]) => (
+                    <div key={deviceType} style={{ marginBottom: "20px" }}>
+                      <h6>{deviceType}</h6>
+                      <img src={imageSrc} alt={`${deviceType} format`} style={{ maxWidth: "100%" }} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </Alert>
           )}
 
@@ -114,10 +157,7 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
                   </TableHead>
                   <TableBody>
                     {Object.entries(sceneData)
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                       .map(([sceneName, devices]) => (
                         <TableRow key={sceneName}>
                           <TableCell>{sceneName}</TableCell>

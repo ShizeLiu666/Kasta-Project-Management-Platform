@@ -99,40 +99,35 @@ export function validateDevices(deviceDataArray) {
   const registeredDeviceNames = new Set();
   let currentDeviceType = null;
   let currentDeviceModel = null;
-  let hasAnyError = false;
 
   deviceDataArray.forEach((line) => {
     line = line.trim();
 
     if (line.startsWith(QTY_PREFIX) || line.includes("(")) return;
 
-    let hasErrors = false;
-
     if (line.startsWith(NAME_PREFIX)) {
-      if (!checkNamePrefix(line, errors)) hasErrors = true;
+      // 情况1和2：NAME开头的行
+      if (!checkNamePrefix(line, errors)) return;
       currentDeviceModel = line.substring(NAME_PREFIX.length).trim();
-      if (!validateDeviceModel(currentDeviceModel, errors)) hasErrors = true;
+      if (!validateDeviceModel(currentDeviceModel, errors)) return;
 
       const { type, exists } = findDeviceType(currentDeviceModel);
       currentDeviceType = type;
 
       if (!exists) {
         errors.push(createError(`The device model '${currentDeviceModel}' is not recognized in any known device type.`));
-        hasErrors = true;
-      } else {
-        deviceNameToType[currentDeviceModel] = currentDeviceType;
+        return;
       }
+      
+      deviceNameToType[currentDeviceModel] = currentDeviceType;
     } else {
-      if (!checkMissingNamePrefix(line, errors)) hasErrors = true;
+      // 情况3：可能缺少NAME前缀的行
+      if (!checkMissingNamePrefix(line, errors)) return;
       if (!validateDeviceName(line, errors, registeredDeviceNames)) return;
 
       if (currentDeviceType) {
         deviceNameToType[line] = currentDeviceType;
       }
-    }
-
-    if (hasErrors) {
-      hasAnyError = true;
     }
   });
 
@@ -153,11 +148,6 @@ export function validateDevices(deviceDataArray) {
   });
 
   console.log("Errors found:", errors);
-  
-  if (hasAnyError) {
-    deviceNameToType = null;
-  }
-  
   console.log("Device Types:", deviceNameToType);
 
   return { errors, deviceNameToType, registeredDeviceNames };

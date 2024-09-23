@@ -52,12 +52,13 @@ function validateRelayTypeOperations(names, operation, errors, sceneName) {
     !groupOnPattern.test(operationString) &&
     !groupOffPattern.test(operationString)
   ) {
-    // 使用 <br> 替代 \n 进行换行
-    errors.push(`KASTA SCENE [${sceneName}]: Invalid operation format for Relay Type. The operation string "${operationString}" is not valid. Accepted formats are:
-            <br> - DEVICE_NAME ON (Single ON)
-            <br> - DEVICE_NAME OFF (Single OFF)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)<br>`);
+    errors.push([
+      `KASTA SCENE [${sceneName}]: Invalid operation format for Relay Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
+      "- DEVICE_NAME ON (Single ON)",
+      "- DEVICE_NAME OFF (Single OFF)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)"
+    ]);
   }
 }
 
@@ -65,10 +66,10 @@ function validateRelayTypeOperations(names, operation, errors, sceneName) {
 function validateDimmerTypeOperations(names, operation, errors, sceneName) {
   const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/;
   const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/;
-  const groupOnPattern = /^([a-zA-Z0-9_]+,\s*)+[a-zA-Z0-9_]+ ON$/;
-  const groupOffPattern = /^([a-zA-Z0-9_]+,\s*)+[a-zA-Z0-9_]+ OFF$/;
+  const groupOnPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* ON$/;
+  const groupOffPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* OFF$/;
   const singleDimmerPattern = /^[a-zA-Z0-9_]+ ON \+\d+%$/;
-  const groupDimmerPattern = /^([a-zA-Z0-9_]+,\s*)+[a-zA-Z0-9_]+ ON \+\d+%$/;
+  const groupDimmerPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* ON \+\d+%$/;
 
   const operationString = names.join(", ") + " " + operation;
 
@@ -80,13 +81,15 @@ function validateDimmerTypeOperations(names, operation, errors, sceneName) {
     !singleDimmerPattern.test(operationString) &&
     !groupDimmerPattern.test(operationString)
   ) {
-    errors.push(`KASTA SCENE [${sceneName}]: Dimmer Type operation '${operationString}' does not match any of the allowed formats. Accepted formats are:
-            <br> - DEVICE_NAME ON (Single ON)
-            <br> - DEVICE_NAME OFF (Single OFF)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)
-            <br> - DEVICE_NAME ON +XX% (Single Device Dimming)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 ON +XX% (Group Device Dimming)<br>`);
+    errors.push([
+      `KASTA SCENE [${sceneName}]: Dimmer Type operation '${operationString}' does not match any of the allowed formats. Accepted formats are:`,
+      "- DEVICE_NAME ON (Single ON)",
+      "- DEVICE_NAME OFF (Single OFF)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)",
+      "- DEVICE_NAME ON +XX% (Single Device Dimming)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 ON +XX% (Group Device Dimming)"
+    ]);
   } else {
     const dimmerMatch = operation.match(/\+(\d+)%$/);
     if (dimmerMatch) {
@@ -137,10 +140,12 @@ function validateFanTypeOperations(parts, errors, sceneName) {
     !singleFanPattern.test(operationString) &&
     !singleFanOffPattern.test(operationString)
   ) {
-    errors.push(`KASTA SCENE [${sceneName}]: Fan Type operation '${operationString}' does not match any of the allowed formats. Accepted formats are:
-            <br> - FAN_NAME ON RELAY ON (Single ON)
-            <br> - FAN_NAME OFF RELAY OFF (Single OFF)
-            <br> - FAN_NAME ON RELAY ON SPEED X (Single ON with Speed, optional)<br>`);
+    errors.push([
+      `KASTA SCENE [${sceneName}]: Fan Type operation '${operationString}' does not match any of the allowed formats. Accepted formats are:`,
+      "- FAN_NAME ON RELAY ON (Single ON)",
+      "- FAN_NAME OFF RELAY OFF (Single OFF)",
+      "- FAN_NAME ON RELAY ON SPEED X (Single ON with Speed, optional)"
+    ]);
   }
 }
 
@@ -156,11 +161,13 @@ function validateCurtainTypeOperations(names, operation, errors, sceneName) {
     !singleCurtainPattern.test(operationString) &&
     !groupCurtainPattern.test(operationString)
   ) {
-    errors.push(`KASTA SCENE [${sceneName}]: Invalid operation format for Curtain Type. The operation string "${operationString}" is not valid. Accepted formats are:
-            <br> - DEVICE_NAME OPEN (Single Open)
-            <br> - DEVICE_NAME CLOSE (Single Close)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 OPEN (Group Open)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 CLOSE (Group Close)<br>`);
+    errors.push([
+      `KASTA SCENE [${sceneName}]: Invalid operation format for Curtain Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
+      "- DEVICE_NAME OPEN (Single Open)",
+      "- DEVICE_NAME CLOSE (Single Close)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 OPEN (Group Open)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 CLOSE (Group Close)"
+    ]);
   }
 }
 
@@ -246,11 +253,13 @@ function validatePowerPointTypeOperations(
   }
 
   if (!isValid) {
-    errors.push(`KASTA SCENE [${sceneName}]: Invalid POWERPOINT operation. The operation string "${operationString}" is not valid for device type "${deviceType}". Supported formats are:
-            <br> - DEVICE_NAME ON (Single-way ON)
-            <br> - DEVICE_NAME ON ON (Two-way ON ON)
-            <br> - DEVICE_NAME OFF OFF (Two-way OFF OFF)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_ ON OFF (Group ON OFF)<br>`);
+    errors.push([
+      `KASTA SCENE [${sceneName}]: Invalid POWERPOINT operation. The operation string "${operationString}" is not valid for device type "${deviceType}". Supported formats are:`,
+      "- DEVICE_NAME ON (Single-way ON)",
+      "- DEVICE_NAME ON ON (Two-way ON ON)",
+      "- DEVICE_NAME OFF OFF (Two-way OFF OFF)",
+      "- DEVICE_NAME_1, DEVICE_NAME_ ON OFF (Group ON OFF)"
+    ]);
   }
 }
 
@@ -269,11 +278,13 @@ function validateDryContactTypeOperations(names, operation, errors, sceneName) {
     !groupOnPattern.test(operationString) &&
     !groupOffPattern.test(operationString)
   ) {
-    errors.push(`KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:
-            <br> - DEVICE_NAME ON (Single ON)
-            <br> - DEVICE_NAME OFF (Single OFF)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)
-            <br> - DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)<br>`);
+    errors.push([
+      `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
+      "- DEVICE_NAME ON (Single ON)",
+      "- DEVICE_NAME OFF (Single OFF)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
+      "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)"
+    ]);
   }
 }
 

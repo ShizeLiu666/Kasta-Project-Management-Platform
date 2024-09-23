@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
 import { Alert, AlertTitle } from "@mui/material";
+import { Button } from "reactstrap";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,14 +12,20 @@ import TablePagination from "@mui/material/TablePagination";
 import { validateRemoteControls } from "../ExcelProcessor/validation/RemoteControls";
 import "./steps.scss"
 
-// 格式化错误信息的函数
+import controlDeviceImage from '../../../../assets/excel/remote_control_format/control_device.png';
+import controlGroupImage from '../../../../assets/excel/remote_control_format/control_group.png';
+import controlSceneImage from '../../../../assets/excel/remote_control_format/control_scene.png';
+import withOperationImage from '../../../../assets/excel/remote_control_format/with_operation.png';
+
+// Format error messages function
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
-    return errors.split('KASTA REMOTE CONTROL:')
+    return errors.split('Remote Control')
       .filter(error => error.trim())
-      .map(error => error.trim().replace(/^:\s*/, '')); // 去掉可能残留的冒号和空格
+      .map(error => 'Remote Control' + error.trim())
+      .sort();
   }
-  return errors;
+  return errors.sort();
 };
 
 // Step5 function component
@@ -28,7 +35,15 @@ const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, 
   const [remoteControlData, setRemoteControlData] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [showFormatImages, setShowFormatImages] = useState(false);
   const hasValidated = useRef(false);
+
+  const formatImages = {
+    'Device Control': controlDeviceImage,
+    'Group Control': controlGroupImage,
+    'Scene Control': controlSceneImage,
+    'With Operation': withOperationImage,
+  };
 
   useEffect(() => {
     if (!splitData || !splitData.remoteControls || !deviceNameToType || hasValidated.current) {
@@ -41,6 +56,7 @@ const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, 
       setRemoteControlErrors(formatErrors(errors));
       setSuccess(false);
       onValidate(false, errors);
+      setShowFormatImages(true);
     } else {
       const remoteControlData = {};
       let currentRemoteControl = null;
@@ -54,10 +70,10 @@ const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, 
         }
       });
 
-      console.log("Generated remoteControlData:", remoteControlData);
       setRemoteControlData(remoteControlData);
       setSuccess(true);
       onValidate(true, { remoteControlData });
+      setShowFormatImages(false);
     }
 
     hasValidated.current = true;
@@ -93,6 +109,20 @@ const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, 
                   <li key={index}>{error}</li>
                 ))}
               </ul>
+              <Button onClick={() => setShowFormatImages(!showFormatImages)} variant="outlined" size="sm" sx={{ mt: 1 }}>
+                {showFormatImages ? "Hide Format Images" : "Show Format Images"}
+              </Button>
+              {showFormatImages && (
+                <div style={{ marginTop: "20px" }}>
+                  <h5>Correct remote control formats:</h5>
+                  {Object.entries(formatImages).map(([controlType, imageSrc]) => (
+                    <div key={controlType} style={{ marginBottom: "20px" }}>
+                      <h6>{controlType}</h6>
+                      <img src={imageSrc} alt={`${controlType} format`} style={{ maxWidth: "100%" }} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </Alert>
           )}
 

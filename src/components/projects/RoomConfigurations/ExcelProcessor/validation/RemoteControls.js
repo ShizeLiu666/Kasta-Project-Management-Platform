@@ -70,7 +70,7 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
     const match = line.match(/^(\d+):\s*(.*)$/);
     if (!match) {
         errors.push(
-            `KASTA REMOTE CONTROL: The line '${line}' in '${currentRemoteControlName}' does not follow the required format '1: COMMAND'.`
+            `Remote Control '${currentRemoteControlName}': The command '${line}' is invalid. It should follow the format 'key: COMMAND' (e.g., '1: DEVICE LightA').`
         );
         return false;
     }
@@ -78,7 +78,7 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
     const keyNumber = parseInt(match[1], 10);
     if (isNaN(keyNumber) || keyNumber < 1 || keyNumber > maxKeyCount) {
         errors.push(
-            `KASTA REMOTE CONTROL: The key number '${keyNumber}' in line '${line}' exceeds the allowed key count of ${maxKeyCount} for the device '${currentRemoteControlName}'.`
+            `Remote Control '${currentRemoteControlName}': The key number '${keyNumber}' in '${line}' is invalid. It should be between 1 and ${maxKeyCount}.`
         );
         return false;
     }
@@ -86,7 +86,7 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
     const command = match[2];
     if (!/^(DEVICE|GROUP|SCENE)\b/.test(command)) {
         errors.push(
-            `KASTA REMOTE CONTROL: The command '${command}' in '${currentRemoteControlName}' must start with one of the following: 'DEVICE', 'GROUP', 'SCENE'.`
+            `Remote Control '${currentRemoteControlName}': The command '${command}' is invalid. It must start with 'DEVICE', 'GROUP', or 'SCENE'.`
         );
         return false;
     }        
