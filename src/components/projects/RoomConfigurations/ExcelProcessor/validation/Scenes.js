@@ -39,10 +39,10 @@ function validateSceneName(sceneName, errors, registeredSceneNames) {
 
 //! Validate Relay Type operations using regex
 function validateRelayTypeOperations(names, operation, errors, sceneName) {
-  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/;
-  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/;
-  const groupOnPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* ON$/;
-  const groupOffPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* OFF$/;
+  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
+  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
+  const groupOnPattern = /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+ON$/i;
+  const groupOffPattern = /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+OFF$/i;
 
   const operationString = names.join(", ") + " " + operation;
 
@@ -64,12 +64,12 @@ function validateRelayTypeOperations(names, operation, errors, sceneName) {
 
 //! Validate Dimmer Type operations using regex
 function validateDimmerTypeOperations(names, operation, errors, sceneName) {
-  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/;
-  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/;
-  const groupOnPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* ON$/;
-  const groupOffPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* OFF$/;
-  const singleDimmerPattern = /^[a-zA-Z0-9_]+ ON \+\d+%$/;
-  const groupDimmerPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* ON \+\d+%$/;
+  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
+  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
+  const groupOnPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* ON$/i;
+  const groupOffPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* OFF$/i;
+  const singleDimmerPattern = /^[a-zA-Z0-9_]+ ON \+\d+%$/i;
+  const groupDimmerPattern = /^[a-zA-Z0-9_]+(\s*[,\s]\s*[a-zA-Z0-9_]+)* ON \+\d+%$/i;
 
   const operationString = names.join(", ") + " " + operation;
 
@@ -129,8 +129,8 @@ function validateFanTypeOperations(parts, errors, sceneName) {
   const operation = parts.slice(1).join(" ");
 
   // 定义单风扇操作的合法模式
-  const singleFanPattern = /^[a-zA-Z0-9_]+ ON RELAY (ON|OFF)(?: SPEED \d+)?$/;
-  const singleFanOffPattern = /^[a-zA-Z0-9_]+ OFF RELAY OFF$/;
+  const singleFanPattern = /^[a-zA-Z0-9_]+ ON RELAY (ON|OFF)(?: SPEED \d+)?$/i;
+  const singleFanOffPattern = /^[a-zA-Z0-9_]+ OFF RELAY OFF$/i;
 
   // 构建操作字符串
   const operationString = deviceName + " " + operation;
@@ -151,9 +151,9 @@ function validateFanTypeOperations(parts, errors, sceneName) {
 
 //! Validate Curtain Type operations using regex
 function validateCurtainTypeOperations(names, operation, errors, sceneName) {
-  const singleCurtainPattern = /^[a-zA-Z0-9_]+ (OPEN|CLOSE)$/;
+  const singleCurtainPattern = /^[a-zA-Z0-9_]+ (OPEN|CLOSE)$/i;
   const groupCurtainPattern =
-    /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+(OPEN|CLOSE)$/;
+    /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+(OPEN|CLOSE)$/i;
 
   const operationString = names.join(", ") + " " + operation;
 
@@ -183,7 +183,7 @@ function validatePowerPointTypeOperations(
   let operationIndex = -1;
 
   for (let i = 0; i < parts.length; i++) {
-    if (["ON", "OFF"].includes(parts[i])) {
+    if (["ON", "OFF"].includes(parts[i].toUpperCase())) {
       operationIndex = i;
       break;
     } else {
@@ -235,10 +235,10 @@ function validatePowerPointTypeOperations(
   const operationString =
     deviceNames.join(", ") + " " + operationParts.join(" ");
 
-  const singlePPTPattern = /^PPT\d+\s+(ON|OFF)$/;
-  const twoWayPPTPattern = /^PPT_\d+\s+(ON|OFF)\s+(ON|OFF)$/;
-  const groupSingleWayPPTPattern = /^PPT_\d+(,\s*PPT_\d+)*\s+(ON|OFF)$/;
-  const groupTwoWayPPTPattern = /^PPT_\d+(,\s*PPT_\d+)*\s+(ON|OFF)\s+(ON|OFF)$/;
+  const singlePPTPattern = /^PPT\d+\s+(ON|OFF)$/i;
+  const twoWayPPTPattern = /^PPT_\d+\s+(ON|OFF)\s+(ON|OFF)$/i;
+  const groupSingleWayPPTPattern = /^PPT_\d+(,\s*PPT_\d+)*\s+(ON|OFF)$/i;
+  const groupTwoWayPPTPattern = /^PPT_\d+(,\s*PPT_\d+)*\s+(ON|OFF)\s+(ON|OFF)$/i;
 
   let isValid = false;
 
@@ -265,10 +265,10 @@ function validatePowerPointTypeOperations(
 
 //! Validate Dry Contact Type operations using regex
 function validateDryContactTypeOperations(names, operation, errors, sceneName) {
-  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/;
-  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/;
-  const groupOnPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* ON$/;
-  const groupOffPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* OFF$/;
+  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
+  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
+  const groupOnPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* ON$/i;
+  const groupOffPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* OFF$/i;
 
   const operationString = names.join(", ") + " " + operation;
 
@@ -289,50 +289,47 @@ function validateDryContactTypeOperations(names, operation, errors, sceneName) {
 }
 
 //! Validate the consistency of device types within a line in a scene
-function validateSceneDevicesInLine(
-  parts,
-  errors,
-  deviceNameToType,
-  sceneName
-) {
+function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) {
   let deviceTypesInLine = new Set();
   let deviceNames = [];
   let operation = null;
   let isFanOperation = false;
 
-  // Step 1: Check if the line contains a valid operation (ON, OFF, OPEN, CLOSE)
-  if (!parts.some((part) => ["ON", "OFF", "OPEN", "CLOSE"].includes(part))) {
-    const instruction = parts.join(" ");
-    errors.push(
-      `KASTA SCENE [${sceneName}]: No valid operation (ON, OFF, OPEN, CLOSE) found in the instruction: "${instruction}". Unable to determine command.`
-    );
-    return; // Skip further processing for this line as it doesn't contain a valid operation
+  function isValidOperation(part) {
+    const normalizedPart = part.toLowerCase();
+    return ["on", "off", "turn on", "turn off", "open", "close"].includes(normalizedPart);
   }
 
-  // Step 2: Separate device names, operation parts, and detect FAN operation
+  function normalizeOperation(operation) {
+    operation = operation.toLowerCase().trim();
+    if (operation === 'on' || operation === 'turn on') {
+        return 'ON';
+    } else if (operation === 'off' || operation === 'turn off') {
+        return 'OFF';
+    }
+    return operation.toUpperCase(); // 对于其他操作，保持大写
+  }
+
+  // Step 1 & 2: Identify devices and operation
   let deviceNameProvided = false;
-  parts.forEach((part) => {
-    if (["ON", "OFF", "OPEN", "CLOSE"].includes(part)) {
+  let operationParts = [];
+  let i = 0;
+  while (i < parts.length) {
+    const part = parts[i];
+    const nextPart = parts[i + 1];
+    
+    if (isValidOperation(part) || (part.toLowerCase() === "turn" && nextPart && isValidOperation(part + " " + nextPart))) {
       if (!operation) {
-        operation = part;
-      }
-      if (deviceNames.length === 0) {
-        if (!deviceNameProvided) {
-          errors.push(
-            `KASTA SCENE [${sceneName}]: The instruction "${parts.join(
-              " "
-            )}" is missing a device name or has an invalid format.`
-          );
-        }
-        return; // Exit if no device name is provided to avoid further processing
+        operation = normalizeOperation(part + (nextPart && part.toLowerCase() === "turn" ? " " + nextPart : ""));
+        operationParts.push(operation);
+        i += (part.toLowerCase() === "turn" ? 2 : 1);
+        continue;
       }
     } else if (/^\+\d+%$/.test(part)) {
-      operation += ` ${part}`;
-    } else if (operation) {
-      if (["RELAY", "SPEED"].includes(part)) {
-        isFanOperation = true;
-        operation += ` ${part}`;
-      }
+      operationParts.push(part);
+    } else if (operation && ["RELAY", "SPEED"].includes(part.toUpperCase())) {
+      isFanOperation = true;
+      operationParts.push(part);
     } else {
       if (deviceNames.length === 0) {
         deviceNames.push([]);
@@ -340,7 +337,24 @@ function validateSceneDevicesInLine(
       deviceNames[0].push(part.replace(",", ""));
       deviceNameProvided = true;
     }
-  });
+    i++;
+  }
+
+  if (!deviceNameProvided) {
+    errors.push(
+      `KASTA SCENE [${sceneName}]: The instruction "${parts.join(" ")}" is missing a device name or has an invalid format.`
+    );
+    return;
+  }
+
+  if (!operation) {
+    errors.push(
+      `KASTA SCENE [${sceneName}]: No valid operation (ON, OFF, OPEN, CLOSE) found in the instruction: "${parts.join(" ")}". Unable to determine command.`
+    );
+    return;
+  }
+
+  operation = operationParts.join(" ");
 
   // Step 3: Validate the existence and type of each device
   deviceNames.forEach((names) => {
@@ -371,7 +385,7 @@ function validateSceneDevicesInLine(
       [...typesInBatch].map((type) => type.split(" ")[0])
     );
 
-    const instruction = parts.join(" "); // 将指令行连接成一个字符串
+    const instruction = parts.join(" ");
     // Allow PowerPoint Types to be treated in a special case
     if (
       simplifiedTypesInBatch.size > 1 &&
@@ -466,7 +480,6 @@ function validateSceneDevicesInLine(
     );
   }
 }
-
 
 //! Validate all scenes in the provided data
 export function validateScenes(sceneDataArray, deviceNameToType) {

@@ -192,8 +192,6 @@ function handleDimmerType(parts) {
         level = 0;
     }
 
-    // console.log(`Dimmer Type - Status: ${status}, Level: ${level}`);
-
     parts.slice(0, statusIndex).forEach(entry => {
         const deviceName = entry.trim().replace(",", "");
         try {
@@ -214,8 +212,6 @@ function handleDimmerType(parts) {
 function handleRelayType(parts) {
     const contents = [];
     const status = parts[parts.length - 1] === "ON"; // 将状态转换为布尔值
-
-    // console.log(`Relay Type - Status: ${status}`);
 
     parts.slice(0, -1).forEach(entry => {
         const deviceName = entry.trim().replace(",", "");
@@ -263,13 +259,23 @@ function handlePowerPointType(parts, deviceType) {
     const contents = [];
 
     if (deviceType.includes("Two-Way")) {
-        const rightPower = parts.pop() === "ON"; // 转换为布尔值
-        const leftPower = parts.pop() === "ON"; // 转换为布尔值
-        parts.forEach(deviceName => {
+        // 查找操作指令的索引
+        let leftPowerIndex = parts.findIndex(part => part.toUpperCase() === "ON" || part.toUpperCase() === "OFF");
+        let rightPowerIndex = parts.findIndex((part, index) => index > leftPowerIndex && (part.toUpperCase() === "ON" || part.toUpperCase() === "OFF"));
+
+        if (leftPowerIndex === -1 || rightPowerIndex === -1) {
+            console.warn(`Invalid operation format for Two-Way PowerPoint Type: ${parts.join(" ")}`);
+            return contents;
+        }
+
+        const leftPower = parts[leftPowerIndex].toUpperCase() === "ON";
+        const rightPower = parts[rightPowerIndex].toUpperCase() === "ON";
+
+        parts.slice(0, leftPowerIndex).forEach(deviceName => {
             contents.push(sceneOutputTemplates["PowerPoint Type"]["Two-Way"](deviceName.trim().replace(",", ""), leftPower, rightPower));
         });
     } else if (deviceType.includes("Single-Way")) {
-        const power = parts.pop() === "ON"; // 转换为布尔值
+        const power = parts.pop().toUpperCase() === "ON"; // 转换为布尔值
         parts.forEach(deviceName => {
             contents.push(sceneOutputTemplates["PowerPoint Type"]["Single-Way"](deviceName.trim().replace(",", ""), power));
         });
@@ -297,12 +303,40 @@ function determineDeviceType(deviceName) {
 export function parseSceneContent(sceneName, contentLines) {
     const contents = [];
 
+    function normalizeOperation(operation) {
+        operation = operation.toLowerCase().trim();
+        if (operation === 'on' || operation === 'turn on') {
+            return 'ON';
+        } else if (operation === 'off' || operation === 'turn off') {
+            return 'OFF';
+        }
+        return operation.toUpperCase();
+    }
+
     contentLines.forEach(line => {
         const parts = line.split(/\s+/);
         if (parts.length < 2) return;
 
         try {
             const deviceType = determineDeviceType(parts[0]);
+
+            // 查找操作指令的索引
+            let operationIndex = parts.findIndex(part => 
+                ['ON', 'OFF', 'OPEN', 'CLOSE'].includes(part.toUpperCase()) ||
+                (part.toUpperCase() === 'TURN' && parts[parts.indexOf(part) + 1] && 
+                 ['ON', 'OFF'].includes(parts[parts.indexOf(part) + 1].toUpperCase()))
+            );
+
+            if (operationIndex !== -1) {
+                // 标准化操作指令
+                let operation = parts[operationIndex].toUpperCase();
+                if (operation === 'TURN') {
+                    operation += ' ' + parts[operationIndex + 1].toUpperCase();
+                    parts.splice(operationIndex, 2, normalizeOperation(operation));
+                } else {
+                    parts[operationIndex] = normalizeOperation(operation);
+                }
+            }
 
             if (deviceType === "Fan Type") {
                 contents.push(...handleFanType(parts));
@@ -318,7 +352,7 @@ export function parseSceneContent(sceneName, contentLines) {
                 } else if (deviceType.includes("Single-Way")) {
                     contents.push(...handlePowerPointType(parts, "Single-Way PowerPoint Type"));
                 }
-            } else if (deviceType === "Dry Contact") {  // 添加对 Dry Contact 的处理
+            } else if (deviceType === "Dry Contact") {
                 contents.push(...handleDryContactType(parts));
             }
         } catch (e) {
@@ -414,19 +448,34 @@ export function processRemoteControls(splitData) {
 
             let linkType = 0;
             let linkName = "";
+            let rc_index = 1; // 默认值为 1
 
             if (linkDescription.startsWith("SCENE")) {
-                linkType = 2;
+                linkType = 4; // 场景
                 linkName = linkDescription.replace("SCENE", "").trim();
+                rc_index = 0; // 场景控制
             } else if (linkDescription.startsWith("GROUP")) {
-                linkType = 1;
+                linkType = 2; // 分组
                 linkName = linkDescription.replace("GROUP", "").trim();
+                rc_index = 32; // 分组控制
             } else if (linkDescription.startsWith("DEVICE")) {
-                linkType = 0;
+                linkType = 1; // 设备
                 linkName = linkDescription.replace("DEVICE", "").trim();
+                // 根据设备类型和操作指令设置 rc_index
+                // if (linkName.includes("Two-Way")) {
+                //     const operations = action.split(" ");
+                //     if (operations.length === 2) {
+                //         const [leftOperation, rightOperation] = operations;
+                //         if (leftOperation === "ON" && rightOperation === "OFF") {
+                //             rc_index = 2; // 左侧控制
+                //         } else if (leftOperation === "OFF" && rightOperation === "ON") {
+                //             rc_index = 3; // 右侧控制
+                //         }
+                //     }
+                // }
             }
 
-            currentLinks.push({ linkIndex, linkType, linkName, action });
+            currentLinks.push({ linkIndex, linkType, linkName, action, rc_index });
         }
     });
 
