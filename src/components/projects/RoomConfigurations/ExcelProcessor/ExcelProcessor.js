@@ -423,19 +423,21 @@ export function processRemoteControls(splitData) {
     function getRcIndex(deviceType, operation) {
         if (deviceType === "PowerPoint Type (Two-Way)") {
             if (!operation) {
-                return 4;
+                return 4; // 保持不变，表示两路都开
             }
-            const [rightOperation, leftOperation] = operation.split(/\s+/);
+            const [leftOperation, rightOperation] = operation.split(/\s+/);
+            console.log(`Device: ${deviceType}, Operation: ${operation}, Right: ${rightOperation}, Left: ${leftOperation}`); // 调试日志
             if (rightOperation === "ON" && leftOperation === "OFF") {
                 return 2; // 右侧（第一路）开，左侧关
             } else if (rightOperation === "OFF" && leftOperation === "ON") {
                 return 3; // 右侧（第一路）关，左侧开
             } else if (rightOperation === "ON" && leftOperation === "ON") {
                 return 4; // 两路都开
-            } else if (leftOperation === "OFF" && rightOperation === "OFF") {
-                return 0;
+            } else if (rightOperation === "OFF" && leftOperation === "OFF") {
+                return 5; // 两路都关
             }
         }
+        console.log(`Default case: Device: ${deviceType}, Operation: ${operation}`); // 调试日志
         return 1; // 默认值，用于其他设备类型
     }
 
