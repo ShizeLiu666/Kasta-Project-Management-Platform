@@ -34,14 +34,15 @@ const LoginPage = () => {
   }, []);
 
   const handleLogin = async () => {
-    console.log("username:", username);
+    console.log("Attempting login with username:", username);
     try {
+      console.log("Sending login request...");
       const response = await axios.post("/api/users/login", {
         username,
         password,
       });
 
-      console.log(response.data);
+      console.log("Login response:", response.data);
 
       if (response.data && response.data.success) {
         const token = response.data.data.token;
