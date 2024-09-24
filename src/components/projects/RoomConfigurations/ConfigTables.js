@@ -58,7 +58,13 @@ export const renderGroupsTable = (groups) => {
         {groups.map((group, index) => (
           <tr key={index}>
             <td>{group.groupName}</td>
-            <td>{group.devices}</td>
+            <td>
+              {group.devices.map((device, deviceIndex) => (
+                <div key={deviceIndex}>
+                  {device.deviceName} ({device.appearanceShortname})
+                </div>
+              ))}
+            </td>
           </tr>
         ))}
       </tbody>

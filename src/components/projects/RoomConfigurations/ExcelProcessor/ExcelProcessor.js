@@ -25,9 +25,11 @@ export const AllDeviceTypes = {
 };
 
 let deviceNameToType = {};
+let deviceNameToAppearanceShortname = {};
 
 export function resetDeviceNameToType() {
     deviceNameToType = {};
+    deviceNameToAppearanceShortname = {};
 }
 
 export function extractTextFromSheet(sheet) {
@@ -109,6 +111,7 @@ export function processDevices(splitData) {
             devicesData.push(deviceInfo);
 
             deviceNameToType[line] = deviceType;
+            deviceNameToAppearanceShortname[line] = currentShortname;
             console.log(`Mapping ${line} to ${deviceType}`); // 调试信息
         }
     });
@@ -392,29 +395,42 @@ export function processGroups(splitData) {
     const groupsContent = splitData.groups || [];
     const groupsData = [];
     let currentGroupName = null;
+    let currentDevices = [];
 
     groupsContent.forEach(line => {
         line = line.trim();
 
         if (line.startsWith("NAME:")) {
+            if (currentGroupName) {
+                groupsData.push({
+                    groupName: currentGroupName,
+                    devices: currentDevices
+                });
+                currentDevices = [];
+            }
             currentGroupName = line.replace("NAME:", "").trim();
         } else if (currentGroupName) {
-            // 移除所有关键词
             line = line.replace(/CONTROL CONTENT:|DEVICE CONTENT:|DEVICE CONTROL:/g, '').trim();
-            // 分割设备名称并去除空白字符
             const devices = line.split(',')
                                 .map(device => device.trim())
                                 .filter(device => device);
             
-            // 为每个设备创建一个单独的对象
-            devices.forEach(device => {
-                groupsData.push({
-                    groupName: currentGroupName,
-                    devices: device
+            devices.forEach(deviceName => {
+                currentDevices.push({
+                    appearanceShortname: deviceNameToAppearanceShortname[deviceName] || '',
+                    deviceName: deviceName
                 });
             });
         }
     });
+
+    // 添加最后一个组
+    if (currentGroupName) {
+        groupsData.push({
+            groupName: currentGroupName,
+            devices: currentDevices
+        });
+    }
 
     return { groups: groupsData };
 }

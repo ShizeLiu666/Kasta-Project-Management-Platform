@@ -40,12 +40,11 @@ const LoginPage = () => {
         password,
       });
 
+      console.log(response.data);
+
       if (response.data && response.data.success) {
         const token = response.data.data.token;
         const loggedInUsername = response.data.data.username; // Assuming the backend also returns the username
-
-        // localStorage.setItem("authToken", token);
-        // localStorage.setItem("username", loggedInUsername); // Store the username
 
         setToken(token, rememberMe);
         saveUsername(loggedInUsername, rememberMe);
