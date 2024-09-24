@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 配置生产环境的 API 地址
-export const kastacloud_environment = 'http://kastacloud.com/api';
+export const kastacloud_environment = 'http://170.64.162.201:3000/api';
 
 // 创建 axios 实例
 const axiosInstance = axios.create({
