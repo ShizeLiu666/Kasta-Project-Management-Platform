@@ -95,11 +95,16 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
 }
 
 //! 验证 DEVICE 指令的格式
-function validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames) {
-    const deviceMatch = command.match(/^DEVICE\s+(\S+)(?:\s+-\s+(\S+))?$/);
+function validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType) {
+    if (!deviceNameToType) {
+        console.error('deviceNameToType is undefined');
+        return false;
+    }
+
+    const deviceMatch = command.match(/^DEVICE\s+(\S+)(?:\s+-\s+(\S+(?:\s+\S+)?))?$/);
     if (!deviceMatch) {
         errors.push(
-            `KASTA REMOTE CONTROL: The DEVICE command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'DEVICE <device_name>' with an optional operation after a space and '-'.`
+            `KASTA REMOTE CONTROL: The DEVICE command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'DEVICE <device_name>' with an optional operation after ' - '.`
         );
         return false;
     }
@@ -110,6 +115,41 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
             `KASTA REMOTE CONTROL: The DEVICE name '${deviceName}' in '${currentRemoteControlName}' does not exist.`
         );
         return false;
+    }
+
+    const deviceType = deviceNameToType[deviceName];
+    if (!deviceType) {
+        console.error(`Device type for ${deviceName} is undefined`);
+        return false;
+    }
+
+    const operation = deviceMatch[2];
+
+    if (deviceType === "PowerPoint Type (Two-Way)") {
+        if (operation) {
+            const operationParts = operation.split(/\s+/);
+            if (operationParts.length !== 2) {
+                errors.push(
+                    `KASTA REMOTE CONTROL: The operation '${operation}' for PowerPoint Type (Two-Way) device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected format: 'ON/OFF ON/OFF'.`
+                );
+                return false;
+            }
+
+            const [leftOperation, rightOperation] = operationParts;
+            if (!['ON', 'OFF'].includes(leftOperation.toUpperCase()) || !['ON', 'OFF'].includes(rightOperation.toUpperCase())) {
+                errors.push(
+                    `KASTA REMOTE CONTROL: The operation '${operation}' for PowerPoint Type (Two-Way) device '${deviceName}' in '${currentRemoteControlName}' is invalid. Both operations must be either 'ON' or 'OFF'.`
+                );
+                return false;
+            }
+        }
+    } else {
+        if (operation && !['ON', 'OFF'].includes(operation.toUpperCase())) {
+            errors.push(
+                `KASTA REMOTE CONTROL: The operation '${operation}' for device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'ON' or 'OFF'.`
+            );
+            return false;
+        }
     }
 
     return true;

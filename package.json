@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
-    "@emotion/react": "^11.13.0",
+    "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
@@ -27,7 +27,9 @@
     "react-bootstrap": "^2.10.4",
     "react-dom": "18.2.0",
     "react-icons-kit": "^2.0.0",
+    "react-multistep": "^5.5.9",
     "react-router-dom": "^6.12.1",
+    "react-stepzilla": "^7.0.0",
     "reactstrap": "9.2.0",
     "sass": "1.63.2",
     "web-vitals": "3.3.2",

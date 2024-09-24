@@ -151,6 +151,28 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
     fetchRoomDetail();
   }, [projectRoomId, fetchRoomDetail]);
 
+  useEffect(() => {
+    if (config) {
+      console.log('Config:', JSON.stringify(config, null, 2));
+      if (config.devices) {
+        console.log('Devices:', JSON.stringify(config.devices, null, 2));
+      }
+    }
+  }, [config]);
+
+  const processDevices = (devices) => {
+    if (Array.isArray(devices)) {
+      return devices;
+    }
+    if (typeof devices === 'object' && devices !== null) {
+      return Object.entries(devices).map(([key, value]) => ({
+        deviceName: key,
+        ...value
+      }));
+    }
+    return [];
+  };
+
   const handleCloudUploadClick = () => {
     setIsEditing(true);
   };
@@ -317,7 +339,12 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
               <>
                 {config && config !== "{}" && (
                   <>
-                    {config.devices && renderDevicesTable(config.devices)}
+                    {config.devices && (
+                      <div>
+                        {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))}
+                        {renderDevicesTable(processDevices(config.devices))}
+                      </div>
+                    )}
                     {config.groups && renderGroupsTable(config.groups)}
                     {config.scenes && renderScenesTable(config.scenes)}
                     {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}

@@ -275,9 +275,9 @@ function handlePowerPointType(parts, deviceType) {
             contents.push(sceneOutputTemplates["PowerPoint Type"]["Two-Way"](deviceName.trim().replace(",", ""), leftPower, rightPower));
         });
     } else if (deviceType.includes("Single-Way")) {
-        const power = parts.pop().toUpperCase() === "ON"; // 转换为布尔值
-        parts.forEach(deviceName => {
-            contents.push(sceneOutputTemplates["PowerPoint Type"]["Single-Way"](deviceName.trim().replace(",", ""), power));
+        const power = parts[parts.length - 1].toUpperCase() === "ON"; // 转换为布尔值
+        parts.slice(0, -1).forEach(deviceName => {
+          contents.push(sceneOutputTemplates["PowerPoint Type"]["Single-Way"](deviceName.trim().replace(",", ""), power));
         });
     }
 
@@ -420,6 +420,25 @@ export function processRemoteControls(splitData) {
     let currentRemote = null;
     let currentLinks = [];
 
+    function getRcIndex(deviceType, operation) {
+        if (deviceType === "PowerPoint Type (Two-Way)") {
+            if (!operation) {
+                return 4;
+            }
+            const [leftOperation, rightOperation] = operation.split(/\s+/);
+            if (leftOperation === "ON" && rightOperation === "OFF") {
+                return 2;
+            } else if (leftOperation === "OFF" && rightOperation === "ON") {
+                return 3;
+            } else if (leftOperation === "ON" && rightOperation === "ON") {
+                return 4;
+            } else if (leftOperation === "OFF" && rightOperation === "OFF") {
+                return 5; 
+            }
+        }
+        return 1; // 默认值，用于其他设备类型
+    }
+
     remoteControlsContent.forEach(line => {
         line = line.trim();
 
@@ -439,11 +458,11 @@ export function processRemoteControls(splitData) {
 
             const linkIndex = parseInt(parts[0].trim(), 10) - 1;
             let linkDescription = parts[1].trim();
-            let action = false;
+            let action = null;
 
             if (linkDescription.includes(" - ")) {
                 [linkDescription, action] = linkDescription.split(" - ");
-                action = action.trim().toUpperCase();
+                action = action.trim();
             }
 
             let linkType = 0;
@@ -461,18 +480,8 @@ export function processRemoteControls(splitData) {
             } else if (linkDescription.startsWith("DEVICE")) {
                 linkType = 1; // 设备
                 linkName = linkDescription.replace("DEVICE", "").trim();
-                // 根据设备类型和操作指令设置 rc_index
-                // if (linkName.includes("Two-Way")) {
-                //     const operations = action.split(" ");
-                //     if (operations.length === 2) {
-                //         const [leftOperation, rightOperation] = operations;
-                //         if (leftOperation === "ON" && rightOperation === "OFF") {
-                //             rc_index = 2; // 左侧控制
-                //         } else if (leftOperation === "OFF" && rightOperation === "ON") {
-                //             rc_index = 3; // 右侧控制
-                //         }
-                //     }
-                // }
+                const deviceType = deviceNameToType[linkName];
+                rc_index = getRcIndex(deviceType, action);
             }
 
             currentLinks.push({ linkIndex, linkType, linkName, action, rc_index });
