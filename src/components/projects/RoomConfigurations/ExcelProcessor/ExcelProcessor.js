@@ -391,22 +391,27 @@ export function processScenes(splitData) {
 export function processGroups(splitData) {
     const groupsContent = splitData.groups || [];
     const groupsData = [];
-    let currentGroup = null;
+    let currentGroupName = null;
 
     groupsContent.forEach(line => {
         line = line.trim();
 
         if (line.startsWith("NAME:")) {
-            currentGroup = line.replace("NAME:", "").trim();
-            return;
-        }
-
-        if (line.startsWith("DEVICE CONTROL")) return;
-
-        if (currentGroup) {
-            groupsData.push({
-                groupName: currentGroup,
-                devices: line
+            currentGroupName = line.replace("NAME:", "").trim();
+        } else if (currentGroupName) {
+            // 移除所有关键词
+            line = line.replace(/CONTROL CONTENT:|DEVICE CONTENT:|DEVICE CONTROL:/g, '').trim();
+            // 分割设备名称并去除空白字符
+            const devices = line.split(',')
+                                .map(device => device.trim())
+                                .filter(device => device);
+            
+            // 为每个设备创建一个单独的对象
+            devices.forEach(device => {
+                groupsData.push({
+                    groupName: currentGroupName,
+                    devices: device
+                });
             });
         }
     });
