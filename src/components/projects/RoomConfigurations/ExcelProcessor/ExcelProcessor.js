@@ -49,7 +49,7 @@ export function extractTextFromSheet(sheet) {
 export function processExcelToJson(fileContent) {
     const workbook = XLSX.read(fileContent, { type: 'array' });
     const allTextData = {};
-    
+
     workbook.SheetNames.forEach(sheetName => {
         if (sheetName.includes("Programming Details")) {
             const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
@@ -95,7 +95,7 @@ export function processDevices(splitData) {
                         deviceType = `${dtype} (${subType})`;
                         break;
                     }
-                }      
+                }
             }
             if (deviceType) break;
         }
@@ -260,24 +260,24 @@ function handlePowerPointType(parts, deviceType) {
 
     if (deviceType.includes("Two-Way")) {
         // 查找操作指令的索引
-        let leftPowerIndex = parts.findIndex(part => part.toUpperCase() === "ON" || part.toUpperCase() === "OFF");
-        let rightPowerIndex = parts.findIndex((part, index) => index > leftPowerIndex && (part.toUpperCase() === "ON" || part.toUpperCase() === "OFF"));
+        let rightPowerIndex = parts.findIndex(part => part.toUpperCase() === "ON" || part.toUpperCase() === "OFF");
+        let leftPowerIndex = parts.findIndex((part, index) => index > rightPowerIndex && (part.toUpperCase() === "ON" || part.toUpperCase() === "OFF"));
 
-        if (leftPowerIndex === -1 || rightPowerIndex === -1) {
+        if (rightPowerIndex === -1 || leftPowerIndex === -1) {
             console.warn(`Invalid operation format for Two-Way PowerPoint Type: ${parts.join(" ")}`);
             return contents;
         }
 
-        const leftPower = parts[leftPowerIndex].toUpperCase() === "ON";
         const rightPower = parts[rightPowerIndex].toUpperCase() === "ON";
+        const leftPower = parts[leftPowerIndex].toUpperCase() === "ON";
 
-        parts.slice(0, leftPowerIndex).forEach(deviceName => {
-            contents.push(sceneOutputTemplates["PowerPoint Type"]["Two-Way"](deviceName.trim().replace(",", ""), leftPower, rightPower));
+        parts.slice(0, rightPowerIndex).forEach(deviceName => {
+            contents.push(sceneOutputTemplates["PowerPoint Type"]["Two-Way"](deviceName.trim().replace(",", ""), rightPower, leftPower));
         });
     } else if (deviceType.includes("Single-Way")) {
         const power = parts[parts.length - 1].toUpperCase() === "ON"; // 转换为布尔值
         parts.slice(0, -1).forEach(deviceName => {
-          contents.push(sceneOutputTemplates["PowerPoint Type"]["Single-Way"](deviceName.trim().replace(",", ""), power));
+            contents.push(sceneOutputTemplates["PowerPoint Type"]["Single-Way"](deviceName.trim().replace(",", ""), power));
         });
     }
 
@@ -321,10 +321,10 @@ export function parseSceneContent(sceneName, contentLines) {
             const deviceType = determineDeviceType(parts[0]);
 
             // 查找操作指令的索引
-            let operationIndex = parts.findIndex(part => 
+            let operationIndex = parts.findIndex(part =>
                 ['ON', 'OFF', 'OPEN', 'CLOSE'].includes(part.toUpperCase()) ||
-                (part.toUpperCase() === 'TURN' && parts[parts.indexOf(part) + 1] && 
-                 ['ON', 'OFF'].includes(parts[parts.indexOf(part) + 1].toUpperCase()))
+                (part.toUpperCase() === 'TURN' && parts[parts.indexOf(part) + 1] &&
+                    ['ON', 'OFF'].includes(parts[parts.indexOf(part) + 1].toUpperCase()))
             );
 
             if (operationIndex !== -1) {
@@ -370,7 +370,7 @@ export function processScenes(splitData) {
 
     scenesContent.forEach(line => {
         line = line.trim();
-        
+
         if (line.startsWith("CONTROL CONTENT:")) return;
 
         if (line.startsWith("NAME:")) {
@@ -425,15 +425,15 @@ export function processRemoteControls(splitData) {
             if (!operation) {
                 return 4;
             }
-            const [leftOperation, rightOperation] = operation.split(/\s+/);
-            if (leftOperation === "ON" && rightOperation === "OFF") {
-                return 2;
-            } else if (leftOperation === "OFF" && rightOperation === "ON") {
-                return 3;
-            } else if (leftOperation === "ON" && rightOperation === "ON") {
-                return 4;
+            const [rightOperation, leftOperation] = operation.split(/\s+/);
+            if (rightOperation === "ON" && leftOperation === "OFF") {
+                return 2; // 右侧（第一路）开，左侧关
+            } else if (rightOperation === "OFF" && leftOperation === "ON") {
+                return 3; // 右侧（第一路）关，左侧开
+            } else if (rightOperation === "ON" && leftOperation === "ON") {
+                return 4; // 两路都开
             } else if (leftOperation === "OFF" && rightOperation === "OFF") {
-                return 5; 
+                return 0;
             }
         }
         return 1; // 默认值，用于其他设备类型
