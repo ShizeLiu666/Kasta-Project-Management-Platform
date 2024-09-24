@@ -34,6 +34,7 @@ const LoginPage = () => {
   }, []);
 
   const handleLogin = async () => {
+    console.log("username:", username);
     try {
       const response = await axios.post("/api/users/login", {
         username,
