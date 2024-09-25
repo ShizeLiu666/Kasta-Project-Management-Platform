@@ -151,7 +151,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   const sendVerificationCodeWithFeedback = async (email) => {
     setLoading(true); // 显示加载动画
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `/users/send-verification-code?email=${encodeURIComponent(email)}`
       );
 
@@ -175,7 +175,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
 
   const sendVerificationCodeWithoutFeedback = async (email) => {
     try {
-      await axios.post(
+      await axiosInstance.post(
         `/users/send-verification-code?email=${encodeURIComponent(email)}`
       );
     } catch (error) {
@@ -214,7 +214,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
 
     try {
       // 发起POST请求
-      const response = await axios.post("/users/register", userData);
+      const response = await axiosInstance.post("/users/register", userData);
 
       // 检查返回数据中的 success 字段
       if (response.data.success) {

@@ -122,7 +122,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
     setLoading(true); // Start loading
 
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `/api/users/send-verification-code?email=${encodeURIComponent(email)}`
       );
 
