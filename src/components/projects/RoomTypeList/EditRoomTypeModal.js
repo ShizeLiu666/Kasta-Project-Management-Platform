@@ -22,7 +22,7 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
       }
 
       const response = await axios.post(
-        '/api/project-rooms',
+        '/project-rooms',
         {
           projectId: roomType.projectId,
           name,

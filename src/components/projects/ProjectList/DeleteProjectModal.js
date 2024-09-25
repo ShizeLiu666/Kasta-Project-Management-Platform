@@ -39,7 +39,7 @@ const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
     }
 
     try {
-      const response = await axios.delete(`/api/projects/${project.projectId}`, {
+      const response = await axios.delete(`/projects/${project.projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

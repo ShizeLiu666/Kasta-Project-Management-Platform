@@ -15,7 +15,7 @@ const DeleteRoomTypeModal = ({ isOpen, toggle, selectedRoomType, onRoomTypeDelet
       }
 
       const response = await axios.delete(
-        `/api/project-rooms/${selectedRoomType.projectRoomId}`,
+        `/project-rooms/${selectedRoomType.projectRoomId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

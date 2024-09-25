@@ -27,7 +27,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           return;
         }
 
-        const response = await axios.get(`/api/project-rooms/${projectId}`, {
+        const response = await axios.get(`/project-rooms/${projectId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -40,7 +40,7 @@ const ProjectList = () => {
         return;
       }
   
-      const response = await axios.get("/api/projects", {
+      const response = await axios.get("/projects", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -84,7 +84,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
 
     try {
       const response = await axios.put(
-        `/api/projects/modify`,
+        `/projects/modify`,
         { 
           projectId: project.projectId,
           attributes

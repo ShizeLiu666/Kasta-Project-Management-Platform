@@ -50,7 +50,7 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
 
     try {
       const response = await axios.post(
-        "/api/project-rooms",
+        "/project-rooms",
         {
           projectId,
           name,

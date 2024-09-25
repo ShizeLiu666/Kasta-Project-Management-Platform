@@ -33,7 +33,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
     }
     try {
       const response = await axios.post(
-        "/api/projects",
+        "/projects",
         { name, address, des, password },
         {
           headers: {

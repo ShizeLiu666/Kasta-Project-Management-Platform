@@ -42,7 +42,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       }
 
       const response = await fetch(
-        `/api/project-rooms/detail/${projectRoomId}`,
+        `/project-rooms/detail/${projectRoomId}`,
         {
           method: "GET",
           headers: {
@@ -95,7 +95,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       }
 
       const response = await fetch(
-        `/api/project-rooms/${projectRoomId}/config`,
+        `/project-rooms/${projectRoomId}/config`,
         {
           method: "POST",
           headers: {
@@ -194,7 +194,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       }
 
       const response = await fetch(
-        `/api/project-rooms/clear-config/${projectRoomId}`,
+        `/project-rooms/clear-config/${projectRoomId}`,
         {
           method: "POST",
           headers: {
