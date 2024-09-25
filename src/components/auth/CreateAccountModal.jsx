@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import axios from "axios";
 import "./CreateAccountModal.css";
 import CountryCodeSelect from "./CountryCodeSelect"; // 引入新的 CountryCodeSelect 组件
+import axiosInstance from '../../config';  // 路径可能需要调整
 
 const CreateAccountModal = ({ handleBackToLogin }) => {
   const [username, setUsername] = useState(""); // 新增 User Name
