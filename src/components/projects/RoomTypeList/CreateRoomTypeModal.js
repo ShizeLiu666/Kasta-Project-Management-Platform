@@ -45,7 +45,6 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
       name,
       typeCode,
       des,
-      // iconUrl,
     });
 
     try {
