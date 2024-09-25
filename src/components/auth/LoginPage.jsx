@@ -10,7 +10,7 @@ import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { setToken, saveUsername } from './auth';
-import { kastacloud_environment } from '../../config';
+import axiosInstance from '../../config';  // 路径可能需要调整
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
