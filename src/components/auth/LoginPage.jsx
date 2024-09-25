@@ -36,6 +36,7 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     console.log("Attempting login with username:", username);
+    console.log('here')
     try {
       console.log("Sending login request...");
       const response = await axiosInstance.post('/users/login', {
