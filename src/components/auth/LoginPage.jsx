@@ -10,6 +10,7 @@ import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { setToken, saveUsername } from './auth';
+import { kastacloud_environment } from '../../config';
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -37,7 +38,7 @@ const LoginPage = () => {
     console.log("Attempting login with username:", username);
     try {
       console.log("Sending login request...");
-      const response = await axios.post("/users/login", {
+      const response = await axios.post(`${kastacloud_environment}/users/login`, {
         username,
         password,
       });
