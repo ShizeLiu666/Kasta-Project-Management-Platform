@@ -10,8 +10,7 @@ import {
   Button,
   Alert,
 } from "reactstrap";
-import axios from "axios";
-import axiosInstance from '../../config'; 
+import axiosInstance from '../../../config'; 
 import { getToken } from '../../auth/auth';
 
 const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) => {

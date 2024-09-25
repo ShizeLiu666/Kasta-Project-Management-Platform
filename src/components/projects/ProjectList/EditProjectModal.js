@@ -10,9 +10,8 @@ import {
   Button,
   Alert,
 } from "reactstrap";
-import axios from "axios";
 import { getToken } from '../../auth/auth';
-import axiosInstance from '../../config';
+import axiosInstance from '../../../config'; 
 
 const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
   const [formData, setFormData] = useState({

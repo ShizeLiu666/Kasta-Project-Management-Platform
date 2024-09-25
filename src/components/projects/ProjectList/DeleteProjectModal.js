@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Alert, Form, FormGroup, Label, Input } from "reactstrap";
-import axios from "axios";
 import { getToken } from '../../auth/auth';
-import axiosInstance from '../../config';
+import axiosInstance from '../../../config'; 
 
 const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
   const [error, setError] = useState("");

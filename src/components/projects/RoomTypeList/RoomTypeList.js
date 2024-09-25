@@ -8,7 +8,7 @@ import { Typography, CircularProgress } from "@mui/material";
 import { Button } from "reactstrap";
 import SearchComponent from "../ProjectList/SearchComponent";
 import { getToken } from '../../auth/auth';
-import axiosInstance from '../../config'; 
+import axiosInstance from '../../../config'; 
 
 
 const RoomTypeList = ({ projectId, projectName, onNavigate }) => {

@@ -10,8 +10,7 @@ import {
   Button,
   Alert,
 } from "reactstrap";
-import axios from "axios";
-import axiosInstance from '../../config';
+import axiosInstance from '../../../config'; 
 import { getToken } from '../../auth/auth'; // 导入 getToken 函数
 
 const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
