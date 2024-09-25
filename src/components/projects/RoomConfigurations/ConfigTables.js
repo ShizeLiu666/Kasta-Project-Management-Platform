@@ -145,12 +145,8 @@ export const renderRemoteControlsTable = (remoteControls) => (
               remote.links.map((link, i) => (
                 <div key={i}>
                   {i + 1}. {link.linkName}:
-                  <ul>
-                    <li>Type: {link.linkType}</li>
-                    <li>Index: {link.linkIndex}</li>
-                    <li>RC Index: {link.rc_index}</li>
+                    Type: {link.linkType}; RC Index: {link.rc_index}
                     {link.action !== null && <li>Action: {link.action}</li>}
-                  </ul>
                 </div>
               ))
             )}
