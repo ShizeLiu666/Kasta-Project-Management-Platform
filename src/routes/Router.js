@@ -43,11 +43,11 @@ const ThemeRoutes = [
       { path: "breadcrumbs", element: <Breadcrumbs /> },
       { path: "forms", element: <Form /> },
     ],
-  }
-  // {
-  //   path: "*",
-  //   element: <Navigate to="/login" />,
-  // },
+  },
+  {
+    path: "*",
+    element: <Navigate to="/login" />,
+  },
 ];
 
 export default ThemeRoutes;

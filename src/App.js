@@ -6,7 +6,7 @@ import "./assets/scss/App.css";
 
 const ErrorFallback = ({ error }) => (
   <div>
-    <h1>error!</h1>
+    <h1>{error.message}</h1>
     <pre>{error.message}</pre>
   </div>
 );
