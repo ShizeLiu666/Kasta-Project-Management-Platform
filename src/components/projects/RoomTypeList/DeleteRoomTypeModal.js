@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Alert } from 'reactstrap';
 import axios from "axios";
+import axiosInstance from '../../config'; 
 import { getToken } from '../../auth/auth';
 
 const DeleteRoomTypeModal = ({ isOpen, toggle, selectedRoomType, onRoomTypeDeleted }) => {
@@ -14,7 +15,7 @@ const DeleteRoomTypeModal = ({ isOpen, toggle, selectedRoomType, onRoomTypeDelet
         return;
       }
 
-      const response = await axios.delete(
+      const response = await axiosInstance.delete(
         `/project-rooms/${selectedRoomType.projectRoomId}`,
         {
           headers: {

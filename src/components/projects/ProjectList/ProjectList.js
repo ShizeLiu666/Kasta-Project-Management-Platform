@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import axios from "axios";
+import axiosInstance from '../../config'; 
 import ProjectCard from "./ProjectCard";
 import PasswordModal from "./PasswordModal";
 import RoomTypeList from "../RoomTypeList/RoomTypeList";
@@ -40,7 +41,7 @@ const ProjectList = () => {
         return;
       }
   
-      const response = await axios.get("/projects", {
+      const response = await axiosInstance.get("/projects", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

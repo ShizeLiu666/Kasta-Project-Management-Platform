@@ -8,6 +8,8 @@ import { Typography, CircularProgress } from "@mui/material";
 import { Button } from "reactstrap";
 import SearchComponent from "../ProjectList/SearchComponent";
 import { getToken } from '../../auth/auth';
+import axiosInstance from '../../config'; 
+
 
 const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
   const [roomTypes, setRoomTypes] = useState([]);
@@ -27,7 +29,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           return;
         }
 
-        const response = await axios.get(`/project-rooms/${projectId}`, {
+        const response = await axiosInstance.get(`/project-rooms/${projectId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

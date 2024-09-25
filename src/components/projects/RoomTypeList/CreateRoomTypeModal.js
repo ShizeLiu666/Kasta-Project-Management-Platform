@@ -11,6 +11,7 @@ import {
   Alert,
 } from "reactstrap";
 import axios from "axios";
+import axiosInstance from '../../config'; 
 import { getToken } from '../../auth/auth';
 
 const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) => {
@@ -48,7 +49,7 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
     });
 
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         "/project-rooms",
         {
           projectId,

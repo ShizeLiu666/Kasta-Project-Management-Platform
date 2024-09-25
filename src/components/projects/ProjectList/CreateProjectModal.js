@@ -11,6 +11,7 @@ import {
   Alert,
 } from "reactstrap";
 import axios from "axios";
+import axiosInstance from '../../config';
 import { getToken } from '../../auth/auth'; // 导入 getToken 函数
 
 const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
@@ -32,7 +33,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
       return;
     }
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         "/projects",
         { name, address, des, password },
         {

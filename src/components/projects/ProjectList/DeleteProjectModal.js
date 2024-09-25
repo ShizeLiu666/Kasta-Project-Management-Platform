@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Alert, Form, FormGroup, Label, Input } from "reactstrap";
 import axios from "axios";
 import { getToken } from '../../auth/auth';
+import axiosInstance from '../../config';
 
 const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
   const [error, setError] = useState("");
@@ -39,7 +40,7 @@ const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
     }
 
     try {
-      const response = await axios.delete(`/projects/${project.projectId}`, {
+      const response = await axiosInstance.delete(`/projects/${project.projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

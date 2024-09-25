@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
 import axios from 'axios';
+import axiosInstance from '../../config'; 
 import { getToken } from '../../auth/auth';
 
 const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
@@ -21,7 +22,7 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
         return;
       }
 
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         '/project-rooms',
         {
           projectId: roomType.projectId,

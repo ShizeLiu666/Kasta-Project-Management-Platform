@@ -12,6 +12,7 @@ import {
 } from "reactstrap";
 import axios from "axios";
 import { getToken } from '../../auth/auth';
+import axiosInstance from '../../config';
 
 const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
   const [formData, setFormData] = useState({
@@ -83,7 +84,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     }
 
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `/projects/modify`,
         { 
           projectId: project.projectId,
