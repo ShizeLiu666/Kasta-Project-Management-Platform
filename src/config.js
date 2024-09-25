@@ -5,7 +5,7 @@ export const kastacloud_environment = '/api';
 
 // 创建 axios 实例
 const axiosInstance = axios.create({
-  baseURL: kastacloud_environment,  // 基础 URL 设为生产环境
+  baseURL: kastacloud_environment,
 });
 
 // 配置拦截器，自动添加 Authorization 头

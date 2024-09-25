@@ -38,7 +38,7 @@ const LoginPage = () => {
     console.log("Attempting login with username:", username);
     try {
       console.log("Sending login request...");
-      const response = await axios.post(`${kastacloud_environment}/users/login`, {
+      const response = await axios.post(`/users/login`, {
         username,
         password,
       });
