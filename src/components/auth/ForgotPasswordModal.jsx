@@ -117,13 +117,13 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   }, [countdown, canRequestAgain]);
 
   const handleSendVerificationCode = async () => {
-    if (!isValidForm) return;
+    if (!validateEmail(email)) return;
 
     setLoading(true); // Start loading
 
     try {
       const response = await axios.post(
-        `/api/users/send-verification-code?email=${encodeURIComponent(email)}`
+        `/users/send-verification-code?email=${encodeURIComponent(email)}`
       );
 
       if (response.data.success) {
@@ -159,7 +159,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   
     try {
       // Send the POST request to the reset password endpoint
-      const response = await axios.post("/api/users/modify/pwd", userData);
+      const response = await axios.post("/users/modify/pwd", userData);
   
       // Check the 'success' field in the response
       if (response.data.success) {
@@ -257,7 +257,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
                   alignItems: "center", // Center vertically
                 }}
                 onClick={handleSendVerificationCode}
-                disabled={!isValidForm || !canRequestAgain || loading} // Disable if loading
+                disabled={!validateEmail(email) || !canRequestAgain || loading} // Disable if loading
               >
                 {loading ? (
                   <CircularProgress size={15} style={{ color: "#fff" }} /> // Use size 15 and center
