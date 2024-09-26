@@ -88,12 +88,12 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
                 ))}
               </ul>
               <Button onClick={() => setShowFormatImage(!showFormatImage)} variant="outlined" size="sm" sx={{ mt: 1 }}>
-                {showFormatImage ? "Hide Format Image" : "Show Format Image"}
+                {showFormatImage ? "Hide Device List" : "Show Supported Device List"}
               </Button>
               {showFormatImage && (
                 <div style={{ marginTop: "20px" }}>
-                  <h5>Correct device type formats:</h5>
-                  <img src={deviceTypesFormatImage} alt="Device types format" style={{ maxWidth: "100%" }} />
+                  <h5>Currently Supported Device Types and Models:</h5>
+                  <img src={deviceTypesFormatImage} alt="Supported device types and models" style={{ maxWidth: "100%" }} />
                 </div>
               )}
             </Alert>
