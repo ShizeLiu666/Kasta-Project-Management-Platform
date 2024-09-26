@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = '/http://kastacloud.com/api';
+const baseURL = 'http://kastacloud.com/api';
 
 const getTimestamp = () => {
   const now = new Date();
