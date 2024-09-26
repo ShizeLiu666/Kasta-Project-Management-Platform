@@ -9,9 +9,6 @@ const getTimestamp = () => {
 
 console.log(`[${getTimestamp()}] Testing baseURL:`, baseURL);
 
-console.log('Testing', baseURL);
-console.log('Axios baseURL:', baseURL);
-
 const axiosInstance = axios.create({
   baseURL: baseURL,
 });
