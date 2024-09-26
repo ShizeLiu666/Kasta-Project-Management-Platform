@@ -7,7 +7,7 @@ const getTimestamp = () => {
   return now.toISOString(); // 使用 ISO 格式的时间戳
 };
 
-console.log(`[${getTimestamp()}] Testing baseURL:`, baseURL);
+console.log(`[${getTimestamp()}] Testing baseURL2:`, baseURL);
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
