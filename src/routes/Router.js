@@ -31,23 +31,22 @@ const ThemeRoutes = [
     path: "/admin",
     element: <FullLayout />,
     children: [
-      // { path: "starter", element: <Starter /> },
       { path: "about", element: <About /> },
       { path: "alerts", element: <Alerts /> },
       { path: "badges", element: <Badges /> },
       { path: "buttons", element: <Buttons /> },
-      { path: "Projects", element: <Projects /> },
+      { path: "projects", element: <Projects /> },
       { path: "grid", element: <Grid /> },
       { path: "table", element: <Tables /> },
       { path: "excelconverter", element: <ExcelConverter /> },
       { path: "breadcrumbs", element: <Breadcrumbs /> },
       { path: "forms", element: <Form /> },
     ],
-  }
-  // {
-  //   path: "*",
-  //   element: <Navigate to="/login" />,
-  // },
+  },
+  {
+    path: "*",
+    element: <Navigate to="/login" />,
+  },
 ];
 
 export default ThemeRoutes;
