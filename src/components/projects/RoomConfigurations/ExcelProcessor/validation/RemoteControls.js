@@ -97,7 +97,7 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
 //! 验证 DEVICE 指令的格式
 function validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType) {
     if (!deviceNameToType) {
-        console.error('deviceNameToType is undefined');
+        // console.error('deviceNameToType is undefined');
         return false;
     }
 
@@ -119,7 +119,7 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
 
     const deviceType = deviceNameToType[deviceName];
     if (!deviceType) {
-        console.error(`Device type for ${deviceName} is undefined`);
+        // console.error(`Device type for ${deviceName} is undefined`);
         return false;
     }
 
@@ -285,8 +285,8 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
                 
     });
 
-    console.log('================================================================')
-    console.log("Errors found:", errors);
+    // console.log('================================================================')
+    // console.log("Errors found:", errors);
 
     return errors;
 }

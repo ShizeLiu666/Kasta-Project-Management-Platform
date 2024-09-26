@@ -147,8 +147,8 @@ export function validateDevices(deviceDataArray) {
     }
   });
 
-  console.log("Errors found:", errors);
-  console.log("Device Types:", deviceNameToType);
+  // console.log("Errors found:", errors);
+  // console.log("Device Types:", deviceNameToType);
 
   return { errors, deviceNameToType, registeredDeviceNames };
 }

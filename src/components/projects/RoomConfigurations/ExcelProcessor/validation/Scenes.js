@@ -510,8 +510,8 @@ export function validateScenes(sceneDataArray, deviceNameToType) {
     }
   });
 
-  console.log(deviceNameToType);
-  console.log("Errors found:", errors);
+  // console.log(deviceNameToType);
+  // console.log("Errors found:", errors);
 
   return { errors, registeredSceneNames };
 }

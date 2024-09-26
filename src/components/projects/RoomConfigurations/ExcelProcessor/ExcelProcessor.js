@@ -112,7 +112,7 @@ export function processDevices(splitData) {
 
             deviceNameToType[line] = deviceType;
             deviceNameToAppearanceShortname[line] = currentShortname;
-            console.log(`Mapping ${line} to ${deviceType}`); // 调试信息
+            // console.log(`Mapping ${line} to ${deviceType}`); // 调试信息
         }
     });
 
@@ -205,7 +205,7 @@ function handleDimmerType(parts) {
                 contents.push(sceneOutputTemplates["Dimmer Type"](deviceName, status, level));
             }
         } catch (e) {
-            console.warn(`Skipping device due to error: ${e.message}`);
+            // console.warn(`Skipping device due to error: ${e.message}`);
         }
     });
 
@@ -227,7 +227,7 @@ function handleRelayType(parts) {
                 contents.push(sceneOutputTemplates["Relay Type"](deviceName, status));
             }
         } catch (e) {
-            console.warn(`Skipping device due to error: ${e.message}`);
+            // console.warn(`Skipping device due to error: ${e.message}`);
         }
     });
 
@@ -267,7 +267,7 @@ function handlePowerPointType(parts, deviceType) {
         let leftPowerIndex = parts.findIndex((part, index) => index > rightPowerIndex && (part.toUpperCase() === "ON" || part.toUpperCase() === "OFF"));
 
         if (rightPowerIndex === -1 || leftPowerIndex === -1) {
-            console.warn(`Invalid operation format for Two-Way PowerPoint Type: ${parts.join(" ")}`);
+            // console.warn(`Invalid operation format for Two-Way PowerPoint Type: ${parts.join(" ")}`);
             return contents;
         }
 
@@ -291,15 +291,15 @@ function determineDeviceType(deviceName) {
     const originalDeviceName = deviceName.trim().replace(',', '');
 
     if (!originalDeviceName) {
-        console.error(`Error: Detected empty or invalid device name: '${originalDeviceName}'`);
-        throw new Error("设备名称不能为空。");
+        // console.error(`Error: Detected empty or invalid device name: '${originalDeviceName}'`);
+        throw new Error("Device name can not be empty.");
     }
 
     const deviceType = deviceNameToType[originalDeviceName];
     if (deviceType) {
         return deviceType;
     } else {
-        throw new Error(`无法确定设备类型：'${originalDeviceName}'`);
+        throw new Error(`Can not define device type for '${originalDeviceName}'`);
     }
 }
 
@@ -447,7 +447,7 @@ export function processRemoteControls(splitData) {
                 return 4; // 保持不变，表示两路都开
             }
             const [leftOperation, rightOperation] = operation.split(/\s+/);
-            console.log(`Device: ${deviceType}, Operation: ${operation}, Right: ${rightOperation}, Left: ${leftOperation}`); // 调试日志
+            // console.log(`Device: ${deviceType}, Operation: ${operation}, Right: ${rightOperation}, Left: ${leftOperation}`); // 调试日志
             if (rightOperation === "ON" && leftOperation === "OFF") {
                 return 2; // 右侧（第一路）开，左侧关
             } else if (rightOperation === "OFF" && leftOperation === "ON") {
@@ -458,7 +458,7 @@ export function processRemoteControls(splitData) {
                 return 5; // 两路都关
             }
         }
-        console.log(`Default case: Device: ${deviceType}, Operation: ${operation}`); // 调试日志
+        // console.log(`Default case: Device: ${deviceType}, Operation: ${operation}`); // 调试日志
         return 1; // 默认值，用于其他设备类型
     }
 
