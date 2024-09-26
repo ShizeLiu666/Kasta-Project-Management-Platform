@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
 import { Alert, AlertTitle } from "@mui/material";
+import { Button } from "reactstrap";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -10,6 +11,9 @@ import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
 import { validateDevices } from "../ExcelProcessor/validation/Devices";
 import "./steps.scss"
+
+// 导入设备类型格式图片
+import deviceTypesFormatImage from '../../../../assets/excel/device_format/device_types.png';
 
 // 格式化错误信息的函数
 const formatErrors = (errors) => {
@@ -28,6 +32,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
   const [deviceNameToType, setDeviceNameToType] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [showFormatImage, setShowFormatImage] = useState(false);
   const hasValidated = useRef(false);
 
   useEffect(() => {
@@ -41,10 +46,12 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
       setDeviceErrors(formatErrors(deviceErrors));
       setSuccess(false);
       onValidate(false, deviceErrors);
+      setShowFormatImage(true);
     } else {
       setDeviceNameToType(deviceNameToType);
       setSuccess(true);
       onValidate(true, { deviceNameToType, groupData: splitData.groups });
+      setShowFormatImage(false);
     }
 
     hasValidated.current = true;
@@ -80,6 +87,15 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
                   <li key={index}>{error}</li>
                 ))}
               </ul>
+              <Button onClick={() => setShowFormatImage(!showFormatImage)} variant="outlined" size="sm" sx={{ mt: 1 }}>
+                {showFormatImage ? "Hide Format Image" : "Show Format Image"}
+              </Button>
+              {showFormatImage && (
+                <div style={{ marginTop: "20px" }}>
+                  <h5>Correct device type formats:</h5>
+                  <img src={deviceTypesFormatImage} alt="Device types format" style={{ maxWidth: "100%" }} />
+                </div>
+              )}
             </Alert>
           )}
 
@@ -93,7 +109,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                    <TableCell>
+                      <TableCell>
                         <strong>Device Name</strong>
                       </TableCell>
                       <TableCell>
@@ -103,10 +119,7 @@ const Step2 = forwardRef(({ splitData, onValidate }, ref) => {
                   </TableHead>
                   <TableBody>
                     {Object.entries(deviceNameToType)
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                       .map(([deviceName, deviceType]) => (
                         <TableRow key={deviceName}>
                           <TableCell>{deviceName}</TableCell>
