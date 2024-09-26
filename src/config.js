@@ -1,33 +1,40 @@
 import axios from 'axios';
 
-// // 配置生产环境的 API 地址
-const axiosInstance = axios.create({
-  baseURL: 'http://10.126.0.3:8080/api', // 假设后端在 8080 端口
-});
+const baseURL = 'http://10.126.0.3:8080/api';
+
 console.log('Axios baseURL:', baseURL);
-// 配置拦截器，自动添加 Authorization 头
-// axiosInstance.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem('authToken');  // 从 localStorage 中获取 token
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;  // 如果 token 存在，添加 Authorization 头
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
 
-// // 响应拦截器，处理 401 错误（未授权）
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response && error.response.status === 401) {
-//       localStorage.removeItem('authToken');  // 移除过期的 token
-//       alert('Your session has expired. Please log in again.');
-//       window.location.href = '/login';  // 重定向到登录页面
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+const axiosInstance = axios.create({
+  baseURL: baseURL,
+});
 
-export default axiosInstance;  // 默认导出 axios 实例
+// 请求拦截器
+axiosInstance.interceptors.request.use(
+  (config) => {
+    console.log('Request:', config.method.toUpperCase(), config.url);
+    console.log('Full URL:', config.baseURL + config.url);
+    return config;
+  },
+  (error) => {
+    console.error('Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// 响应拦截器
+axiosInstance.interceptors.response.use(
+  (response) => {
+    console.log('Response:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('Response Error:', error);
+    if (error.response) {
+      console.error('Error Status:', error.response.status);
+      console.error('Error Data:', error.response.data);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;
