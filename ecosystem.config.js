@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
       name: "kasta-frontend",
-      script: "serve",
+      script: "http-server",
       env: {
         PM2_SERVE_PATH: "./build",
         PM2_SERVE_PORT: 3000,
