@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'http://localhost:8080/api';
+const baseURL = 'http://kastacloud.com/api';
 
 console.log('Axios baseURL:', baseURL);
 
