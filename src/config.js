@@ -1,7 +1,15 @@
 import axios from 'axios';
 
-const baseURL = 'http://170.64.162.201/api';
+const baseURL = 'localhost:8080/api';
 
+const getTimestamp = () => {
+  const now = new Date();
+  return now.toISOString(); // 使用 ISO 格式的时间戳
+};
+
+console.log(`[${getTimestamp()}] Testing baseURL:`, baseURL);
+
+console.log('Testing', baseURL);
 console.log('Axios baseURL:', baseURL);
 
 const axiosInstance = axios.create({
