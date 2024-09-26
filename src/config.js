@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'http://10.126.0.3:8080/api';
+const baseURL = 'http://localhost:8080/api';
 
 console.log('Axios baseURL:', baseURL);
 
