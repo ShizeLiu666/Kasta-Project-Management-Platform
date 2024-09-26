@@ -22,6 +22,7 @@ import {
   renderRemoteControlsTable
 } from './ConfigTables';
 import { getToken } from '../../auth/auth';
+import axiosInstance from '../../config';  // 添加这行
 
 const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
   const [config, setConfig] = useState(null);
@@ -41,17 +42,13 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
         return;
       }
 
-      const response = await fetch(
-        `/project-rooms/detail/${projectRoomId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axiosInstance.get(`/project-rooms/detail/${projectRoomId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
   
-      const data = await response.json();
+      const data = response.data;
       
       if (data.success && data.data) {
         let parsedConfig;
@@ -94,43 +91,30 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
         return;
       }
 
-      const response = await fetch(
-        `/project-rooms/${projectRoomId}/config`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: jsonResult,
-        }
-      );
+      const response = await axiosInstance.post(`/project-rooms/${projectRoomId}/config`, jsonResult, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setIsEditing(false);
+      const data = response.data;
+      if (data.success) {
+        setIsEditing(false);
 
-          setAlert({
-            severity: "success",
-            message: isReplace
-              ? "Configuration replaced successfully."
-              : "JSON configuration submitted successfully.",
-            open: true,
-          });
+        setAlert({
+          severity: "success",
+          message: isReplace
+            ? "Configuration replaced successfully."
+            : "JSON configuration submitted successfully.",
+          open: true,
+        });
 
-          fetchRoomDetail();
-        } else {
-          setAlert({
-            severity: "error",
-            message: `Failed to submit JSON configuration: ${data.errorMsg}`,
-            open: true,
-          });
-        }
+        fetchRoomDetail();
       } else {
         setAlert({
           severity: "error",
-          message: "Failed to submit JSON configuration",
+          message: `Failed to submit JSON configuration: ${data.errorMsg}`,
           open: true,
         });
       }
@@ -193,17 +177,14 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
         return;
       }
 
-      const response = await fetch(
-        `/project-rooms/clear-config/${projectRoomId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axiosInstance.post(`/project-rooms/clear-config/${projectRoomId}`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      if (response.ok) {
+      const data = response.data;
+      if (data.success) {
         setConfig(null);
         setAlert({
           severity: "success",
@@ -214,10 +195,9 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
           document.getElementById("exampleFile").value = null;
         }
       } else {
-        const errorData = await response.json();
         setAlert({
           severity: "error",
-          message: `Error deleting room configuration: ${errorData.errorMsg}`,
+          message: `Error deleting room configuration: ${data.errorMsg}`,
           open: true,
         });
       }
