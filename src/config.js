@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // // 配置生产环境的 API 地址
 const axiosInstance = axios.create({
-  baseURL: '/api', // 使用实际的后端 API 地址
+  baseURL: 'http://10.126.0.3:8080/api', // 假设后端在 8080 端口
 });
 
 // 配置拦截器，自动添加 Authorization 头
