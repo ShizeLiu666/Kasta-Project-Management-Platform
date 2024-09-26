@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'localhost:8080/api';
+const baseURL = '/api';
 
 const getTimestamp = () => {
   const now = new Date();
