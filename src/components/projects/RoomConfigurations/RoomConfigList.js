@@ -22,7 +22,7 @@ import {
   renderRemoteControlsTable
 } from './ConfigTables';
 import { getToken } from '../../auth/auth';
-import axiosInstance from '../../config';  // 添加这行
+import axiosInstance from '../../../config';  // 添加这行
 
 const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
   const [config, setConfig] = useState(null);
