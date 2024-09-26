@@ -4,7 +4,7 @@ import axios from 'axios';
 const axiosInstance = axios.create({
   baseURL: 'http://10.126.0.3:8080/api', // 假设后端在 8080 端口
 });
-
+console.log('Axios baseURL:', baseURL);
 // 配置拦截器，自动添加 Authorization 头
 // axiosInstance.interceptors.request.use(
 //   (config) => {
