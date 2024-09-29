@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const baseURL = '/api';
+// const baseURL = '/api';
+const baseURL = 'http://kastacloud.com:8080/api';
 
 console.log(`Testing4 baseURL:`, baseURL);
 
