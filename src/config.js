@@ -1,7 +1,10 @@
 import axios from 'axios';
-
+console.log('NODE_ENV:', process.env.NODE_ENV);
 const baseURL = '/api';
 // const baseURL = 'http://kastacloud.com:8080/api';
+// const baseURL = process.env.NODE_ENV === 'production' 
+//   ? 'http://kastacloud.com:8080/api' 
+//   : '/api';
 
 console.log(`baseURL:`, baseURL);
 
