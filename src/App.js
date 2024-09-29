@@ -1,22 +1,12 @@
-import React from "react";
-import { BrowserRouter as Router, useRoutes } from "react-router-dom";
+import { useRoutes } from "react-router-dom";
 import ThemeRoutes from "./routes/Router";
 import "./assets/scss/App.css";
 // import { ExcelConverterProvider } from './components/fileConverter/ExcelConverterContext';
 
-const AppRoutes = () => {
-  const routing = useRoutes(ThemeRoutes);
-  return routing;
-};
-
 const App = () => {
-  return (
-    <Router>
-      <div className="dark">
-        <AppRoutes />
-      </div>
-    </Router>
-  );
+  const routing = useRoutes(ThemeRoutes);
+
+  return <div className="dark"> {routing} </div>;
 };
 
 export default App;
