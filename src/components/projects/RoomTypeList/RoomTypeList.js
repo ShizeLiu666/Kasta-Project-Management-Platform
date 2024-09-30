@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import RoomElement from "./RoomElement";
-// import EditRoomTypeModal from "./EditRoomTypeModal";
+import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
 import { Typography, CircularProgress } from "@mui/material";
@@ -14,7 +13,7 @@ import axiosInstance from '../../../config';
 const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
   const [roomTypes, setRoomTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  // const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
@@ -64,7 +63,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
 
   const handleEditRoomType = (roomType) => {
     setSelectedRoomType(roomType);
-    // setEditModalOpen(true);
+    setEditModalOpen(true);
   };
 
   const handleDeleteClick = (roomType) => {
@@ -80,11 +79,11 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
     );
   };
 
-  // const handleRoomTypeUpdated = (updatedRoomType) => {
-  //   setRoomTypes(roomTypes.map(roomType => 
-  //     roomType.projectRoomId === updatedRoomType.projectRoomId ? updatedRoomType : roomType
-  //   ));
-  // };
+  const handleRoomTypeUpdated = (updatedRoomType) => {
+    setRoomTypes(roomTypes.map(roomType => 
+      roomType.projectRoomId === updatedRoomType.projectRoomId ? updatedRoomType : roomType
+    ));
+  };
 
   if (loading) {
     return <CircularProgress />;
@@ -144,15 +143,12 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
       ))}
       {selectedRoomType && (
         <>
-          {/* <EditRoomTypeModal
+          <EditRoomTypeModal
             isOpen={editModalOpen}
             toggle={() => setEditModalOpen(!editModalOpen)}
-            roomType={{
-              ...selectedRoomType,
-              projectId, // 添加 projectId
-            }}
+            roomType={selectedRoomType}
             onRoomTypeUpdated={handleRoomTypeUpdated}
-          /> */}
+          />
           <DeleteRoomTypeModal
             isOpen={deleteModalOpen}
             toggle={() => setDeleteModalOpen(!deleteModalOpen)}
