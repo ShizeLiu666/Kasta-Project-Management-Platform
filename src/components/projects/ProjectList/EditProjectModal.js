@@ -21,6 +21,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     currentPassword: "",
     newPassword: "",
   });
+  const [iconFile, setIconFile] = useState(null);
   const [error, setError] = useState("");
   const [successAlert, setSuccessAlert] = useState(false);
 
@@ -38,6 +39,21 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setIconFile(file);
+    } else {
+      setError("Please select a valid image file.");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  const clearSelectedFile = () => {
+    setIconFile(null);
+    document.getElementById("iconFile").value = "";
   };
 
   const isFormValid = () => {
@@ -76,10 +92,22 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     if (formData.des !== project.des && formData.des !== "") attributes.des = formData.des;
     if (formData.newPassword !== "") attributes.password = formData.newPassword;
 
-    if (Object.keys(attributes).length === 0) {
+    if (Object.keys(attributes).length === 0 && !iconFile) {
       setError("No changes detected. Please modify at least one field.");
       setTimeout(() => setError(""), 3000);
       return;
+    }
+
+    const updatedFormData = new FormData();
+    updatedFormData.append('projectId', project.projectId);
+    Object.keys(attributes).forEach(key => {
+      updatedFormData.append(key, attributes[key]);
+    });
+    if (iconFile) updatedFormData.append('icon', iconFile);
+
+    // 添加这个循环来打印 FormData 的内容
+    for (let pair of updatedFormData.entries()) {
+      console.log(pair[0] + ', ' + pair[1]);
     }
 
     try {
@@ -92,9 +120,11 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            // 'Content-Type': 'application/json'
           },
         }
       );
+      console.log("Server response:", response.data);
       if (response.data.success) {
         setSuccessAlert(true);
         setError("");
@@ -108,6 +138,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
         setTimeout(() => setError(""), 3000);
       }
     } catch (err) {
+      console.error("Error details:", err.response ? err.response.data : err);
       setError("An unexpected error occurred.");
       setTimeout(() => setError(""), 3000);
     }
@@ -153,6 +184,31 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
               value={formData.des}
               onChange={handleChange}
             />
+          </FormGroup>
+          <FormGroup>
+            <Label for="iconFile">Icon:</Label>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Input
+                id="iconFile"
+                name="file"
+                type="file"
+                onChange={handleFileChange}
+                accept="image/*"
+                style={{ flexGrow: 1 }}
+              />
+              {iconFile && (
+                <Button
+                  onClick={clearSelectedFile}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    marginLeft: "10px",
+                  }}
+                >
+                  Remove
+                </Button>
+              )}
+            </div>
           </FormGroup>
           <FormGroup>
             <Label for="currentPassword">

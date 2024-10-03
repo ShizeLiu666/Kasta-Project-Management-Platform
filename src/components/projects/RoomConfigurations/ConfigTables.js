@@ -10,6 +10,27 @@ const captionStyle = {
     color: '#007bff'
 };
 
+const getTypeString = (type) => {
+  switch (type) {
+    case 0: return 'None';
+    case 1: return 'Device';
+    case 2: return 'Group';
+    case 3: return 'Room';
+    case 4: return 'Scene';
+    default: return 'Unknown';
+  }
+};
+
+const renderLinkInfo = (link) => {
+  const typeString = getTypeString(link.linkType);
+  return (
+    <div>
+      {link.linkIndex + 1}: {typeString} {link.linkName}
+      {link.action !== null && <span> ({link.action})</span>}
+    </div>
+  );
+};
+
 export const renderDevicesTable = (devices) => {
   if (!devices || (Array.isArray(devices) && devices.length === 0) || Object.keys(devices).length === 0) {
     return <p>No devices available.</p>;
@@ -144,9 +165,7 @@ export const renderRemoteControlsTable = (remoteControls) => (
             {remote.links.length === 0 ? '(None)' : (
               remote.links.map((link, i) => (
                 <div key={i}>
-                  {i + 1}. {link.linkName}:
-                    Type: {link.linkType}; RC Index: {link.rc_index}
-                    {link.action !== null && <li>Action: {link.action}</li>}
+                  {renderLinkInfo(link)}
                 </div>
               ))
             )}
