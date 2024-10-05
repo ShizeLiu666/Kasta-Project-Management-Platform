@@ -25,7 +25,7 @@ const ThemeRoutes = [
   },
   {
     path: "/",
-    element: <LoginPage />,
+    element: <Navigate to="/login" />,
   },
   {
     path: "/admin",
