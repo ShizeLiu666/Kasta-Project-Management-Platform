@@ -23,7 +23,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
   const [registeredDeviceNames, setRegisteredDeviceNames] = useState(new Set());
   const [registeredGroupNames, setRegisteredGroupNames] = useState(new Set());
   const [registeredSceneNames, setRegisteredSceneNames] = useState(new Set());
-  const [finalJsonData, setFinalJsonData] = useState(null);
+  // const [finalJsonData, setFinalJsonData] = useState(null);
 
   const handleStep1Validation = (isValid, data) => {
     if (isValid) {
@@ -58,11 +58,11 @@ const Steps = ({ projectRoomId, submitJson }) => {
     }
   };
 
-  const handleStep6Validation = (isValid, data) => {
-    if (isValid) {
-      setFinalJsonData(data);
-    }
-  };
+  // const handleStep6Validation = (isValid, data) => {
+  //   if (isValid) {
+  //     // setFinalJsonData(data);
+  //   }
+  // };
 
   const handleNextStep = (currentStep) => {
     if (currentStep === 0) {
@@ -105,9 +105,9 @@ const Steps = ({ projectRoomId, submitJson }) => {
     if (currentStep === 5) {
       setRemoteControlData(null);
     }
-    if (currentStep === 6) {
-      setFinalJsonData(null);
-    }
+    // if (currentStep === 6) {
+    //   setFinalJsonData(null);
+    // }
   };
 
   const steps = [
@@ -123,7 +123,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
       groupData={groupData}
       sceneData={sceneData}
       remoteControlData={remoteControlData}
-      onValidate={handleStep6Validation}
+      // onValidate={handleStep6Validation}
       submitJson={submitJson}
       projectRoomId={projectRoomId}
     /> },

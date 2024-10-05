@@ -14,7 +14,7 @@ const Buttons = lazy(() => import("../views/ui/Buttons"));
 const Projects = lazy(() => import("../components/projects/ProjectList/ProjectList"));
 const Grid = lazy(() => import("../views/ui/Grid"));
 const Tables = lazy(() => import("../views/ui/Tables"));
-const ExcelConverter = lazy(() => import("../components/fileConverter/ExcelConverter"));
+// const ExcelConverter = lazy(() => import("../components/fileConverter/ExcelConverter"));
 const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
 
 /*****Routes******/
@@ -38,7 +38,7 @@ const ThemeRoutes = [
       { path: "projects", element: <Projects /> },
       { path: "grid", element: <Grid /> },
       { path: "table", element: <Tables /> },
-      { path: "excelconverter", element: <ExcelConverter /> },
+      // { path: "excelconverter", element: <ExcelConverter /> },
       { path: "breadcrumbs", element: <Breadcrumbs /> },
       { path: "forms", element: <Form /> },
     ],

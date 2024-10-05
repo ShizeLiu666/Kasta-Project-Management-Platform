@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef, useMemo } from "react";
+import React, { useState, useImperativeHandle, forwardRef, useMemo } from "react";
 import { Alert, AlertTitle, Box } from "@mui/material";
 import { Input, FormGroup, Label, Button } from "reactstrap";
 import {
@@ -15,7 +15,7 @@ const Step6 = forwardRef(({
   groupData,
   sceneData,
   remoteControlData,
-  onValidate,
+  // onValidate,
   submitJson,
   projectRoomId
 }, ref) => {
@@ -41,7 +41,7 @@ const Step6 = forwardRef(({
       setError(err.message);
       return null;
     }
-  }, [splitData, groupData]);
+  }, [splitData]);
 
   const jsonResult = useMemo(() => {
     return processedData ? JSON.stringify(processedData, null, 2) : "";
@@ -49,13 +49,13 @@ const Step6 = forwardRef(({
 
   const success = Boolean(jsonResult);
 
-  useEffect(() => {
-    if (processedData) {
-      onValidate(true, processedData);
-    } else if (error) {
-      onValidate(false, error);
-    }
-  }, [processedData, error, onValidate]);
+  // useEffect(() => {
+  //   if (processedData) {
+  //     onValidate(true, processedData);
+  //   } else if (error) {
+  //     onValidate(false, error);
+  //   }
+  // }, [processedData, error, onValidate]);
 
   const handleDownloadJson = () => {
     if (jsonResult) {

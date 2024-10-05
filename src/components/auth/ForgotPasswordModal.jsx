@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Form, FormGroup, Input, Button, Label, Row, Col } from "reactstrap";
-import axios from "axios";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -342,14 +341,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
                 fontWeight: "bold",
               }}
               onClick={handleResetPassword}
-              disabled={
-                !(
-                  validateEmail(email) &&
-                  validateUsername(username) &&
-                  validateNewPassword(newPassword) &&
-                  code.length === 6
-                )
-              } // Disable logic
+              disabled={!isValidForm || code.length !== 6} // 使用 isValidForm
             >
               Reset Password
             </Button>

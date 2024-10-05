@@ -5,7 +5,6 @@ import VerifyCodeModal from "./VerifyCodeModal";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-import axios from "axios";
 import "./CreateAccountModal.css";
 import CountryCodeSelect from "./CountryCodeSelect"; // 引入新的 CountryCodeSelect 组件
 import axiosInstance from '../../config';  // 路径可能需要调整
