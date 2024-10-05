@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
@@ -18,7 +19,7 @@ const Tables = lazy(() => import("../views/ui/Tables"));
 const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
 
 /*****Routes******/
-const ThemeRoutes = [
+const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
@@ -47,6 +48,6 @@ const ThemeRoutes = [
     path: "*",
     element: <Navigate to="/login" />,
   },
-];
+]);
 
-export default ThemeRoutes;
+export default router;
