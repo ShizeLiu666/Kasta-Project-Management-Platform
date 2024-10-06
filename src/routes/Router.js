@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
-import { createBrowserRouter } from "react-router-dom";
+// import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";  // 改为 createHashRouter
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
@@ -19,7 +20,8 @@ const Tables = lazy(() => import("../views/ui/Tables"));
 const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
 
 /*****Routes******/
-const router = createBrowserRouter([
+const router = createHashRouter([
+// const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
