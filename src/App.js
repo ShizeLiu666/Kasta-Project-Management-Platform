@@ -1,12 +1,15 @@
-import { RouterProvider } from "react-router-dom";
-import router from "./routes/Router";
+import React from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import AppRoutes from "./routes/Router";
 import "./assets/scss/App.css";
 
 const App = () => {
   return (
-    <div className="dark">
-      <RouterProvider router={router} />
-    </div>
+    <Router>
+      <div className="dark">
+        <AppRoutes />
+      </div>
+    </Router>
   );
 };
 
