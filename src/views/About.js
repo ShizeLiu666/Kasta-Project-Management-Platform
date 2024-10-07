@@ -1,4 +1,4 @@
-import { Row, Col, Card, CardBody, CardTitle, Button } from "reactstrap";
+import { Row, Col, Card, CardBody, CardTitle } from "reactstrap";
 
 const About = () => {
   return (
@@ -9,11 +9,11 @@ const About = () => {
         {/* --------------------------------------------------------------------------------*/}
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-            <i className="bi bi-bell me-2"> </i>
-            About Material Pro React
+            {/* <i className="bi bi-bell me-2"> </i> */}
+            Testing
           </CardTitle>
           <CardBody className="p-4">
-            <Row >
+            {/* <Row >
               <Col lg="8">
                 <h2 className="mt-4">Material React Admin Pro Version</h2>
                 <h5 className=" mb-4">
@@ -35,7 +35,7 @@ const About = () => {
                   Check Pro Version
                 </Button>
               </Col>
-            </Row>
+            </Row> */}
           </CardBody>
         </Card>
       </Col>
