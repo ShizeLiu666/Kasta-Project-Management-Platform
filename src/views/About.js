@@ -10,7 +10,7 @@ const About = () => {
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             {/* <i className="bi bi-bell me-2"> </i> */}
-            Testing
+            Just a Testing...
           </CardTitle>
           <CardBody className="p-4">
             {/* <Row >
