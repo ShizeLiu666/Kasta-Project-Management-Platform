@@ -34,14 +34,15 @@ const LoginPage = () => {
   }, []);
 
   const handleLogin = async () => {
+    // console.log("Attempting login with username:", username);
     try {
-      // 将用户名转换为小写
-      const lowercaseUsername = username.toLowerCase();
-      
+      // console.log("Sending login request...");
       const response = await axiosInstance.post('/users/login', {
-        username: lowercaseUsername,
+        username,
         password,
       });
+
+      // console.log("Login response:", response.data);
 
       if (response.data && response.data.success) {
         const token = response.data.data.token;
@@ -72,6 +73,7 @@ const LoginPage = () => {
         }, 3000);
       }
     } catch (error) {
+      // console.error("Login error:", error);
       setAlert({
         severity: "error",
         message: "There was an error logging in. Please try again.",
