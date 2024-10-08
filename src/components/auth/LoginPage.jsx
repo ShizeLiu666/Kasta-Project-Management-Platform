@@ -33,20 +33,16 @@ const LoginPage = () => {
     setPassword("");
   }, []);
 
-  const handleLogin = async () => {
-    // console.log("Attempting login with username:", username);
+  const attemptLogin = async (attemptedUsername) => {
     try {
-      // console.log("Sending login request...");
       const response = await axiosInstance.post('/users/login', {
-        username,
+        username: attemptedUsername,
         password,
       });
 
-      // console.log("Login response:", response.data);
-
       if (response.data && response.data.success) {
-        const token = response.data.data.token;
-        const loggedInUsername = response.data.data.username; // Assuming the backend also returns the username
+        // Login success handling logic
+        const { token, username: loggedInUsername } = response.data.data;
 
         setToken(token, rememberMe);
         saveUsername(loggedInUsername, rememberMe);
@@ -59,31 +55,58 @@ const LoginPage = () => {
 
         setTimeout(() => {
           setAlert({ open: false });
-          navigate("/admin/projects"); // Navigate to the project list
+          navigate("/admin/projects");
         }, 1000);
-      } else {
-        setAlert({
-          severity: "error",
-          message: response.data.errorMsg || "Login failed. Please try again.",
-          open: true,
-        });
-
-        setTimeout(() => {
-          setAlert({ open: false });
-        }, 3000);
+        return { success: true };
       }
+      return { success: false, error: response.data.errorMsg || "Login failed" };
     } catch (error) {
-      // console.error("Login error:", error);
+      console.error("Login error:", error);
+      return { success: false, error: error.response?.data?.errorMsg || "An error occurred during login" };
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!username.trim()) {
       setAlert({
         severity: "error",
-        message: "There was an error logging in. Please try again.",
+        message: "Please enter a username",
         open: true,
       });
-
-      setTimeout(() => {
-        setAlert({ open: false });
-      }, 3000);
+      return;
     }
+
+    if (!password.trim()) {
+      setAlert({
+        severity: "error",
+        message: "Please enter a password",
+        open: true,
+      });
+      return;
+    }
+
+    let loginResult = await attemptLogin(username);
+
+    if (!loginResult.success) {
+      // Try changing the case of the first letter
+      const alteredUsername = username.charAt(0) === username.charAt(0).toLowerCase()
+        ? username.charAt(0).toUpperCase() + username.slice(1)
+        : username.charAt(0).toLowerCase() + username.slice(1);
+
+      loginResult = await attemptLogin(alteredUsername);
+    }
+
+    if (!loginResult.success) {
+      setAlert({
+        severity: "error",
+        message: loginResult.error,
+        open: true,
+      });
+    }
+
+    setTimeout(() => {
+      setAlert({ open: false });
+    }, 3000);
   };
 
   const handleSubmit = (e) => {
