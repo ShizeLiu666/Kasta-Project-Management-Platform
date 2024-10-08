@@ -32,3 +32,14 @@ export const removeUsername = () => {
     localStorage.removeItem("username");
     sessionStorage.removeItem("username");
 };
+
+export const saveUserDetails = (userDetails) => {
+  localStorage.setItem('userDetails', JSON.stringify(userDetails));
+};
+
+export const getUserDetails = () => {
+    const storedDetails = localStorage.getItem('userDetails');
+    if (storedDetails) {
+      return JSON.parse(storedDetails);
+    }
+};

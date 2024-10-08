@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import { FormGroup, Label } from "reactstrap"; // Import FormGroup and Label for consistent styling
 import './CountryCodeSelect.css'; // Import the custom CSS
 
-const countryOptions = [
+export const countryOptions = [
   { en: "Australia", zh: "澳大利亚", locale: "AU", code: "61" },
   { en: "New Zealand", zh: "新西兰", locale: "NZ", code: "64" },
   { en: "China", zh: "中国", locale: "CN", code: "86" },

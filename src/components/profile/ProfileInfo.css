@@ -1,0 +1,50 @@
+.avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.avatar-overlay:hover {
+    opacity: 1;
+}
+
+.avatar-overlay svg {
+    color: white;
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.avatar-overlay span {
+    color: white;
+    font-size: 14px;
+}

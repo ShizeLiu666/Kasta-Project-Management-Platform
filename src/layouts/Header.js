@@ -16,25 +16,46 @@ import {
   ModalFooter
 } from "reactstrap";
 import kasta_logo from "../assets/images/logos/kasta_logo.png";
-import user1 from "../assets/images/users/normal_user.jpg";
 import '../assets/scss/loader/Header.css';
-import { getUsername } from '../components/auth/auth';
-// import { useExcelConverter } from '../components/fileConverter/ExcelConverterContext';
+import { getUserDetails } from '../components/auth/auth';
+import defaultAvatar from '../assets/images/users/normal_user.jpg';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [username, setUsername] = useState(""); // Used to store username
+  const [avatarSrc, setAvatarSrc] = useState(defaultAvatar);
   const navigate = useNavigate();
-  // const { resetState } = useExcelConverter();
 
-  // On component load, retrieve the username from either localStorage or sessionStorage
+  const updateAvatar = (userDetails) => {
+    setAvatarSrc(userDetails?.headPic || defaultAvatar);
+  };
+
   useEffect(() => {
-    const storedUsername = getUsername();
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
+    // const storedUsername = getUsername();
+    // if (storedUsername) {
+    //   setUsername(storedUsername);
+    // }
+    updateAvatar(getUserDetails());
+
+    const handleUserDetailsUpdate = (event) => {
+      updateAvatar(event.detail);
+    };
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'userDetailsUpdated') {
+        const updatedUserDetails = JSON.parse(e.newValue);
+        updateAvatar(updatedUserDetails);
+      }
+    };
+
+    window.addEventListener('userDetailsUpdated', handleUserDetailsUpdate);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('userDetailsUpdated', handleUserDetailsUpdate);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
@@ -46,7 +67,6 @@ const Header = () => {
     console.log("Logout button clicked");
     localStorage.clear(); // Clear localStorage
     sessionStorage.clear(); // Clear sessionStorage
-    // resetState(); // Reset any app state
     navigate("/login"); // Redirect to login page
   };
 
@@ -84,15 +104,12 @@ const Header = () => {
         </Nav>
         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
           <DropdownToggle color="transparent" className="d-flex align-items-center">
-            {/* Dynamically display the username */}
-            <span className="me-2" style={{ color: 'black', fontSize: '20px' }}>
-              {username ? `${username}` : "Hi, User"}
-            </span>
             <img
-              src={user1}
+              src={avatarSrc}
               alt="profile"
               className="rounded-circle"
-              width="40"
+              width="45"
+              height="45"
             />
           </DropdownToggle>
           <DropdownMenu>

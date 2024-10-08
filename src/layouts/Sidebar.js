@@ -2,20 +2,20 @@ import React from "react";
 import { Nav, NavItem } from "reactstrap";
 import { Link, useLocation } from "react-router-dom";
 import '../assets/scss/loader/Sidebar.css'
-import projecttIcon from '../assets/icons/project.png';
+// import projecttIcon from '../assets/icons/project.png';
 // import convertIcon from '../assets/icons/convert_file.png';
-import aboutIcon from '../assets/icons/about.png';
+// import aboutIcon from '../assets/icons/about.png';
 
 const navigation = [
   {
     title: "Projects",
     href: "/admin/projects",
-    img: projecttIcon,
+    icon: 'bi-card-list',
   },
   {
-    title: "About",
-    href: "/admin/about",
-    icon: aboutIcon,
+    title: "Profile",
+    href: "/admin/profile",
+    icon: 'bi-person-circle',
   },
   // {
   //   title: "Dashboard",

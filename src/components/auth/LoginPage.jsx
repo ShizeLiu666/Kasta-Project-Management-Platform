@@ -8,7 +8,7 @@ import "./LoginPage.css";
 import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { setToken, saveUsername } from './auth';
+import { setToken, saveUsername, saveUserDetails } from './auth';
 import axiosInstance from '../../config';  // 路径可能需要调整
 
 const LoginPage = () => {
@@ -46,6 +46,20 @@ const LoginPage = () => {
 
         setToken(token, rememberMe);
         saveUsername(loggedInUsername, rememberMe);
+
+        // 设置 axios 实例的默认 headers
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        // 获取用户详情
+        try {
+          const userDetailResponse = await axiosInstance.get('/users/detail');
+          if (userDetailResponse.data && userDetailResponse.data.success) {
+            saveUserDetails(userDetailResponse.data.data);
+          }
+        } catch (detailError) {
+          console.error("Error fetching user details:", detailError);
+          // 即使获取用户详情失败，我们仍然认为登录是成功的
+        }
 
         setAlert({
           severity: "success",
