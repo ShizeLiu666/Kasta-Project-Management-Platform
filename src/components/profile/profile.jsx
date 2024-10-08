@@ -104,14 +104,14 @@ const Profile = () => {
         </Alert>
       )}
       <Row className="h-100">
-        <Col xs="12" md="12" lg="4" className="h-100">
+        <Col xs="12" md="12" lg="4" className="h-150">
           <ProfileInfo 
             userDetails={userDetails} 
             projectCount={projectCount} 
             onEditAvatar={handleEditAvatar}
           />
         </Col>
-        <Col xs="12" md="12" lg="8" className="h-100">
+        <Col xs="12" md="12" lg="8" className="h-150">
           <ProfileSettings userDetails={userDetails} />
         </Col>
       </Row>

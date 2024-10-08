@@ -67,7 +67,7 @@ const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvat
             {userDetails.username}
           </CardTitle>
           <CardSubtitle className="text-muted">
-            {userDetails.userType}
+            {userDetails.userType === 0 ? 'Owner' : 'Unknown'}
           </CardSubtitle>
         </div>
         <Row className="text-center justify-content-md-center mt-2">

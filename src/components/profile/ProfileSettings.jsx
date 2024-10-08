@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Card,
     CardBody,
@@ -14,63 +14,205 @@ import {
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-// import LockIcon from '@mui/icons-material/Lock'; // 导入锁定图标
-// 导入 countryOptions
-import { countryOptions } from '../auth/CountryCodeSelect';
+import axiosInstance from '../../config';
+import { getToken, saveUserDetails } from '../auth/auth';
 
-const ProfileSettings = ({ userDetails }) => {
+const ProfileSettings = ({ userDetails: initialUserDetails }) => {
+    const [userDetails, setUserDetails] = useState(initialUserDetails);
     const [username, setUsername] = useState("");
     const [nickname, setNickname] = useState("");
     const [email, setEmail] = useState("");
-    const [countryCode, setCountryCode] = useState(null);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [alert, setAlert] = useState({
         severity: "",
         message: "",
         open: false,
     });
     const [loading, setLoading] = useState(false);
+    const [verificationCode, setVerificationCode] = useState("");
+    const [countdown, setCountdown] = useState(60);
+    const [canRequestAgain, setCanRequestAgain] = useState(true);
 
     useEffect(() => {
         if (userDetails) {
             setUsername(userDetails.username || "");
             setNickname(userDetails.nickName || "");
             setEmail(userDetails.email || "");
-            setCountryCode(userDetails.countryCode ? { code: userDetails.countryCode } : null);
         }
     }, [userDetails]);
 
     const showAlert = (severity, message) => {
         setAlert({ severity, message, open: true });
         setTimeout(() => {
-            setAlert({ ...alert, open: false });
+            setAlert((prevAlert) => ({ ...prevAlert, open: false }));
         }, 3000);
+    };
+
+    const handleSendVerificationCode = async () => {
+        if (!email) return;
+
+        setLoading(true);
+
+        try {
+            const token = getToken();
+            const response = await axiosInstance.post(
+                `/users/send-verification-code?email=${encodeURIComponent(email)}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                setCanRequestAgain(false);
+                setCountdown(60);
+                showAlert("success", "Verification code sent!");
+            } else {
+                showAlert(
+                    "error",
+                    response.data.errorMsg || "Failed to send verification code."
+                );
+            }
+        } catch (error) {
+            showAlert(
+                "error",
+                "Failed to send verification code. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!canRequestAgain && countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        } else if (countdown === 0) {
+            setCanRequestAgain(true);
+        }
+    }, [countdown, canRequestAgain]);
+
+    const validatePassword = (password) => {
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        return passwordRegex.test(password);
+    };
+
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+        if (value === "") {
+            setPasswordError("");
+        } else if (!validatePassword(value)) {
+            setPasswordError(
+                "* Password must be at least 8 characters long and include both letters and numbers"
+            );
+        } else {
+            setPasswordError("");
+        }
+    };
+
+    const handleConfirmPasswordChange = (e) => {
+        const value = e.target.value;
+        setConfirmPassword(value);
+        if (value !== password) {
+            setConfirmPasswordError("Passwords do not match");
+        } else {
+            setConfirmPasswordError("");
+        }
     };
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        // 这里您可以添加密码验证逻辑
         if (password !== confirmPassword) {
-            showAlert("error", "Passwords do not match!");
+            showAlert("error", "Passwords do not match.");
             setLoading(false);
             return;
         }
 
-        // Here you would typically make an API call to update the user's profile
-        // For now, we'll just simulate it with a timeout
-        setTimeout(() => {
-            setLoading(false);
+        try {
+            const token = getToken();
+            if (nickname !== userDetails.nickName) {
+                await axiosInstance.post("/users/modify/nickname", {
+                    nickName: nickname
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            }
+
+            if (password && verificationCode) {
+                const userData = {
+                    username,
+                    password,
+                    verificationCode
+                };
+
+                const response = await axiosInstance.post("/users/modify/pwd", userData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (response.data.success) {
+                    showAlert("success", "Password updated successfully!");
+                } else {
+                    showAlert("error", response.data.errorMsg || "Failed to update password.");
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            // Update local user details
+            const updatedUserDetails = {
+                ...userDetails,
+                nickName: nickname
+            };
+            setUserDetails(updatedUserDetails);
+            saveUserDetails(updatedUserDetails);
+
+            // Trigger update event
+            const event = new CustomEvent('userDetailsUpdated', { detail: updatedUserDetails });
+            window.dispatchEvent(event);
+
+            // Update localStorage to trigger storage event
+            localStorage.setItem('userDetailsUpdated', JSON.stringify(updatedUserDetails));
+
             showAlert("success", "Profile updated successfully!");
-        }, 2000);
+            setPassword("");
+            setConfirmPassword("");
+            setVerificationCode("");
+        } catch (error) {
+            console.error("Error during profile update:", error);
+            showAlert("error", "An error occurred while updating the profile. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const readOnlyStyle = {
         backgroundColor: '#f8f9fa',
         cursor: 'not-allowed',
-        // borderColor: '#ced4da',
+    };
+
+    const isFormValid = useCallback(() => {
+        return (
+            (nickname !== userDetails.nickName) ||
+            (password && confirmPassword && verificationCode && password === confirmPassword && !passwordError && verificationCode.length === 6)
+        );
+    }, [nickname, userDetails.nickName, password, confirmPassword, verificationCode, passwordError]);
+
+    const errorMessageStyle = {
+        color: 'red',
+        fontSize: '14px',
+        marginTop: '5px'
     };
 
     return (
@@ -96,17 +238,13 @@ const ProfileSettings = ({ userDetails }) => {
                         <Col md={6}>
                             <FormGroup>
                                 <Label for="username">Username</Label>
-                                <div className="input-group">
-                                    <div className="input-group-prepend">
-                                    </div>
-                                    <Input
-                                        type="text"
-                                        id="username"
-                                        value={username}
-                                        readOnly
-                                        style={readOnlyStyle}
-                                    />
-                                </div>
+                                <Input
+                                    type="text"
+                                    id="username"
+                                    value={username}
+                                    readOnly
+                                    style={readOnlyStyle}
+                                />
                             </FormGroup>
                         </Col>
                         <Col md={6}>
@@ -123,61 +261,73 @@ const ProfileSettings = ({ userDetails }) => {
                     </Row>
                     <FormGroup>
                         <Label for="email">Email</Label>
-                        <div className="input-group">
-                            <div className="input-group-prepend">
-                            </div>
-                            <Input
-                                type="email"
-                                id="email"
-                                value={email}
-                                readOnly
-                                style={readOnlyStyle}
-                            />
-                        </div>
+                        <Row>
+                            <Col md={8}>
+                                <Input
+                                    type="email"
+                                    id="email"
+                                    value={email}
+                                    readOnly
+                                    style={readOnlyStyle}
+                                />
+                            </Col>
+                            <Col md={4}>
+                                <Button
+                                    style={{
+                                        backgroundColor: "#fbcd0b",
+                                        border: "none",
+                                        width: "100%",
+                                        fontSize: "14px",
+                                        fontWeight: "bold",
+                                        height: "37px",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                    }}
+                                    onClick={handleSendVerificationCode}
+                                    disabled={!canRequestAgain || loading}
+                                >
+                                    {loading ? (
+                                        <CircularProgress size={15} style={{ color: "#fff" }} />
+                                    ) : canRequestAgain ? (
+                                        "Send Code"
+                                    ) : (
+                                        `${countdown}s`
+                                    )}
+                                </Button>
+                            </Col>
+                        </Row>
                     </FormGroup>
                     <FormGroup>
-                        <Label for="countryCode">Country Code</Label>
-                        <div className="input-group">
-                            <div className="input-group-prepend">
-                            </div>
-                            <Input 
-                                // type="select" 
-                                type="text" 
-                                id="countryCode"
-                                value={countryCode ? countryCode.code : ''}
-                                onChange={(e) => {
-                                    const selectedCountry = countryOptions.find(country => country.code === e.target.value);
-                                    setCountryCode(selectedCountry);
-                                }}
-                                readOnly
-                                style={readOnlyStyle}
-                            >
-                                {/* <option value="">Select a country</option>
-                                {countryOptions.map((country, index) => (
-                                    <option key={`${country.code}-${index}`} value={country.code}>
-                                        {country.en} (+{country.code})
-                                    </option>
-                                ))} */}
-                            </Input>
-                        </div>
+                        <Label for="verificationCode">Verification Code</Label>
+                        <Input
+                            type="text"
+                            id="verificationCode"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value)}
+                            maxLength="6"
+                            placeholder="Enter 6-digit code"
+                        />
                     </FormGroup>
                     <FormGroup>
-                        <Label for="password">Password</Label>
+                        <Label for="password">New Password</Label>
                         <Input
                             type="password"
                             id="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                         />
+                        {passwordError && <p style={errorMessageStyle}>{passwordError}</p>}
                     </FormGroup>
                     <FormGroup>
-                        <Label for="confirmPassword">Confirm Password</Label>
+                        <Label for="confirmPassword">Confirm New Password</Label>
                         <Input
                             type="password"
                             id="confirmPassword"
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={handleConfirmPasswordChange}
                         />
+                        {confirmPasswordError && <p style={errorMessageStyle}>{confirmPasswordError}</p>}
                     </FormGroup>
                     <div className="d-flex justify-content-end">
                         {loading ? (
@@ -193,6 +343,7 @@ const ProfileSettings = ({ userDetails }) => {
                                     borderColor: "#fbcd0b",
                                     fontWeight: "bold",
                                 }}
+                                disabled={!isFormValid()}
                             >
                                 Update Profile
                             </Button>
