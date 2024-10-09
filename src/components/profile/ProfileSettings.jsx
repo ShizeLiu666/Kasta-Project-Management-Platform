@@ -262,7 +262,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                     <FormGroup>
                         <Label for="email">Email</Label>
                         <Row>
-                            <Col md={8}>
+                            <Col md={10}>
                                 <Input
                                     type="email"
                                     id="email"
@@ -271,7 +271,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                                     style={readOnlyStyle}
                                 />
                             </Col>
-                            <Col md={4}>
+                            <Col md={2}>
                                 <Button
                                     style={{
                                         backgroundColor: "#fbcd0b",

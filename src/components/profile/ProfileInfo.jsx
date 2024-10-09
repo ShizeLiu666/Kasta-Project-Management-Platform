@@ -67,13 +67,13 @@ const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvat
             {userDetails.username}
           </CardTitle>
           <CardSubtitle className="text-muted">
-            {userDetails.userType === 0 ? 'Owner' : 'Unknown'}
+            {userDetails.userType === 0 ? 'Owner' : userDetails.userType === 99999 ? 'Super User' : 'Unknown'}
           </CardSubtitle>
         </div>
         <Row className="text-center justify-content-md-center mt-2">
           <Col xs="4">
             <a href="/admin/projects" className="text-dark fw-bold text-decoration-none">
-              <i className="bi-card-list"></i>
+              <i className="bi-folder2-open"></i>
               <span className="font-medium ms-2">{projectCount}</span>
             </a>
           </Col>

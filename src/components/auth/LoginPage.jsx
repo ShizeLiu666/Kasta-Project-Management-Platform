@@ -97,7 +97,16 @@ const LoginPage = () => {
       return { success: false, error: response.data.errorMsg || "Login failed" };
     } catch (error) {
       console.error("Login error:", error);
-      return { success: false, error: error.response?.data?.errorMsg || "An error occurred during login" };
+      if (error.response) {
+        if (error.response.status === 500 || error.response.status === 502) {
+          return { 
+            success: false, 
+            error: "Server issue detected. Please wait while we resolve it.", 
+            isServerError: true 
+          };
+        }
+      }
+      return { success: false, error: "An error occurred during login" };
     }
   };
 
@@ -115,7 +124,7 @@ const LoginPage = () => {
     let loginResult = await attemptLogin(username);
 
     if (!loginResult.success) {
-      // Try changing the case of the first letter
+      // 尝试更改第一个字母的大小写
       const alteredUsername = username.charAt(0) === username.charAt(0).toLowerCase()
         ? username.charAt(0).toUpperCase() + username.slice(1)
         : username.charAt(0).toLowerCase() + username.slice(1);
@@ -124,11 +133,19 @@ const LoginPage = () => {
     }
 
     if (!loginResult.success) {
-      setAlert({
-        severity: "error",
-        message: "Incorrect username or password. Please check your credentials.",
-        open: true,
-      });
+      if (loginResult.isServerError) {
+        setAlert({
+          severity: "error",
+          message: loginResult.error,
+          open: true,
+        });
+      } else {
+        setAlert({
+          severity: "error",
+          message: "Incorrect username or password. Please check your credentials.",
+          open: true,
+        });
+      }
     }
 
     setTimeout(() => {

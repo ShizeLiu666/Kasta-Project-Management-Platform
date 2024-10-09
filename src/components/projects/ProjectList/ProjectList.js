@@ -5,7 +5,6 @@ import ProjectCard from "./ProjectCard";
 import PasswordModal from "./PasswordModal";
 import RoomTypeList from "../RoomTypeList/RoomTypeList";
 import RoomConfigList from "../RoomConfigurations/RoomConfigList";
-import default_image from "../../../assets/images/projects/default_image.jpg";
 import Alert from "@mui/material/Alert";
 import { Button } from "reactstrap";
 import CreateProjectModal from "./CreateProjectModal";
@@ -13,6 +12,7 @@ import DeleteProjectModal from "./DeleteProjectModal";
 import EditProjectModal from './EditProjectModal';
 import SearchComponent from "./SearchComponent";
 import { getToken } from '../../auth/auth';
+import UploadBackgroundModal from "./UploadBackgroundModal";
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
@@ -28,9 +28,10 @@ const ProjectList = () => {
   const [showRoomTypes, setShowRoomTypes] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
-  const [deleteProjectModalOpen, setDeleteProjectModalOpen] = useState(false); // State for delete modal
-  const [searchTerm, setSearchTerm] = useState(""); // State to track the search term
+  const [deleteProjectModalOpen, setDeleteProjectModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [editProjectModalOpen, setEditProjectModalOpen] = useState(false);
+  const [uploadBackgroundModalOpen, setUploadBackgroundModalOpen] = useState(false);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -78,7 +79,17 @@ const ProjectList = () => {
 
   const toggleDeleteProjectModal = (project) => {
     setSelectedProject(project);
-    setDeleteProjectModalOpen(!deleteProjectModalOpen); // Toggle delete modal
+    setDeleteProjectModalOpen(!deleteProjectModalOpen);
+  };
+
+  const toggleEditProjectModal = (project) => {
+    setSelectedProject(project);
+    setEditProjectModalOpen(!editProjectModalOpen);
+  };
+
+  const toggleUploadBackgroundModal = (project) => {
+    setSelectedProject(project);
+    setUploadBackgroundModalOpen(!uploadBackgroundModalOpen);
   };
 
   const handleCardClick = (event, project) => {
@@ -137,9 +148,8 @@ const ProjectList = () => {
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleEditProjectModal = (project) => {
-    setSelectedProject(project);
-    setEditProjectModalOpen(!editProjectModalOpen);
+  const handleUploadSuccess = (newBackgroundUrl) => {
+    fetchProjectList();
   };
 
   return (
@@ -245,12 +255,11 @@ const ProjectList = () => {
             <Col sm="6" lg="6" xl="4" key={index}>
               <div>
                 <ProjectCard
-                  image={project.iconUrl ? project.iconUrl : default_image}
-                  title={project.name}
-                  subtitle={project.address}
-                  onCardClick={(event) => handleCardClick(event, project)}
-                  onEdit={() => toggleEditProjectModal(project)}
-                  onRemove={() => toggleDeleteProjectModal(project)}
+                  project={project}
+                  onCardClick={handleCardClick}
+                  onEdit={toggleEditProjectModal}
+                  onRemove={toggleDeleteProjectModal}
+                  onChangeBackground={toggleUploadBackgroundModal}
                   setMenuOpen={setMenuOpen}
                 />
               </div>
@@ -286,7 +295,7 @@ const ProjectList = () => {
       <CreateProjectModal
         isOpen={createProjectModalOpen}
         toggle={toggleCreateProjectModal}
-        fetchProjects={fetchProjectList} // Pass fetchProjects as a prop to refresh the project list
+        fetchProjects={fetchProjectList}
       />
 
       <EditProjectModal
@@ -304,6 +313,13 @@ const ProjectList = () => {
           onDelete={fetchProjectList}
         />
       )}
+
+      <UploadBackgroundModal
+        isOpen={uploadBackgroundModalOpen}
+        toggle={() => toggleUploadBackgroundModal(null)}
+        projectId={selectedProject?.projectId}  // 确保这里使用 projectId
+        onUploadSuccess={handleUploadSuccess}
+      />
     </div>
   );
 };

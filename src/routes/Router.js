@@ -9,6 +9,7 @@ const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
 const LoginPage = lazy(() => import("../components/auth/LoginPage"));
 const Projects = lazy(() => import("../components/projects/ProjectList/ProjectList"));
 const Profile = lazy(() => import("../components/profile/profile"));
+const AuthCodeManagement = lazy(() => import("../components/AuthCodeManagement/AuthCodeManagement"));
 
 const Form = lazy(() => import("../views/ui/Form.js"));
 const About = lazy(() => import("../views/About.js"));
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
     children: [
       { path: "projects", element: <Projects /> },
       { path: "profile", element: <Profile /> },
+      { path: "auth-code-management", element: <AuthCodeManagement /> },
       { path: "about", element: <About /> },
       { path: "alerts", element: <Alerts /> },
       { path: "badges", element: <Badges /> },

@@ -1,20 +1,25 @@
 import React, { useState } from "react";
-import { Card, CardBody, CardImg, CardSubtitle, CardTitle } from "reactstrap";
+import { Card, CardBody, CardSubtitle, CardTitle } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/EditNote';
+import WallpaperIcon from '@mui/icons-material/Wallpaper';
+import default_image from "../../../assets/images/projects/default_image.jpg";
+
 
 const ProjectCard = ({
-  image,
-  title,
-  subtitle,
+  project,  // 我们现在传入整个 project 对象
   onCardClick,
   onEdit,
   onRemove,
+  onChangeBackground,
   setMenuOpen,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+
+  // 使用 project.iconUrl 如果存在，否则使用默认图片
+  const cardImage = project.iconUrl || default_image;
 
   // Handle Menu open/close
   const handleMenuClick = (event) => {
@@ -31,25 +36,46 @@ const ProjectCard = ({
   // Edit action
   const handleEdit = () => {
     handleClose();
-    onEdit();
+    onEdit(project);
   };
 
   // Remove action
   const handleRemove = () => {
     handleClose();
-    onRemove();
+    onRemove(project);
+  };
+
+  // Change Background action
+  const handleChangeBackground = () => {
+    handleClose();
+    onChangeBackground(project);
   };
 
   return (
     <Card
       className="blog-card"
       style={{ position: "relative" }}
-      onClick={onCardClick}
+      onClick={(event) => onCardClick(event, project)}
     >
-      <CardImg alt="Card image cap" src={image} />
+      <div style={{
+        height: "250px",
+        overflow: "hidden",
+        position: "relative"
+      }}>
+        <img
+          src={cardImage}
+          alt={project.name}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center"
+          }}
+        />
+      </div>
       <CardBody className="p-4">
-        <CardTitle tag="h5">{title}</CardTitle>
-        <CardSubtitle>{subtitle}</CardSubtitle>
+        <CardTitle tag="h5">{project.name}</CardTitle>
+        <CardSubtitle>{project.address}</CardSubtitle>
       </CardBody>
 
       {/* More Options Icon */}
@@ -62,13 +88,13 @@ const ProjectCard = ({
           position: "absolute",
           top: "5px",
           right: "10px",
-          color: "#68696a",
+          color: "#A9A9A9",
         }}
       >
         <MoreHorizIcon fontSize="large"/>
       </IconButton>
 
-      {/* Menu for Edit and Remove actions */}
+      {/* Menu for Edit, Remove, and Change Background actions */}
       <Menu
         id="menu"
         anchorEl={anchorEl}
@@ -87,6 +113,7 @@ const ProjectCard = ({
           marginTop: "50px",
         }}
       >
+        <MenuItem onClick={handleChangeBackground}><WallpaperIcon style={{marginRight:"8px", color: "#4CAF50"}}/>Change Image</MenuItem>
         <MenuItem onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px", color: "#007bff"}}/>Edit</MenuItem>
         <MenuItem onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
       </Menu>

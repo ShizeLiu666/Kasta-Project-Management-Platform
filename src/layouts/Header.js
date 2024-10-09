@@ -85,6 +85,10 @@ const Header = () => {
     navigate("/login"); // 重定向到登录页面
   };
 
+  const handleEditProfile = () => {
+    navigate('/admin/profile');
+  };
+
   return (
     <Navbar dark expand="md" className="fix-header header-background">
       <div className="d-flex align-items-center">
@@ -129,8 +133,8 @@ const Header = () => {
           </DropdownToggle>
           <DropdownMenu>
             <DropdownItem header>Info</DropdownItem>
-            <DropdownItem>My Account</DropdownItem>
-            <DropdownItem>Edit Profile</DropdownItem>
+            {/* <DropdownItem>My Account</DropdownItem> */}
+            <DropdownItem onClick={handleEditProfile}>Edit Profile</DropdownItem>
             <DropdownItem divider />
             <DropdownItem onClick={toggleModal}>Logout</DropdownItem>
           </DropdownMenu>
