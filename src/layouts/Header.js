@@ -65,9 +65,24 @@ const Header = () => {
 
   const handleLogout = () => {
     console.log("Logout button clicked");
-    localStorage.clear(); // Clear localStorage
-    sessionStorage.clear(); // Clear sessionStorage
-    navigate("/login"); // Redirect to login page
+    
+    // 保存 Remember Me 凭据
+    const rememberedUsername = localStorage.getItem('rememberedUsername');
+    const rememberedPassword = localStorage.getItem('rememberedPassword');
+    
+    // 清除 localStorage 和 sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // 如果存在 Remember Me 凭据，则重新保存
+    if (rememberedUsername) {
+      localStorage.setItem('rememberedUsername', rememberedUsername);
+    }
+    if (rememberedPassword) {
+      localStorage.setItem('rememberedPassword', rememberedPassword);
+    }
+    
+    navigate("/login"); // 重定向到登录页面
   };
 
   return (

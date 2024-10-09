@@ -31,7 +31,20 @@ const LoginPage = () => {
   useEffect(() => {
     setUsername("");
     setPassword("");
+    const { savedUsername, savedPassword } = getSavedCredentials();
+    if (savedUsername && savedPassword) {
+      setUsername(savedUsername);
+      setPassword(savedPassword);
+      setRememberMe(true);
+    }
   }, []);
+
+
+  const getSavedCredentials = () => {
+    const savedUsername = localStorage.getItem('rememberedUsername');
+    const savedPassword = localStorage.getItem('rememberedPassword');
+    return { savedUsername, savedPassword };
+  };
 
   const attemptLogin = async (attemptedUsername) => {
     try {
@@ -61,6 +74,14 @@ const LoginPage = () => {
           // 即使获取用户详情失败，我们仍然认为登录是成功的
         }
 
+        if (rememberMe) {
+          localStorage.setItem('rememberedUsername', username);
+          localStorage.setItem('rememberedPassword', password);
+        } else {
+          localStorage.removeItem('rememberedUsername');
+          localStorage.removeItem('rememberedPassword');
+        }
+
         setAlert({
           severity: "success",
           message: "Login successful! Redirecting...",
@@ -82,20 +103,12 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     if (!username.trim()) {
-      setAlert({
-        severity: "error",
-        message: "Please enter a username",
-        open: true,
-      });
+      showAlert("error", "Please enter a username");
       return;
     }
 
     if (!password.trim()) {
-      setAlert({
-        severity: "error",
-        message: "Please enter a password",
-        open: true,
-      });
+      showAlert("error", "Please enter a password");
       return;
     }
 
@@ -113,7 +126,7 @@ const LoginPage = () => {
     if (!loginResult.success) {
       setAlert({
         severity: "error",
-        message: loginResult.error,
+        message: "Incorrect username or password. Please check your credentials.",
         open: true,
       });
     }
@@ -159,6 +172,18 @@ const LoginPage = () => {
   const handleBackToLogin = () => {
     setIsCreatingAccount(false);
     setIsForgotPassword(false); // Show Login Form
+  };
+
+  const showAlert = (severity, message) => {
+    setAlert({
+      severity,
+      message,
+      open: true,
+    });
+
+    setTimeout(() => {
+      setAlert(prevAlert => ({ ...prevAlert, open: false }));
+    }, 3000);
   };
 
   return (
@@ -221,7 +246,7 @@ const LoginPage = () => {
                                 onChange={(e) => setUsername(e.target.value)}
                                 onKeyDown={handleUsernameKeyDown}
                                 autoComplete="off"
-                                required
+                                // required
                                 ref={usernameInputRef}
                               />
                             </FormGroup>
@@ -240,7 +265,7 @@ const LoginPage = () => {
                                 onKeyDown={handlePasswordKeyDown}
                                 autoComplete="new-password"
                                 ref={passwordInputRef}
-                                required
+                                // required
                               />
                               <span
                                 onClick={togglePasswordVisibility}
