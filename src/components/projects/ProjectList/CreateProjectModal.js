@@ -1,40 +1,53 @@
-import React, { useState } from "react";
-import {
-  Modal,
-  ModalHeader,
-  ModalBody,
-  Form,
-  FormGroup,
-  Label,
-  Input,
-  Button,
-  Alert,
-} from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Form, FormGroup, Label, Input } from "reactstrap";
 import axiosInstance from '../../../config'; 
-import { getToken } from '../../auth/auth'; // 导入 getToken 函数
+import { getToken } from '../../auth/auth';
+import CustomModal from '../../CustomModal';
 
 const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [des, setDes] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    des: "",
+    password: ""
+  });
   const [error, setError] = useState("");
-  const [successAlert, setSuccessAlert] = useState(false); // Track success alert
+  const [successAlert, setSuccessAlert] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check if the required fields are empty
-  const isFormValid = name && password && address;
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({ name: "", address: "", des: "", password: "" });
+      setError("");
+      setSuccessAlert("");
+    }
+  }, [isOpen]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = getToken(); // 使用 getToken 函数获取 token
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const isFormValid = () => {
+    return formData.name && formData.password && formData.address;
+  };
+
+  const handleSubmit = async () => {
+    if (!isFormValid()) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    const token = getToken();
     if (!token) {
       setError("Authentication token not found, please log in again");
       return;
     }
+
+    setIsSubmitting(true);
     try {
       const response = await axiosInstance.post(
         "/projects",
-        { name, address, des, password },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -42,95 +55,87 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
         }
       );
       if (response.data.success) {
-        setSuccessAlert(true);
-        setError(""); // Clear any previous errors
+        setSuccessAlert("Project created successfully!");
         setTimeout(() => {
-          setSuccessAlert(false);
-          toggle(); // Close modal after 1 second
-          fetchProjects(); // Refresh the project list after creating a new project
+          setSuccessAlert("");
+          toggle();
+          fetchProjects();
         }, 1000);
       } else {
         setError(response.data.errorMsg || "Error creating project.");
-        setTimeout(() => setError(""), 3000); // Keep the modal open, alert for 3 seconds
       }
     } catch (err) {
       setError("An unexpected error occurred.");
-      setTimeout(() => setError(""), 3000); // Keep the modal open, alert for 3 seconds
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} centered>
-      <ModalHeader toggle={toggle}>Create New Project</ModalHeader>
-      <ModalBody>
-        <Form onSubmit={handleSubmit}>
-          {successAlert && <Alert color="success">Project created successfully</Alert>}
-          {error && <Alert color="danger">{error}</Alert>}
-          <FormGroup>
-            <Label for="name">
-              <span style={{ color: "red" }}>*</span> Project Name:
-            </Label>
-            <Input
-              type="text"
-              name="name"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="password">
-              <span style={{ color: "red" }}>*</span> Password:
-            </Label>
-            <Input
-              type="password"
-              name="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="address">
-              <span style={{ color: "red" }}>*</span> Address:
-            </Label>
-            <Input
-              type="text"
-              name="address"
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="des">Description:</Label>
-            <Input
-              type="text"
-              name="des"
-              id="des"
-              value={des}
-              onChange={(e) => setDes(e.target.value)}
-            />
-          </FormGroup>
-          <Button
-            color="secondary"
-            size="sm"
-            type="submit"
-            style={{
-              backgroundColor: "#fbcd0b",
-              borderColor: "#fbcd0b",
-              fontWeight: "bold",
-            }}
-            disabled={!isFormValid} // Disable the button if form is not valid
-          >
-            Create
-          </Button>
-        </Form>
-      </ModalBody>
-    </Modal>
+    <CustomModal
+      isOpen={isOpen}
+      toggle={toggle}
+      title="Create New Project"
+      onSubmit={handleSubmit}
+      submitText="Create"
+      successAlert={successAlert}
+      error={error}
+      isSubmitting={isSubmitting}
+      disabled={!isFormValid()}
+      submitButtonColor="#fbcd0b"
+    >
+      <Form>
+        <FormGroup>
+          <Label for="name">
+            <span style={{ color: "red" }}>*</span> Project Name:
+          </Label>
+          <Input
+            type="text"
+            name="name"
+            id="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="password">
+            <span style={{ color: "red" }}>*</span> Password:
+          </Label>
+          <Input
+            type="password"
+            name="password"
+            id="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="address">
+            <span style={{ color: "red" }}>*</span> Address:
+          </Label>
+          <Input
+            type="text"
+            name="address"
+            id="address"
+            value={formData.address}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="des">Description:</Label>
+          <Input
+            type="text"
+            name="des"
+            id="des"
+            value={formData.des}
+            onChange={handleChange}
+          />
+        </FormGroup>
+      </Form>
+    </CustomModal>
   );
 };
 

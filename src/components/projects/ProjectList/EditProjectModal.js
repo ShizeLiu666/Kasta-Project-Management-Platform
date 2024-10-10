@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  Modal,
-  ModalHeader,
-  ModalBody,
-  Form,
-  FormGroup,
-  Label,
-  Input,
-  Button,
-  Alert,
-} from "reactstrap";
+import { Form, FormGroup, Label, Input } from "reactstrap";
 import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config'; 
+import CustomModal from '../../CustomModal';
 
 const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
   const [formData, setFormData] = useState({
@@ -22,7 +13,8 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     newPassword: "",
   });
   const [error, setError] = useState("");
-  const [successAlert, setSuccessAlert] = useState(false);
+  const [successAlert, setSuccessAlert] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (project) {
@@ -43,18 +35,21 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
   const isFormValid = () => {
     if (!project) return false;
     const { name, address, des, currentPassword, newPassword } = formData;
-    const isChanged = name !== "" || 
-                      address !== "" || 
-                      des !== "" || 
+    const isChanged = name !== project.name || 
+                      address !== project.address || 
+                      des !== project.des || 
                       newPassword !== "";
     return currentPassword !== "" && isChanged;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const handleSubmit = async () => {
     if (!project) {
       setError("Project information is missing. Please try again.");
+      return;
+    }
+
+    if (!isFormValid()) {
+      setError("Please fill all required fields and make at least one change.");
       return;
     }
 
@@ -71,9 +66,9 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     }
 
     const attributes = {};
-    if (formData.name !== project.name && formData.name !== "") attributes.name = formData.name;
-    if (formData.address !== project.address && formData.address !== "") attributes.address = formData.address;
-    if (formData.des !== project.des && formData.des !== "") attributes.des = formData.des;
+    if (formData.name !== project.name) attributes.name = formData.name;
+    if (formData.address !== project.address) attributes.address = formData.address;
+    if (formData.des !== project.des) attributes.des = formData.des;
     if (formData.newPassword !== "") attributes.password = formData.newPassword;
 
     if (Object.keys(attributes).length === 0) {
@@ -82,17 +77,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
       return;
     }
 
-    const updatedFormData = new FormData();
-    updatedFormData.append('projectId', project.projectId);
-    Object.keys(attributes).forEach(key => {
-      updatedFormData.append(key, attributes[key]);
-    });
-
-    // 添加这个循环来打印 FormData 的内容
-    for (let pair of updatedFormData.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
-
+    setIsSubmitting(true);
     try {
       const response = await axiosInstance.put(
         `/projects/modify`,
@@ -103,27 +88,24 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            // 'Content-Type': 'application/json'
           },
         }
       );
-      console.log("Server response:", response.data);
       if (response.data.success) {
-        setSuccessAlert(true);
-        setError("");
+        setSuccessAlert("Project updated successfully");
         setTimeout(() => {
-          setSuccessAlert(false);
+          setSuccessAlert("");
           toggle();
           fetchProjects();
         }, 1000);
       } else {
         setError(response.data.errorMsg || "Error updating project");
-        setTimeout(() => setError(""), 3000);
       }
     } catch (err) {
       console.error("Error details:", err.response ? err.response.data : err);
       setError("An unexpected error occurred.");
-      setTimeout(() => setError(""), 3000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -132,80 +114,74 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
   }
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} centered>
-      <ModalHeader toggle={toggle}>Edit Project</ModalHeader>
-      <ModalBody>
-        <Form onSubmit={handleSubmit}>
-          {successAlert && <Alert color="success">Project updated successfully</Alert>}
-          {error && <Alert color="danger">{error}</Alert>}
-          <FormGroup>
-            <Label for="name">Project Name:</Label>
-            <Input
-              type="text"
-              name="name"
-              id="name"
-              value={formData.name}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="address">Address:</Label>
-            <Input
-              type="text"
-              name="address"
-              id="address"
-              value={formData.address}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="des">Description:</Label>
-            <Input
-              type="text"
-              name="des"
-              id="des"
-              value={formData.des}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="currentPassword">
-              <span style={{ color: "red" }}>*</span> Current Password:
-            </Label>
-            <Input
-              type="password"
-              name="currentPassword"
-              id="currentPassword"
-              value={formData.currentPassword}
-              onChange={handleChange}
-              required
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="newPassword">New Password:</Label>
-            <Input
-              type="password"
-              name="newPassword"
-              id="newPassword"
-              value={formData.newPassword}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <Button
-            color="secondary"
-            type="submit"
-            style={{
-              backgroundColor: "#fbcd0b",
-              borderColor: "#fbcd0b",
-              fontWeight: "bold",
-            }}
-            disabled={!isFormValid()}
-          >
-            Update
-          </Button>
-        </Form>
-      </ModalBody>
-    </Modal>
+    <CustomModal
+      isOpen={isOpen}
+      toggle={toggle}
+      title="Edit Project"
+      onSubmit={handleSubmit}
+      submitText="Update"
+      successAlert={successAlert}
+      error={error}
+      isSubmitting={isSubmitting}
+      submitButtonColor="#007bff"
+      disabled={!isFormValid()}  // 添加这一行
+    >
+      <Form>
+        <FormGroup>
+          <Label for="name">Project Name:</Label>
+          <Input
+            type="text"
+            name="name"
+            id="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="address">Address:</Label>
+          <Input
+            type="text"
+            name="address"
+            id="address"
+            value={formData.address}
+            onChange={handleChange}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="des">Description:</Label>
+          <Input
+            type="text"
+            name="des"
+            id="des"
+            value={formData.des}
+            onChange={handleChange}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="currentPassword">
+            <span style={{ color: "red" }}>*</span> Current Password:
+          </Label>
+          <Input
+            type="password"
+            name="currentPassword"
+            id="currentPassword"
+            value={formData.currentPassword}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="newPassword">New Password:</Label>
+          <Input
+            type="password"
+            name="newPassword"
+            id="newPassword"
+            value={formData.newPassword}
+            onChange={handleChange}
+          />
+        </FormGroup>
+      </Form>
+    </CustomModal>
   );
 };
 

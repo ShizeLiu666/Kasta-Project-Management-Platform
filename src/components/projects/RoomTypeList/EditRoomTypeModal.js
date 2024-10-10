@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
+import { Form, FormGroup, Label, Input } from 'reactstrap';
 import axiosInstance from '../../../config'; 
 import { getToken } from '../../auth/auth';
+import CustomModal from '../../CustomModal';
 
 const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
   const [formData, setFormData] = useState({
     name: '',
-    typeCode: '',
+    typeCode: ''
   });
   const [error, setError] = useState('');
-  const [successAlert, setSuccessAlert] = useState(false);
+  const [successAlert, setSuccessAlert] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (roomType) {
       setFormData({
         name: roomType.name || '',
-        typeCode: roomType.typeCode || '',
+        typeCode: roomType.typeCode || ''
       });
     }
   }, [roomType]);
@@ -25,16 +27,12 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
   };
 
   const isFormValid = () => {
-    if (!roomType) return false;
-    const { name, typeCode } = formData;
-    return name.trim() !== '' || typeCode.trim() !== '';
+    return formData.name.trim() !== '' && formData.typeCode.trim() !== '';
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!roomType) {
-      setError("Room type information is missing. Please try again.");
+  const handleSubmit = async () => {
+    if (!isFormValid()) {
+      setError("Please fill in all required fields.");
       return;
     }
 
@@ -45,15 +43,15 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
     }
 
     const attributes = {};
-    if (formData.name !== roomType.name && formData.name.trim() !== '') attributes.name = formData.name.trim();
-    if (formData.typeCode !== roomType.typeCode && formData.typeCode.trim() !== '') attributes.typeCode = formData.typeCode.trim();
+    if (formData.name !== roomType.name) attributes.name = formData.name.trim();
+    if (formData.typeCode !== roomType.typeCode) attributes.typeCode = formData.typeCode.trim();
 
     if (Object.keys(attributes).length === 0) {
       setError("No changes detected. Please modify at least one field.");
-      setTimeout(() => setError(""), 3000);
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const response = await axiosInstance.put(
         `/project-rooms/modify`,
@@ -68,20 +66,19 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
         }
       );
       if (response.data.success) {
-        setSuccessAlert(true);
-        setError("");
+        setSuccessAlert("Room type updated successfully!");
         setTimeout(() => {
-          setSuccessAlert(false);
+          setSuccessAlert("");
           toggle();
           onRoomTypeUpdated(response.data.data);
         }, 1000);
       } else {
         setError(response.data.errorMsg || "Error updating room type");
-        setTimeout(() => setError(""), 3000);
       }
     } catch (err) {
       setError("An unexpected error occurred.");
-      setTimeout(() => setError(""), 3000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -90,44 +87,41 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
   }
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} centered>
-      <ModalHeader toggle={toggle}>Edit Room Type</ModalHeader>
-      <ModalBody>
-        {successAlert && <Alert color="success">Room type updated successfully</Alert>}
-        {error && <Alert color="danger">{error}</Alert>}
-        <Form onSubmit={handleSubmit}>
-          <FormGroup>
-            <Label for="name">Room Type Name:</Label>
-            <Input
-              type="text"
-              name="name"
-              id="name"
-              value={formData.name}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="typeCode">Type Code:</Label>
-            <Input
-              type="text"
-              name="typeCode"
-              id="typeCode"
-              value={formData.typeCode}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <Button 
-            color="primary" 
-            size="sm" 
-            type="submit" 
-            style={{ backgroundColor: "#fbcd0b", borderColor: "#fbcd0b", fontWeight: "bold" }}
-            disabled={!isFormValid()}
-          >
-            Update
-          </Button>
-        </Form>
-      </ModalBody>
-    </Modal>
+    <CustomModal
+      isOpen={isOpen}
+      toggle={toggle}
+      title="Edit Room Type"
+      onSubmit={handleSubmit}
+      submitText="Update"
+      successAlert={successAlert}
+      error={error}
+      isSubmitting={isSubmitting}
+      submitButtonColor="#007bff"
+      disabled={!isFormValid()}
+    >
+      <Form>
+        <FormGroup>
+          <Label for="name">Room Type Name:</Label>
+          <Input
+            type="text"
+            name="name"
+            id="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="typeCode">Type Code:</Label>
+          <Input
+            type="text"
+            name="typeCode"
+            id="typeCode"
+            value={formData.typeCode}
+            onChange={handleChange}
+          />
+        </FormGroup>
+      </Form>
+    </CustomModal>
   );
 };
 

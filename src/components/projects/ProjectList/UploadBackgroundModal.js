@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
+import { Form, FormGroup, Label, Input } from 'reactstrap';
 import axiosInstance from '../../../config';
 import { getToken } from '../../auth/auth';
+import CustomModal from '../../CustomModal';
 
 const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [successAlert, setSuccessAlert] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -19,8 +21,7 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) =
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!file) {
       setError('Please select an image file.');
       return;
@@ -29,6 +30,7 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) =
     const formData = new FormData();
     formData.append('file', file);
 
+    setIsSubmitting(true);
     try {
       const token = getToken();
       const response = await axiosInstance.post('/file/upload', formData, {
@@ -38,26 +40,26 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) =
         },
       });
 
-      console.log("File upload response:", response.data);  // 打印上传文件的响应
-
       if (response.data.success) {
-        // 上传成功后，调用更新项目背景的 API
         const updateResponse = await updateProjectBackground(response.data.data);
-        console.log("Project background update response:", updateResponse.data);  // 打印更新项目背景的响应
-        
-        setSuccess(true);
-        setError('');
-        onUploadSuccess(response.data.data);
-        setTimeout(() => {
-          setSuccess(false);
-          toggle();
-        }, 2000);
+        if (updateResponse.data.success) {
+          setSuccessAlert('Background image updated successfully!');
+          setTimeout(() => {
+            setSuccessAlert('');
+            toggle();
+            onUploadSuccess(response.data.data);
+          }, 2000);
+        } else {
+          setError(updateResponse.data.errorMsg || 'Failed to update project background.');
+        }
       } else {
         setError(response.data.errorMsg || 'Failed to upload image.');
       }
     } catch (error) {
       console.error('Error uploading image:', error);
       setError('An error occurred while uploading the image.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -65,9 +67,9 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) =
     try {
       const token = getToken();
       return await axiosInstance.put(
-        `/projects/modify`,  // 修正的 API 端点
+        `/projects/modify`,
         { 
-          projectId: projectId,  // 使用 projectId 而不是 projectRoomId
+          projectId: projectId,
           attributes: { iconUrl: imageUrl }
         },
         {
@@ -84,39 +86,31 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) =
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} centered>
-      <ModalHeader toggle={toggle}>Upload Background Image</ModalHeader>
-      <ModalBody>
-        <Form onSubmit={handleSubmit}>
-          {error && <Alert color="danger">{error}</Alert>}
-          {success && <Alert color="success">Background image updated successfully!</Alert>}
-          <FormGroup>
-            <Label for="backgroundFile">Select Image:</Label>
-            <Input
-              type="file"
-              name="file"
-              id="backgroundFile"
-              onChange={handleFileChange}
-              accept="image/*"
-            />
-          </FormGroup>
-          <Button 
-            color="secondary" 
-            type="submit" 
-            disabled={!file}
-            style={{
-              backgroundColor: "#fbcd0b",
-              borderColor: "#fbcd0b",
-              color: "#fff",
-              fontWeight: "bold",
-              textTransform: "none",
-            }}
-          >
-            Upload
-          </Button>
-        </Form>
-      </ModalBody>
-    </Modal>
+    <CustomModal
+      isOpen={isOpen}
+      toggle={toggle}
+      title="Upload Background Image"
+      onSubmit={handleSubmit}
+      submitText="Upload"
+      successAlert={successAlert}
+      error={error}
+      isSubmitting={isSubmitting}
+      disabled={!file}
+      submitButtonColor="#fbcd0b"
+    >
+      <Form>
+        <FormGroup>
+          <Label for="backgroundFile">Select Image:</Label>
+          <Input
+            type="file"
+            name="file"
+            id="backgroundFile"
+            onChange={handleFileChange}
+            accept="image/*"
+          />
+        </FormGroup>
+      </Form>
+    </CustomModal>
   );
 };
 
