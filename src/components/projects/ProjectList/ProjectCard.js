@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardBody, CardSubtitle, CardTitle } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { IconButton, Menu, MenuItem } from "@mui/material";
@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/EditNote';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import default_image from "../../../assets/images/projects/default_image.jpg";
-
+import LazyLoad from 'react-lazyload';
 
 const ProjectCard = ({
   project,  // 我们现在传入整个 project 对象
@@ -18,8 +18,14 @@ const ProjectCard = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
-  // 使用 project.iconUrl 如果存在，否则使用默认图片
-  const cardImage = project.iconUrl || default_image;
+  // 使用 useMemo 缓存图片 URL
+  const imageUrl = useMemo(() => {
+    if (project.iconUrl) {
+      const timestamp = project.updatedAt || Date.now();
+      return `${project.iconUrl}?v=${timestamp}`;
+    }
+    return default_image;
+  }, [project.iconUrl, project.updatedAt]);
 
   // Handle Menu open/close
   const handleMenuClick = (event) => {
@@ -57,22 +63,17 @@ const ProjectCard = ({
       style={{ position: "relative" }}
       onClick={(event) => onCardClick(event, project)}
     >
-      <div style={{
-        height: "250px",
-        overflow: "hidden",
-        position: "relative"
-      }}>
-        <img
-          src={cardImage}
-          alt={project.name}
+      <LazyLoad height={0} once>
+        <div
           style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center"
+            paddingTop: '75%', // 16:9 宽高比
+            backgroundImage: `url(${imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           }}
         />
-      </div>
+      </LazyLoad>
       <CardBody className="p-4">
         <CardTitle tag="h5">{project.name}</CardTitle>
         <CardSubtitle>{project.address}</CardSubtitle>

@@ -16,12 +16,13 @@
     font-size: 24px;
 }
 
-.modal-header > span {
+.modal-header>span {
     width: 100%;
     display: flex;
     align-items: center;
     flex-direction: row-reverse;
     justify-content: space-between;
+
     .close {
         float: right;
     }
@@ -29,7 +30,8 @@
 
 .form-group {
     margin-bottom: 15px;
-    > label {
+
+    >label {
         margin-bottom: 8px;
     }
 }
@@ -40,6 +42,69 @@
     }
 }
 
-.CreateAuthCodeModal_input{
+.CreateAuthCodeModal_input {
     padding-bottom: 5px;
+}
+
+.no-selection-highlight {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.no-selection-highlight tr {
+    transition: background-color 0.2s ease;
+}
+
+.no-selection-highlight tr:focus,
+.no-selection-highlight tr:active {
+    outline: none !important;
+    background-color: inherit !important;
+}
+
+.no-selection-highlight tr.selection-row {
+    background-color: red;
+    /* 或者你想要的任何颜色 */
+}
+
+.react-bootstrap-table {
+    &.no-selection-highlight {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+
+        table {
+            tbody {
+                tr {
+                    transition: background-color 0.2s ease;
+
+                    &:focus,
+                    &:active {
+                        outline: none !important;
+                        background-color: inherit !important;
+                    }
+
+                    &.selection-row {
+                        background-color: #e8e8e8 !important; // 使用 !important 来确保覆盖其他样式
+                    }
+                }
+            }
+        }
+    }
+
+    .custom-selection-row {
+        background-color: #e8e8e8 !important;
+        transition: background-color 0.2s ease;
+        outline: none !important;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
 }
