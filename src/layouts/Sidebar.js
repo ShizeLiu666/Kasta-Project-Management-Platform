@@ -22,13 +22,15 @@ const navigation = [
   },
 ];
 
-const Sidebar = ({ userType }) => {
-  // console.log("User Type in Sidebar:", userType)
+const Sidebar = ({ userType, toggleSidebar }) => {
   let location = useLocation();
 
   return (
     <div>
-      <div className="d-flex align-items-center"></div>
+      {/* <div className="d-flex align-items-center justify-content-between p-3">
+        <div></div>
+        <button className="btn-close d-lg-none" onClick={toggleSidebar}></button>
+      </div> */}
       <div className="p-3 mt-2">
         <Nav vertical className="sidebarNav">
           {navigation.map((navi, index) => (
@@ -41,6 +43,11 @@ const Sidebar = ({ userType }) => {
                       ? "active nav-link py-3"
                       : "nav-link text-secondary py-3"
                   }
+                  onClick={() => {
+                    if (window.innerWidth < 992) {
+                      toggleSidebar();
+                    }
+                  }}
                 >
                   <i className={navi.icon}></i>
                   <span className="ms-3 d-inline-block">{navi.title}</span>

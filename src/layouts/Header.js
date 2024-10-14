@@ -20,7 +20,7 @@ import '../assets/scss/loader/Header.css';
 import { getUserDetails } from '../components/auth/auth';
 import defaultAvatar from '../assets/images/users/normal_user.jpg';
 
-const Header = () => {
+const Header = ({ toggleSidebar }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,7 +60,9 @@ const Header = () => {
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
   const Handletoggle = () => setIsOpen(!isOpen);
-  const showMobilemenu = () => document.getElementById("sidebarArea").classList.toggle("showSidebar");
+  const showMobilemenu = () => {
+    toggleSidebar();
+  };
   const toggleModal = () => setModalOpen(!modalOpen);
 
   const handleLogout = () => {

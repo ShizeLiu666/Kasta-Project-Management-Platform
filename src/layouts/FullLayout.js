@@ -6,6 +6,7 @@ import { Container } from "reactstrap";
 
 const FullLayout = () => {
   const [userType, setUserType] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // 从 localStorage 获取用户详情
@@ -15,14 +16,18 @@ const FullLayout = () => {
     }
   }, []);
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <main>
       {/********header**********/}
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <div className="pageWrapper d-lg-flex">
         {/********Sidebar**********/}
-        <aside className="sidebarArea shadow" id="sidebarArea">
-          <Sidebar userType={userType} />
+        <aside className={`sidebarArea shadow ${sidebarOpen ? 'showSidebar' : ''}`} id="sidebarArea">
+          <Sidebar userType={userType} toggleSidebar={toggleSidebar} />
         </aside>
         {/********Content Area**********/}
         <div className="contentArea">
