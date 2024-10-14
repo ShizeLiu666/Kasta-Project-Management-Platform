@@ -1,3 +1,49 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gradient-form {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("../../assets/images/logos/background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.card {
+  background-color: rgba(255, 255, 255, 0.9);
+  max-width: 90%;
+  width: 100%;
+  margin: 20px;
+  overflow-y: auto;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+
+}
+
 .gradient-custom-2 {
   /* fallback for old browsers */
   background: #1f2122;
@@ -21,40 +67,6 @@
     #3d3e3f,
     #232526
   );
-}
-
-.gradient-form {
-  /* 确保背景图覆盖整个页面 */
-  background-image: url("../../assets/images/logos/background.png");
-  background-size: cover; /* 确保背景图覆盖整个容器 */
-  background-position: center; /* 居中显示背景图 */
-  background-repeat: no-repeat; /* 防止背景图重复 */
-  height: 100vh; /* 使背景图覆盖整个视口高度 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.card {
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.9
-  ); /* 使卡片有点透明，背景图能隐约可见 */
-}
-
-@media (min-width: 768px) {
-  .gradient-form {
-    height: 100vh !important;
-  }
-}
-
-@media (min-width: 769px) {
-  .gradient-custom-2 {
-    border-top-right-radius: 0.3rem;
-    border-bottom-right-radius: 0.3rem;
-  }
 }
 
 .custom-title {

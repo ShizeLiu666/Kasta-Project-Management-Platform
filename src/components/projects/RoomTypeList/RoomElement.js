@@ -13,26 +13,26 @@ const Demo = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
 }));
 
-const RoomElement = ({ primaryText, secondaryText, icon, onDelete, onEdit, onClick }) => {
+const RoomElement = ({ roomType, onDelete, onEdit, onClick }) => {
   return (
     <Demo>
       <ListItemButton
-        onClick={onClick} // 添加点击事件处理器
+        onClick={onClick}
         sx={{
           '&:hover': {
-            backgroundColor: '#f0f0f0', // 设置悬停效果
+            backgroundColor: '#f0f0f0',
             cursor: 'pointer',
           },
         }}
       >
         <ListItemAvatar>
           <Avatar>
-            {icon || <FolderIcon />} {/* 默认使用 FolderIcon */}
+            <FolderIcon />
           </Avatar>
         </ListItemAvatar>
         <ListItemText
-          primary={primaryText}
-          secondary={secondaryText}
+          primary={`${roomType.name} (${roomType.typeCode})`}
+          secondary={roomType.des || "No description"}
         />
         <IconButton edge="end" style={{ marginRight: "5px" }} aria-label="edit" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
           <EditIcon fontSize="medium" sx={{ color: "#007bff" }}/>

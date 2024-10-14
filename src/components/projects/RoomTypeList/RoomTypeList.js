@@ -134,8 +134,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
       {filteredRoomTypes.map((roomType) => (
         <RoomElement
           key={roomType.projectRoomId}
-          primaryText={`${roomType.typeCode}`}
-          secondaryText={roomType.name}
+          roomType={roomType}
           onDelete={() => handleDeleteClick(roomType)}
           onEdit={() => handleEditRoomType(roomType)}
           onClick={() => handleRoomTypeClick(roomType)}

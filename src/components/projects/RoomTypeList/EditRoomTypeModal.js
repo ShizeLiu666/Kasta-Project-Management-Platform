@@ -7,7 +7,8 @@ import CustomModal from '../../CustomModal';
 const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
   const [formData, setFormData] = useState({
     name: '',
-    typeCode: ''
+    typeCode: '',
+    des: ''
   });
   const [error, setError] = useState('');
   const [successAlert, setSuccessAlert] = useState('');
@@ -17,7 +18,8 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
     if (roomType) {
       setFormData({
         name: roomType.name || '',
-        typeCode: roomType.typeCode || ''
+        typeCode: roomType.typeCode || '',
+        des: roomType.des || ''
       });
     }
   }, [roomType]);
@@ -45,6 +47,7 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
     const attributes = {};
     if (formData.name !== roomType.name) attributes.name = formData.name.trim();
     if (formData.typeCode !== roomType.typeCode) attributes.typeCode = formData.typeCode.trim();
+    if (formData.des !== roomType.des) attributes.des = formData.des.trim();
 
     if (Object.keys(attributes).length === 0) {
       setError("No changes detected. Please modify at least one field.");
@@ -117,6 +120,16 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
             name="typeCode"
             id="typeCode"
             value={formData.typeCode}
+            onChange={handleChange}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="des">Description:</Label>
+          <Input
+            type="text"
+            name="des"
+            id="des"
+            value={formData.des}
             onChange={handleChange}
           />
         </FormGroup>
