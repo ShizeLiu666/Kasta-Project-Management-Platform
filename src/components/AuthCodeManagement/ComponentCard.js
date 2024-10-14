@@ -1,17 +1,16 @@
-import { Card, CardBody, CardTitle, CardSubtitle } from 'reactstrap';
+import React from 'react';
 import PropTypes from 'prop-types';
+import './ComponentCard.css';
 
 const ComponentCard = ({ children, title, subtitle }) => {
   return (
-    <Card>
-      <CardTitle tag="h4" className="border-bottom px-4 py-3 mb-0">
-        {title}
-      </CardTitle>
-      <CardBody className="p-4">
-        <CardSubtitle className="text-muted mb-3">{subtitle || ''}</CardSubtitle>
+    <div className="component-card">
+      <h4 className="component-card-title">{title}</h4>
+      <div className="component-card-body">
+        {subtitle && <div className="component-card-subtitle">{subtitle}</div>}
         <div>{children}</div>
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 };
 
