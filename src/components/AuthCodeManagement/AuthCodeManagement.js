@@ -10,8 +10,15 @@ import CreateAuthCodeModal from './CreateAuthCodeModal';
 import EditAuthCodeModal from './EditAuthCodeModal';
 import './AuthCodeManagement.scss';
 import EditIcon from '@mui/icons-material/EditNote';  // 导入 EditIcon
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 const { SearchBar } = Search;
+
+const sortIndicator = (order) => {
+  if (!order) return <span className="sort-indicator">&nbsp;↕</span>;
+  return order === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />;
+};
 
 const AuthCodeManagement = () => {
   const [authCodes, setAuthCodes] = useState([]);
@@ -90,29 +97,49 @@ const AuthCodeManagement = () => {
     {
       dataField: 'code',
       text: 'Code',
-      sort: true,
+      // sort: true, // 如果 Code 不需要排序，可以保持注释
     },
     {
       dataField: 'creator',
       text: 'Creator',
       sort: true,
+      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {column.text} {sortElement}
+        </div>
+      ),
+      sortCaret: sortIndicator,
     },
     {
       dataField: 'usageCount',
       text: 'Usage Count',
       sort: true,
+      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {column.text} {sortElement}
+        </div>
+      ),
+      sortCaret: sortIndicator,
+      headerStyle: { width: '150px' },
+      style: { width: '150px' }, 
     },
     {
       dataField: 'createDate',
       text: 'Create Date',
       sort: true,
       formatter: (cell) => new Date(cell).toLocaleString(),
+      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {column.text} {sortElement}
+        </div>
+      ),
+      sortCaret: sortIndicator,
     },
     {
       dataField: 'valid',
       text: 'Valid',
-      sort: true,
       formatter: (cell) => cell ? 'Yes' : 'No',
+      // 移除了 sort 属性和相关的排序配置
     },
     {
       dataField: 'actions',
@@ -185,7 +212,10 @@ const AuthCodeManagement = () => {
                 {(props) => (
                   <div>
                     <div className="d-flex justify-content-between mb-3">
-                      <SearchBar {...props.searchProps} />
+                      <SearchBar 
+                        {...props.searchProps} 
+                        placeholder="Search Code..."
+                      />
                       <Button
                         color="secondary"
                         onClick={toggleCreateModal}
@@ -213,6 +243,12 @@ const AuthCodeManagement = () => {
                             noDataIndication="No data available"
                             selectRow={selectRow}
                             classes="allow-selection"
+                            sortCaret={(order, column) => {
+                              if (!order) return (<span>&nbsp;&nbsp;↕</span>);
+                              else if (order === 'asc') return (<span>&nbsp;&nbsp;↑</span>);
+                              else if (order === 'desc') return (<span>&nbsp;&nbsp;↓</span>);
+                              return null;
+                            }}
                           />
                           <div className="d-flex justify-content-between align-items-center mt-3">
                             <SizePerPageDropdownStandalone {...paginationProps} />
