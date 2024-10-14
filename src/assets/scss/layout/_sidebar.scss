@@ -19,11 +19,13 @@
     height: 100%;
     overflow: auto;
     top: 0;
-    z-index: 1;
-    margin-left: -$sidebarWidth;
-    transition: 0.2s ease-in;
+    left: 0; /* 确保从左边开始 */
+    z-index: 1050; /* 增加z-index确保在其他元素之上 */
+    width: 250px; /* 设置固定宽度 */
+    transform: translateX(-100%); /* 初始状态隐藏 */
+    transition: transform 0.3s ease-in-out;
     &.showSidebar {
-      margin-left: 0px;
+      transform: translateX(0); /* 显示时移动到可见区域 */
     }
   }
 }

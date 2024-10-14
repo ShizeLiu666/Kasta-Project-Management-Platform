@@ -2,6 +2,7 @@ import React from "react";
 import { Nav, NavItem } from "reactstrap";
 import { Link, useLocation } from "react-router-dom";
 import '../assets/scss/loader/Sidebar.css'
+import CloseIcon from '@mui/icons-material/Close'; // 确保已安装 @mui/icons-material
 
 const navigation = [
   {
@@ -26,11 +27,10 @@ const Sidebar = ({ userType, toggleSidebar }) => {
   let location = useLocation();
 
   return (
-    <div>
-      {/* <div className="d-flex align-items-center justify-content-between p-3">
-        <div></div>
-        <button className="btn-close d-lg-none" onClick={toggleSidebar}></button>
-      </div> */}
+    <div className="sidebar-container">
+      <div className="sidebar-close-button d-lg-none" onClick={toggleSidebar}>
+        <CloseIcon />
+      </div>
       <div className="p-3 mt-2">
         <Nav vertical className="sidebarNav">
           {navigation.map((navi, index) => (
@@ -49,8 +49,8 @@ const Sidebar = ({ userType, toggleSidebar }) => {
                     }
                   }}
                 >
-                  <i className={navi.icon}></i>
-                  <span className="ms-3 d-inline-block">{navi.title}</span>
+                  <i className={`bi ${navi.icon} me-2`}></i>
+                  <span>{navi.title}</span>
                 </Link>
               </NavItem>
             )
