@@ -9,6 +9,7 @@ import axiosInstance from '../../config';
 import CreateAuthCodeModal from './CreateAuthCodeModal';
 import EditAuthCodeModal from './EditAuthCodeModal';
 import './AuthCodeManagement.scss';
+import EditIcon from '@mui/icons-material/EditNote';  // 导入 EditIcon
 
 const { SearchBar } = Search;
 
@@ -24,30 +25,39 @@ const AuthCodeManagement = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchAuthCodes = useCallback(async () => {
+    setLoading(true);
     try {
       const token = getToken();
-      const response = await axiosInstance.get('/authorization-codes', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          page: page - 1,
-          size: sizePerPage,
-        },
+      // 首先获取总数
+      const countResponse = await axiosInstance.get('/authorization-codes', {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page: 0, size: 1 },
       });
 
-      if (response.data.success) {
-        setAuthCodes(response.data.data.content);
-        setTotalElements(response.data.data.totalElements);
+      if (countResponse.data.success) {
+        const totalCount = countResponse.data.data.totalElements;
+        setTotalElements(totalCount);
+
+        // 然后获取所有数据
+        const allDataResponse = await axiosInstance.get('/authorization-codes', {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { page: 0, size: totalCount },
+        });
+
+        if (allDataResponse.data.success) {
+          setAuthCodes(allDataResponse.data.data.content);
+        } else {
+          console.error('Failed to fetch auth codes:', allDataResponse.data.errorMsg);
+        }
       } else {
-        console.error('Failed to fetch auth codes:', response.data.errorMsg);
+        console.error('Failed to fetch total count:', countResponse.data.errorMsg);
       }
     } catch (error) {
       console.error('Error fetching auth codes:', error);
     } finally {
       setLoading(false);
     }
-  }, [page, sizePerPage]);
+  }, []);
 
   useEffect(() => {
     fetchAuthCodes();
@@ -70,7 +80,7 @@ const AuthCodeManagement = () => {
     clickToSelect: true,
     onSelect: handleSelectRow,
     selected: selectedAuthCode ? [selectedAuthCode.code] : [],
-    hideSelectColumn: false,
+    hideSelectColumn: true,
     selectionHeaderRenderer: () => null,
     style: { backgroundColor: '#e8e8e8' },
     classes: 'custom-selection-row',
@@ -104,7 +114,33 @@ const AuthCodeManagement = () => {
       sort: true,
       formatter: (cell) => cell ? 'Yes' : 'No',
     },
+    {
+      dataField: 'actions',
+      text: 'Actions',
+      formatter: (cell, row) => (
+        <Button
+          color="primary"
+          size="sm"
+          onClick={() => handleEditClick(row)}
+          style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: '#007bff',
+            padding: '0',
+          }}
+        >
+          <EditIcon fontSize="medium" style={{marginRight:"4px"}}/>
+          Edit
+        </Button>
+      ),
+      headerStyle: { width: '100px' }
+    }
   ];
+
+  const handleEditClick = (row) => {
+    setSelectedAuthCode(row);
+    toggleEditModal();
+  };
 
   const paginationOptions = {
     custom: true,
@@ -150,36 +186,19 @@ const AuthCodeManagement = () => {
                   <div>
                     <div className="d-flex justify-content-between mb-3">
                       <SearchBar {...props.searchProps} />
-                      <div>
-                        <Button
-                          color="secondary"
-                          onClick={toggleCreateModal}
-                          style={{
-                            backgroundColor: "#fbcd0b",
-                            borderColor: "#fbcd0b",
-                            color: "#fff",
-                            fontWeight: "bold",
-                            textTransform: "none",
-                            marginRight: "10px"
-                          }}
-                        >
-                          Create Auth Codes
-                        </Button>
-                        <Button
-                          color="secondary"
-                          onClick={toggleEditModal}
-                          style={{
-                            backgroundColor: "#007bff",
-                            borderColor: "#007bff",
-                            color: "#fff",
-                            fontWeight: "bold",
-                            textTransform: "none",
-                          }}
-                          disabled={!selectedAuthCode}
-                        >
-                          Edit Auth Code
-                        </Button>
-                      </div>
+                      <Button
+                        color="secondary"
+                        onClick={toggleCreateModal}
+                        style={{
+                          backgroundColor: "#fbcd0b",
+                          borderColor: "#fbcd0b",
+                          color: "#fff",
+                          fontWeight: "bold",
+                          textTransform: "none",
+                        }}
+                      >
+                        Create Auth Codes
+                      </Button>
                     </div>
                     <PaginationProvider pagination={paginationFactory(paginationOptions)}>
                       {({ paginationProps, paginationTableProps }) => (
@@ -193,8 +212,7 @@ const AuthCodeManagement = () => {
                             condensed
                             noDataIndication="No data available"
                             selectRow={selectRow}
-                            classes="no-selection-highlight"
-                            wrapperClasses="no-selection-highlight" // 添加这一行
+                            classes="allow-selection"
                           />
                           <div className="d-flex justify-content-between align-items-center mt-3">
                             <SizePerPageDropdownStandalone {...paginationProps} />
