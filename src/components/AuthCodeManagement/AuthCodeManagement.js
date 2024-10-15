@@ -212,20 +212,62 @@ const AuthCodeManagement = () => {
   };
 
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setAlert({
-        isOpen: true,
-        message: 'Copied.',
-        severity: 'success'
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Modern browsers
+      navigator.clipboard.writeText(text).then(() => {
+        setAlert({
+          isOpen: true,
+          message: 'Copied successfully',
+          severity: 'success'
+        });
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        fallbackCopyTextToClipboard(text);
       });
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
+    } else {
+      // Fallback
+      fallbackCopyTextToClipboard(text);
+    }
+  };
+
+  const fallbackCopyTextToClipboard = (text) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Avoid scrolling to bottom
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        setAlert({
+          isOpen: true,
+          message: 'Copied successfully',
+          severity: 'success'
+        });
+      } else {
+        setAlert({
+          isOpen: true,
+          message: 'Copy failed, please copy manually',
+          severity: 'error'
+        });
+      }
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
       setAlert({
         isOpen: true,
-        message: 'Copy failed.',
+        message: 'Copy failed, please copy manually',
         severity: 'error'
       });
-    });
+    }
+
+    document.body.removeChild(textArea);
   };
 
   const handleCloseAlert = (event, reason) => {
