@@ -227,7 +227,7 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                 }}
               >
                 <Input
-                  id="excelFile"
+                  id="excelFile"  
                   name="file"
                   type="file"
                   onChange={handleFileChange}
