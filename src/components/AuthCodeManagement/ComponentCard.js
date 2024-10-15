@@ -7,7 +7,7 @@ const ComponentCard = ({ children, title, subtitle }) => {
     <div className="component-card">
       <h4 className="component-card-title">{title}</h4>
       <div className="component-card-body">
-        {subtitle && <div className="component-card-subtitle">{subtitle}</div>}
+        {/* {subtitle && <div className="component-card-subtitle">{subtitle}</div>} */}
         <div>{children}</div>
       </div>
     </div>

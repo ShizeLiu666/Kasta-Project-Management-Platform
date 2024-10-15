@@ -4,6 +4,7 @@ import * as XLSX from "xlsx"; // 导入 xlsx 库
 import exampleFile from "../../../../assets/excel/example.xlsx"; // 导入示例文件
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import TreeView from './TreeView';  // 导入新的 TreeView 组件
 
 // Helper functions moved from Step2
 function extractTextFromSheet(sheet) {
@@ -274,6 +275,9 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                 )
               )
             )}
+
+            {/* 使用新的 TreeView 组件 */}
+            <TreeView />
           </form>
         </div>
       </div>

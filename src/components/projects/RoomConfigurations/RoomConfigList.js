@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Card,
   Row,
   Col,
-  CardTitle,
-  CardBody,
   Button
 } from "reactstrap";
 import Box from "@mui/material/Box";
@@ -23,6 +20,7 @@ import {
 import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config';
 import CustomAlert from '../../CustomAlert';  // 导入 CustomAlert
+import ComponentCard from '../../AuthCodeManagement/ComponentCard';
 
 const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
   const [config, setConfig] = useState(null);
@@ -203,92 +201,92 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       />
       <Row>
         <Col>
-          <Card>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              className="border-bottom p-3 mb-0"
-            >
-              <Box display="flex" alignItems="center">
-                <CardTitle tag="h5" style={{ marginBottom: 0, marginRight: "10px" }}>
-                  {roomTypeName}
-                </CardTitle>
-                {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
-                  <Button
-                    color="secondary"
-                    onClick={handleDownloadJson}
-                    size="sm"
-                    style={{marginTop:"2px", marginLeft:"5px", display: "flex", alignItems: "center"}}
-                  >
-                    <CloudDownloadIcon style={{ marginRight: "8px" }} />
-                    <span style={{ position: "relative", bottom: "1px"}}>Download JSON</span>
-                  </Button>
-                )}
-              </Box>
-
-              <Box display="flex" alignItems="center">
-                {!isEditing ? (
-                  <>
+          <ComponentCard
+            title={
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                className="room-config-title"
+              >
+                <Box display="flex" alignItems="center">
+                  <span style={{ fontSize: '18px', fontWeight: '500', marginRight: '10px' }}>
+                    {roomTypeName}
+                  </span>
+                  {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
                     <Button
-                      color="success"
-                      onClick={handleCloudUploadClick}
+                      color="secondary"
+                      onClick={handleDownloadJson}
                       size="sm"
-                      style={{ marginRight: "10px", backgroundColor: "#007bff", borderColor: "#007bff" }}
+                      style={{marginTop:"2px", marginLeft:"5px", display: "flex", alignItems: "center"}}
                     >
-                      <CloudUploadIcon style={{ marginRight: "8px" }} />
-                      <span style={{ position: "relative", top: "1px"}}>Upload / Overwrite</span>
+                      <CloudDownloadIcon style={{ marginRight: "8px" }} />
+                      <span style={{ position: "relative", bottom: "1px"}}>Download JSON</span>
                     </Button>
-                    {config && config !== "{}" && Object.keys(config).length > 0 && (
-                      <Button
-                        color="danger"
-                        onClick={() => setDeleteModalOpen(true)}
-                        size="sm"
-                      >
-                        <DeleteForeverIcon style={{ marginRight: "8px" }} />
-                        <span style={{ position: "relative", top: "1px"}}>Delete</span>
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  <Button
-                    color="secondary"
-                    onClick={handleBackClick}
-                    size="sm"
-                    style={{ marginRight: "10px"}}
-                  >
-                    <ArrowBackIosIcon style={{ marginRight: "4px" }} />
-                    <span style={{ position: "relative", top: "1px"}}>Back</span>
-                  </Button>
-                )}
-              </Box>
-            </Box>
-
-            <CardBody>
-              {isEditing ? (
-                <Steps
-                  projectRoomId={projectRoomId}
-                  submitJson={submitJson}
-                />
-              ) : (
-                <>
-                  {config && config !== "{}" && (
-                    <>
-                      {config.devices && (
-                        <div>
-                          {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))}
-                          {renderDevicesTable(processDevices(config.devices))}
-                        </div>
-                      )}
-                      {config.groups && renderGroupsTable(config.groups)}
-                      {config.scenes && renderScenesTable(config.scenes)}
-                      {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
-                    </>
                   )}
-                </>
-              )}
-            </CardBody>
-          </Card>
+                </Box>
+
+                <Box display="flex" alignItems="center">
+                  {!isEditing ? (
+                    <>
+                      <Button
+                        color="success"
+                        onClick={handleCloudUploadClick}
+                        size="sm"
+                        style={{ marginRight: "10px", backgroundColor: "#007bff", borderColor: "#007bff" }}
+                      >
+                        <CloudUploadIcon style={{ marginRight: "8px" }} />
+                        <span style={{ position: "relative", top: "1px"}}>Upload / Overwrite</span>
+                      </Button>
+                      {config && config !== "{}" && Object.keys(config).length > 0 && (
+                        <Button
+                          color="danger"
+                          onClick={() => setDeleteModalOpen(true)}
+                          size="sm"
+                        >
+                          <DeleteForeverIcon style={{ marginRight: "8px" }} />
+                          <span style={{ position: "relative", top: "1px"}}>Delete</span>
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <Button
+                      color="secondary"
+                      onClick={handleBackClick}
+                      size="sm"
+                      style={{ marginRight: "10px"}}
+                    >
+                      <ArrowBackIosIcon style={{ marginRight: "4px" }} />
+                      <span style={{ position: "relative", top: "1px"}}>Back</span>
+                    </Button>
+                  )}
+                </Box>
+              </Box>
+            }
+          >
+            {isEditing ? (
+              <Steps
+                projectRoomId={projectRoomId}
+                submitJson={submitJson}
+              />
+            ) : (
+              <>
+                {config && config !== "{}" && (
+                  <>
+                    {config.devices && (
+                      <div>
+                        {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))}
+                        {renderDevicesTable(processDevices(config.devices))}
+                      </div>
+                    )}
+                    {config.groups && renderGroupsTable(config.groups)}
+                    {config.scenes && renderScenesTable(config.scenes)}
+                    {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
+                  </>
+                )}
+              </>
+            )}
+          </ComponentCard>
 
           <DeleteRoomConfigModal
             isOpen={deleteModalOpen}
