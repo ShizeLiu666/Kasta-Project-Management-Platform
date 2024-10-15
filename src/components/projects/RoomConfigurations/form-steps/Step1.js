@@ -203,11 +203,27 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
         <div className="col col-lg-6">
           <form id="Form" className="form-horizontal mt-2">
             <div className="form-group content form-block-holder">
+              {/* 显示错误信息或成功信息 */}
+            {(isNextClicked || file) && (
+              errorMessage ? (
+                <Alert severity="error" style={{ marginTop: "10px" }}>
+                  <AlertTitle>Error</AlertTitle>
+                  {errorMessage}
+                </Alert>
+              ) : (
+                file && (
+                  <Alert severity="success" style={{ marginTop: "10px" }}>
+                    <AlertTitle>Success</AlertTitle>
+                  </Alert>
+                )
+              )
+            )}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   marginBottom: "15px",
+                  marginTop: "20px",
                 }}
               >
                 <Input
@@ -259,25 +275,10 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                 )
               </FormText>
             </div>
-
-            {/* 显示错误信息或成功信息 */}
-            {(isNextClicked || file) && (
-              errorMessage ? (
-                <Alert severity="error" style={{ marginTop: "10px" }}>
-                  <AlertTitle>Error</AlertTitle>
-                  {errorMessage}
-                </Alert>
-              ) : (
-                file && (
-                  <Alert severity="success" style={{ marginTop: "10px" }}>
-                    <AlertTitle>Success</AlertTitle>
-                  </Alert>
-                )
-              )
-            )}
-
             {/* 使用新的 TreeView 组件 */}
             <TreeView />
+
+        
           </form>
         </div>
       </div>
