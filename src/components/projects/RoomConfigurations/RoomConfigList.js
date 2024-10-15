@@ -7,7 +7,6 @@ import {
   CardBody,
   Button
 } from "reactstrap";
-import { Alert } from "@mui/material";
 import Box from "@mui/material/Box";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
@@ -22,23 +21,29 @@ import {
   renderRemoteControlsTable
 } from './ConfigTables';
 import { getToken } from '../../auth/auth';
-import axiosInstance from '../../../config';  // 添加这行
+import axiosInstance from '../../../config';
+import CustomAlert from '../../CustomAlert';  // 导入 CustomAlert
 
 const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
   const [config, setConfig] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [alert, setAlert] = useState({
-    open: false,
-    severity: "",
+    isOpen: false,
     message: "",
+    severity: "info",
+    duration: 3000
   });
   const [isEditing, setIsEditing] = useState(false);
+
+  const showAlert = (message, severity, duration = 3000) => {
+    setAlert({ isOpen: true, message, severity, duration });
+  };
 
   const fetchRoomDetail = useCallback(async () => {
     try {
       const token = getToken();
       if (!token) {
-        console.error("No token found, please log in again.");
+        showAlert("No token found, please log in again.", "error");
         return;
       }
 
@@ -64,30 +69,23 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
         
         setConfig(parsedConfig);
       } else {
-        console.error(`Error fetching room details: ${data.errorMsg}`);
+        showAlert(`Error fetching room details: ${data.errorMsg}`, "error");
       }
     } catch (error) {
+      showAlert("Error fetching room details", "error");
       console.error("Error fetching room details:", error);
     }
   }, [projectRoomId]);
 
   const submitJson = async (jsonResult, isReplace = false) => {
     if (!jsonResult) {
-      setAlert({
-        severity: "error",
-        message: "JSON content is empty",
-        open: true,
-      });
+      showAlert("JSON content is empty", "error");
       return;
     }
     try {
       const token = getToken();
       if (!token) {
-        setAlert({
-          severity: "error",
-          message: "No token found, please log in again.",
-          open: true,
-        });
+        showAlert("No token found, please log in again.", "error");
         return;
       }
 
@@ -102,32 +100,19 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       if (data.success) {
         setIsEditing(false);
 
-        setAlert({
-          severity: "success",
-          message: isReplace
+        showAlert(
+          isReplace
             ? "Configuration replaced successfully."
             : "JSON configuration submitted successfully.",
-          open: true,
-        });
+          "success"
+        );
 
         fetchRoomDetail();
       } else {
-        setAlert({
-          severity: "error",
-          message: `Failed to submit JSON configuration: ${data.errorMsg}`,
-          open: true,
-        });
+        showAlert(`Failed to submit JSON configuration: ${data.errorMsg}`, "error");
       }
-
-      setTimeout(() => {
-        setAlert({ open: false });
-      }, 3000);
     } catch (error) {
-      setAlert({
-        severity: "error",
-        message: "An error occurred while submitting JSON",
-        open: true,
-      });
+      showAlert("An error occurred while submitting JSON", "error");
     }
   };
 
@@ -169,11 +154,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
     try {
       const token = getToken();
       if (!token) {
-        setAlert({
-          severity: "error",
-          message: "No token found, please log in again.",
-          open: true,
-        });
+        showAlert("No token found, please log in again.", "error");
         return;
       }
 
@@ -186,34 +167,15 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
       const data = response.data;
       if (data.success) {
         setConfig(null);
-        setAlert({
-          severity: "success",
-          message: "Room configuration deleted successfully.",
-          open: true,
-        });
+        showAlert("Room configuration deleted successfully.", "success");
         if (document.getElementById("exampleFile")) {
           document.getElementById("exampleFile").value = null;
         }
       } else {
-        setAlert({
-          severity: "error",
-          message: `Error deleting room configuration: ${data.errorMsg}`,
-          open: true,
-        });
+        showAlert(`Error deleting room configuration: ${data.errorMsg}`, "error");
       }
-
-      setTimeout(() => {
-        setAlert({ open: false });
-      }, 3000);
     } catch (error) {
-      setAlert({
-        severity: "error",
-        message: "An error occurred while deleting the room configuration.",
-        open: true,
-      });
-      setTimeout(() => {
-        setAlert({ open: false });
-      }, 3000);
+      showAlert("An error occurred while deleting the room configuration.", "error");
     }
 
     setDeleteModalOpen(false);
@@ -231,117 +193,111 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
   };
 
   return (
-    <Row>
-      {alert.open && (
-        <Alert
-          severity={alert.severity}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 9999,
-          }}
-        >
-          {alert.message}
-        </Alert>
-      )}
+    <div>
+      <CustomAlert
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        message={alert.message}
+        severity={alert.severity}
+        autoHideDuration={alert.duration}
+      />
+      <Row>
+        <Col>
+          <Card>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              className="border-bottom p-3 mb-0"
+            >
+              <Box display="flex" alignItems="center">
+                <CardTitle tag="h5" style={{ marginBottom: 0, marginRight: "10px" }}>
+                  {roomTypeName}
+                </CardTitle>
+                {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
+                  <Button
+                    color="secondary"
+                    onClick={handleDownloadJson}
+                    size="sm"
+                    style={{marginTop:"2px", marginLeft:"5px", display: "flex", alignItems: "center"}}
+                  >
+                    <CloudDownloadIcon style={{ marginRight: "8px" }} />
+                    <span style={{ position: "relative", bottom: "1px"}}>Download JSON</span>
+                  </Button>
+                )}
+              </Box>
 
-      <Col>
-        <Card>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            className="border-bottom p-3 mb-0"
-          >
-            <Box display="flex" alignItems="center">
-              <CardTitle tag="h5" style={{ marginBottom: 0, marginRight: "10px" }}>
-                {roomTypeName}
-              </CardTitle>
-              {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
-                <Button
-                  color="secondary"
-                  onClick={handleDownloadJson}
-                  size="sm"
-                  style={{marginTop:"2px", marginLeft:"5px", display: "flex", alignItems: "center"}}
-                >
-                  <CloudDownloadIcon style={{ marginRight: "8px" }} />
-                  <span style={{ position: "relative", bottom: "1px"}}>Download JSON</span>
-                </Button>
-              )}
+              <Box display="flex" alignItems="center">
+                {!isEditing ? (
+                  <>
+                    <Button
+                      color="success"
+                      onClick={handleCloudUploadClick}
+                      size="sm"
+                      style={{ marginRight: "10px", backgroundColor: "#007bff", borderColor: "#007bff" }}
+                    >
+                      <CloudUploadIcon style={{ marginRight: "8px" }} />
+                      <span style={{ position: "relative", top: "1px"}}>Upload / Overwrite</span>
+                    </Button>
+                    {config && config !== "{}" && Object.keys(config).length > 0 && (
+                      <Button
+                        color="danger"
+                        onClick={() => setDeleteModalOpen(true)}
+                        size="sm"
+                      >
+                        <DeleteForeverIcon style={{ marginRight: "8px" }} />
+                        <span style={{ position: "relative", top: "1px"}}>Delete</span>
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <Button
+                    color="secondary"
+                    onClick={handleBackClick}
+                    size="sm"
+                    style={{ marginRight: "10px"}}
+                  >
+                    <ArrowBackIosIcon style={{ marginRight: "4px" }} />
+                    <span style={{ position: "relative", top: "1px"}}>Back</span>
+                  </Button>
+                )}
+              </Box>
             </Box>
 
-            <Box display="flex" alignItems="center">
-              {!isEditing ? (
+            <CardBody>
+              {isEditing ? (
+                <Steps
+                  projectRoomId={projectRoomId}
+                  submitJson={submitJson}
+                />
+              ) : (
                 <>
-                  <Button
-                    color="success"
-                    onClick={handleCloudUploadClick}
-                    size="sm"
-                    style={{ marginRight: "10px", backgroundColor: "#007bff", borderColor: "#007bff" }}
-                  >
-                    <CloudUploadIcon style={{ marginRight: "8px" }} />
-                    <span style={{ position: "relative", top: "1px"}}>Upload / Overwrite</span>
-                  </Button>
-                  {config && config !== "{}" && Object.keys(config).length > 0 && (
-                    <Button
-                      color="danger"
-                      onClick={() => setDeleteModalOpen(true)}
-                      size="sm"
-                    >
-                      <DeleteForeverIcon style={{ marginRight: "8px" }} />
-                      <span style={{ position: "relative", top: "1px"}}>Delete</span>
-                    </Button>
+                  {config && config !== "{}" && (
+                    <>
+                      {config.devices && (
+                        <div>
+                          {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))}
+                          {renderDevicesTable(processDevices(config.devices))}
+                        </div>
+                      )}
+                      {config.groups && renderGroupsTable(config.groups)}
+                      {config.scenes && renderScenesTable(config.scenes)}
+                      {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
+                    </>
                   )}
                 </>
-              ) : (
-                <Button
-                  color="secondary"
-                  onClick={handleBackClick}
-                  size="sm"
-                  style={{ marginRight: "10px"}}
-                >
-                  <ArrowBackIosIcon style={{ marginRight: "4px" }} />
-                  <span style={{ position: "relative", top: "1px"}}>Back</span>
-                </Button>
               )}
-            </Box>
-          </Box>
+            </CardBody>
+          </Card>
 
-          <CardBody>
-            {isEditing ? (
-              <Steps
-                projectRoomId={projectRoomId}
-                submitJson={submitJson}
-              />
-            ) : (
-              <>
-                {config && config !== "{}" && (
-                  <>
-                    {config.devices && (
-                      <div>
-                        {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))}
-                        {renderDevicesTable(processDevices(config.devices))}
-                      </div>
-                    )}
-                    {config.groups && renderGroupsTable(config.groups)}
-                    {config.scenes && renderScenesTable(config.scenes)}
-                    {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
-                  </>
-                )}
-              </>
-            )}
-          </CardBody>
-        </Card>
-
-        <DeleteRoomConfigModal
-          isOpen={deleteModalOpen}
-          toggle={() => setDeleteModalOpen(!deleteModalOpen)}
-          onDelete={handleDeleteConfig}
-        />
-      </Col>
-    </Row>
+          <DeleteRoomConfigModal
+            isOpen={deleteModalOpen}
+            toggle={() => setDeleteModalOpen(!deleteModalOpen)}
+            onDelete={handleDeleteConfig}
+          />
+        </Col>
+      </Row>
+    </div>
   );
 };
 

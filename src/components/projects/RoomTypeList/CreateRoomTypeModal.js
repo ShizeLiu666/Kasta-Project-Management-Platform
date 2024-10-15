@@ -55,7 +55,7 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
 
       if (response.data.success) {
         const validCodes = response.data.data.content
-          .filter(code => code.valid)
+          .filter(code => code.usageCount < 10)  // 修改这里：只选择使用次数小于10的授权码
           .map(code => ({
             code: code.code,
             label: `${code.code} (Used ${code.usageCount} ${code.usageCount === 1 ? 'time' : 'times'})`,

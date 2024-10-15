@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Form, FormGroup, Input, Button, Label, Row, Col } from "reactstrap";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import VerifyCodeModal from "./VerifyCodeModal";
-import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import "./CreateAccountModal.css";
 import CountryCodeSelect from "./CountryCodeSelect"; // 引入新的 CountryCodeSelect 组件
 import axiosInstance from '../../config';  // 路径可能需要调整
+import CustomAlert from '../CustomAlert';  // 确保正确导入
 
 const CreateAccountModal = ({ handleBackToLogin }) => {
   const [username, setUsername] = useState(""); // 新增 User Name
@@ -22,9 +22,10 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [alert, setAlert] = useState({
-    severity: "",
+    isOpen: false,
     message: "",
-    open: false,
+    severity: "info",
+    duration: 3000
   });
   const [loading, setLoading] = useState(false); // 添加loading状态
   const [isValidForm, setIsValidForm] = useState(false); // State to track if the form is valid
@@ -51,13 +52,8 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   }, [countdown, canRequestAgain]);
 
   // 统一管理Alert展示时间的函数
-  const showAlert = (severity, message) => {
-    setAlert({ severity, message, open: true });
-
-    // 设置3秒后关闭alert
-    setTimeout(() => {
-      setAlert({ ...alert, open: false });
-    }, 3000);
+  const showAlert = (message, severity, duration = 3000) => {
+    setAlert({ isOpen: true, message, severity, duration });
   };
 
   // User Name validation
@@ -149,27 +145,27 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   };
 
   const sendVerificationCodeWithFeedback = async (email) => {
-    setLoading(true); // 显示加载动画
+    setLoading(true);
     try {
       const response = await axiosInstance.post(
         `/users/send-verification-code?email=${encodeURIComponent(email)}`
       );
 
       if (response.data.success) {
-        setShowVerifyModal(true); // 显示验证码弹窗
-        showAlert("success", "Verification code sent!");
-        setCountdown(60); // 重置倒计时
-        setCanRequestAgain(false); // 开启倒计时，暂时不允许再次请求验证码
+        setShowVerifyModal(true);
+        showAlert("Verification code sent!", "success");
+        setCountdown(60);
+        setCanRequestAgain(false);
       } else {
         showAlert(
-          "error",
-          response.data.errorMsg || "Error sending verification code"
+          response.data.errorMsg || "Error sending verification code",
+          "error"
         );
       }
     } catch (error) {
-      showAlert("error", "Error sending verification code");
+      showAlert("Error sending verification code", "error");
     } finally {
-      setLoading(false); // 停止加载动画
+      setLoading(false);
     }
   };
 
@@ -203,41 +199,36 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
       password,
       verificationCode,
       nickName: nickname,
-      countryCode: countryCode?.code, // 假设countryCode是一个对象
-      userType: 0, // 假设默认userType为0
+      countryCode: countryCode?.code,
+      userType: 0,
       email,
     };
 
     console.log("User Data to be submitted:", userData);
 
-    setLoading(true); // 请求开始，设置loading状态
+    setLoading(true);
 
     try {
-      // 发起POST请求
       const response = await axiosInstance.post("/users/register", userData);
 
-      // 检查返回数据中的 success 字段
       if (response.data.success) {
-        // 注册成功，关闭 VerifyCodeModal
         setShowVerifyModal(false);
-
-        // 显示成功消息
-        showAlert("success", "Registration successful!");
-
-        // 等待3秒后返回登录页面
+        
+        // 显示成功消息，持续时间为3秒
+        showAlert("Registration successful!", "success", 3000);
+        
+        // 1秒后返回登录页面
         setTimeout(() => {
-          handleBackToLogin(); // 返回登录页面
-        }, 3000); // 3秒后执行
+          handleBackToLogin();
+        }, 1000);
       } else {
-        // 注册失败，显示错误消息
-        showAlert("error", response.data.errorMsg || "Registration failed.");
+        showAlert(response.data.errorMsg || "Registration failed.", "error");
       }
     } catch (error) {
-      // 处理请求失败的情况，比如网络问题等
       console.error("Error during registration:", error);
-      showAlert("error", "An error occurred during registration.");
+      showAlert("An error occurred during registration.", "error");
     } finally {
-      setLoading(false); // 请求结束，恢复按钮状态
+      setLoading(false);
     }
   };
 
@@ -248,20 +239,13 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
 
   return (
     <div className="form-container">
-      {alert.open && (
-        <Alert
-          severity={alert.severity}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 9999,
-          }}
-        >
-          {alert.message}
-        </Alert>
-      )}
+      <CustomAlert
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        message={alert.message}
+        severity={alert.severity}
+        autoHideDuration={alert.duration}
+      />
       <Form autoComplete="off">
         <FormGroup className="mb-3">
           <Row className="g-2">

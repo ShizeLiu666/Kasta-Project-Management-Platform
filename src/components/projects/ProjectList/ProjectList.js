@@ -5,7 +5,6 @@ import ProjectCard from "./ProjectCard";
 import PasswordModal from "./PasswordModal";
 import RoomTypeList from "../RoomTypeList/RoomTypeList";
 import RoomConfigList from "../RoomConfigurations/RoomConfigList";
-import Alert from "@mui/material/Alert";
 import { Button } from "reactstrap";
 import CreateProjectModal from "./CreateProjectModal";
 import DeleteProjectModal from "./DeleteProjectModal";
@@ -13,6 +12,7 @@ import EditProjectModal from './EditProjectModal';
 import SearchComponent from "./SearchComponent";
 import { getToken } from '../../auth/auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
+import CustomAlert from '../../CustomAlert';  // 导入 CustomAlert
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
@@ -20,9 +20,10 @@ const ProjectList = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [alert, setAlert] = useState({
-    severity: "",
+    isOpen: false,
     message: "",
-    open: false,
+    severity: "info",
+    duration: 3000
   });
   const [breadcrumbPath, setBreadcrumbPath] = useState(["Project List"]);
   const [showRoomTypes, setShowRoomTypes] = useState(false);
@@ -99,39 +100,29 @@ const ProjectList = () => {
     }
   };
 
+  const showAlert = (message, severity, duration = 3000) => {
+    setAlert({ isOpen: true, message, severity, duration });
+  };
+
   const handlePasswordSubmit = async (password) => {
     try {
       if (password === selectedProject.password) {
-        setAlert({
-          severity: "success",
-          message: `Password for ${selectedProject.name} is correct!`,
-          open: true,
-        });
-        setTimeout(() => {
-          setAlert({ open: false });
-          toggleModal();
-          setBreadcrumbPath(["Project List", "Room Types"]);
-          setShowRoomTypes(true);
-        }, 1000);
+        showAlert(`Password for ${selectedProject.name} is correct!`, "success");
+        toggleModal();
+        setBreadcrumbPath(["Project List", "Room Types"]);
+        setShowRoomTypes(true);
+        // setTimeout(() => {
+        //   toggleModal();
+        //   setBreadcrumbPath(["Project List", "Room Types"]);
+        //   setShowRoomTypes(true);
+        // }, 1000);
       } else {
-        setAlert({
-          severity: "error",
-          message: `Incorrect password for ${selectedProject.name}.`,
-          open: true,
-        });
+        showAlert(`Incorrect password for ${selectedProject.name}.`, "error");
       }
     } catch (error) {
-      setAlert({
-        severity: "error",
-        message: "An error occurred. Please try again later.",
-        open: true,
-      });
+      showAlert("An error occurred. Please try again later.", "error");
       console.error("Error verifying password:", error);
     }
-
-    setTimeout(() => {
-      setAlert({ open: false });
-    }, 3000);
   };
 
   const handleBreadcrumbClick = () => {
@@ -154,20 +145,13 @@ const ProjectList = () => {
 
   return (
     <div>
-      {alert.open && (
-        <Alert
-          severity={alert.severity}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 9999,
-          }}
-        >
-          {alert.message}
-        </Alert>
-      )}
+      <CustomAlert
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        message={alert.message}
+        severity={alert.severity}
+        autoHideDuration={alert.duration}
+      />
 
       <Row>
         <Col>

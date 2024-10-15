@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Form, FormGroup, Input, Button, Label, Row, Col } from "reactstrap";
-import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import rotateLockIcon from "../../assets/icons/rotate-lock.png";
-import axiosInstance from '../../config';  // 路径可能需要调整
+import axiosInstance from '../../config'; 
+import CustomAlert from '../CustomAlert';  // 确保正确导入
 
 const ForgotPasswordModal = ({ handleBackToLogin }) => {
   const [email, setEmail] = useState("");
@@ -16,9 +16,10 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   const [passwordError, setPasswordError] = useState("");
   const [isValidForm, setIsValidForm] = useState(false);
   const [alert, setAlert] = useState({
-    severity: "",
+    isOpen: false,
     message: "",
-    open: false,
+    severity: "info",
+    duration: 3000
   });
   const [countdown, setCountdown] = useState(60);
   const [canRequestAgain, setCanRequestAgain] = useState(true);
@@ -87,11 +88,8 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   };
 
   // Reusable function to display alert with timeout
-  const showAlertWithTimeout = (severity, message) => {
-    setAlert({ severity, message, open: true });
-    setTimeout(() => {
-      setAlert({ severity: "", message: "", open: false });
-    }, 1000); // Alert closes after 1 seconds
+  const showAlertWithTimeout = (message, severity, duration = 3000) => {
+    setAlert({ isOpen: true, message, severity, duration });
   };
 
   // Function to check form validity
@@ -129,7 +127,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
       if (response.data.success) {
         setCanRequestAgain(false);
         setCountdown(60);
-        showAlertWithTimeout("success", "Verification code sent!");
+        showAlertWithTimeout("Verification code sent!", "success");
       } else {
         showAlertWithTimeout(
           "error",
@@ -161,23 +159,19 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
       // Send the POST request to the reset password endpoint
       const response = await axiosInstance.post("/users/modify/pwd", userData);
   
-      // Check the 'success' field in the response
       if (response.data.success) {
-        // Password reset was successful, show a success message
-        showAlertWithTimeout("success", "Password reset successful!");
-  
-        // Wait for 3 seconds, then go back to the login interface
+        showAlertWithTimeout("Password reset successful!", "success");
         setTimeout(() => {
-          handleBackToLogin(); // Navigate back to login
+          handleBackToLogin();
         }, 3000);
       } else {
         // Password reset failed, show the error message from the response
-        showAlertWithTimeout("error", response.data.errorMsg || "Password reset failed.");
+        showAlertWithTimeout(response.data.errorMsg || "Password reset failed.", "error");
       }
     } catch (error) {
       // Handle any errors that occur during the request (e.g., network issues)
       console.error("Error during password reset:", error);
-      showAlertWithTimeout("error", "An error occurred during password reset. Please try again.");
+      showAlertWithTimeout("An error occurred during password reset. Please try again.", "error");
     } finally {
       setLoading(false); // Reset loading state once the request completes
     }
@@ -185,20 +179,13 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
 
   return (
     <div className="form-container">
-      {alert.open && (
-        <Alert
-          severity={alert.severity}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 9999,
-          }}
-        >
-          {alert.message}
-        </Alert>
-      )}
+      <CustomAlert
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        message={alert.message}
+        severity={alert.severity}
+        autoHideDuration={alert.duration}
+      />
       <div className="text-left">
         <p
           style={{

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Alert from "@mui/material/Alert";
 import { Form, FormGroup, Input, Button, Label } from "reactstrap";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,6 +9,9 @@ import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { setToken, saveUsername, saveUserDetails } from './auth';
 import axiosInstance from '../../config';  // 路径可能需要调整
+import CustomAlert from '../CustomAlert';
+
+const DEFAULT_ALERT_DURATION = 3000;
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -17,9 +19,10 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [alert, setAlert] = useState({
-    severity: "",
+    isOpen: false,
     message: "",
-    open: false,
+    severity: "info",
+    duration: DEFAULT_ALERT_DURATION
   });
   const [isCreatingAccount, setIsCreatingAccount] = useState(false); // Toggle Create Account form
   const [isForgotPassword, setIsForgotPassword] = useState(false); // Toggle Forgot Password form
@@ -60,10 +63,10 @@ const LoginPage = () => {
         setToken(token, rememberMe);
         saveUsername(loggedInUsername, rememberMe);
 
-        // 设置 axios 实例的默认 headers
+        // Set default headers for axios instance
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-        // 获取用户详情
+        // Fetch user details
         try {
           const userDetailResponse = await axiosInstance.get('/users/detail');
           if (userDetailResponse.data && userDetailResponse.data.success) {
@@ -71,7 +74,7 @@ const LoginPage = () => {
           }
         } catch (detailError) {
           console.error("Error fetching user details:", detailError);
-          // 即使获取用户详情失败，我们仍然认为登录是成功的
+          // We still consider login successful even if fetching user details fails
         }
 
         if (rememberMe) {
@@ -82,29 +85,23 @@ const LoginPage = () => {
           localStorage.removeItem('rememberedPassword');
         }
 
-        setAlert({
-          severity: "success",
-          message: "Login successful! Redirecting...",
-          open: true,
-        });
-
+        showAlert("Login successful! Redirecting...", "success");
         setTimeout(() => {
-          setAlert({ open: false });
           navigate("/admin/projects");
         }, 1000);
         return { success: true };
+      } else {
+        showAlert(response.data.errorMsg || "Login failed", "warning");
+        return { success: false, error: response.data.errorMsg || "Login failed" };
       }
-      return { success: false, error: response.data.errorMsg || "Login failed" };
     } catch (error) {
       console.error("Login error:", error);
-      if (error.response) {
-        if (error.response.status === 500 || error.response.status === 502) {
-          return { 
-            success: false, 
-            error: "Server issue detected. Please wait while we resolve it.", 
-            isServerError: true 
-          };
-        }
+      if (error.response && (error.response.status === 500 || error.response.status === 502)) {
+        showAlert("Server error, please wait for maintenance", "error");
+      } else if (error.response) {
+        showAlert("An error occurred during login", "error");
+      } else {
+        showAlert("Network error, please check your connection", "error");
       }
       return { success: false, error: "An error occurred during login" };
     }
@@ -112,12 +109,12 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     if (!username.trim()) {
-      showAlert("error", "Please enter a username");
+      showAlert("Please enter a username", "error");
       return;
     }
 
     if (!password.trim()) {
-      showAlert("error", "Please enter a password");
+      showAlert("Please enter a password", "error");
       return;
     }
 
@@ -132,25 +129,9 @@ const LoginPage = () => {
       loginResult = await attemptLogin(alteredUsername);
     }
 
-    if (!loginResult.success) {
-      if (loginResult.isServerError) {
-        setAlert({
-          severity: "error",
-          message: loginResult.error,
-          open: true,
-        });
-      } else {
-        setAlert({
-          severity: "error",
-          message: "Incorrect username or password. Please check your credentials.",
-          open: true,
-        });
-      }
+    if (!loginResult.success && !loginResult.isServerError) {
+      showAlert("Incorrect username or password. Please check your credentials.", "error");
     }
-
-    setTimeout(() => {
-      setAlert({ open: false });
-    }, 3000);
   };
 
   const handleSubmit = (e) => {
@@ -191,16 +172,8 @@ const LoginPage = () => {
     setIsForgotPassword(false); // Show Login Form
   };
 
-  const showAlert = (severity, message) => {
-    setAlert({
-      severity,
-      message,
-      open: true,
-    });
-
-    setTimeout(() => {
-      setAlert(prevAlert => ({ ...prevAlert, open: false }));
-    }, 3000);
+  const showAlert = (message, severity, duration = DEFAULT_ALERT_DURATION) => {
+    setAlert({ isOpen: true, message, severity, duration });
   };
 
   return (
@@ -226,19 +199,14 @@ const LoginPage = () => {
                         </h4>
                       </div>
 
-                      {alert.open && (
-                        <Alert
+                      {alert.isOpen && (
+                        <CustomAlert
+                          isOpen={alert.isOpen}
+                          onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+                          message={alert.message}
                           severity={alert.severity}
-                          style={{
-                            position: "fixed",
-                            top: 0,
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            zIndex: 9999,
-                          }}
-                        >
-                          {alert.message}
-                        </Alert>
+                          autoHideDuration={alert.duration}
+                        />
                       )}
 
                       {/* Conditionally Render: Login, Create Account, or Forgot Password */}
