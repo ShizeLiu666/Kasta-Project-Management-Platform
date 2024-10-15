@@ -12,6 +12,8 @@ import './AuthCodeManagement.scss';
 import EditIcon from '@mui/icons-material/EditNote';  // 导入 EditIcon
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';  // 导入 ContentCopyIcon
+import CustomAlert from '../CustomAlert';  // 导入 CustomAlert
 
 const { SearchBar } = Search;
 
@@ -30,6 +32,11 @@ const AuthCodeManagement = () => {
   const [selectedAuthCode, setSelectedAuthCode] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    message: '',
+    severity: 'success'
+  });
 
   const fetchAuthCodes = useCallback(async () => {
     setLoading(true);
@@ -97,7 +104,16 @@ const AuthCodeManagement = () => {
     {
       dataField: 'code',
       text: 'Code',
-      // sort: true, // 如果 Code 不需要排序，可以保持注释
+      formatter: (cell, row) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <ContentCopyIcon 
+            style={{ marginRight: '10px', cursor: 'pointer' }}
+            onClick={() => copyToClipboard(cell)}
+            fontSize="small"
+          />
+          {cell}
+        </div>
+      ),
     },
     {
       dataField: 'creator',
@@ -195,8 +211,38 @@ const AuthCodeManagement = () => {
     setCreateModalOpen(false);
   };
 
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setAlert({
+        isOpen: true,
+        message: 'Copied.',
+        severity: 'success'
+      });
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      setAlert({
+        isOpen: true,
+        message: 'Copy failed.',
+        severity: 'error'
+      });
+    });
+  };
+
+  const handleCloseAlert = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setAlert(prev => ({ ...prev, isOpen: false }));
+  };
+
   return (
     <div>
+      <CustomAlert
+        isOpen={alert.isOpen}
+        onClose={handleCloseAlert}
+        message={alert.message}
+        severity={alert.severity}
+      />
       {loading ? (
         <div>Loading...</div>
       ) : (
