@@ -435,32 +435,60 @@ export function processGroups(splitData) {
     return { groups: groupsData };
 }
 
+function getRcIndex(deviceType, operation) {
+    // 将操作转换为大写以进行比较
+    const upperOperation = operation ? operation.toUpperCase() : '';
+
+    if (deviceType === "Curtain Type") {
+        switch (upperOperation) {
+            case "OPEN":
+                return 0;
+            case "CLOSE":
+                return 1;
+            case "WHOLE":
+                return 2;
+            default:
+                return 1; // 默认为 CLOSE
+        }
+    }
+    
+    if (deviceType === "Fan Type") {
+        switch (upperOperation) {
+            case "FAN":
+                return 0;
+            case "LAMP":
+                return 1;
+            case "WHOLE":
+                return 2;
+            default:
+                return 0; // 默认为 FAN
+        }
+    }
+    
+    if (deviceType === "PowerPoint Type (Two-Way)") {
+        if (!upperOperation) {
+            return 4; // 保持不变，表示两路都开
+        }
+        const [leftOperation, rightOperation] = upperOperation.split(/\s+/);
+        if (rightOperation === "ON" && leftOperation === "OFF") {
+            return 2; // 右侧（第一路）开，左侧关
+        } else if (rightOperation === "OFF" && leftOperation === "ON") {
+            return 3; // 右侧（第一路）关，左侧开
+        } else if (rightOperation === "ON" && leftOperation === "ON") {
+            return 4; // 两路都开
+        } else if (rightOperation === "OFF" && leftOperation === "OFF") {
+            return 5; // 两路都关
+        }
+    }
+    
+    return 1; // 默认值，用于其他设备类型
+}
+
 export function processRemoteControls(splitData) {
     const remoteControlsContent = splitData.remoteControls || [];
     const remoteControlsData = [];
     let currentRemote = null;
     let currentLinks = [];
-
-    function getRcIndex(deviceType, operation) {
-        if (deviceType === "PowerPoint Type (Two-Way)") {
-            if (!operation) {
-                return 4; // 保持不变，表示两路都开
-            }
-            const [leftOperation, rightOperation] = operation.split(/\s+/);
-            // console.log(`Device: ${deviceType}, Operation: ${operation}, Right: ${rightOperation}, Left: ${leftOperation}`); // 调试日志
-            if (rightOperation === "ON" && leftOperation === "OFF") {
-                return 2; // 右侧（第一路）开，左侧关
-            } else if (rightOperation === "OFF" && leftOperation === "ON") {
-                return 3; // 右侧（第一路）关，左侧开
-            } else if (rightOperation === "ON" && leftOperation === "ON") {
-                return 4; // 两路都开
-            } else if (rightOperation === "OFF" && leftOperation === "OFF") {
-                return 5; // 两路都关
-            }
-        }
-        // console.log(`Default case: Device: ${deviceType}, Operation: ${operation}`); // 调试日志
-        return 1; // 默认值，用于其他设备类型
-    }
 
     remoteControlsContent.forEach(line => {
         line = line.trim();
@@ -506,6 +534,9 @@ export function processRemoteControls(splitData) {
                 const deviceType = deviceNameToType[linkName];
                 rc_index = getRcIndex(deviceType, action);
             }
+
+            // 将 action 转换为大写
+            action = action ? action.toUpperCase() : null;
 
             currentLinks.push({ linkIndex, linkType, linkName, action, rc_index });
         }
