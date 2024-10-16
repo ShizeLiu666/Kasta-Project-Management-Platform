@@ -3,9 +3,9 @@ import { Form, FormGroup, Label, Input } from "reactstrap";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
-import axiosInstance from '../../../config'; 
-import { getToken } from '../../auth/auth';
-import CustomModal from '../../CustomModal';
+import axiosInstance from '../../../../config';
+import { getToken } from '../../../auth/auth';
+import CustomModal from '../../../CustomModal';
 
 const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) => {
   const [formData, setFormData] = useState({

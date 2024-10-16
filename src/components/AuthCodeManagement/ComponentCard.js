@@ -5,9 +5,9 @@ import './ComponentCard.css';
 const ComponentCard = ({ children, title, subtitle }) => {
   return (
     <div className="component-card">
-      <h4 className="component-card-title">{title}</h4>
+      <div className="component-card-title">{title}</div>
       <div className="component-card-body">
-        {/* {subtitle && <div className="component-card-subtitle">{subtitle}</div>} */}
+        {subtitle && <div className="component-card-subtitle">{subtitle}</div>}
         <div>{children}</div>
       </div>
     </div>
@@ -16,7 +16,7 @@ const ComponentCard = ({ children, title, subtitle }) => {
 
 ComponentCard.propTypes = {
   children: PropTypes.node,
-  title: PropTypes.string,
+  title: PropTypes.node,
   subtitle: PropTypes.node
 };
 

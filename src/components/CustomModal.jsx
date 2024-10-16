@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Button,
     Modal,
@@ -23,12 +23,39 @@ const CustomModal = ({
     cancelButtonColor = "#6c757d",  
     disabled = false
 }) => {
+    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+    const [showErrorAlert, setShowErrorAlert] = useState(false);
+
+    useEffect(() => {
+        setShowSuccessAlert(!!successAlert);
+    }, [successAlert]);
+
+    useEffect(() => {
+        setShowErrorAlert(!!error);
+    }, [error]);
+
+    const handleCloseSuccessAlert = () => {
+        setShowSuccessAlert(false);
+    };
+
+    const handleCloseErrorAlert = () => {
+        setShowErrorAlert(false);
+    };
+
     return (
         <Modal isOpen={isOpen} toggle={toggle} centered>
             <ModalHeader toggle={toggle}>{title}</ModalHeader>
             <ModalBody style={{paddingBottom: '5px'}}>
-                {successAlert && <Alert color="success">{successAlert}</Alert>}
-                {error && <Alert color="danger">{error}</Alert>}
+                {showSuccessAlert && successAlert && (
+                    <Alert color="success" toggle={handleCloseSuccessAlert}>
+                        {successAlert}
+                    </Alert>
+                )}
+                {showErrorAlert && error && (
+                    <Alert color="danger" toggle={handleCloseErrorAlert}>
+                        {error}
+                    </Alert>
+                )}
                 {children}
             </ModalBody>
             <ModalFooter>
@@ -42,7 +69,7 @@ const CustomModal = ({
                         fontWeight: "bold",
                         textTransform: "none",
                     }}
-                    disabled={isSubmitting || disabled}  // 修改这一行
+                    disabled={isSubmitting || disabled}
                 >
                     {isSubmitting ? 'Submitting...' : submitText}
                 </Button>

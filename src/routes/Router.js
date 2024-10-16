@@ -65,7 +65,7 @@ import FullLayout from "../layouts/FullLayout.js";
 
 /***** Pages ****/
 import LoginPage from "../components/auth/LoginPage";
-import Projects from "../components/projects/ProjectList/ProjectList";
+import ProjectListComponent from "../components/projects/ProjectList/ProjectListComponent";
 import Profile from "../components/profile/profile";
 import AuthCodeManagement from "../components/AuthCodeManagement/AuthCodeManagement";
 
@@ -84,7 +84,7 @@ const router = createBrowserRouter([
     element: <FullLayout />,
     children: [
       { index: true, element: <Navigate to="/admin/projects" /> },
-      { path: "projects", element: <Projects /> },
+      { path: "projects", element: <ProjectListComponent /> },
       { path: "profile", element: <Profile /> },
       { path: "auth-code-management", element: <AuthCodeManagement /> },
     ],

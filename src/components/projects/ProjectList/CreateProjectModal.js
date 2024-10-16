@@ -9,7 +9,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
     name: "",
     address: "",
     des: "",
-    password: ""
+    // password: ""  // 注释掉密码字段
   });
   const [error, setError] = useState("");
   const [successAlert, setSuccessAlert] = useState("");
@@ -17,9 +17,10 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({ name: "", address: "", des: "", password: "" });
+      setFormData({ name: "", address: "", des: "" });
       setError("");
       setSuccessAlert("");
+      setIsSubmitting(false);
     }
   }, [isOpen]);
 
@@ -28,7 +29,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
   };
 
   const isFormValid = () => {
-    return formData.name && formData.password && formData.address;
+    return formData.name && formData.address;
   };
 
   const handleSubmit = async () => {
@@ -44,6 +45,9 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
     }
 
     setIsSubmitting(true);
+    setError("");
+    setSuccessAlert("");
+
     try {
       const response = await axiosInstance.post(
         "/projects",
@@ -56,11 +60,10 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
       );
       if (response.data.success) {
         setSuccessAlert("Project created successfully!");
+        fetchProjects();
         setTimeout(() => {
-          setSuccessAlert("");
           toggle();
-          fetchProjects();
-        }, 1000);
+        }, 2000);
       } else {
         setError(response.data.errorMsg || "Error creating project.");
       }
@@ -98,6 +101,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
             required
           />
         </FormGroup>
+        {/* 注释掉密码字段
         <FormGroup>
           <Label for="password">
             <span style={{ color: "red" }}>*</span> Password:
@@ -111,6 +115,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
             required
           />
         </FormGroup>
+        */}
         <FormGroup>
           <Label for="address">
             <span style={{ color: "red" }}>*</span> Address:

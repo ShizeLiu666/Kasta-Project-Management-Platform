@@ -3,11 +3,11 @@ import RoomElement from "./RoomElement";
 import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
-import { Typography, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { Button } from "reactstrap";
-import SearchComponent from "../ProjectList/SearchComponent";
-import { getToken } from '../../auth/auth';
-import axiosInstance from '../../../config'; 
+import SearchComponent from "../../ProjectList/SearchComponent";
+import { getToken } from '../../../auth/auth';
+import axiosInstance from '../../../../config'; 
 
 
 const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
@@ -100,22 +100,11 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           marginBottom: "10px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <Typography variant="h5" gutterBottom>
-            {projectName}
-          </Typography>
-          <SearchComponent
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            placeholder="Search Room Types..."
-          />
-        </div>
+        <SearchComponent
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          placeholder="Search Room Types..."
+        />
         <Button
           color="secondary"
           onClick={() => setCreateModalOpen(true)}

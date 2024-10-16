@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axiosInstance from '../../../config'; 
-import { getToken } from '../../auth/auth';
-import CustomModal from '../../CustomModal';
+import axiosInstance from '../../../../config';
+import { getToken } from '../../../auth/auth';
+import CustomModal from '../../../CustomModal';
 
 const DeleteRoomTypeModal = ({ isOpen, toggle, selectedRoomType, onRoomTypeDeleted }) => {
   const [error, setError] = useState("");

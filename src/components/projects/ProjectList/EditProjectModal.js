@@ -9,8 +9,9 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     name: "",
     address: "",
     des: "",
-    currentPassword: "",
-    newPassword: "",
+    // 移除密码相关字段
+    // currentPassword: "",
+    // newPassword: "",
   });
   const [error, setError] = useState("");
   const [successAlert, setSuccessAlert] = useState("");
@@ -22,8 +23,9 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
         name: project.name || "",
         address: project.address || "",
         des: project.des || "",
-        currentPassword: "",
-        newPassword: "",
+        // 移除密码相关字段
+        // currentPassword: "",
+        // newPassword: "",
       });
     }
   }, [project]);
@@ -34,12 +36,11 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
 
   const isFormValid = () => {
     if (!project) return false;
-    const { name, address, des, currentPassword, newPassword } = formData;
+    const { name, address, des } = formData;
     const isChanged = name !== project.name || 
                       address !== project.address || 
-                      des !== project.des || 
-                      newPassword !== "";
-    return currentPassword !== "" && isChanged;
+                      des !== project.des;
+    return isChanged;
   };
 
   const handleSubmit = async () => {
@@ -49,15 +50,16 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     }
 
     if (!isFormValid()) {
-      setError("Please fill all required fields and make at least one change.");
+      setError("Please make at least one change.");
       return;
     }
 
-    if (formData.currentPassword !== project.password) {
-      setError("Current password is incorrect. Please try again.");
-      setTimeout(() => setError(""), 3000);
-      return;
-    }
+    // 移除密码验证
+    // if (formData.currentPassword !== project.password) {
+    //   setError("Current password is incorrect. Please try again.");
+    //   setTimeout(() => setError(""), 3000);
+    //   return;
+    // }
 
     const token = getToken();
     if (!token) {
@@ -69,7 +71,8 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     if (formData.name !== project.name) attributes.name = formData.name;
     if (formData.address !== project.address) attributes.address = formData.address;
     if (formData.des !== project.des) attributes.des = formData.des;
-    if (formData.newPassword !== "") attributes.password = formData.newPassword;
+    // 移除新密码设置
+    // if (formData.newPassword !== "") attributes.password = formData.newPassword;
 
     if (Object.keys(attributes).length === 0) {
       setError("No changes detected. Please modify at least one field.");
@@ -124,7 +127,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
       error={error}
       isSubmitting={isSubmitting}
       submitButtonColor="#007bff"
-      disabled={!isFormValid()}  // 添加这一行
+      disabled={!isFormValid()}
     >
       <Form>
         <FormGroup>
@@ -157,7 +160,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
             onChange={handleChange}
           />
         </FormGroup>
-        <FormGroup>
+        {/* <FormGroup>
           <Label for="currentPassword">
             <span style={{ color: "red" }}>*</span> Current Password:
           </Label>
@@ -179,7 +182,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
             value={formData.newPassword}
             onChange={handleChange}
           />
-        </FormGroup>
+        </FormGroup> */}
       </Form>
     </CustomModal>
   );

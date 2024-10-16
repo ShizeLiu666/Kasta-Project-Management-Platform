@@ -2,8 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import axiosInstance from '../../../config'; 
 import ProjectCard from "./ProjectCard";
-import PasswordModal from "./PasswordModal";
-import RoomTypeList from "../RoomTypeList/RoomTypeList";
+import ProjectDetails from '../ProjectDetails/ProjectDetails';
 import RoomConfigList from "../RoomConfigurations/RoomConfigList";
 import { Button } from "reactstrap";
 import CreateProjectModal from "./CreateProjectModal";
@@ -14,9 +13,9 @@ import { getToken } from '../../auth/auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
 import CustomAlert from '../../CustomAlert';  // 导入 CustomAlert
 
-const ProjectList = () => {
+// 将组件名称从 ProjectList 改为 ProjectListComponent
+const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [alert, setAlert] = useState({
@@ -70,9 +69,9 @@ const ProjectList = () => {
     fetchProjectList();
   }, [fetchProjectList]);
 
-  const toggleModal = () => {
-    setModalOpen(!modalOpen);
-  };
+  // const toggleModal = () => {
+  //   setModalOpen(!modalOpen);
+  // };
 
   const toggleCreateProjectModal = () => {
     setCreateProjectModalOpen(!createProjectModalOpen);
@@ -96,34 +95,30 @@ const ProjectList = () => {
   const handleCardClick = (event, project) => {
     if (!event.defaultPrevented && !menuOpen) {
       setSelectedProject(project);
-      toggleModal();
+      setBreadcrumbPath(["Project List", "Project Details"]);
+      setShowRoomTypes(true);
     }
   };
 
-  const showAlert = (message, severity, duration = 3000) => {
-    setAlert({ isOpen: true, message, severity, duration });
-  };
+  // const showAlert = (message, severity, duration = 3000) => {
+  //   setAlert({ isOpen: true, message, severity, duration });
+  // };
 
-  const handlePasswordSubmit = async (password) => {
-    try {
-      if (password === selectedProject.password) {
-        showAlert(`Password for ${selectedProject.name} is correct!`, "success");
-        toggleModal();
-        setBreadcrumbPath(["Project List", "Room Types"]);
-        setShowRoomTypes(true);
-        // setTimeout(() => {
-        //   toggleModal();
-        //   setBreadcrumbPath(["Project List", "Room Types"]);
-        //   setShowRoomTypes(true);
-        // }, 1000);
-      } else {
-        showAlert(`Incorrect password for ${selectedProject.name}.`, "error");
-      }
-    } catch (error) {
-      showAlert("An error occurred. Please try again later.", "error");
-      console.error("Error verifying password:", error);
-    }
-  };
+  // const handlePasswordSubmit = async (password) => {
+  //   try {
+  //     if (password === selectedProject.password) {
+  //       showAlert(`Password for ${selectedProject.name} is correct!`, "success");
+  //       toggleModal();
+  //       setBreadcrumbPath(["Project List", "Project Details"]);
+  //       setShowRoomTypes(true);
+  //     } else {
+  //       showAlert(`Incorrect password for ${selectedProject.name}.`, "error");
+  //     }
+  //   } catch (error) {
+  //     showAlert("An error occurred. Please try again later.", "error");
+  //     console.error("Error verifying password:", error);
+  //   }
+  // };
 
   const handleBreadcrumbClick = () => {
     setBreadcrumbPath(["Project List"]);
@@ -236,7 +231,7 @@ const ProjectList = () => {
       {!showRoomTypes && (
         <Row>
           {filteredProjects.map((project, index) => (
-            <Col sm="6" lg="6" xl="4" key={index}>
+            <Col xs="12" sm="6" md="4" lg="3" key={index}>
               <div>
                 <ProjectCard
                   project={project}
@@ -253,7 +248,7 @@ const ProjectList = () => {
       )}
 
       {showRoomTypes && selectedProject && breadcrumbPath.length === 2 && (
-        <RoomTypeList
+        <ProjectDetails
           projectId={selectedProject.projectId}
           projectName={selectedProject.name}
           onNavigate={handleNavigate}
@@ -267,14 +262,14 @@ const ProjectList = () => {
         />
       )}
 
-      {selectedProject && (
+      {/* {selectedProject && (
         <PasswordModal
           isOpen={modalOpen}
           toggle={toggleModal}
           projectName={selectedProject.name}
           onSubmit={handlePasswordSubmit}
         />
-      )}
+      )} */}
 
       <CreateProjectModal
         isOpen={createProjectModalOpen}
@@ -301,11 +296,12 @@ const ProjectList = () => {
       <UploadBackgroundModal
         isOpen={uploadBackgroundModalOpen}
         toggle={() => toggleUploadBackgroundModal(null)}
-        projectId={selectedProject?.projectId}  // 确保这里使用 projectId
+        projectId={selectedProject?.projectId}
         onUploadSuccess={handleUploadSuccess}
       />
     </div>
   );
 };
 
-export default ProjectList;
+// 导出时使用新的组件名称
+export default ProjectListComponent;

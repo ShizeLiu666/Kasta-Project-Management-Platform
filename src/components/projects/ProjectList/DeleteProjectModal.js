@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Form, FormGroup, Label, Input } from "reactstrap";
+// import { Form, FormGroup, Label, Input } from "reactstrap";
 import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config'; 
 import CustomModal from '../../CustomModal';
 
 const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
-  const [password, setPassword] = useState("");
+  // const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [successAlert, setSuccessAlert] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,7 +14,7 @@ const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
     if (isOpen) {
       setError("");
       setSuccessAlert("");
-      setPassword("");
+      // setPassword("");
     }
   }, [isOpen]);
 
@@ -24,11 +24,12 @@ const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
       return;
     }
 
-    if (password !== project.password) {
-      setError("Incorrect password. Please try again.");
-      setTimeout(() => setError(""), 3000);
-      return;
-    }
+    // 移除密码验证
+    // if (password !== project.password) {
+    //   setError("Incorrect password. Please try again.");
+    //   setTimeout(() => setError(""), 3000);
+    //   return;
+    // }
 
     const token = getToken();
     if (!token) {
@@ -76,9 +77,10 @@ const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
       error={error}
       isSubmitting={isSubmitting}
       submitButtonColor="#dc3545"  // 使用 Bootstrap 的 danger 颜色
-      disabled={!password}
+      // disabled={!password}
     >
       <p>Are you sure you want to delete the project "{project.name}"?</p>
+      {/* 移除密码输入框
       <Form>
         <FormGroup>
           <Label for="password">
@@ -94,6 +96,7 @@ const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
           />
         </FormGroup>
       </Form>
+      */}
     </CustomModal>
   );
 };
