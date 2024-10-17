@@ -1,19 +1,18 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
+import { Row, Col, Breadcrumb, BreadcrumbItem, Button } from "reactstrap";
 import axiosInstance from '../../../config'; 
 import ProjectCard from "./ProjectCard";
 import ProjectDetails from '../ProjectDetails/ProjectDetails';
 import RoomConfigList from "../RoomConfigurations/RoomConfigList";
-import { Button } from "reactstrap";
 import CreateProjectModal from "./CreateProjectModal";
 import DeleteProjectModal from "./DeleteProjectModal";
 import EditProjectModal from './EditProjectModal';
 import SearchComponent from "./SearchComponent";
 import { getToken } from '../../auth/auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
-import CustomAlert from '../../CustomAlert';  // 导入 CustomAlert
+import CustomAlert from '../../CustomAlert';
+import InvitationModal from '../../UserInvitations/InvitationModal';
 
-// 将组件名称从 ProjectList 改为 ProjectListComponent
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -32,6 +31,8 @@ const ProjectListComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editProjectModalOpen, setEditProjectModalOpen] = useState(false);
   const [uploadBackgroundModalOpen, setUploadBackgroundModalOpen] = useState(false);
+  const [pendingInvitations, setPendingInvitations] = useState([]);
+  const [invitationModalOpen, setInvitationModalOpen] = useState(false);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -48,7 +49,8 @@ const ProjectListComponent = () => {
       });
   
       if (response.data.success) {
-        const projects = response.data.data.map((project) => ({
+        const allProjects = response.data.data;
+        const ownedProjects = allProjects.filter(project => project.role === 'OWNER' || project.role === 'VISITOR').map(project => ({
           projectId: project.projectId,
           name: project.name,
           password: project.password,
@@ -56,7 +58,17 @@ const ProjectListComponent = () => {
           address: project.address,
           role: project.role,
         }));
-        setProjects(projects);
+        setProjects(ownedProjects);
+
+        const pendingInvites = allProjects.filter(project => project.memberStatus === 'WAITING');
+        setPendingInvitations(pendingInvites);
+
+        // Only open the invitation modal if there are pending invitations
+        if (pendingInvites.length > 0) {
+          setInvitationModalOpen(true);
+        } else {
+          setInvitationModalOpen(false);
+        }
       } else {
         console.error("Error fetching projects:", response.data.errorMsg);
       }
@@ -134,8 +146,18 @@ const ProjectListComponent = () => {
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleUploadSuccess = (newBackgroundUrl) => {
+  const handleUploadSuccess = () => {
     fetchProjectList();
+  };
+
+  const handleInvitationAction = (action, projectId) => {
+    fetchProjectList();
+    setAlert({
+      isOpen: true,
+      message: `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} invitation for project ${projectId}`,
+      severity: "success",
+      duration: 3000
+    });
   };
 
   return (
@@ -240,6 +262,7 @@ const ProjectListComponent = () => {
                   onRemove={toggleDeleteProjectModal}
                   onChangeBackground={toggleUploadBackgroundModal}
                   setMenuOpen={setMenuOpen}
+                  userRole={project.role}
                 />
               </div>
             </Col>
@@ -298,6 +321,13 @@ const ProjectListComponent = () => {
         toggle={() => toggleUploadBackgroundModal(null)}
         projectId={selectedProject?.projectId}
         onUploadSuccess={handleUploadSuccess}
+      />
+
+      <InvitationModal
+        isOpen={invitationModalOpen}
+        toggle={() => setInvitationModalOpen(!invitationModalOpen)}
+        invitations={pendingInvitations}
+        onActionComplete={handleInvitationAction}
       />
     </div>
   );

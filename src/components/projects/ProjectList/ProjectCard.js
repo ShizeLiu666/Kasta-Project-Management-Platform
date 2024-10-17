@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Card, CardBody, CardSubtitle, CardTitle } from "reactstrap";
+import { Card, CardBody, CardSubtitle } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/DeleteForever';
@@ -9,12 +9,13 @@ import default_image from "../../../assets/images/projects/default_image.jpg";
 import LazyLoad from 'react-lazyload';
 
 const ProjectCard = ({
-  project,  // 我们现在传入整个 project 对象
+  project,
   onCardClick,
   onEdit,
   onRemove,
   onChangeBackground,
   setMenuOpen,
+  userRole,  // 添加这个 prop
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -63,10 +64,28 @@ const ProjectCard = ({
       style={{ position: "relative" }}
       onClick={(event) => onCardClick(event, project)}
     >
+      <div style={{ 
+        padding: "10px", 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center",
+        // borderBottom: "1px solid #e0e0e0"
+      }}>
+        <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
+        <IconButton
+          aria-label="more"
+          aria-controls="menu"
+          aria-haspopup="true"
+          onClick={handleMenuClick}
+          style={{ padding: 0 }}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+      </div>
       <LazyLoad height={0} once>
         <div
           style={{
-            paddingTop: '75%', // 16:9 宽高比
+            paddingTop: '75%',
             backgroundImage: `url(${imageUrl})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -74,9 +93,10 @@ const ProjectCard = ({
           }}
         />
       </LazyLoad>
-      <CardBody className="p-4">
-        <CardTitle tag="h5">{project.name}</CardTitle>
-        <CardSubtitle>{project.address}</CardSubtitle>
+      <CardBody style={{padding: "10px "}}>
+        <CardSubtitle>Address: {project.address || 'None'}</CardSubtitle>
+        <CardSubtitle>Description: {project.des || 'None'}</CardSubtitle>
+        <CardSubtitle>Role: {project.role || 'Visitor'}</CardSubtitle>
       </CardBody>
 
       {/* More Options Icon */}
@@ -92,7 +112,7 @@ const ProjectCard = ({
           color: "#A9A9A9",
         }}
       >
-        <MoreHorizIcon fontSize="large"/>
+        {/* <MoreHorizIcon fontSize="large"/> */}
       </IconButton>
 
       {/* Menu for Edit, Remove, and Change Background actions */}
@@ -109,14 +129,16 @@ const ProjectCard = ({
           vertical: "top",
           horizontal: "right",
         }}
-        style={{
-          marginRight: 0,
-          marginTop: "50px",
-        }}
       >
-        <MenuItem onClick={handleChangeBackground}><WallpaperIcon style={{marginRight:"8px", color: "#4CAF50"}}/>Change Image</MenuItem>
-        <MenuItem onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px", color: "#007bff"}}/>Edit</MenuItem>
-        <MenuItem onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
+        {userRole === 'OWNER' && (
+          <>
+            <MenuItem onClick={handleChangeBackground}><WallpaperIcon style={{marginRight:"8px", color: "#4CAF50"}}/>Change Image</MenuItem>
+            <MenuItem onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px", color: "#007bff"}}/>Edit</MenuItem>
+            <MenuItem onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
+          </>
+        )}
+        {/* 可以添加一些 VISITOR 可以看到的菜单项 */}
+        <MenuItem onClick={handleClose}>Close</MenuItem>
       </Menu>
     </Card>
   );

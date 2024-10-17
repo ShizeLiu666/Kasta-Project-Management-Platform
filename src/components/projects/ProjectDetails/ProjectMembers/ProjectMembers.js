@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button } from 'reactstrap';
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth/auth';
@@ -10,82 +10,75 @@ const ProjectMembers = ({ projectId }) => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ownerDetails, setOwnerDetails] = useState(null);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
-  useEffect(() => {
-    const userDetailsString = localStorage.getItem('userDetails');
-    if (userDetailsString) {
-      const userDetails = JSON.parse(userDetailsString);
-      setOwnerDetails(userDetails);
-    }
+  const fetchMembers = useCallback(async () => {
+    try {
+      const token = getToken();
+      const response = await axiosInstance.get(`/projects/${projectId}/members`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const fetchMembers = async () => {
-      try {
-        const token = getToken();
-        const response = await axiosInstance.get(`/projects/${projectId}/members`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      if (response.data.success) {
+        const sortedMembers = response.data.data.sort((a, b) => {
+          if (a.role === 'OWNER') return -1;
+          if (b.role === 'OWNER') return 1;
+          if (a.isCurrentUser) return -1;
+          if (b.isCurrentUser) return 1;
+          return 0;
         });
-
-        console.log('Project Members API Response:', response.data);
-
-        if (response.data.success) {
-          setMembers(response.data.data);
-          console.log('Project Members:', response.data.data);
-        } else {
-          setError(response.data.errorMsg);
-          console.error('API Error:', response.data.errorMsg);
-        }
-      } catch (err) {
-        setError('Failed to fetch project members');
-        console.error('Error fetching project members:', err);
-      } finally {
-        setLoading(false);
+        setMembers(sortedMembers);
+      } else {
+        setError(response.data.errorMsg);
       }
-    };
-
-    fetchMembers();
+    } catch (err) {
+      setError('Failed to fetch project members');
+    } finally {
+      setLoading(false);
+    }
   }, [projectId]);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   const toggleInviteModal = () => {
     setInviteModalOpen(!inviteModalOpen);
   };
 
-  const handleInvite = () => {
-    toggleInviteModal();
+  const handleMemberInvited = () => {
+    fetchMembers();
   };
 
-  const handleMemberInvited = () => {
-    // 重新获取成员列表
-    const fetchMembers = async () => {
-      try {
-        const token = getToken();
-        const response = await axiosInstance.get(`/projects/${projectId}/members`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        console.log('Project Members API Response:', response.data);
-
-        if (response.data.success) {
-          setMembers(response.data.data);
-          console.log('Project Members:', response.data.data);
-        } else {
-          setError(response.data.errorMsg);
-          console.error('API Error:', response.data.errorMsg);
-        }
-      } catch (err) {
-        setError('Failed to fetch project members');
-        console.error('Error fetching project members:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMembers();
+  const getStatusDot = (status) => {
+    let color;
+    switch (status) {
+      case 'ACCEPT':
+        color = 'green';
+        break;
+      case 'REJECT':
+        color = 'red';
+        break;
+      case 'WAITING':
+        color = 'orange';
+        break;
+      default:
+        color = 'grey';
+    }
+    return (
+      <span
+        style={{
+          height: '10px',
+          width: '10px',
+          backgroundColor: color,
+          borderRadius: '50%',
+          display: 'inline-block',
+          marginLeft: '10px',
+        }}
+      />
+    );
   };
 
   if (loading) return <div>Loading...</div>;
@@ -96,7 +89,7 @@ const ProjectMembers = ({ projectId }) => {
       <span>Project Members</span>
       <Button
         color="secondary"
-        onClick={handleInvite}
+        onClick={toggleInviteModal}
         style={{
           backgroundColor: "#fbcd0b",
           borderColor: "#fbcd0b",
@@ -123,34 +116,36 @@ const ProjectMembers = ({ projectId }) => {
             </tr>
           </thead>
           <tbody>
-            {members.map((member, index) => {
-              const isOwner = member.role === 'OWNER';
-              const displayMember = isOwner && ownerDetails ? ownerDetails : member;
-              
-              return (
-                <tr key={index} className="border-top">
-                  <td>
-                    <div className="d-flex align-items-center p-2">
-                      <img
-                        src={displayMember.headPic || defaultAvatar}
-                        className="rounded-circle"
-                        alt="avatar"
-                        width="45"
-                        height="45"
-                        onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
-                      />
-                      <div className="ms-3">
-                        <h6 className="mb-0">{displayMember.account || displayMember.username}</h6>
-                        <span className="text-muted">{displayMember.nickname || displayMember.nickName}</span>
-                      </div>
+            {members.map((member, index) => (
+              <tr key={index} className="border-top">
+                <td>
+                  <div className="d-flex align-items-center p-2">
+                    <img
+                      src={member.headPic || defaultAvatar}
+                      className="rounded-circle"
+                      alt="avatar"
+                      width="45"
+                      height="45"
+                      onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
+                    />
+                    <div className="ms-3">
+                      <h6 className="mb-0">{member.account || member.username}</h6>
+                      <span className="text-muted">{member.nickname || member.nickName}</span>
                     </div>
-                  </td>
-                  <td>{member.role}</td>
-                  <td>{member.memberStatus}</td>
-                  <td>{/* Actions will be added here later */}</td>
-                </tr>
-              );
-            })}
+                  </div>
+                </td>
+                <td>{member.role}</td>
+                <td>
+                  {member.role !== 'OWNER' && (
+                    <>
+                      {member.memberStatus}
+                      {getStatusDot(member.memberStatus)}
+                    </>
+                  )}
+                </td>
+                <td>{/* Actions will be added here later */}</td>
+              </tr>
+            ))}
           </tbody>
         </Table>
       </ComponentCard>
