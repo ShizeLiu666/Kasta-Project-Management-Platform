@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Card, CardBody, CardSubtitle } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { IconButton, Menu, MenuItem } from "@mui/material";
@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/EditNote';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import default_image from "../../../assets/images/projects/default_image.jpg";
-import LazyLoad from 'react-lazyload';
+// import LazyLoad from 'react-lazyload';
 
 const ProjectCard = ({
   project,
@@ -15,29 +15,23 @@ const ProjectCard = ({
   onRemove,
   onChangeBackground,
   setMenuOpen,
-  userRole,  // 添加这个 prop
+  userRole,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
-  // 使用 useMemo 缓存图片 URL
-  const imageUrl = useMemo(() => {
-    if (project.iconUrl) {
-      const timestamp = project.updatedAt || Date.now();
-      return `${project.iconUrl}?v=${timestamp}`;
-    }
-    return default_image;
-  }, [project.iconUrl, project.updatedAt]);
+  // 直接设置图片 URL，不使用 useMemo
+  const imageUrl = project.iconUrl || default_image;
 
   // Handle Menu open/close
   const handleMenuClick = (event) => {
-    event.stopPropagation(); // Prevent triggering the card's click handler
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
-    setMenuOpen(true); // Menu is open
+    setMenuOpen(true);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
-    setMenuOpen(false); // Menu is closed
+    setMenuOpen(false);
   };
 
   // Edit action
@@ -61,7 +55,7 @@ const ProjectCard = ({
   return (
     <Card
       className="blog-card"
-      style={{ position: "relative" }}
+      style={{ position: "relative", borderRadius: '4px'}}
       onClick={(event) => onCardClick(event, project)}
     >
       <div style={{ 
@@ -69,7 +63,6 @@ const ProjectCard = ({
         display: "flex", 
         justifyContent: "space-between", 
         alignItems: "center",
-        // borderBottom: "1px solid #e0e0e0"
       }}>
         <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
         <IconButton
@@ -82,7 +75,7 @@ const ProjectCard = ({
           <MoreHorizIcon />
         </IconButton>
       </div>
-      <LazyLoad height={0} once>
+
         <div
           style={{
             paddingTop: '75%',
@@ -92,28 +85,12 @@ const ProjectCard = ({
             backgroundRepeat: 'no-repeat',
           }}
         />
-      </LazyLoad>
+
       <CardBody style={{padding: "10px "}}>
         <CardSubtitle>Address: {project.address || 'None'}</CardSubtitle>
         <CardSubtitle>Description: {project.des || 'None'}</CardSubtitle>
         <CardSubtitle>Role: {project.role || 'Visitor'}</CardSubtitle>
       </CardBody>
-
-      {/* More Options Icon */}
-      <IconButton
-        aria-label="more"
-        aria-controls="menu"
-        aria-haspopup="true"
-        onClick={handleMenuClick}
-        style={{
-          position: "absolute",
-          top: "5px",
-          right: "10px",
-          color: "#A9A9A9",
-        }}
-      >
-        {/* <MoreHorizIcon fontSize="large"/> */}
-      </IconButton>
 
       {/* Menu for Edit, Remove, and Change Background actions */}
       <Menu
@@ -130,14 +107,11 @@ const ProjectCard = ({
           horizontal: "right",
         }}
       >
-        {userRole === 'OWNER' && (
-          <>
-            <MenuItem onClick={handleChangeBackground}><WallpaperIcon style={{marginRight:"8px", color: "#4CAF50"}}/>Change Image</MenuItem>
-            <MenuItem onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px", color: "#007bff"}}/>Edit</MenuItem>
-            <MenuItem onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
-          </>
-        )}
-        {/* 可以添加一些 VISITOR 可以看到的菜单项 */}
+        {userRole === 'OWNER' ? [
+          <MenuItem key="change" onClick={handleChangeBackground}><WallpaperIcon style={{marginRight:"8px", color: "#4CAF50"}}/>Change Image</MenuItem>,
+          <MenuItem key="edit" onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px", color: "#007bff"}}/>Edit</MenuItem>,
+          <MenuItem key="remove" onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
+        ] : null}
         <MenuItem onClick={handleClose}>Close</MenuItem>
       </Menu>
     </Card>

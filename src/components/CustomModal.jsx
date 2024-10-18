@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Button,
     Modal,
     ModalHeader,
     ModalBody,
     ModalFooter,
     Alert
 } from 'reactstrap';
+import CustomButton from './CustomButton';
 
 const CustomModal = ({ 
     isOpen, 
@@ -21,10 +21,20 @@ const CustomModal = ({
     isSubmitting,
     submitButtonColor = "#fbcd0b",  
     cancelButtonColor = "#6c757d",  
-    disabled = false
+    disabled = false,
+    submitButtonType,
+    cancelButtonType
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [showErrorAlert, setShowErrorAlert] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            // 重置 alert 状态当模态框打开时
+            setShowSuccessAlert(false);
+            setShowErrorAlert(false);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         setShowSuccessAlert(!!successAlert);
@@ -59,31 +69,22 @@ const CustomModal = ({
                 {children}
             </ModalBody>
             <ModalFooter>
-                <Button
-                    color="primary"
+                <CustomButton
+                    type={submitButtonType}
+                    color={submitButtonColor}
                     onClick={onSubmit}
-                    style={{
-                        backgroundColor: submitButtonColor,
-                        borderColor: submitButtonColor,
-                        color: "#fff",
-                        fontWeight: "bold",
-                        textTransform: "none",
-                    }}
                     disabled={isSubmitting || disabled}
+                    style={{marginRight: '10px'}}
                 >
                     {isSubmitting ? 'Submitting...' : submitText}
-                </Button>
-                <Button 
-                    color="secondary" 
+                </CustomButton>
+                <CustomButton 
+                    type={cancelButtonType}
+                    color={cancelButtonColor}
                     onClick={toggle}
-                    style={{
-                        backgroundColor: cancelButtonColor,
-                        borderColor: cancelButtonColor,
-                        color: "#fff",
-                    }}
                 >
                     {cancelText}
-                </Button>
+                </CustomButton>
             </ModalFooter>
         </Modal>
     );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Row, Col, Breadcrumb, BreadcrumbItem, Button } from "reactstrap";
+import { Row, Col, Breadcrumb, BreadcrumbItem} from "reactstrap";
 import axiosInstance from '../../../config'; 
 import ProjectCard from "./ProjectCard";
 import ProjectDetails from '../ProjectDetails/ProjectDetails';
@@ -12,6 +12,7 @@ import { getToken } from '../../auth/auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
 import CustomAlert from '../../CustomAlert';
 import InvitationModal from '../../UserInvitations/InvitationModal';
+import CustomButton from '../../CustomButton';
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
@@ -33,6 +34,7 @@ const ProjectListComponent = () => {
   const [uploadBackgroundModalOpen, setUploadBackgroundModalOpen] = useState(false);
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [invitationModalOpen, setInvitationModalOpen] = useState(false);
+  // const [userRole, setUserRole] = useState(null);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -41,24 +43,19 @@ const ProjectListComponent = () => {
         window.alert("No token found, please log in again.");
         return;
       }
-  
+
       const response = await axiosInstance.get("/projects", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (response.data.success) {
         const allProjects = response.data.data;
-        const ownedProjects = allProjects.filter(project => project.role === 'OWNER' || project.role === 'VISITOR').map(project => ({
-          projectId: project.projectId,
-          name: project.name,
-          password: project.password,
-          iconUrl: project.iconUrl,
-          address: project.address,
-          role: project.role,
-        }));
-        setProjects(ownedProjects);
+        const acceptedProjects = allProjects.filter(project => 
+          project.role === 'OWNER' || project.memberStatus === 'ACCEPT'
+        );
+        setProjects(acceptedProjects);
 
         const pendingInvites = allProjects.filter(project => project.memberStatus === 'WAITING');
         setPendingInvitations(pendingInvites);
@@ -77,8 +74,34 @@ const ProjectListComponent = () => {
     }
   }, []);
 
+  // const fetchUserRole = useCallback(async () => {
+  //   try {
+  //     const token = getToken();
+  //     if (!token) {
+  //       console.error("No token found, please log in again.");
+  //       return;
+  //     }
+  
+  //     const response = await axiosInstance.get("/user/role", {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  
+  //     if (response.data.success) {
+  //       setUserRole(response.data.data.role);
+  //     } else {
+  //       console.error("Error fetching user role:", response.data.errorMsg);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching user role:", error);
+  //   }
+  // }, []);
+
   useEffect(() => {
     fetchProjectList();
+    // 暂时注释掉 fetchUserRole
+    // fetchUserRole();
   }, [fetchProjectList]);
 
   // const toggleModal = () => {
@@ -135,6 +158,7 @@ const ProjectListComponent = () => {
   const handleBreadcrumbClick = () => {
     setBreadcrumbPath(["Project List"]);
     setShowRoomTypes(false);
+    fetchProjectList(); // 重新获取项目列表
   };
 
   const handleNavigate = (newPath, roomTypeId, roomTypeName) => {
@@ -234,19 +258,12 @@ const ProjectListComponent = () => {
         >
           <SearchComponent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-          <Button
-            color="secondary"
+          <CustomButton
+            type="create"
             onClick={toggleCreateProjectModal}
-            style={{
-              backgroundColor: "#fbcd0b",
-              borderColor: "#fbcd0b",
-              color: "#fff",
-              fontWeight: "bold",
-              textTransform: "none",
-            }}
           >
             Create New Project
-          </Button>
+          </CustomButton>
         </div>
       )}
 
@@ -275,6 +292,7 @@ const ProjectListComponent = () => {
           projectId={selectedProject.projectId}
           projectName={selectedProject.name}
           onNavigate={handleNavigate}
+          userRole={selectedProject.role}
         />
       )}
 

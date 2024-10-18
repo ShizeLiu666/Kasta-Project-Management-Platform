@@ -4,13 +4,12 @@ import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
 import { CircularProgress } from "@mui/material";
-import { Button } from "reactstrap";
 import SearchComponent from "../../ProjectList/SearchComponent";
 import { getToken } from '../../../auth/auth';
 import axiosInstance from '../../../../config'; 
+import CustomButton from '../../../CustomButton';
 
-
-const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
+const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const [roomTypes, setRoomTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -105,19 +104,14 @@ const RoomTypeList = ({ projectId, projectName, onNavigate }) => {
           setSearchTerm={setSearchTerm}
           placeholder="Search Room Types..."
         />
-        <Button
-          color="secondary"
+        <CustomButton
+          type="create"
           onClick={() => setCreateModalOpen(true)}
-          style={{
-            backgroundColor: "#fbcd0b",
-            borderColor: "#fbcd0b",
-            color: "#fff",
-            fontWeight: "bold",
-            textTransform: "none",
-          }}
+          allowedRoles={['OWNER']}
+          userRole={userRole}
         >
           Create Room Type
-        </Button>
+        </CustomButton>
       </div>
 
       {filteredRoomTypes.map((roomType) => (
