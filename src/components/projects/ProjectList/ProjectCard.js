@@ -5,6 +5,7 @@ import { IconButton, Menu, MenuItem } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/EditNote';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
+import LogoutIcon from '@mui/icons-material/Logout';
 import default_image from "../../../assets/images/projects/default_image.jpg";
 // import LazyLoad from 'react-lazyload';
 
@@ -14,6 +15,7 @@ const ProjectCard = ({
   onEdit,
   onRemove,
   onChangeBackground,
+  onLeaveProject,
   setMenuOpen,
   userRole,
 }) => {
@@ -52,6 +54,11 @@ const ProjectCard = ({
     onChangeBackground(project);
   };
 
+  const handleLeaveProject = () => {
+    handleClose();
+    onLeaveProject(project);
+  };
+
   return (
     <Card
       className="blog-card"
@@ -70,21 +77,32 @@ const ProjectCard = ({
           aria-controls="menu"
           aria-haspopup="true"
           onClick={handleMenuClick}
-          style={{ padding: 0 }}
+          style={{
+            padding: '8px',  // 减小内边距以适应更大的图标
+            transition: 'background-color 0.3s',
+          }}
+          sx={{
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',  // 稍微加深悬停时的背景色
+            },
+            '& .MuiSvgIcon-root': {  // 针对图标的样式
+              fontSize: '2rem',  // 增大图标尺寸
+            },
+          }}
         >
-          <MoreHorizIcon />
+          <MoreHorizIcon />  {/* 移除 fontSize 属性，使用 sx 中的样式 */}
         </IconButton>
       </div>
 
-        <div
-          style={{
-            paddingTop: '75%',
-            backgroundImage: `url(${imageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
+      <div
+        style={{
+          paddingTop: '75%',
+          backgroundImage: `url(${imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
 
       <CardBody style={{padding: "10px "}}>
         <CardSubtitle>Address: {project.address || 'None'}</CardSubtitle>
@@ -112,7 +130,12 @@ const ProjectCard = ({
           <MenuItem key="edit" onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px", color: "#007bff"}}/>Edit</MenuItem>,
           <MenuItem key="remove" onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
         ] : null}
-        <MenuItem onClick={handleClose}>Close</MenuItem>
+        {userRole === 'VISITOR' && (
+          <MenuItem key="leave" onClick={handleLeaveProject}>
+            <LogoutIcon style={{marginRight:"8px", color: "#dc3545"}}/>
+            Leave Project
+          </MenuItem>
+        )}
       </Menu>
     </Card>
   );

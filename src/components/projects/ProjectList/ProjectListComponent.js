@@ -13,6 +13,7 @@ import UploadBackgroundModal from "./UploadBackgroundModal";
 import CustomAlert from '../../CustomAlert';
 import InvitationModal from '../../UserInvitations/InvitationModal';
 import CustomButton from '../../CustomButton';
+import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
@@ -34,6 +35,8 @@ const ProjectListComponent = () => {
   const [uploadBackgroundModalOpen, setUploadBackgroundModalOpen] = useState(false);
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [invitationModalOpen, setInvitationModalOpen] = useState(false);
+  const [leaveProjectModalOpen, setLeaveProjectModalOpen] = useState(false);
+  const [selectedProjectToLeave, setSelectedProjectToLeave] = useState(null);
   // const [userRole, setUserRole] = useState(null);
 
   const fetchProjectList = useCallback(async () => {
@@ -184,6 +187,18 @@ const ProjectListComponent = () => {
     });
   };
 
+  const handleLeaveProject = (project) => {
+    setSelectedProjectToLeave(project);
+    setLeaveProjectModalOpen(true);
+  };
+
+  const handleLeaveProjectSuccess = () => {
+    // 处理成功离开项目后的逻辑，例如刷新项目列表
+    fetchProjectList();
+    setLeaveProjectModalOpen(false);
+    setSelectedProjectToLeave(null);
+  };
+
   return (
     <div>
       <CustomAlert
@@ -278,6 +293,7 @@ const ProjectListComponent = () => {
                   onEdit={toggleEditProjectModal}
                   onRemove={toggleDeleteProjectModal}
                   onChangeBackground={toggleUploadBackgroundModal}
+                  onLeaveProject={handleLeaveProject}
                   setMenuOpen={setMenuOpen}
                   userRole={project.role}
                 />
@@ -346,6 +362,13 @@ const ProjectListComponent = () => {
         toggle={() => setInvitationModalOpen(!invitationModalOpen)}
         invitations={pendingInvitations}
         onActionComplete={handleInvitationAction}
+      />
+
+      <LeaveProjectModal
+        isOpen={leaveProjectModalOpen}
+        toggle={() => setLeaveProjectModalOpen(false)}
+        projectId={selectedProjectToLeave?.id}
+        onLeaveSuccess={handleLeaveProjectSuccess}
       />
     </div>
   );
