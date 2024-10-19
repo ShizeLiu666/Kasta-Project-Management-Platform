@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   Row,
   Col,
-  Button
 } from "reactstrap";
 import Box from "@mui/material/Box";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -21,8 +20,9 @@ import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config';
 import CustomAlert from '../../CustomAlert';  // 导入 CustomAlert
 import ComponentCard from '../../AuthCodeManagement/ComponentCard';
+import CustomButton from '../../CustomButton';
 
-const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
+const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   const [config, setConfig] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [alert, setAlert] = useState({
@@ -214,51 +214,46 @@ const RoomConfigList = ({ roomTypeName, projectRoomId }) => {
                     {roomTypeName}
                   </span>
                   {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
-                    <Button
-                      color="secondary"
+                    <CustomButton
                       onClick={handleDownloadJson}
-                      size="sm"
-                      style={{marginTop:"2px", marginLeft:"5px", display: "flex", alignItems: "center"}}
+                      icon={<CloudDownloadIcon />}
+                      color="#6c757d"
                     >
-                      <CloudDownloadIcon style={{ marginRight: "8px" }} />
-                      <span style={{ position: "relative", bottom: "1px"}}>Download JSON</span>
-                    </Button>
+                      Download JSON
+                    </CustomButton>
                   )}
                 </Box>
-
+                
                 <Box display="flex" alignItems="center">
                   {!isEditing ? (
                     <>
-                      <Button
-                        color="success"
+                      <CustomButton
                         onClick={handleCloudUploadClick}
-                        size="sm"
-                        style={{ marginRight: "10px", backgroundColor: "#007bff", borderColor: "#007bff" }}
+                        icon={<CloudUploadIcon />}
+                        color="#007bff"
+                        style={{ marginRight: "10px" }}
                       >
-                        <CloudUploadIcon style={{ marginRight: "8px" }} />
-                        <span style={{ position: "relative", top: "1px"}}>Upload / Overwrite</span>
-                      </Button>
+                        Upload / Overwrite
+                      </CustomButton>
                       {config && config !== "{}" && Object.keys(config).length > 0 && (
-                        <Button
-                          color="danger"
+                        <CustomButton
                           onClick={() => setDeleteModalOpen(true)}
-                          size="sm"
+                          icon={<DeleteForeverIcon />}
+                          color="#dc3545"
                         >
-                          <DeleteForeverIcon style={{ marginRight: "8px" }} />
-                          <span style={{ position: "relative", top: "1px"}}>Delete</span>
-                        </Button>
+                          Delete
+                        </CustomButton>
                       )}
                     </>
                   ) : (
-                    <Button
-                      color="secondary"
+                    <CustomButton
                       onClick={handleBackClick}
-                      size="sm"
+                      icon={<ArrowBackIosIcon />}
+                      color="#6c757d"
                       style={{ marginRight: "10px"}}
                     >
-                      <ArrowBackIosIcon style={{ marginRight: "4px" }} />
-                      <span style={{ position: "relative", top: "1px"}}>Back</span>
-                    </Button>
+                      Back
+                    </CustomButton>
                   )}
                 </Box>
               </Box>

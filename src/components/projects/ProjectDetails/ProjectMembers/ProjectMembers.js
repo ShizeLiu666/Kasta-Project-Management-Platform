@@ -64,7 +64,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
       default:
         color = 'secondary';
     }
-    return <Badge color={color}>{status}</Badge>;
+    return <Badge color={color} style={{ borderRadius: '4px'}}>{status}</Badge>;
   };
 
   const cardTitle = (

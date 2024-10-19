@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Card, CardBody, CardSubtitle } from "reactstrap";
+import { Card, CardBody, CardSubtitle, Badge } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/EditNote';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import LogoutIcon from '@mui/icons-material/Logout';
+import SendIcon from '@mui/icons-material/Send';  // 导入 SendIcon
 import default_image from "../../../assets/images/projects/default_image.jpg";
 // import LazyLoad from 'react-lazyload';
 
@@ -16,6 +17,7 @@ const ProjectCard = ({
   onRemove,
   onChangeBackground,
   onLeaveProject,
+  onInviteMember,  // 添加 onInviteMember 属性
   setMenuOpen,
   userRole,
 }) => {
@@ -23,6 +25,21 @@ const ProjectCard = ({
 
   // 直接设置图片 URL，不使用 useMemo
   const imageUrl = project.iconUrl || default_image;
+
+  const getRoleBadge = (role) => {
+    let color;
+    switch (role) {
+      case 'OWNER':
+        color = 'danger';
+        break;
+      case 'VISITOR':
+        color = 'info';
+        break;
+      default:
+        color = 'secondary';
+    }
+    return <Badge color={color} style={{ marginLeft: '10px', borderRadius: '4px'}}>{role}</Badge>;
+  };
 
   // Handle Menu open/close
   const handleMenuClick = (event) => {
@@ -59,6 +76,11 @@ const ProjectCard = ({
     onLeaveProject(project);
   };
 
+  const handleInviteMember = () => {
+    handleClose();
+    onInviteMember(project);
+  };
+
   return (
     <Card
       className="blog-card"
@@ -71,7 +93,10 @@ const ProjectCard = ({
         justifyContent: "space-between", 
         alignItems: "center",
       }}>
-        <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
+          {getRoleBadge(userRole)}
+        </div>
         <IconButton
           aria-label="more"
           aria-controls="menu"
@@ -107,7 +132,6 @@ const ProjectCard = ({
       <CardBody style={{padding: "10px "}}>
         <CardSubtitle>Address: {project.address || 'None'}</CardSubtitle>
         <CardSubtitle>Description: {project.des || 'None'}</CardSubtitle>
-        <CardSubtitle>Role: {project.role || 'Visitor'}</CardSubtitle>
       </CardBody>
 
       {/* Menu for Edit, Remove, and Change Background actions */}
@@ -126,13 +150,26 @@ const ProjectCard = ({
         }}
       >
         {userRole === 'OWNER' ? [
-          <MenuItem key="change" onClick={handleChangeBackground}><WallpaperIcon style={{marginRight:"8px", color: "#4CAF50"}}/>Change Image</MenuItem>,
-          <MenuItem key="edit" onClick={handleEdit}><EditIcon fontSize="medium" style={{marginRight:"8px", color: "#007bff"}}/>Edit</MenuItem>,
-          <MenuItem key="remove" onClick={handleRemove}><DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>Remove</MenuItem>
+          <MenuItem key="invite" onClick={handleInviteMember}>
+            <SendIcon fontSize="small" style={{marginRight:"8px", color: "#4CAF50"}}/>
+            Invite Member
+          </MenuItem>,
+          <MenuItem key="edit" onClick={handleEdit}>
+          <EditIcon style={{marginRight:"8px", color: "#007bff"}}/>
+          Edit
+        </MenuItem>,
+          <MenuItem key="change" onClick={handleChangeBackground}>
+            <WallpaperIcon fontSize="small" style={{marginRight:"8px", color: "grey"}}/>
+            Change Image
+          </MenuItem>,
+          <MenuItem key="remove" onClick={handleRemove}>
+            <DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>
+            Remove
+          </MenuItem>
         ] : null}
         {userRole === 'VISITOR' && (
           <MenuItem key="leave" onClick={handleLeaveProject}>
-            <LogoutIcon style={{marginRight:"8px", color: "#dc3545"}}/>
+            <LogoutIcon fontSize="small" style={{marginRight:"8px", color: "#dc3545"}}/>
             Leave Project
           </MenuItem>
         )}

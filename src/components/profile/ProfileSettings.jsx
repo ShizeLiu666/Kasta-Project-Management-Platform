@@ -7,7 +7,6 @@ import {
     FormGroup,
     Label,
     Input,
-    Button,
     Row,
     Col,
 } from 'reactstrap';
@@ -16,6 +15,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axiosInstance from '../../config';
 import { getToken, saveUserDetails } from '../auth/auth';
+import CustomButton from '../CustomButton';
+import DeleteAccountModal from './DeleteAccountModal';
 
 const ProfileSettings = ({ userDetails: initialUserDetails }) => {
     const [userDetails, setUserDetails] = useState(initialUserDetails);
@@ -35,6 +36,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
     const [verificationCode, setVerificationCode] = useState("");
     const [countdown, setCountdown] = useState(60);
     const [canRequestAgain, setCanRequestAgain] = useState(true);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
     useEffect(() => {
         if (userDetails) {
@@ -215,6 +217,10 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
         marginTop: '5px'
     };
 
+    const handleDeleteAccount = () => {
+        setDeleteModalOpen(true);
+    };
+
     return (
         <Card className="h-100">
             <CardBody>
@@ -262,7 +268,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                     <FormGroup>
                         <Label for="email">Email</Label>
                         <Row>
-                            <Col md={9}>
+                            <Col md={10}>
                                 <Input
                                     type="email"
                                     id="email"
@@ -271,21 +277,15 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                                     style={readOnlyStyle}
                                 />
                             </Col>
-                            <Col md={3}>
-                                <Button
-                                    style={{
-                                        backgroundColor: "#fbcd0b",
-                                        border: "none",
-                                        width: "100%",
-                                        fontSize: "14px",
-                                        fontWeight: "bold",
-                                        height: "37px",
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                    }}
+                            <Col md={2}>
+                                <CustomButton
                                     onClick={handleSendVerificationCode}
                                     disabled={!canRequestAgain || loading}
+                                    style={{
+                                        width: "100%",
+                                        fontSize: "14px",
+                                        height: "37px",
+                                    }}
                                 >
                                     {loading ? (
                                         <CircularProgress size={15} style={{ color: "#fff" }} />
@@ -294,7 +294,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                                     ) : (
                                         `${countdown}s`
                                     )}
-                                </Button>
+                                </CustomButton>
                             </Col>
                         </Row>
                     </FormGroup>
@@ -329,27 +329,39 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                         />
                         {confirmPasswordError && <p style={errorMessageStyle}>{confirmPasswordError}</p>}
                     </FormGroup>
-                    <div className="d-flex justify-content-end">
-                        {loading ? (
-                            <Box sx={{ display: "flex" }}>
-                                <CircularProgress />
-                            </Box>
-                        ) : (
-                            <Button
-                                color="primary"
-                                type="submit"
-                                style={{
-                                    backgroundColor: "#fbcd0b",
-                                    borderColor: "#fbcd0b",
-                                    fontWeight: "bold",
-                                }}
-                                disabled={!isFormValid()}
-                            >
-                                Update Profile
-                            </Button>
-                        )}
+                    <div className="d-flex justify-content-between align-items-center">
+                        <CustomButton
+                            onClick={handleDeleteAccount}
+                            color="#dc3545"
+                            style={{
+                                fontWeight: "bold",
+                            }}
+                        >
+                            Delete Account
+                        </CustomButton>
+                        <div>
+                            {loading ? (
+                                <Box sx={{ display: "flex" }}>
+                                    <CircularProgress />
+                                </Box>
+                            ) : (
+                                <CustomButton
+                                    onClick={handleUpdateProfile}
+                                    disabled={!isFormValid()}
+                                    style={{
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    Update Profile
+                                </CustomButton>
+                            )}
+                        </div>
                     </div>
                 </Form>
+                <DeleteAccountModal
+                    isOpen={deleteModalOpen}
+                    toggle={() => setDeleteModalOpen(!deleteModalOpen)}
+                />
             </CardBody>
         </Card>
     );

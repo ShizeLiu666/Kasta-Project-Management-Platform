@@ -14,6 +14,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';  // 导入 ContentCopyIcon
 import CustomAlert from '../CustomAlert';  // 导入 CustomAlert
+import CustomButton from '../CustomButton';
 
 const { SearchBar } = Search;
 
@@ -304,19 +305,12 @@ const AuthCodeManagement = () => {
                         {...props.searchProps} 
                         placeholder="Search Code..."
                       />
-                      <Button
-                        color="secondary"
+                      <CustomButton
+                        type="create"
                         onClick={toggleCreateModal}
-                        style={{
-                          backgroundColor: "#fbcd0b",
-                          borderColor: "#fbcd0b",
-                          color: "#fff",
-                          fontWeight: "bold",
-                          textTransform: "none",
-                        }}
                       >
                         Create Auth Codes
-                      </Button>
+                      </CustomButton>
                     </div>
                     <PaginationProvider pagination={paginationFactory(paginationOptions)}>
                       {({ paginationProps, paginationTableProps }) => (

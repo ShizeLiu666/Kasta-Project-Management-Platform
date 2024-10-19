@@ -38,6 +38,7 @@ const ProjectListComponent = () => {
   const [leaveProjectModalOpen, setLeaveProjectModalOpen] = useState(false);
   const [selectedProjectToLeave, setSelectedProjectToLeave] = useState(null);
   // const [userRole, setUserRole] = useState(null);
+  const [selectedUserRole, setSelectedUserRole] = useState(null);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -164,9 +165,10 @@ const ProjectListComponent = () => {
     fetchProjectList(); // 重新获取项目列表
   };
 
-  const handleNavigate = (newPath, roomTypeId, roomTypeName) => {
+  const handleNavigate = (newPath, roomTypeId, roomTypeName, userRole) => {
     setBreadcrumbPath(newPath);
     setSelectedRoomType({ id: roomTypeId, name: roomTypeName });
+    setSelectedUserRole(userRole);  // 保存用户角色
   };
 
   const filteredProjects = projects.filter((project) =>
@@ -285,7 +287,7 @@ const ProjectListComponent = () => {
       {!showRoomTypes && (
         <Row>
           {filteredProjects.map((project, index) => (
-            <Col xs="12" sm="6" md="4" lg="3" key={index}>
+            <Col xs="12" sm="6" md="4" lg="3" key={index} className="px-0 mb-0">
               <div>
                 <ProjectCard
                   project={project}
@@ -308,7 +310,7 @@ const ProjectListComponent = () => {
           projectId={selectedProject.projectId}
           projectName={selectedProject.name}
           onNavigate={handleNavigate}
-          userRole={selectedProject.role}
+          userRole={selectedProject.role}  // 传递用户角色
         />
       )}
 
@@ -316,6 +318,7 @@ const ProjectListComponent = () => {
         <RoomConfigList
           projectRoomId={selectedRoomType.id}
           roomTypeName={selectedRoomType.name}
+          userRole={selectedUserRole}  // 传递用户角色
         />
       )}
 

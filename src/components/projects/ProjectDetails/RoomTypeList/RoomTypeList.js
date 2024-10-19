@@ -74,7 +74,8 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
     onNavigate(
       ["Project List", "Room Types", "Room Configurations"],
       roomType.projectRoomId,
-      roomType.name
+      roomType.name,
+      userRole  // 传递用户角色
     );
   };
 

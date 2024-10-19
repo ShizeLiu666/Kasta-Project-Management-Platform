@@ -1,6 +1,6 @@
 import React, { useState, useImperativeHandle, forwardRef, useMemo } from "react";
 import { Alert, AlertTitle, Box } from "@mui/material";
-import { Input, FormGroup, Label, Button } from "reactstrap";
+import { Input, FormGroup, Label } from "reactstrap";
 import {
   processDevices,
   processGroups,
@@ -8,6 +8,9 @@ import {
   processRemoteControls,
   resetDeviceNameToType
 } from "../ExcelProcessor/ExcelProcessor";
+import CustomButton from '../../../CustomButton';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const Step6 = forwardRef(({
   splitData,
@@ -105,21 +108,22 @@ const Step6 = forwardRef(({
               </FormGroup>
 
               <Box mt={2} display="flex" justifyContent="space-between">
-                <Button
-                  color="secondary"
+                <CustomButton
                   onClick={handleDownloadJson}
                   disabled={!jsonResult}
+                  icon={<FileDownloadOutlinedIcon />}
+                  color="#6c757d"  // secondary color
                 >
                   Download JSON File
-                </Button>
-                <Button
-                  color="secondary"
+                </CustomButton>
+                <CustomButton
                   onClick={handleUploadConfig}
                   disabled={!jsonResult}
-                  style={{ fontWeight: "bold", backgroundColor: "#fbcd0b", borderColor: "#fbcd0b" }}
+                  icon={<CloudUploadIcon />}
+                  color="#fbcd0b"  // secondary color
                 >
                   Upload Configuration
-                </Button>
+                </CustomButton>
               </Box>
             </>
           )}

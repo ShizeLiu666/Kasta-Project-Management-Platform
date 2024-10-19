@@ -28,7 +28,7 @@ const ProjectDetails = ({ projectId, projectName, onNavigate, userRole }) => {
             projectId={projectId}
             projectName={projectName}
             onNavigate={onNavigate}
-            userRole={userRole}
+            userRole={userRole}  // 传递用户角色
           />
         </Col>
       </Row>
