@@ -2,18 +2,17 @@ import React from 'react';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 
-const CustomAlert = ({ isOpen, onClose, message, severity, autoHideDuration = 3000 }) => {
+const CustomAlert = ({ isOpen, onClose, message, severity, autoHideDuration = null }) => {
   return (
     <Snackbar
       open={isOpen}
       autoHideDuration={autoHideDuration}
-      onClose={onClose}
+      onClose={autoHideDuration ? onClose : undefined}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Alert
         onClose={onClose}
         severity={severity}
-        // variant="filled"
         sx={{ width: '100%' }}
       >
         {message}

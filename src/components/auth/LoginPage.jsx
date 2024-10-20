@@ -49,7 +49,7 @@ const LoginPage = () => {
     return { savedUsername, savedPassword };
   };
 
-  const attemptLogin = async (attemptedUsername) => {
+  const attemptLogin = async (attemptedUsername, isSecondAttempt = false) => {
     try {
       const response = await axiosInstance.post('/users/login', {
         username: attemptedUsername,
@@ -91,17 +91,23 @@ const LoginPage = () => {
         }, 1000);
         return { success: true };
       } else {
-        showAlert(response.data.errorMsg || "Login failed", "warning");
+        // 注释掉这行，防止在第一次尝试时显示警告
+        // if (isSecondAttempt) {
+        //   showAlert(response.data.errorMsg || "Login failed", "warning");
+        // }
         return { success: false, error: response.data.errorMsg || "Login failed" };
       }
     } catch (error) {
       console.error("Login error:", error);
       if (error.response && (error.response.status === 500 || error.response.status === 502)) {
         showAlert("Server error, please wait for maintenance", "error");
-      } else if (error.response) {
-        showAlert("An error occurred during login", "error");
-      } else {
-        showAlert("Network error, please check your connection", "error");
+        return { success: false, error: "Server error", isServerError: true };
+      } else if (isSecondAttempt) {
+        if (error.response) {
+          showAlert("An error occurred during login", "error");
+        } else {
+          showAlert("Network error, please check your connection", "error");
+        }
       }
       return { success: false, error: "An error occurred during login" };
     }
@@ -346,7 +352,7 @@ const LoginPage = () => {
                         KASTA offers smart control solutions with products
                         designed in Australia. Our seamless integration and
                         modular form ensure connectivity and scalability,
-                        enhancing lifestyles with tailored applications
+                        enhancing lifestyles with tailored applications.
                       </p>
                     </div>
                   </div>

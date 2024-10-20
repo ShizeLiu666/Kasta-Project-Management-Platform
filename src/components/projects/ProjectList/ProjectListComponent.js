@@ -39,6 +39,11 @@ const ProjectListComponent = () => {
   const [selectedProjectToLeave, setSelectedProjectToLeave] = useState(null);
   // const [userRole, setUserRole] = useState(null);
   const [selectedUserRole, setSelectedUserRole] = useState(null);
+  const [warningAlert, setWarningAlert] = useState({
+    isOpen: true,
+    message: "We are currently addressing an issue where changing the project card image also affects the avatar. We appreciate your patience.",
+    severity: "warning"
+  });
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -104,8 +109,8 @@ const ProjectListComponent = () => {
 
   useEffect(() => {
     fetchProjectList();
-    // 暂时注释掉 fetchUserRole
-    // fetchUserRole();
+    // 显示警告信息
+    setWarningAlert(prev => ({ ...prev, isOpen: true }));
   }, [fetchProjectList]);
 
   // const toggleModal = () => {
@@ -201,8 +206,19 @@ const ProjectListComponent = () => {
     setSelectedProjectToLeave(null);
   };
 
+  const handleCloseWarning = () => {
+    setWarningAlert(prev => ({ ...prev, isOpen: false }));
+  };
+
   return (
     <div>
+      <CustomAlert
+        isOpen={warningAlert.isOpen}
+        onClose={handleCloseWarning}
+        message={warningAlert.message}
+        severity={warningAlert.severity}
+      />
+
       <CustomAlert
         isOpen={alert.isOpen}
         onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
