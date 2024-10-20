@@ -25,7 +25,7 @@ const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited }) => {
       const response = await axiosInstance.post('/projects/invite', {
         account: account.trim(),
         role: 'VISITOR',
-        projectId: projectId  // 添加 projectId 参数
+        projectId: projectId
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -34,17 +34,19 @@ const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited }) => {
 
       if (response.data.success) {
         setSuccessAlert('Member invited successfully');
-        onMemberInvited();
+        onMemberInvited(response.data);  // 传递整个响应对象
         setTimeout(() => {
           toggle();
           setAccount('');
         }, 2000);
       } else {
         setError(response.data.errorMsg || 'Failed to invite member');
+        onMemberInvited(response.data);  // 即使失败也传递响应对象
       }
     } catch (err) {
       setError('An error occurred while inviting the member');
       console.error('Error inviting member:', err);
+      onMemberInvited({ success: false, errorMsg: err.message });  // 传递错误信息
     } finally {
       setIsSubmitting(false);
     }

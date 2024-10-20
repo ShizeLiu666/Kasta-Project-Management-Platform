@@ -24,15 +24,18 @@ const LeaveProjectModal = ({ isOpen, toggle, projectId, onLeaveSuccess }) => {
       if (response.data.success) {
         setSuccessAlert('You have successfully left the project.');
         setTimeout(() => {
-          onLeaveSuccess();
+          onLeaveSuccess({ success: true, data: response.data });
           toggle();
         }, 2000);
       } else {
         setError(response.data.errorMsg || 'Failed to leave the project');
+        onLeaveSuccess({ success: false, errorMsg: response.data.errorMsg || 'Failed to leave the project' });
       }
     } catch (err) {
-      setError('An error occurred while leaving the project');
+      const errorMsg = err.response?.data?.errorMsg || err.message || 'An error occurred while leaving the project';
+      setError(errorMsg);
       console.error('Error leaving project:', err);
+      onLeaveSuccess({ success: false, errorMsg });
     } finally {
       setIsSubmitting(false);
     }

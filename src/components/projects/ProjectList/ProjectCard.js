@@ -73,7 +73,7 @@ const ProjectCard = ({
 
   const handleLeaveProject = () => {
     handleClose();
-    onLeaveProject(project);
+    onLeaveProject(project);  // 传递整个 project 对象
   };
 
   const handleInviteMember = () => {

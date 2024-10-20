@@ -14,6 +14,7 @@ import CustomAlert from '../../CustomAlert';
 import InvitationModal from '../../UserInvitations/InvitationModal';
 import CustomButton from '../../CustomButton';
 import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
+import InviteMemberModal from '../ProjectDetails/ProjectMembers/InviteMemberModal';
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
@@ -44,6 +45,8 @@ const ProjectListComponent = () => {
     message: "We are currently addressing an issue where changing the project card image also affects the avatar. We appreciate your patience.",
     severity: "warning"
   });
+  const [inviteMemberModalOpen, setInviteMemberModalOpen] = useState(false);
+  const [selectedProjectForInvite, setSelectedProjectForInvite] = useState(null);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -200,14 +203,24 @@ const ProjectListComponent = () => {
   };
 
   const handleLeaveProjectSuccess = () => {
-    // 处理成功离开项目后的逻辑，例如刷新项目列表
     fetchProjectList();
     setLeaveProjectModalOpen(false);
     setSelectedProjectToLeave(null);
+    setAlert({
+      isOpen: true,
+      message: 'Successfully left the project',
+      severity: 'success',
+      duration: 3000
+    });
   };
 
   const handleCloseWarning = () => {
     setWarningAlert(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleInviteMember = (project) => {
+    setSelectedProjectForInvite(project);
+    setInviteMemberModalOpen(true);
   };
 
   return (
@@ -314,6 +327,7 @@ const ProjectListComponent = () => {
                   onLeaveProject={handleLeaveProject}
                   setMenuOpen={setMenuOpen}
                   userRole={project.role}
+                  onInviteMember={handleInviteMember}
                 />
               </div>
             </Col>
@@ -386,8 +400,35 @@ const ProjectListComponent = () => {
       <LeaveProjectModal
         isOpen={leaveProjectModalOpen}
         toggle={() => setLeaveProjectModalOpen(false)}
-        projectId={selectedProjectToLeave?.id}
-        onLeaveSuccess={handleLeaveProjectSuccess}
+        projectId={selectedProjectToLeave?.projectId}
+        onLeaveSuccess={(response) => {
+          console.log('Leave Project Response:', response);
+          if (response && response.success) {
+            handleLeaveProjectSuccess();
+          } else {
+            console.error('Error leaving project:', response?.errorMsg || 'Unknown error');
+            setAlert({
+              isOpen: true,
+              message: response?.errorMsg || 'Failed to leave the project',
+              severity: 'error',
+              duration: 3000
+            });
+          }
+        }}
+      />
+
+      <InviteMemberModal
+        isOpen={inviteMemberModalOpen}
+        toggle={() => setInviteMemberModalOpen(false)}
+        projectId={selectedProjectForInvite?.projectId}  // 使用 projectId 而不是 id
+        onMemberInvited={(response) => {
+          console.log('Invite Member Response:', response);
+          if (response.success) {
+            fetchProjectList();
+          } else {
+            console.error('Error inviting member:', response.errorMsg);
+          }
+        }}
       />
     </div>
   );

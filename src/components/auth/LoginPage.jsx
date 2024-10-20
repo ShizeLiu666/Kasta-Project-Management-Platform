@@ -124,7 +124,7 @@ const LoginPage = () => {
       return;
     }
 
-    let loginResult = await attemptLogin(username);
+    let loginResult = await attemptLogin(username, false);
 
     if (!loginResult.success) {
       // 尝试更改第一个字母的大小写
@@ -132,7 +132,7 @@ const LoginPage = () => {
         ? username.charAt(0).toUpperCase() + username.slice(1)
         : username.charAt(0).toLowerCase() + username.slice(1);
 
-      loginResult = await attemptLogin(alteredUsername);
+      loginResult = await attemptLogin(alteredUsername, true);
     }
 
     if (!loginResult.success && !loginResult.isServerError) {
