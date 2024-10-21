@@ -31,7 +31,7 @@ const Sidebar = ({ userType, toggleSidebar }) => {
       <div className="sidebar-close-button d-lg-none" onClick={toggleSidebar}>
         <CloseIcon />
       </div>
-      <div className="p-3 mt-2">
+      <div className="p-2 mt-2">
         <Nav vertical className="sidebarNav">
           {navigation.map((navi, index) => (
             (!navi.superUserOnly || userType === 99999) && (

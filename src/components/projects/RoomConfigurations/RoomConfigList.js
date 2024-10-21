@@ -218,6 +218,8 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                       onClick={handleDownloadJson}
                       icon={<CloudDownloadIcon />}
                       color="#6c757d"
+                      allowedRoles={['OWNER']}
+                      userRole={userRole}
                     >
                       Download JSON
                     </CustomButton>
@@ -232,6 +234,8 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                         icon={<CloudUploadIcon />}
                         color="#007bff"
                         style={{ marginRight: "10px" }}
+                        allowedRoles={['OWNER']}
+                        userRole={userRole}
                       >
                         Upload / Overwrite
                       </CustomButton>
@@ -240,6 +244,8 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                           onClick={() => setDeleteModalOpen(true)}
                           icon={<DeleteForeverIcon />}
                           color="#dc3545"
+                          allowedRoles={['OWNER']}
+                          userRole={userRole}
                         >
                           Delete
                         </CustomButton>

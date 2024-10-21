@@ -40,11 +40,11 @@ const ProjectListComponent = () => {
   const [selectedProjectToLeave, setSelectedProjectToLeave] = useState(null);
   // const [userRole, setUserRole] = useState(null);
   const [selectedUserRole, setSelectedUserRole] = useState(null);
-  const [warningAlert, setWarningAlert] = useState({
-    isOpen: true,
-    message: "We are currently addressing an issue where changing the project card image also affects the avatar. We appreciate your patience.",
-    severity: "warning"
-  });
+  // const [warningAlert, setWarningAlert] = useState({
+  //   isOpen: true,
+  //   message: "We are currently addressing an issue where changing the project card image also affects the avatar. We appreciate your patience.",
+  //   severity: "warning"
+  // });
   const [inviteMemberModalOpen, setInviteMemberModalOpen] = useState(false);
   const [selectedProjectForInvite, setSelectedProjectForInvite] = useState(null);
 
@@ -113,7 +113,7 @@ const ProjectListComponent = () => {
   useEffect(() => {
     fetchProjectList();
     // 显示警告信息
-    setWarningAlert(prev => ({ ...prev, isOpen: true }));
+    // setWarningAlert(prev => ({ ...prev, isOpen: true }));
   }, [fetchProjectList]);
 
   // const toggleModal = () => {
@@ -214,9 +214,9 @@ const ProjectListComponent = () => {
     });
   };
 
-  const handleCloseWarning = () => {
-    setWarningAlert(prev => ({ ...prev, isOpen: false }));
-  };
+  // const handleCloseWarning = () => {
+  //   setWarningAlert(prev => ({ ...prev, isOpen: false }));
+  // };
 
   const handleInviteMember = (project) => {
     setSelectedProjectForInvite(project);
@@ -225,12 +225,12 @@ const ProjectListComponent = () => {
 
   return (
     <div>
-      <CustomAlert
+      {/* <CustomAlert
         isOpen={warningAlert.isOpen}
         onClose={handleCloseWarning}
         message={warningAlert.message}
         severity={warningAlert.severity}
-      />
+      /> */}
 
       <CustomAlert
         isOpen={alert.isOpen}

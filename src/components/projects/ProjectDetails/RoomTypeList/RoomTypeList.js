@@ -122,6 +122,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
           onDelete={() => handleDeleteClick(roomType)}
           onEdit={() => handleEditRoomType(roomType)}
           onClick={() => handleRoomTypeClick(roomType)}
+          userRole={userRole}
         />
       ))}
       {selectedRoomType && (
