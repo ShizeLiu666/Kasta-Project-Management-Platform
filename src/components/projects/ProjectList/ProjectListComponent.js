@@ -340,7 +340,12 @@ const ProjectListComponent = () => {
           projectId={selectedProject.projectId}
           projectName={selectedProject.name}
           onNavigate={handleNavigate}
-          userRole={selectedProject.role}  // 传递用户角色
+          userRole={selectedProject.role}
+          onLeaveProject={() => {
+            setShowRoomTypes(false);
+            setBreadcrumbPath(["Project List"]);
+            fetchProjectList();
+          }}
         />
       )}
 
@@ -422,7 +427,7 @@ const ProjectListComponent = () => {
         toggle={() => setInviteMemberModalOpen(false)}
         projectId={selectedProjectForInvite?.projectId}  // 使用 projectId 而不是 id
         onMemberInvited={(response) => {
-          console.log('Invite Member Response:', response);
+          // console.log('Invite Member Response:', response);
           if (response.success) {
             fetchProjectList();
           } else {

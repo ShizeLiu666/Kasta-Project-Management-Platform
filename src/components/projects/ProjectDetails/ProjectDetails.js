@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import RoomTypeList from './RoomTypeList/RoomTypeList';
 import ProjectMembers from './ProjectMembers/ProjectMembers';
 import CustomAlert from '../../CustomAlert';
 
-const ProjectDetails = ({ projectId, projectName, onNavigate, userRole }) => {
-  const navigate = useNavigate();
+const ProjectDetails = ({ projectId, projectName, onNavigate, userRole, onLeaveProject }) => {
+  // const navigate = useNavigate();
   const [warningAlert, setWarningAlert] = useState({
     isOpen: true,
     message: "We are currently addressing an issue where visitors may not be able to see room types in specific projects. We appreciate your patience.",
@@ -20,11 +20,6 @@ const ProjectDetails = ({ projectId, projectName, onNavigate, userRole }) => {
 
   const handleCloseWarning = () => {
     setWarningAlert(prev => ({ ...prev, isOpen: false }));
-  };
-
-  const handleLeaveProject = () => {
-    // 导航回项目列表页面
-    navigate('/admin/projects');
   };
 
   return (
@@ -42,7 +37,7 @@ const ProjectDetails = ({ projectId, projectName, onNavigate, userRole }) => {
           <ProjectMembers 
             projectId={projectId} 
             userRole={userRole} 
-            onLeaveProject={handleLeaveProject}
+            onLeaveProject={onLeaveProject}
           />
         </Col>
         <Col md="6">

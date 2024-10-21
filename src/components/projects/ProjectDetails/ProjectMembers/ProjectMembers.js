@@ -92,6 +92,10 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
     </div>
   );
 
+  const handleLeaveProjectSuccess = () => {
+    onLeaveProject();
+  };
+
   return (
     <>
       <ComponentCard title={cardTitle}>
@@ -147,7 +151,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         isOpen={leaveModalOpen}
         toggle={() => setLeaveModalOpen(!leaveModalOpen)}
         projectId={projectId}
-        onLeaveSuccess={onLeaveProject}
+        onLeaveSuccess={handleLeaveProjectSuccess}
       />
     </>
   );
