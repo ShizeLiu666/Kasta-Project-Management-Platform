@@ -32,13 +32,7 @@ const CustomModal = ({
         if (isOpen) {
             setShowSuccessAlert(false);
             setShowErrorAlert(false);
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
         }
-        return () => {
-            document.body.style.overflow = '';
-        };
     }, [isOpen]);
 
     useEffect(() => {
@@ -57,21 +51,14 @@ const CustomModal = ({
         setShowErrorAlert(false);
     };
 
-    const handleToggle = () => {
-        toggle();
-        setTimeout(() => {
-            document.body.style.overflow = '';
-        }, 300); // 等待模态框关闭动画完成
-    };
-
     return (
         <Modal 
             isOpen={isOpen} 
-            toggle={handleToggle} 
+            toggle={toggle} 
             centered
             scrollable
         >
-            <ModalHeader toggle={handleToggle}>{title}</ModalHeader>
+            <ModalHeader toggle={toggle}>{title}</ModalHeader>
             <ModalBody>
                 {showSuccessAlert && successAlert && (
                     <Alert color="success" toggle={handleCloseSuccessAlert}>
@@ -91,7 +78,7 @@ const CustomModal = ({
                     color={submitButtonColor}
                     onClick={() => {
                         onSubmit();
-                        handleToggle();
+                        toggle();
                     }}
                     disabled={isSubmitting || disabled}
                     style={{marginRight: '10px'}}
@@ -101,7 +88,7 @@ const CustomModal = ({
                 <CustomButton 
                     type={cancelButtonType}
                     color={cancelButtonColor}
-                    onClick={handleToggle}
+                    onClick={toggle}
                 >
                     {cancelText}
                 </CustomButton>
