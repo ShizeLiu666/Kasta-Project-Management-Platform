@@ -92,7 +92,13 @@ const LoginPage = () => {
               }, 1000);
             } else {
               // Normal user - 不允许登录
-              showAlert("This platform is currently only open to Project users. Normal user access is coming soon.", "warning", 5000);
+              showAlert(
+                "This platform is currently only open to Project users. Normal user access is coming soon.\n\n" +
+                "If you previously registered as a project user on our website, please send your account details to jackliu@haneco.com.au for permission update.\n\n" +
+                "Thank you for your cooperation.",
+                "warning",
+                15000
+              );
             }
           }
         } catch (detailError) {
