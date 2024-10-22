@@ -30,10 +30,15 @@ const CustomModal = ({
 
     useEffect(() => {
         if (isOpen) {
-            // 重置 alert 状态当模态框打开时
             setShowSuccessAlert(false);
             setShowErrorAlert(false);
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
         }
+        return () => {
+            document.body.style.overflow = '';
+        };
     }, [isOpen]);
 
     useEffect(() => {
@@ -52,10 +57,22 @@ const CustomModal = ({
         setShowErrorAlert(false);
     };
 
+    const handleToggle = () => {
+        toggle();
+        setTimeout(() => {
+            document.body.style.overflow = '';
+        }, 300); // 等待模态框关闭动画完成
+    };
+
     return (
-        <Modal isOpen={isOpen} toggle={toggle} centered>
-            <ModalHeader toggle={toggle}>{title}</ModalHeader>
-            <ModalBody style={{paddingBottom: '5px'}}>
+        <Modal 
+            isOpen={isOpen} 
+            toggle={handleToggle} 
+            centered
+            scrollable
+        >
+            <ModalHeader toggle={handleToggle}>{title}</ModalHeader>
+            <ModalBody>
                 {showSuccessAlert && successAlert && (
                     <Alert color="success" toggle={handleCloseSuccessAlert}>
                         {successAlert}
@@ -72,7 +89,10 @@ const CustomModal = ({
                 <CustomButton
                     type={submitButtonType}
                     color={submitButtonColor}
-                    onClick={onSubmit}
+                    onClick={() => {
+                        onSubmit();
+                        handleToggle();
+                    }}
                     disabled={isSubmitting || disabled}
                     style={{marginRight: '10px'}}
                 >
@@ -81,7 +101,7 @@ const CustomModal = ({
                 <CustomButton 
                     type={cancelButtonType}
                     color={cancelButtonColor}
-                    onClick={toggle}
+                    onClick={handleToggle}
                 >
                     {cancelText}
                 </CustomButton>

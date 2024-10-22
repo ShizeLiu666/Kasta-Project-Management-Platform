@@ -16,6 +16,10 @@
     font-size: 24px;
 }
 
+.custom-size-per-page {
+    margin-bottom: 15px;
+}
+
 .modal-header>span {
     width: 100%;
     display: flex;
@@ -110,29 +114,29 @@
 }
 
 .sorting-header {
-  position: relative;
-  cursor: pointer;
-  
-  &::after {
-    content: '\25B2'; // 上三角
-    position: absolute;
-    right: 8px;
-    opacity: 0.5;
-  }
-  
-  &::before {
-    content: '\25BC'; // 下三角
-    position: absolute;
-    right: 8px;
-    top: 10px;
-    opacity: 0.5;
-  }
-  
-  &.asc::after {
-    opacity: 1;
-  }
-  
-  &.desc::before {
-    opacity: 1;
-  }
+    position: relative;
+    cursor: pointer;
+
+    &::after {
+        content: '\25B2'; // 上三角
+        position: absolute;
+        right: 8px;
+        opacity: 0.5;
+    }
+
+    &::before {
+        content: '\25BC'; // 下三角
+        position: absolute;
+        right: 8px;
+        top: 10px;
+        opacity: 0.5;
+    }
+
+    &.asc::after {
+        opacity: 1;
+    }
+
+    &.desc::before {
+        opacity: 1;
+    }
 }

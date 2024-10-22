@@ -75,7 +75,8 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
       ["Project List", "Room Types", "Room Configurations"],
       roomType.projectRoomId,
       roomType.name,
-      userRole  // 传递用户角色
+      userRole,
+      roomType.projectRoomId  // 添加这一行
     );
   };
 

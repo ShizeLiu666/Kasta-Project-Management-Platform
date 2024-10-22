@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Form, FormGroup, Label, Input } from "reactstrap";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth/auth';
 import CustomModal from '../../../CustomModal';
+
+const filter = createFilterOptions();
 
 const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) => {
   const [formData, setFormData] = useState({
@@ -23,10 +25,74 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
 
   useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem('userDetails'));
-    if (userDetails && userDetails.userType) {
+    if (userDetails) {
       setIsSuperUser(userDetails.userType === 99999);
     }
   }, []);
+
+  const fetchValidAuthCodes = useCallback(async (token) => {
+    const response = await axiosInstance.get('/authorization-codes', {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { page: 0, size: 1000 },
+    });
+
+    if (response.data.success) {
+      const validCodes = response.data.data.content
+        .filter(code => code.usageCount < 10)
+        .map(code => ({
+          code: code.code,
+          label: `${code.code} (${10 - code.usageCount} uses left)`,
+          usageCount: code.usageCount
+        }));
+      setValidAuthCodes(validCodes);
+    } else {
+      console.error('Failed to fetch auth codes:', response.data.errorMsg);
+    }
+  }, []);
+
+  const fetchProjectRoomCodes = useCallback(async (token) => {
+    // First, get the total number of elements
+    const initialResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { page: 0, size: 1 },
+    });
+
+    if (initialResponse.data.success) {
+      const totalElements = initialResponse.data.data.totalElements;
+
+      // Now fetch all codes in one request
+      const fullResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page: 0, size: totalElements },
+      });
+
+      if (fullResponse.data.success) {
+        const validCodes = fullResponse.data.data.content.map(code => ({
+          code: code.code,
+          label: `${code.code} (${10 - code.usageCount} uses left)`,
+          usageCount: code.usageCount
+        }));
+        setValidAuthCodes(validCodes);
+      } else {
+        console.error('Failed to fetch project room codes:', fullResponse.data.errorMsg);
+      }
+    } else {
+      console.error('Failed to fetch initial project room codes:', initialResponse.data.errorMsg);
+    }
+  }, []);
+
+  const fetchAuthCodes = useCallback(async () => {
+    try {
+      const token = getToken();
+      if (isSuperUser) {
+        await fetchValidAuthCodes(token);
+      } else {
+        await fetchProjectRoomCodes(token);
+      }
+    } catch (error) {
+      console.error('Error fetching auth codes:', error);
+    }
+  }, [isSuperUser, fetchValidAuthCodes, fetchProjectRoomCodes]);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,41 +100,14 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
         name: "",
         typeCode: "",
         des: "",
-        authorizationCode: ""  // 确保这里被重置
+        authorizationCode: ""
       });
       setError("");
       setSuccessAlert("");
       setIsTypeCodeManuallyEdited(false);
-      if (isSuperUser) {
-        fetchValidAuthCodes();
-      }
+      fetchAuthCodes();
     }
-  }, [isOpen, isSuperUser]);
-
-  const fetchValidAuthCodes = async () => {
-    try {
-      const token = getToken();
-      const response = await axiosInstance.get('/authorization-codes', {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { page: 0, size: 1000 },
-      });
-
-      if (response.data.success) {
-        const validCodes = response.data.data.content
-          .filter(code => code.usageCount < 10)  // 修改这里：只选择使用次数小于10的授权码
-          .map(code => ({
-            code: code.code,
-            label: `${code.code} (Used ${code.usageCount} ${code.usageCount === 1 ? 'time' : 'times'})`,
-            usageCount: code.usageCount
-          }));
-        setValidAuthCodes(validCodes);
-      } else {
-        console.error('Failed to fetch auth codes:', response.data.errorMsg);
-      }
-    } catch (error) {
-      console.error('Error fetching auth codes:', error);
-    }
-  };
+  }, [isOpen, fetchAuthCodes]);
 
   const generateTypeCode = (name) => {
     const words = name
@@ -96,14 +135,17 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
   };
 
   const handleAuthCodeChange = (event, newValue) => {
-    if (newValue) {
-      // 使用正则表达式移除括号及其中的内容
-      const codeWithoutParentheses = newValue.code.replace(/\s*\([^)]*\)/, '').trim();
-      setFormData(prev => ({ 
-        ...prev, 
-        authorizationCode: codeWithoutParentheses
-      }));
+    if (typeof newValue === 'string') {
+      // 用户输入了自定义的 Auth Code
+      setFormData(prev => ({ ...prev, authorizationCode: newValue.trim() }));
+    } else if (newValue && newValue.inputValue) {
+      // 用户创建了新的 Auth Code
+      setFormData(prev => ({ ...prev, authorizationCode: newValue.inputValue.trim() }));
+    } else if (newValue && newValue.code) {
+      // 用户选择了预设的 Auth Code
+      setFormData(prev => ({ ...prev, authorizationCode: newValue.code.trim() }));
     } else {
+      // 清空选择
       setFormData(prev => ({ ...prev, authorizationCode: '' }));
     }
   };
@@ -173,41 +215,55 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
           <Label for="authorizationCode">
             <span style={{ color: "red" }}>*</span> Auth Code:
           </Label>
-          {isSuperUser ? (
-            <Autocomplete
-              id="auth-code-select"
-              options={validAuthCodes}
-              getOptionLabel={(option) => option.label}
-              renderOption={(props, option) => (
-                <Box component="li" {...props} key={option.code}>
-                  {option.label}
-                </Box>
-              )}
-              value={formData.authorizationCode ? { code: formData.authorizationCode, label: formData.authorizationCode } : null}
-              onChange={handleAuthCodeChange}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  placeholder="Choose an auth code"
-                  fullWidth
-                  className="custom-form-control"
-                  InputLabelProps={{ shrink: true }}
-                  autoComplete="off"  // 添加这一行
-                />
-              )}
-              isOptionEqualToValue={(option, value) => option.code.startsWith(value.code)}
-            />
-          ) : (
-            <Input
-              type="text"
-              name="authorizationCode"
-              id="authorizationCode"
-              value={formData.authorizationCode}
-              onChange={handleChange}
-              required
-            />
-          )}
+          <Autocomplete
+            id="auth-code-select"
+            options={validAuthCodes}
+            getOptionLabel={(option) => {
+              if (typeof option === 'string') {
+                return option;
+              }
+              if (option.inputValue) {
+                return option.inputValue;
+              }
+              return option.label;
+            }}
+            filterOptions={(options, params) => {
+              const filtered = filter(options, params);
+              const { inputValue } = params;
+              // 建议创建新值
+              const isExisting = options.some((option) => inputValue === option.code);
+              if (inputValue !== '' && !isExisting) {
+                filtered.push({
+                  inputValue,
+                  label: `Use "${inputValue}"`,
+                });
+              }
+              return filtered;
+            }}
+            renderOption={(props, option) => (
+              <Box component="li" {...props} key={option.code || option.inputValue}>
+                {option.label}
+              </Box>
+            )}
+            freeSolo
+            selectOnFocus
+            clearOnBlur
+            handleHomeEndKeys
+            value={formData.authorizationCode}
+            onChange={handleAuthCodeChange}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                placeholder="Choose or enter an auth code"
+                fullWidth
+                className="custom-form-control"
+                InputLabelProps={{ shrink: true }}
+                autoComplete="off"
+              />
+            )}
+            isOptionEqualToValue={(option, value) => option.code === value.code}
+          />
         </FormGroup>
         <FormGroup>
           <Label for="name">

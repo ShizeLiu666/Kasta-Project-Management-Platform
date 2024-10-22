@@ -47,8 +47,12 @@ const CustomButton = ({
     textTransform: "none",
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center', // 确保内容居中
     transition: 'all 0.3s ease',
     borderRadius: '4px',
+    padding: '6px 12px', // 添加一些内边距
+    minWidth: '120px', // 设置最小宽度以确保按钮不会太窄
+    height: '40px', // 设置固定高度
     ...style
   };
 
@@ -60,8 +64,8 @@ const CustomButton = ({
       className="custom-button"
       {...props}
     >
-      {buttonIcon && <span style={{ marginRight: '8px' }}>{buttonIcon}</span>}
-      {children}
+      {buttonIcon && <span style={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>{buttonIcon}</span>}
+      <span>{children}</span>
     </Button>
   );
 };

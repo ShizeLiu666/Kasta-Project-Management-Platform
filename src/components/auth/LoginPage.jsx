@@ -57,44 +57,55 @@ const LoginPage = () => {
       });
 
       if (response.data && response.data.success) {
-        // Login success handling logic
         const { token, username: loggedInUsername } = response.data.data;
 
-        setToken(token, rememberMe);
-        saveUsername(loggedInUsername, rememberMe);
-
-        // Set default headers for axios instance
-        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-        // Fetch user details
+        // 获取用户详情
         try {
-          const userDetailResponse = await axiosInstance.get('/users/detail');
+          const userDetailResponse = await axiosInstance.get('/users/detail', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
           if (userDetailResponse.data && userDetailResponse.data.success) {
-            saveUserDetails(userDetailResponse.data.data);
+            const userDetails = userDetailResponse.data.data;
+            
+            // 检查用户类型
+            if (userDetails.userType !== 0) {
+              // Project user - 允许登录
+              setToken(token, rememberMe);
+              saveUsername(loggedInUsername, rememberMe);
+              saveUserDetails(userDetails);
+              
+              // 设置 axios 默认 headers
+              axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+              if (rememberMe) {
+                localStorage.setItem('rememberedUsername', username);
+                localStorage.setItem('rememberedPassword', password);
+              } else {
+                localStorage.removeItem('rememberedUsername');
+                localStorage.removeItem('rememberedPassword');
+              }
+
+              showAlert("Login successful! Redirecting...", "success");
+              setTimeout(() => {
+                navigate("/admin/projects");
+              }, 1000);
+            } else {
+              // Normal user - 不允许登录
+              showAlert("This platform is currently only open to Project users. Normal user access is coming soon.", "warning", 5000);
+            }
           }
         } catch (detailError) {
           console.error("Error fetching user details:", detailError);
-          // We still consider login successful even if fetching user details fails
+          showAlert("An error occurred while fetching user details. Please try again.", "error");
         }
 
-        if (rememberMe) {
-          localStorage.setItem('rememberedUsername', username);
-          localStorage.setItem('rememberedPassword', password);
-        } else {
-          localStorage.removeItem('rememberedUsername');
-          localStorage.removeItem('rememberedPassword');
-        }
-
-        showAlert("Login successful! Redirecting...", "success");
-        setTimeout(() => {
-          navigate("/admin/projects");
-        }, 1000);
         return { success: true };
       } else {
-        // 注释掉这行，防止在第一次尝试时显示警告
-        // if (isSecondAttempt) {
-        //   showAlert(response.data.errorMsg || "Login failed", "warning");
-        // }
+        // 登录失败处理
+        if (isSecondAttempt) {
+          showAlert(response.data.errorMsg || "Login failed", "error");
+        }
         return { success: false, error: response.data.errorMsg || "Login failed" };
       }
     } catch (error) {
@@ -232,7 +243,7 @@ const LoginPage = () => {
                                 type="text"
                                 id="username"
                                 name="username"
-                                placeholder="Username"
+                                placeholder="Email / Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 onKeyDown={handleUsernameKeyDown}

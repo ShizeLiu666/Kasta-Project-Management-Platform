@@ -6,9 +6,8 @@ import DeleteIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/EditNote';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import LogoutIcon from '@mui/icons-material/Logout';
-import SendIcon from '@mui/icons-material/Send';  // 导入 SendIcon
+import SendIcon from '@mui/icons-material/Send';
 import default_image from "../../../assets/images/projects/default_image.jpg";
-// import LazyLoad from 'react-lazyload';
 
 const ProjectCard = ({
   project,
@@ -17,13 +16,13 @@ const ProjectCard = ({
   onRemove,
   onChangeBackground,
   onLeaveProject,
-  onInviteMember,  // 添加 onInviteMember 属性
+  onInviteMember,
   setMenuOpen,
   userRole,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // 直接设置图片 URL，不使用 useMemo
   const imageUrl = project.iconUrl || default_image;
 
   const getRoleBadge = (role) => {
@@ -41,7 +40,6 @@ const ProjectCard = ({
     return <Badge color={color} style={{ marginLeft: '10px', borderRadius: '4px'}}>{role}</Badge>;
   };
 
-  // Handle Menu open/close
   const handleMenuClick = (event) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
@@ -53,19 +51,16 @@ const ProjectCard = ({
     setMenuOpen(false);
   };
 
-  // Edit action
   const handleEdit = () => {
     handleClose();
     onEdit(project);
   };
 
-  // Remove action
   const handleRemove = () => {
     handleClose();
     onRemove(project);
   };
 
-  // Change Background action
   const handleChangeBackground = () => {
     handleClose();
     onChangeBackground(project);
@@ -73,7 +68,7 @@ const ProjectCard = ({
 
   const handleLeaveProject = () => {
     handleClose();
-    onLeaveProject(project);  // 传递整个 project 对象
+    onLeaveProject(project);
   };
 
   const handleInviteMember = () => {
@@ -84,14 +79,25 @@ const ProjectCard = ({
   return (
     <Card
       className="blog-card"
-      style={{ position: "relative", borderRadius: '4px'}}
+      style={{
+        position: "relative",
+        borderRadius: '8px',
+        transition: 'all 0.3s ease',
+        boxShadow: isHovered ? '0 8px 16px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)',
+        border: isHovered ? '1px solid #fbcd0b' : '1px solid #e0e0e0',
+        margin: '10px',
+        overflow: 'hidden',
+      }}
       onClick={(event) => onCardClick(event, project)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div style={{ 
         padding: "10px", 
         display: "flex", 
         justifyContent: "space-between", 
         alignItems: "center",
+        borderBottom: '1px solid #e0e0e0',
       }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
@@ -103,19 +109,19 @@ const ProjectCard = ({
           aria-haspopup="true"
           onClick={handleMenuClick}
           style={{
-            padding: '8px',  // 减小内边距以适应更大的图标
+            padding: '8px',
             transition: 'background-color 0.3s',
           }}
           sx={{
             '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',  // 稍微加深悬停时的背景色
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
             },
-            '& .MuiSvgIcon-root': {  // 针对图标的样式
-              fontSize: '2rem',  // 增大图标尺寸
+            '& .MuiSvgIcon-root': {
+              fontSize: '2rem',
             },
           }}
         >
-          <MoreHorizIcon />  {/* 移除 fontSize 属性，使用 sx 中的样式 */}
+          <MoreHorizIcon />
         </IconButton>
       </div>
 
@@ -126,15 +132,16 @@ const ProjectCard = ({
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
+          transition: 'transform 0.3s ease',
+          // transform: isHovered ? 'scale(1.05)' : 'scale(1)',
         }}
       />
 
-      <CardBody style={{padding: "10px "}}>
+      <CardBody>
         <CardSubtitle>Address: {project.address || 'None'}</CardSubtitle>
         <CardSubtitle>Description: {project.des || 'None'}</CardSubtitle>
       </CardBody>
 
-      {/* Menu for Edit, Remove, and Change Background actions */}
       <Menu
         id="menu"
         anchorEl={anchorEl}

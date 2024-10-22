@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Form, FormGroup, Input, Button, Label, Row, Col } from "reactstrap";
-import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
+import CircularProgress from "@mui/material/CircularProgress";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import rotateLockIcon from "../../assets/icons/rotate-lock.png";
 import axiosInstance from '../../config'; 
-import CustomAlert from '../CustomAlert';  // 确保正确导入
+import CustomAlert from '../CustomAlert';
 
 const ForgotPasswordModal = ({ handleBackToLogin }) => {
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
   const [newPassword, setnewPassword] = useState("");
   const [code, setCode] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isValidForm, setIsValidForm] = useState(false);
   const [alert, setAlert] = useState({
@@ -23,7 +21,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   });
   const [countdown, setCountdown] = useState(60);
   const [canRequestAgain, setCanRequestAgain] = useState(true);
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   // Email validation
   const validateEmail = (email) => {
@@ -31,15 +29,9 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
     return emailRegex.test(email);
   };
 
-  // Username validation
-  const validateUsername = (username) => {
-    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_ ]{3,19}$/; // Adjust the regex as needed
-    return usernameRegex.test(username);
-  };
-
   // New password validation
   const validateNewPassword = (newPassword) => {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Minimum 8 characters, at least one letter and one number
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     return passwordRegex.test(newPassword);
   };
 
@@ -47,25 +39,11 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
     const value = e.target.value;
     setEmail(value);
     if (value === "") {
-      setEmailError(""); // No error message if empty
+      setEmailError("");
     } else if (!validateEmail(value)) {
       setEmailError("* Invalid email format");
     } else {
-      setEmailError(""); // Clear error
-    }
-  };
-
-  const handleUsernameChange = (e) => {
-    const value = e.target.value;
-    setUsername(value);
-    if (value === "") {
-      setEmailError(""); // No error message if empty
-    } else if (!validateUsername(value)) {
-      setUsernameError(
-        "* Username must be 4-20 characters and can contain letters, numbers, and underscores"
-      );
-    } else {
-      setUsernameError("");
+      setEmailError("");
     }
   };
 
@@ -73,13 +51,13 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
     const value = e.target.value;
     setnewPassword(value);
     if (value === "") {
-      setPasswordError(""); // No error message if empty
+      setPasswordError("");
     } else if (!validateNewPassword(value)) {
       setPasswordError(
         "* Password must be at least 8 characters long and include both letters and numbers"
       );
     } else {
-      setPasswordError(""); // Clear error
+      setPasswordError("");
     }
   };
 
@@ -96,10 +74,9 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   const isFormValid = useCallback(() => {
     return (
       validateEmail(email) &&
-      validateUsername(username) &&
       validateNewPassword(newPassword)
     );
-  }, [email, username, newPassword]);
+  }, [email, newPassword]);
 
   useEffect(() => {
     setIsValidForm(isFormValid());
@@ -115,9 +92,9 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   }, [countdown, canRequestAgain]);
 
   const handleSendVerificationCode = async () => {
-    if (!validateEmail) return;
+    if (!validateEmail(email)) return;
 
-    setLoading(true); // Start loading
+    setLoading(true);
 
     try {
       const response = await axiosInstance.post(
@@ -130,50 +107,47 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
         showAlertWithTimeout("Verification code sent!", "success");
       } else {
         showAlertWithTimeout(
-          "error",
-          response.data.errorMsg || "Failed to send verification code."
+          response.data.errorMsg || "Failed to send verification code.",
+          "error"
         );
       }
     } catch (error) {
       showAlertWithTimeout(
-        "error",
-        "Failed to send verification code. Please try again."
+        "Failed to send verification code. Please try again.",
+        "error"
       );
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   const handleResetPassword = async () => {
     const userData = {
-      username,
-      password: newPassword, // Use the new password from the state
-      verificationCode: code, // Verification code from the user input
+      username: email,
+      password: newPassword,
+      verificationCode: code,
     };
   
     console.log("Reset Password Data to be submitted:", userData);
   
-    setLoading(true); // Set loading state to true while the request is being made
+    setLoading(true);
   
     try {
-      // Send the POST request to the reset password endpoint
       const response = await axiosInstance.post("/users/modify/pwd", userData);
   
       if (response.data.success) {
         showAlertWithTimeout("Password reset successful!", "success");
         setTimeout(() => {
           handleBackToLogin();
-        }, 3000);
+        }, 2000);
       } else {
-        // Password reset failed, show the error message from the response
         showAlertWithTimeout(response.data.errorMsg || "Password reset failed.", "error");
       }
     } catch (error) {
-      // Handle any errors that occur during the request (e.g., network issues)
       console.error("Error during password reset:", error);
       showAlertWithTimeout("An error occurred during password reset. Please try again.", "error");
     } finally {
-      setLoading(false); // Reset loading state once the request completes
+      setLoading(false);
     }
   };   
 
@@ -210,7 +184,6 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
       </div>
 
       <Form autoComplete="off">
-        {/* Email input field with Send Verification Code button */}
         <FormGroup className="mb-2">
           <Row className="g-2">
             <Col md={8}>
@@ -239,15 +212,15 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
                   fontSize: "14px",
                   fontWeight: "bold",
                   height: "37px",
-                  display: "flex", // Add flexbox
-                  justifyContent: "center", // Center horizontally
-                  alignItems: "center", // Center vertically
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
                 onClick={handleSendVerificationCode}
-                disabled={!validateEmail(email) || !canRequestAgain || loading} // Disable if loading
+                disabled={!validateEmail(email) || !canRequestAgain || loading}
               >
                 {loading ? (
-                  <CircularProgress size={15} style={{ color: "#fff" }} /> // Use size 15 and center
+                  <CircularProgress size={15} style={{ color: "#fff" }} />
                 ) : canRequestAgain ? (
                   "Send Code"
                 ) : (
@@ -258,21 +231,6 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
           </Row>
         </FormGroup>
 
-        {/* Username input field */}
-        <FormGroup className="mb-3" style={{ marginTop: "0" }}>
-          <Label for="username">User Name</Label>
-          <Input
-            type="text"
-            id="username"
-            placeholder=""
-            value={username}
-            onChange={handleUsernameChange}
-            autoComplete="off"
-          />
-          {usernameError && <p className="error-message">{usernameError}</p>}
-        </FormGroup>
-
-        {/* Password input field */}
         <FormGroup className="mb-3">
           <Label for="password">New Password</Label>
           <Input
@@ -286,7 +244,6 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
           {passwordError && <p className="error-message">{passwordError}</p>}
         </FormGroup>
 
-        {/* 6-digit code input field */}
         <FormGroup className="mb-3">
           <Label for="code">Email Validation</Label>
           <Input
@@ -300,7 +257,6 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
         </FormGroup>
 
         <div className="row align-items-center" style={{ marginTop: "20px" }}>
-          {/* Back to Login Button aligned to the left */}
           <div className="col-auto" style={{ paddingLeft: 0 }}>
             <Button
               className="text-primary"
@@ -319,7 +275,6 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
             </Button>
           </div>
 
-          {/* Reset Password Button aligned to the right */}
           <div className="col d-flex justify-content-end">
             <Button
               style={{
@@ -328,7 +283,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
                 fontWeight: "bold",
               }}
               onClick={handleResetPassword}
-              disabled={!isValidForm || code.length !== 6} // 使用 isValidForm
+              disabled={!isValidForm || code.length !== 6}
             >
               Reset Password
             </Button>

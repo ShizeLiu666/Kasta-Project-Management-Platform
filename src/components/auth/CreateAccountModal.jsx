@@ -5,19 +5,23 @@ import VerifyCodeModal from "./VerifyCodeModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import "./CreateAccountModal.css";
-import CountryCodeSelect from "./CountryCodeSelect"; // 引入新的 CountryCodeSelect 组件
-import axiosInstance from '../../config';  // 路径可能需要调整
-import CustomAlert from '../CustomAlert';  // 确保正确导入
+import CountryCodeSelect from "./CountryCodeSelect";
+import axiosInstance from '../../config';
+import CustomAlert from '../CustomAlert';
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
+import EngineeringIcon from '@mui/icons-material/Engineering';
+import PersonIcon from '@mui/icons-material/Person';
 
 const CreateAccountModal = ({ handleBackToLogin }) => {
-  const [username, setUsername] = useState(""); // 新增 User Name
-  const [nickname, setNickname] = useState(""); // 新增 Nickname
+  // const [username, setUsername] = useState(""); // 注释掉 Username 状态
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
-  const [countryCode, setCountryCode] = useState(null); // State for country code
+  const [countryCode, setCountryCode] = useState(null);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showVerifyModal, setShowVerifyModal] = useState(false);
-  const [usernameError, setUsernameError] = useState(""); // 新增 User Name 错误
+  // const [usernameError, setUsernameError] = useState(""); // 注释掉 Username 错误状态
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
@@ -27,18 +31,24 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     severity: "info",
     duration: 3000
   });
-  const [loading, setLoading] = useState(false); // 添加loading状态
-  const [isValidForm, setIsValidForm] = useState(false); // State to track if the form is valid
-  const [countdown, setCountdown] = useState(60); // 倒计时状态
-  const [canRequestAgain, setCanRequestAgain] = useState(true); // 控制是否能再次请求发送验证码
+  const [loading, setLoading] = useState(false);
+  const [isValidForm, setIsValidForm] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const [canRequestAgain, setCanRequestAgain] = useState(true);
+  const [userRole, setUserRole] = useState(null);
+
+  const userRoleOptions = [
+    { value: "project", label: "Project", icon: <EngineeringIcon fontSize = "medium"/> },
+    { value: "normal", label: "Normal", icon: <PersonIcon fontSize = "medium" />, disabled: true }
+  ];
 
   useEffect(() => {
-    setUsername(""); // 初始化 User Name
-    setCountryCode(null); // 初始化 Country Code
+    // setUsername(""); // 注释掉 Username 初始化
+    setCountryCode(null);
     setEmail("");
     setPassword("");
     setConfirmPassword("");
-    setNickname(""); // 初始化 Nickname
+    setNickname("");
   }, []);
 
   // 倒计时逻辑
@@ -57,11 +67,11 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   };
 
   // User Name validation
-  const validateUsername = (username) => {
-    // Adjust the regex to allow spaces
-    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_ ]{3,19}$/; // Allows spaces, letters, numbers, and underscores
-    return usernameRegex.test(username);
-  };
+  // const validateUsername = (username) => {
+  //   // Adjust the regex to allow spaces
+  //   const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_ ]{3,19}$/; // Allows spaces, letters, numbers, and underscores
+  //   return usernameRegex.test(username);
+  // };
 
   // Email validation
   const validateEmail = (email) => {
@@ -69,68 +79,62 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     return emailRegex.test(email);
   };
 
-  // Password validation
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Minimum 8 characters, with letters and numbers
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     return passwordRegex.test(password);
   };
 
-  // 将 isFormValid 函数移到 useCallback 中，这样它可以作为 useEffect 的依赖
   const isFormValid = useCallback(() => {
     return (
-      validateUsername(username) &&
       validateEmail(email) &&
       validatePassword(password) &&
       password === confirmPassword &&
-      countryCode
+      countryCode &&
+      userRole
     );
-  }, [username, email, password, confirmPassword, countryCode]);
+  }, [email, password, confirmPassword, countryCode, userRole]);
 
-  // 更新表单是否有效的状态
   useEffect(() => {
     setIsValidForm(isFormValid());
   }, [isFormValid]);
 
-  // Real-time username validation
-  const handleUsernameChange = (e) => {
-    const value = e.target.value;
-    setUsername(value);
-    if (value === "") {
-      setUsernameError(""); // No error message if empty
-    } else if (!validateUsername(value)) {
-      setUsernameError(
-        "* Username must be 4-20 characters long, start with a letter, and can only contain letters, numbers, spaces, and underscores"
-      );
-    } else {
-      setUsernameError(""); // Clear error
-    }
-  };
+  // const handleUsernameChange = (e) => {
+  //   const value = e.target.value;
+  //   setUsername(value);
+  //   if (value === "") {
+  //     setUsernameError("");
+  //   } else if (!validateUsername(value)) {
+  //     setUsernameError(
+  //       "* Username must be 4-20 characters long, start with a letter, and can only contain letters, numbers, spaces, and underscores"
+  //     );
+  //   } else {
+  //     setUsernameError("");
+  //   }
+  // };
 
-  // Real-time email validation
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
     if (value === "") {
-      setEmailError(""); // No error message if empty
+      setEmailError("");
     } else if (!validateEmail(value)) {
       setEmailError("* Invalid email format");
     } else {
-      setEmailError(""); // Clear error
+      setEmailError("");
     }
   };
 
-  // Real-time password validation
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     setPassword(value);
     if (value === "") {
-      setPasswordError(""); // No error message if empty
+      setPasswordError("");
     } else if (!validatePassword(value)) {
       setPasswordError(
         "* Password must be at least 8 characters long and include both letters and numbers"
       );
     } else {
-      setPasswordError(""); // Clear error
+      setPasswordError("");
     }
   };
 
@@ -140,7 +144,42 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     if (value !== password) {
       setConfirmPasswordError("* Passwords do not match");
     } else {
-      setConfirmPasswordError(""); // Clear error
+      setConfirmPasswordError("");
+    }
+  };
+
+  const handleVerifyCodeSubmit = async (verificationCode) => {
+    const userData = {
+      username: email, // 使用 email 作为 username
+      password,
+      verificationCode,
+      nickName: nickname,
+      countryCode: countryCode?.code,
+      userType: userRole?.value === "project" ? 1 : 0, // project 1，normal 0
+      email,
+    };
+
+    console.log("User Data to be submitted:", userData);
+
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.post("/users/register", userData);
+
+      if (response.data.success) {
+        setShowVerifyModal(false);
+        showAlert("Registration successful!", "success", 3000);
+        setTimeout(() => {
+          handleBackToLogin();
+        }, 1000);
+      } else {
+        showAlert(response.data.errorMsg || "Registration failed.", "error");
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      showAlert("An error occurred during registration.", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -182,7 +221,6 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   // Handle sending verification code
   const handleSendVerificationCode = async (e) => {
     e.preventDefault();
-    setUsernameError(""); // Clear username error
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
@@ -192,50 +230,14 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
     await sendVerificationCodeWithFeedback(email);
   };
 
-  const handleVerifyCodeSubmit = async (verificationCode) => {
-    // 构建提交的表单数据
-    const userData = {
-      username,
-      password,
-      verificationCode,
-      nickName: nickname,
-      countryCode: countryCode?.code,
-      userType: 0,
-      email,
-    };
-
-    console.log("User Data to be submitted:", userData);
-
-    setLoading(true);
-
-    try {
-      const response = await axiosInstance.post("/users/register", userData);
-
-      if (response.data.success) {
-        setShowVerifyModal(false);
-        
-        // 显示成功消息，持续时间为3秒
-        showAlert("Registration successful!", "success", 3000);
-        
-        // 1秒后返回登录页面
-        setTimeout(() => {
-          handleBackToLogin();
-        }, 1000);
-      } else {
-        showAlert(response.data.errorMsg || "Registration failed.", "error");
-      }
-    } catch (error) {
-      console.error("Error during registration:", error);
-      showAlert("An error occurred during registration.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleBack = (e) => {
     e.preventDefault();
     handleBackToLogin();
   };
+
+  // const handleRoleChange = (e) => {
+  //   setUserRole(e.target.value);
+  // };
 
   return (
     <div className="form-container">
@@ -248,35 +250,6 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
       />
       <Form autoComplete="off">
         <FormGroup className="mb-3">
-          <Row className="g-2">
-            <Col md={6}>
-              <Label for="username">User Name</Label>
-              <Input
-                type="text"
-                id="username"
-                placeholder=""
-                value={username}
-                onChange={handleUsernameChange}
-                autoComplete="off"
-              />
-            </Col>
-            <Col md={6}>
-              <Label for="nickname">Nickname</Label>
-              <Input
-                type="text"
-                id="nickname"
-                placeholder="(Optional)"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)} // Handle Nickname input
-                autoComplete="off"
-              />
-            </Col>
-            {usernameError && <p className="error-message">{usernameError}</p>}
-          </Row>
-        </FormGroup>
-
-        <FormGroup className="mb-3">
-          <Row className="g-2"></Row>
           <Label for="email">Email Address</Label>
           <Input
             type="email"
@@ -287,6 +260,50 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
             autoComplete="off"
           />
           {emailError && <p className="error-message">{emailError}</p>}
+        </FormGroup>
+
+        <FormGroup className="mb-3">
+          <Row className="g-2">
+            <Col md={6}>
+              <Label for="nickname">Nickname</Label>
+              <Input
+                type="text"
+                id="nickname"
+                placeholder="(Optional)"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                autoComplete="off"
+              />
+            </Col>
+            <Col md={6}>
+              <Label for="userRole">User Role</Label>
+              <Autocomplete
+                id="user-role-select"
+                options={userRoleOptions}
+                getOptionLabel={(option) => option.label}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} key={option.value} style={{ opacity: option.disabled ? 0.5 : 1 }}>
+                    {option.icon}
+                    <span style={{ marginLeft: '8px' }}>{option.label}</span>
+                  </Box>
+                )}
+                value={userRole}
+                onChange={(event, newValue) => setUserRole(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder="Select a role"
+                    fullWidth
+                    className="custom-form-control"
+                    InputLabelProps={{ shrink: true }}
+                  />
+                )}
+                isOptionEqualToValue={(option, value) => option.value === value.value}
+                getOptionDisabled={(option) => option.disabled}
+              />
+            </Col>
+          </Row>
         </FormGroup>
 
         <FormGroup className="mb-3">
@@ -376,7 +393,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
         toggle={() => setShowVerifyModal(false)}
         email={email}
         onSubmit={handleVerifyCodeSubmit}
-        sendVerificationCode={sendVerificationCodeWithoutFeedback} // 传递简化版的发送逻辑
+        sendVerificationCode={sendVerificationCodeWithoutFeedback}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Button } from 'reactstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory, { PaginationProvider, PaginationListStandalone, SizePerPageDropdownStandalone } from 'react-bootstrap-table2-paginator';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit';
+import ToolkitProvider from 'react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit';
 import ComponentCard from './ComponentCard';
 import { getToken } from '../auth/auth';
 import axiosInstance from '../../config';
@@ -15,8 +15,9 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';  // 导入 ContentCopyIcon
 import CustomAlert from '../CustomAlert';  // 导入 CustomAlert
 import CustomButton from '../CustomButton';
+// import { backdropClasses } from '@mui/material';
 
-const { SearchBar } = Search;
+// const { SearchBar } = Search;
 
 const sortIndicator = (order) => {
   if (!order) return <span className="sort-indicator">&nbsp;↕</span>;
@@ -36,7 +37,8 @@ const AuthCodeManagement = () => {
   const [alert, setAlert] = useState({
     isOpen: false,
     message: '',
-    severity: 'success'
+    severity: 'success',
+    duration: 2000  // 默认持续时间为 2 秒
   });
 
   const fetchAuthCodes = useCallback(async () => {
@@ -53,7 +55,7 @@ const AuthCodeManagement = () => {
         const totalCount = countResponse.data.data.totalElements;
         setTotalElements(totalCount);
 
-        // 然后获取所有数据
+        // 然后取所有数据
         const allDataResponse = await axiosInstance.get('/authorization-codes', {
           headers: { Authorization: `Bearer ${token}` },
           params: { page: 0, size: totalCount },
@@ -120,6 +122,30 @@ const AuthCodeManagement = () => {
       dataField: 'creator',
       text: 'Creator',
       sort: true,
+      searchable: false,
+      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {column.text} {sortElement}
+        </div>
+      ),
+      sortCaret: sortIndicator,
+    },
+    {
+      dataField: 'createDate',
+      text: 'Create Date',
+      sort: true,
+      formatter: (cell) => new Date(cell).toLocaleString(),
+      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {column.text} {sortElement}
+        </div>
+      ),
+      sortCaret: sortIndicator,
+    },
+    {
+      dataField: 'usedBy',
+      text: 'Used By',
+      sort: true,
       headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {column.text} {sortElement}
@@ -141,22 +167,10 @@ const AuthCodeManagement = () => {
       style: { width: '150px' }, 
     },
     {
-      dataField: 'createDate',
-      text: 'Create Date',
-      sort: true,
-      formatter: (cell) => new Date(cell).toLocaleString(),
-      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {column.text} {sortElement}
-        </div>
-      ),
-      sortCaret: sortIndicator,
-    },
-    {
       dataField: 'valid',
       text: 'Valid',
       formatter: (cell) => cell ? 'Yes' : 'No',
-      // 移除了 sort 属性和相关的排序配置
+      // 移除了 sort 性和相关的排序配置
     },
     {
       dataField: 'actions',
@@ -219,7 +233,8 @@ const AuthCodeManagement = () => {
         setAlert({
           isOpen: true,
           message: 'Copied successfully',
-          severity: 'success'
+          severity: 'success',
+          duration: 2000  // 设置持续时间为 2 秒
         });
       }).catch(err => {
         console.error('Failed to copy: ', err);
@@ -250,13 +265,15 @@ const AuthCodeManagement = () => {
         setAlert({
           isOpen: true,
           message: 'Copied successfully',
-          severity: 'success'
+          severity: 'success',
+          duration: 2000  // 设置持续时间为 2 秒
         });
       } else {
         setAlert({
           isOpen: true,
           message: 'Copy failed, please copy manually',
-          severity: 'error'
+          severity: 'error',
+          duration: 2000  // 设置持续时间为 2 秒
         });
       }
     } catch (err) {
@@ -264,7 +281,8 @@ const AuthCodeManagement = () => {
       setAlert({
         isOpen: true,
         message: 'Copy failed, please copy manually',
-        severity: 'error'
+        severity: 'error',
+        duration: 2000  // 设置持续时间为 2 秒
       });
     }
 
@@ -277,6 +295,16 @@ const AuthCodeManagement = () => {
     }
     setAlert(prev => ({ ...prev, isOpen: false }));
   };
+
+  useEffect(() => {
+    if (alert.isOpen) {
+      const timer = setTimeout(() => {
+        setAlert(prev => ({ ...prev, isOpen: false }));
+      }, alert.duration);
+
+      return () => clearTimeout(timer);
+    }
+  }, [alert.isOpen, alert.duration]);
 
   return (
     <div>
@@ -296,18 +324,23 @@ const AuthCodeManagement = () => {
                 keyField="code"
                 data={authCodes}
                 columns={columns}
-                search
               >
                 {(props) => (
                   <div>
                     <div className="d-flex justify-content-between mb-3">
-                      <SearchBar 
-                        {...props.searchProps} 
-                        placeholder="Search Code..."
-                      />
+                      {/* 移除 SearchBar 组件 */}
+                      {/* 如果您想保留搜索框的样式但使其不可用，可以使用以下注释的代码 */}
+                      {/* <input 
+                        type="text" 
+                        placeholder="Search by Code... (Disabled)"
+                        disabled
+                        className="form-control"
+                        style={{ width: '300px' }}
+                      /> */}
                       <CustomButton
                         type="create"
                         onClick={toggleCreateModal}
+                        style={{ marginLeft: 'auto' }}  // 这会将按钮推到右侧
                       >
                         Create Auth Codes
                       </CustomButton>
@@ -333,7 +366,7 @@ const AuthCodeManagement = () => {
                             }}
                           />
                           <div className="d-flex justify-content-between align-items-center mt-3">
-                            <SizePerPageDropdownStandalone {...paginationProps} />
+                            <SizePerPageDropdownStandalone {...paginationProps} className="custom-size-per-page"/>
                             <PaginationListStandalone {...paginationProps} />
                           </div>
                         </div>

@@ -18,12 +18,13 @@ import {
 } from './ConfigTables';
 import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config';
-import CustomAlert from '../../CustomAlert';  // 导入 CustomAlert
+import CustomAlert from '../../CustomAlert';
 import ComponentCard from '../../AuthCodeManagement/ComponentCard';
 import CustomButton from '../../CustomButton';
 
 const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   const [config, setConfig] = useState(null);
+  const [roomDetails, setRoomDetails] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [alert, setAlert] = useState({
     isOpen: false,
@@ -50,10 +51,11 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       const data = response.data;
-      
+
       if (data.success && data.data) {
+        setRoomDetails(data.data);
         let parsedConfig;
         if (typeof data.data.config === 'string') {
           try {
@@ -64,7 +66,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
         } else {
           parsedConfig = data.data.config;
         }
-        
+
         setConfig(parsedConfig);
       } else {
         showAlert(`Error fetching room details: ${data.errorMsg}`, "error");
@@ -209,26 +211,32 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                 alignItems="center"
                 className="room-config-title"
               >
-                <Box display="flex" alignItems="center">
+                <Box display="flex" flexDirection="column">
                   <span style={{ fontSize: '18px', fontWeight: '500', marginRight: '10px' }}>
                     {roomTypeName}
                   </span>
-                  {config && config !== "{}" && Object.keys(config).length > 0 && !isEditing && (
-                    <CustomButton
-                      onClick={handleDownloadJson}
-                      icon={<CloudDownloadIcon />}
-                      color="#6c757d"
-                      allowedRoles={['OWNER']}
-                      userRole={userRole}
-                    >
-                      Download JSON
-                    </CustomButton>
+                  {roomDetails && (
+                    <span style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+                      Authorization Code: {roomDetails.authorizationCode} | Usage: {roomDetails.count}
+                    </span>
                   )}
                 </Box>
-                
-                <Box display="flex" alignItems="center">
+
+                <Box display="flex" alignItems="center" justifyContent="flex-end" width="50%">
                   {!isEditing ? (
                     <>
+                      {config && config !== "{}" && Object.keys(config).length > 0 && (
+                        <CustomButton
+                          onClick={handleDownloadJson}
+                          icon={<CloudDownloadIcon />}
+                          color="#6c757d"
+                          allowedRoles={['OWNER']}
+                          userRole={userRole}
+                          style={{ marginRight: "10px" }}
+                        >
+                          Download JSON
+                        </CustomButton>
+                      )}
                       <CustomButton
                         onClick={handleCloudUploadClick}
                         icon={<CloudUploadIcon />}
@@ -256,7 +264,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                       onClick={handleBackClick}
                       icon={<ArrowBackIosIcon />}
                       color="#6c757d"
-                      style={{ marginRight: "10px"}}
                     >
                       Back
                     </CustomButton>
