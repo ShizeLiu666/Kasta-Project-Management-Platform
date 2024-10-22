@@ -86,7 +86,7 @@ const ProjectCard = ({
         boxShadow: isHovered ? '0 8px 16px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)',
         border: isHovered ? '1px solid #fbcd0b' : '1px solid #e0e0e0',
         margin: '10px',
-        overflow: 'hidden',
+        // overflow: 'hidden',
       }}
       onClick={(event) => onCardClick(event, project)}
       onMouseEnter={() => setIsHovered(true)}

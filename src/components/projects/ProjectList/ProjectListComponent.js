@@ -267,7 +267,7 @@ const ProjectListComponent = () => {
               <BreadcrumbItem>
                 <button
                   onClick={() =>
-                    handleNavigate(["Project List", "Room Types"], null, null)
+                    handleNavigate(["Project List", "Project Details"], null, null)
                   }
                   style={{
                     background: "none",

@@ -72,7 +72,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
 
   const handleRoomTypeClick = (roomType) => {
     onNavigate(
-      ["Project List", "Room Types", "Room Configurations"],
+      ["Project List", "Project Details", "Room Configurations"],
       roomType.projectRoomId,
       roomType.name,
       userRole,
