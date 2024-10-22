@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { Container } from "reactstrap";
+import "./FullLayout.css";
 
 const FullLayout = () => {
   const [userType, setUserType] = useState(null);
@@ -30,7 +31,7 @@ const FullLayout = () => {
     <main>
       {/********header**********/}
       <Header toggleSidebar={toggleSidebar} />
-      <div className="pageWrapper d-lg-flex">
+      <div className="pageWrapper d-lg-flex content-container">
         {/********Sidebar**********/}
         <aside className={`sidebarArea shadow ${sidebarOpen ? 'showSidebar' : ''}`} id="sidebarArea">
           <Sidebar userType={userType} toggleSidebar={toggleSidebar} />
