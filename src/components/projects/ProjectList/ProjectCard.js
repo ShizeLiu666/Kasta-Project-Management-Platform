@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Card, CardBody, CardSubtitle, Badge } from "reactstrap";
+import { Card, CardBody, CardSubtitle, Badge, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import { IconButton, Menu, MenuItem } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/DeleteForever';
 import EditIcon from '@mui/icons-material/EditNote';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
@@ -20,8 +19,8 @@ const ProjectCard = ({
   setMenuOpen,
   userRole,
 }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [isDropdownHovered, setIsDropdownHovered] = useState(false);
 
   const imageUrl = project.iconUrl || default_image;
 
@@ -42,12 +41,10 @@ const ProjectCard = ({
 
   const handleMenuClick = (event) => {
     event.stopPropagation();
-    setAnchorEl(event.currentTarget);
     setMenuOpen(true);
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
     setMenuOpen(false);
   };
 
@@ -86,7 +83,7 @@ const ProjectCard = ({
         boxShadow: isHovered ? '0 8px 16px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)',
         border: isHovered ? '1px solid #fbcd0b' : '1px solid #e0e0e0',
         margin: '10px',
-        // overflow: 'hidden',
+        overflow: 'hidden',
       }}
       onClick={(event) => onCardClick(event, project)}
       onMouseEnter={() => setIsHovered(true)}
@@ -103,26 +100,49 @@ const ProjectCard = ({
           <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
           {getRoleBadge(userRole)}
         </div>
-        <IconButton
-          aria-label="more"
-          aria-controls="menu"
-          aria-haspopup="true"
-          onClick={handleMenuClick}
-          style={{
-            padding: '8px',
-            transition: 'background-color 0.3s',
-          }}
-          sx={{
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',
-            },
-            '& .MuiSvgIcon-root': {
-              fontSize: '2rem',
-            },
-          }}
-        >
-          <MoreHorizIcon />
-        </IconButton>
+        <UncontrolledDropdown>
+          <DropdownToggle 
+            tag="span" 
+            onClick={handleMenuClick}
+            onMouseEnter={() => setIsDropdownHovered(true)}
+            onMouseLeave={() => setIsDropdownHovered(false)}
+            style={{
+              cursor: 'pointer',
+              padding: '8px 8px 14px 8px',
+              borderRadius: '75%',
+              backgroundColor: isDropdownHovered ? '#f1f1f1' : 'transparent',
+              transition: 'background-color 0.3s'
+            }}
+          >
+            <MoreHorizIcon style={{ fontSize: '30px', marginTop: '3px' }} />
+          </DropdownToggle>
+          <DropdownMenu end>
+            {userRole === 'OWNER' ? [
+              <DropdownItem key="invite" onClick={handleInviteMember}>
+                <SendIcon fontSize="small" style={{marginRight:"8px", color: "#4CAF50"}}/>
+                Invite Member
+              </DropdownItem>,
+              <DropdownItem key="edit" onClick={handleEdit}>
+                <EditIcon style={{marginRight:"8px", color: "#007bff"}}/>
+                Edit
+              </DropdownItem>,
+              <DropdownItem key="change" onClick={handleChangeBackground}>
+                <WallpaperIcon fontSize="small" style={{marginRight:"8px", color: "grey"}}/>
+                Change Image
+              </DropdownItem>,
+              <DropdownItem key="remove" onClick={handleRemove}>
+                <DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>
+                Remove
+              </DropdownItem>
+            ] : null}
+            {userRole === 'VISITOR' && (
+              <DropdownItem key="leave" onClick={handleLeaveProject}>
+                <LogoutIcon fontSize="small" style={{marginRight:"8px", color: "#dc3545"}}/>
+                Leave Project
+              </DropdownItem>
+            )}
+          </DropdownMenu>
+        </UncontrolledDropdown>
       </div>
 
       <div
@@ -133,7 +153,6 @@ const ProjectCard = ({
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           transition: 'transform 0.3s ease',
-          // transform: isHovered ? 'scale(1.05)' : 'scale(1)',
         }}
       />
 
@@ -141,46 +160,6 @@ const ProjectCard = ({
         <CardSubtitle>Address: {project.address || 'None'}</CardSubtitle>
         <CardSubtitle>Description: {project.des || 'None'}</CardSubtitle>
       </CardBody>
-
-      <Menu
-        id="menu"
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-      >
-        {userRole === 'OWNER' ? [
-          <MenuItem key="invite" onClick={handleInviteMember}>
-            <SendIcon fontSize="small" style={{marginRight:"8px", color: "#4CAF50"}}/>
-            Invite Member
-          </MenuItem>,
-          <MenuItem key="edit" onClick={handleEdit}>
-          <EditIcon style={{marginRight:"8px", color: "#007bff"}}/>
-          Edit
-        </MenuItem>,
-          <MenuItem key="change" onClick={handleChangeBackground}>
-            <WallpaperIcon fontSize="small" style={{marginRight:"8px", color: "grey"}}/>
-            Change Image
-          </MenuItem>,
-          <MenuItem key="remove" onClick={handleRemove}>
-            <DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>
-            Remove
-          </MenuItem>
-        ] : null}
-        {userRole === 'VISITOR' && (
-          <MenuItem key="leave" onClick={handleLeaveProject}>
-            <LogoutIcon fontSize="small" style={{marginRight:"8px", color: "#dc3545"}}/>
-            Leave Project
-          </MenuItem>
-        )}
-      </Menu>
     </Card>
   );
 };
