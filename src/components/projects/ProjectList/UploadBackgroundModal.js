@@ -4,7 +4,7 @@ import axiosInstance from '../../../config';
 import { getToken } from '../../auth/auth';
 import CustomModal from '../../CustomModal';
 
-const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) => {
+const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess, project }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [successAlert, setSuccessAlert] = useState('');
@@ -47,7 +47,7 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) =
           setTimeout(() => {
             setSuccessAlert('');
             toggle();
-            onUploadSuccess(updateResponse.data.data); // 返回更新后的项目信息
+            onUploadSuccess({...updateResponse.data.data, role: project.role});
           }, 2000);
         } else {
           setError(updateResponse.data.errorMsg || 'Failed to update project background.');

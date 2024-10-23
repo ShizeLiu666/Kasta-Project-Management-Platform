@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardBody, CardSubtitle, Badge, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import DeleteIcon from '@mui/icons-material/DeleteForever';
@@ -21,6 +21,11 @@ const ProjectCard = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState(userRole);
+
+  useEffect(() => {
+    setCurrentUserRole(userRole);
+  }, [userRole]);
 
   const imageUrl = project.iconUrl || default_image;
 
@@ -98,7 +103,7 @@ const ProjectCard = ({
       }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
-          {getRoleBadge(userRole)}
+          {getRoleBadge(currentUserRole)}
         </div>
         <UncontrolledDropdown>
           <DropdownToggle 
@@ -117,7 +122,7 @@ const ProjectCard = ({
             <MoreHorizIcon style={{ fontSize: '30px', marginTop: '3px' }} />
           </DropdownToggle>
           <DropdownMenu end>
-            {userRole === 'OWNER' ? [
+            {currentUserRole === 'OWNER' ? [
               <DropdownItem key="invite" onClick={handleInviteMember}>
                 <SendIcon fontSize="small" style={{marginRight:"8px", color: "#4CAF50"}}/>
                 Invite Member
@@ -135,7 +140,7 @@ const ProjectCard = ({
                 Remove
               </DropdownItem>
             ] : null}
-            {userRole === 'VISITOR' && (
+            {currentUserRole === 'VISITOR' && (
               <DropdownItem key="leave" onClick={handleLeaveProject}>
                 <LogoutIcon fontSize="small" style={{marginRight:"8px", color: "#dc3545"}}/>
                 Leave Project

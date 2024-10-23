@@ -186,7 +186,7 @@ const ProjectListComponent = () => {
   const handleUploadSuccess = (updatedProject) => {
     setProjects(prevProjects => 
       prevProjects.map(project => 
-        project.projectId === updatedProject.projectId ? updatedProject : project
+        project.projectId === updatedProject.projectId ? {...project, ...updatedProject} : project
       )
     );
   };
@@ -330,7 +330,7 @@ const ProjectListComponent = () => {
                   onChangeBackground={toggleUploadBackgroundModal}
                   onLeaveProject={handleLeaveProject}
                   setMenuOpen={setMenuOpen}
-                  userRole={project.role}
+                  userRole={project.role}  // 确保这里使用正确的属性名
                   onInviteMember={handleInviteMember}
                 />
               </div>
@@ -396,6 +396,7 @@ const ProjectListComponent = () => {
         isOpen={uploadBackgroundModalOpen}
         toggle={() => toggleUploadBackgroundModal(null)}
         projectId={selectedProject?.projectId}
+        project={selectedProject}  // 添加这一行
         onUploadSuccess={handleUploadSuccess}
       />
 
