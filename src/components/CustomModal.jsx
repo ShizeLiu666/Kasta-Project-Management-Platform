@@ -4,9 +4,9 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    Alert
 } from 'reactstrap';
 import CustomButton from './CustomButton';
+import CustomAlert from './CustomAlert';
 
 const CustomModal = ({ 
     isOpen, 
@@ -52,48 +52,51 @@ const CustomModal = ({
     };
 
     return (
-        <Modal 
-            isOpen={isOpen} 
-            toggle={toggle} 
-            centered
-            scrollable
-        >
-            <ModalHeader toggle={toggle}>{title}</ModalHeader>
-            <ModalBody>
-                {showSuccessAlert && successAlert && (
-                    <Alert color="success" toggle={handleCloseSuccessAlert}>
-                        {successAlert}
-                    </Alert>
-                )}
-                {showErrorAlert && error && (
-                    <Alert color="danger" toggle={handleCloseErrorAlert}>
-                        {error}
-                    </Alert>
-                )}
-                {children}
-            </ModalBody>
-            <ModalFooter>
-                <CustomButton
-                    type={submitButtonType}
-                    color={submitButtonColor}
-                    onClick={() => {
-                        onSubmit();
-                        toggle();
-                    }}
-                    disabled={isSubmitting || disabled}
-                    style={{marginRight: '10px'}}
-                >
-                    {isSubmitting ? 'Submitting...' : submitText}
-                </CustomButton>
-                <CustomButton 
-                    type={cancelButtonType}
-                    color={cancelButtonColor}
-                    onClick={toggle}
-                >
-                    {cancelText}
-                </CustomButton>
-            </ModalFooter>
-        </Modal>
+        <>
+            <Modal 
+                isOpen={isOpen} 
+                toggle={toggle} 
+                centered
+                scrollable
+            >
+                <ModalHeader toggle={toggle}>{title}</ModalHeader>
+                <ModalBody>
+                    {children}
+                </ModalBody>
+                <ModalFooter>
+                    <CustomButton
+                        type={submitButtonType}
+                        color={submitButtonColor}
+                        onClick={onSubmit}
+                        disabled={isSubmitting || disabled}
+                        style={{marginRight: '10px'}}
+                    >
+                        {isSubmitting ? 'Submitting...' : submitText}
+                    </CustomButton>
+                    <CustomButton 
+                        type={cancelButtonType}
+                        color={cancelButtonColor}
+                        onClick={toggle}
+                    >
+                        {cancelText}
+                    </CustomButton>
+                </ModalFooter>
+            </Modal>
+            <CustomAlert
+                isOpen={showSuccessAlert}
+                onClose={handleCloseSuccessAlert}
+                message={successAlert}
+                severity="success"
+                autoHideDuration={3000}
+            />
+            <CustomAlert
+                isOpen={showErrorAlert}
+                onClose={handleCloseErrorAlert}
+                message={error}
+                severity="error"
+                autoHideDuration={3000}
+            />
+        </>
     );
 };
 

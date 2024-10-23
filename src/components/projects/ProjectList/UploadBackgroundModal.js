@@ -47,7 +47,7 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess }) =
           setTimeout(() => {
             setSuccessAlert('');
             toggle();
-            onUploadSuccess(response.data.data);
+            onUploadSuccess(updateResponse.data.data); // 返回更新后的项目信息
           }, 2000);
         } else {
           setError(updateResponse.data.errorMsg || 'Failed to update project background.');

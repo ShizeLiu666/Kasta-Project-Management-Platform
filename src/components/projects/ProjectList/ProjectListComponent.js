@@ -183,8 +183,12 @@ const ProjectListComponent = () => {
     project.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleUploadSuccess = () => {
-    fetchProjectList();
+  const handleUploadSuccess = (updatedProject) => {
+    setProjects(prevProjects => 
+      prevProjects.map(project => 
+        project.projectId === updatedProject.projectId ? updatedProject : project
+      )
+    );
   };
 
   const handleInvitationAction = (action, projectId) => {
