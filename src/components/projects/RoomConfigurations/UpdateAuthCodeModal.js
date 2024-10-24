@@ -1,25 +1,21 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Form, FormGroup, Label, Input } from "reactstrap";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Form, FormGroup, Label } from 'reactstrap';
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
-import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth/auth';
-import CustomModal from '../../../CustomModal';
+import CustomModal from '../../CustomModal';
+import { getToken } from '../../auth/auth';
+import axiosInstance from '../../../config';
 
 const filter = createFilterOptions();
 
-const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) => {
+const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
   const [formData, setFormData] = useState({
-    name: "",
-    typeCode: "",
-    des: "",
     authorizationCode: ""
   });
-  const [error, setError] = useState("");
-  const [successAlert, setSuccessAlert] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTypeCodeManuallyEdited, setIsTypeCodeManuallyEdited] = useState(false);
+  const [error, setError] = useState('');
+  const [successAlert, setSuccessAlert] = useState('');
   const [validAuthCodes, setValidAuthCodes] = useState([]);
   const [isSuperUser, setIsSuperUser] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
@@ -60,40 +56,33 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
   }, [currentUsername]);
 
   const fetchProjectRoomCodes = useCallback(async (token) => {
-    try {
-      const initialResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
+    const initialResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { page: 0, size: 1 },
+    });
+
+    if (initialResponse.data.success) {
+      const totalElements = initialResponse.data.data.totalElements;
+
+      const fullResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page: 0, size: 1 },
+        params: { page: 0, size: totalElements },
       });
 
-      if (initialResponse.data.success) {
-        const totalElements = initialResponse.data.data.totalElements;
-
-        const fullResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { page: 0, size: totalElements },
-        });
-
-        if (fullResponse.data.success) {
-          const validCodes = fullResponse.data.data.content
-            .filter(code => 
-              code.usageCount < 10 && 
-              (!code.usedBy || code.usedBy === currentUsername)
-            )
-            .map(code => ({
-              code: code.code,
-              label: `${code.code} (${10 - code.usageCount} uses left)`,
-              usageCount: code.usageCount
-            }));
-          setValidAuthCodes(validCodes);
-        } else {
-          console.error('Failed to fetch project room codes:', fullResponse.data.errorMsg);
-        }
+      if (fullResponse.data.success) {
+        const validCodes = fullResponse.data.data.content
+          .filter(code => code.usageCount < 10 && (!code.used_by || code.used_by === currentUsername))
+          .map(code => ({
+            code: code.code,
+            label: `${code.code} (${10 - code.usageCount} uses left)`,
+            usageCount: code.usageCount
+          }));
+        setValidAuthCodes(validCodes);
       } else {
-        console.error('Failed to fetch initial project room codes:', initialResponse.data.errorMsg);
+        console.error('Failed to fetch project room codes:', fullResponse.data.errorMsg);
       }
-    } catch (error) {
-      console.error('Error fetching project room codes:', error);
+    } else {
+      console.error('Failed to fetch initial project room codes:', initialResponse.data.errorMsg);
     }
   }, [currentUsername]);
 
@@ -112,43 +101,12 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        name: "",
-        typeCode: "",
-        des: "",
-        authorizationCode: ""
-      });
-      setError("");
-      setSuccessAlert("");
-      setIsTypeCodeManuallyEdited(false);
+      setFormData({ authorizationCode: "" });
+      setError('');
+      setSuccessAlert('');
       fetchAuthCodes();
     }
   }, [isOpen, fetchAuthCodes]);
-
-  const generateTypeCode = (name) => {
-    const words = name
-      .split(" ")
-      .filter((word) => word.toLowerCase() !== "room" && word.trim() !== "");
-    const initials = words
-      .slice(0, 2)
-      .map((word) => word[0]?.toUpperCase() || "")
-      .join("");
-    return initials;
-  };
-
-  useEffect(() => {
-    if (!isTypeCodeManuallyEdited) {
-      setFormData(prev => ({ ...prev, typeCode: generateTypeCode(formData.name) }));
-    }
-  }, [formData.name, isTypeCodeManuallyEdited]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (name === 'typeCode') {
-      setIsTypeCodeManuallyEdited(true);
-    }
-  };
 
   const handleAuthCodeChange = (event, newValue) => {
     if (typeof newValue === 'string') {
@@ -166,48 +124,39 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
     }
   };
 
-  const isFormValid = () => {
-    return formData.name && formData.typeCode && formData.authorizationCode;
-  };
-
   const handleSubmit = async () => {
-    if (!isFormValid()) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-
-    const token = getToken();
-    if (!token) {
-      setError("No token found, please log in again.");
-      return;
-    }
-
     setIsSubmitting(true);
+    setError('');
+    setSuccessAlert('');
+
     try {
-      const response = await axiosInstance.post(
-        "/project-rooms",
-        {
-          projectId,
-          ...formData
+      const token = getToken();
+      if (!token) {
+        setError("No token found, please log in again.");
+        return;
+      }
+
+      const response = await axiosInstance.put('/project-rooms/update-code', {
+        projectRoomId,
+        code: formData.authorizationCode
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.data.success) {
-        setSuccessAlert("Room type created successfully!");
+      });
+
+      const data = response.data;
+      if (data.success) {
+        setSuccessAlert("Authorization code updated successfully.");
+        onSuccess();
         setTimeout(() => {
-          setSuccessAlert("");
           toggle();
-          onRoomTypeCreated(response.data.data);
-        }, 1000);
+        }, 2000);
       } else {
-        setError(response.data.errorMsg || "Error creating room type.");
+        setError(data.errorMsg || "Failed to update authorization code.");
       }
     } catch (error) {
-      setError("An unexpected error occurred.");
+      setError("An error occurred while updating the authorization code.");
     } finally {
       setIsSubmitting(false);
     }
@@ -217,20 +166,17 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
     <CustomModal
       isOpen={isOpen}
       toggle={toggle}
-      title="Create New Room Type"
+      title="Update Authorization Code"
       onSubmit={handleSubmit}
-      submitText="Create"
-      successAlert={successAlert}
-      error={error}
+      submitText="Update"
       isSubmitting={isSubmitting}
-      disabled={!isFormValid()}
-      submitButtonColor="#fbcd0b"
+      error={error}
+      successAlert={successAlert}
+      disabled={!formData.authorizationCode}
     >
       <Form>
         <FormGroup>
-          <Label for="authorizationCode">
-            <span style={{ color: "red" }}>*</span> Auth Code:
-          </Label>
+          <Label for="authCode">New Authorization Code</Label>
           <Autocomplete
             id="auth-code-select"
             options={validAuthCodes}
@@ -246,7 +192,6 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
             filterOptions={(options, params) => {
               const filtered = filter(options, params);
               const { inputValue } = params;
-              // 建议创建新值
               const isExisting = options.some((option) => inputValue === option.code);
               if (inputValue !== '' && !isExisting) {
                 filtered.push({
@@ -281,45 +226,9 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
             isOptionEqualToValue={(option, value) => option.code === value.code}
           />
         </FormGroup>
-        <FormGroup>
-          <Label for="name">
-            <span style={{ color: "red" }}>*</span> Room Type Name:
-          </Label>
-          <Input
-            type="text"
-            name="name"
-            id="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
-        <FormGroup>
-          <Label for="typeCode">
-            <span style={{ color: "red" }}>*</span> Room Type Code:
-          </Label>
-          <Input
-            type="text"
-            name="typeCode"
-            id="typeCode"
-            value={formData.typeCode}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
-        <FormGroup>
-          <Label for="des">Description:</Label>
-          <Input
-            type="text"
-            name="des"
-            id="des"
-            value={formData.des}
-            onChange={handleChange}
-          />
-        </FormGroup>
       </Form>
     </CustomModal>
   );
 };
 
-export default CreateRoomTypeModal;
+export default UpdateAuthCodeModal;

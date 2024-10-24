@@ -21,6 +21,8 @@ import axiosInstance from '../../../config';
 import CustomAlert from '../../CustomAlert';
 import ComponentCard from '../../AuthCodeManagement/ComponentCard';
 import CustomButton from '../../CustomButton';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+import UpdateAuthCodeModal from './UpdateAuthCodeModal';
 
 const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   const [config, setConfig] = useState(null);
@@ -33,6 +35,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
     duration: 3000
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [updateAuthCodeModalOpen, setUpdateAuthCodeModalOpen] = useState(false);
 
   const showAlert = (message, severity, duration = 3000) => {
     setAlert({ isOpen: true, message, severity, duration });
@@ -121,6 +124,16 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   }, [projectRoomId, fetchRoomDetail]);
 
   useEffect(() => {
+    if (roomDetails && roomDetails.count === 9) {
+      showAlert(
+        "You have only one use remaining. Please prepare to update your authorization code.",
+        "warning",
+        null  // 设置为 null 使得警告不会自动消失
+      );
+    }
+  }, [roomDetails]);
+
+  useEffect(() => {
     if (config) {
       console.log('Config:', JSON.stringify(config, null, 2));
       if (config.devices) {
@@ -192,6 +205,14 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
     }
   };
 
+  const handleUpdateAuthCode = () => {
+    setUpdateAuthCodeModalOpen(true);
+  };
+
+  const handleUpdateAuthCodeSuccess = () => {
+    fetchRoomDetail();
+  };
+
   return (
     <div>
       <CustomAlert
@@ -217,7 +238,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                   </span>
                   {roomDetails && (
                     <span style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
-                      Authorization Code: {roomDetails.authorizationCode} | Usage: {roomDetails.count}
+                      Authorization Code: {roomDetails.authorizationCode} | Remaining Uses: {10 - roomDetails.count}
                     </span>
                   )}
                 </Box>
@@ -237,16 +258,30 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                           Download JSON
                         </CustomButton>
                       )}
-                      <CustomButton
-                        onClick={handleCloudUploadClick}
-                        icon={<CloudUploadIcon />}
-                        color="#007bff"
-                        style={{ marginRight: "10px" }}
-                        allowedRoles={['OWNER']}
-                        userRole={userRole}
-                      >
-                        Upload / Overwrite
-                      </CustomButton>
+                      {roomDetails && roomDetails.count < 10 && (
+                        <CustomButton
+                          onClick={handleCloudUploadClick}
+                          icon={<CloudUploadIcon />}
+                          color="#007bff"
+                          style={{ marginRight: "10px" }}
+                          allowedRoles={['OWNER']}
+                          userRole={userRole}
+                        >
+                          Upload / Overwrite
+                        </CustomButton>
+                      )}
+                      {roomDetails && roomDetails.count === 10 && (
+                        <CustomButton
+                          onClick={handleUpdateAuthCode}
+                          icon={<UpgradeIcon />}
+                          color="#fbcd0b"
+                          style={{ marginRight: "10px" }}
+                          allowedRoles={['OWNER']}
+                          userRole={userRole}
+                        >
+                          Update Auth Code
+                        </CustomButton>
+                      )}
                       {config && config !== "{}" && Object.keys(config).length > 0 && (
                         <CustomButton
                           onClick={() => setDeleteModalOpen(true)}
@@ -300,6 +335,13 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
             isOpen={deleteModalOpen}
             toggle={() => setDeleteModalOpen(!deleteModalOpen)}
             onDelete={handleDeleteConfig}
+          />
+
+          <UpdateAuthCodeModal
+            isOpen={updateAuthCodeModalOpen}
+            toggle={() => setUpdateAuthCodeModalOpen(false)}
+            projectRoomId={projectRoomId}
+            onSuccess={handleUpdateAuthCodeSuccess}
           />
         </Col>
       </Row>

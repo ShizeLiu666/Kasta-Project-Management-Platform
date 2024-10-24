@@ -1,6 +1,8 @@
 import React from 'react';
 import { Table } from 'reactstrap';
+import ComponentCard from '../../AuthCodeManagement/ComponentCard';
 
+// eslint-disable-next-line no-unused-vars
 const captionStyle = {
     captionSide: 'top',
     fontWeight: 'bold',
@@ -21,14 +23,59 @@ const getTypeString = (type) => {
   }
 };
 
-const renderLinkInfo = (link) => {
-  const typeString = getTypeString(link.linkType);
-  return (
-    <div>
-      {link.linkIndex + 1}: {typeString} {link.linkName}
-      {link.action !== null && <span> ({link.action})</span>}
-    </div>
-  );
+const getLinkTypeColor = (type) => {
+  switch (type) {
+    case 1: return '#4A90E2';    // Device - 蓝色，代表技术和功能
+    case 2: return '#50C878';    // Group - 绿色，代表组织和集合
+    case 3: return '#F5A623';    // Room - 橙色，代表空间和温暖
+    case 4: return '#9B59B6';    // Scene - 紫色，代表创意和多样性
+    default: return '#95A5A6';   // 默认 - 灰色
+  }
+};
+
+const customBadgeStyle = {
+  display: 'inline-block',
+  padding: '5px 10px',
+  fontSize: '0.8em',
+  fontWeight: 'bold',
+  lineHeight: 1,
+  textAlign: 'center',
+  whiteSpace: 'nowrap',
+  verticalAlign: 'baseline',
+  borderRadius: '0.25rem',
+  color: 'white'
+};
+
+const tableStyle = {
+  borderCollapse: 'collapse',
+  width: '100%',
+  marginBottom: '0',
+  border: 'none'  // 保持表格外边框为空
+};
+
+const cellStyle = {
+  borderBottom: '1px solid #dee2e6',  // 添加底部边框
+  padding: '10px'
+};
+
+const headerCellStyle = {
+  ...cellStyle,
+  backgroundColor: '#f8f9fa',
+  fontWeight: 'bold'
+};
+
+const componentCardStyle = {
+  marginBottom: '20px',
+  boxShadow: 'none',
+  border: 'none'
+};
+
+// eslint-disable-next-line no-unused-vars
+const cardHeaderStyle = {
+  backgroundColor: '#f1f1f1',
+  color: 'black',
+  padding: '5px 10px',
+  fontSize: '1.2em'
 };
 
 export const renderDevicesTable = (devices) => {
@@ -39,25 +86,26 @@ export const renderDevicesTable = (devices) => {
   const deviceArray = Array.isArray(devices) ? devices : Object.values(devices);
   
   return (
-    <Table>
-      <caption style={captionStyle}>Devices</caption>
-      <thead>
-        <tr>
-          <th>Device Name</th>
-          <th>Device Type</th>
-          <th>Appearance Shortname</th>
-        </tr>
-      </thead>
-      <tbody>
-        {deviceArray.map((device, index) => (
-          <tr key={index}>
-            <td>{device.deviceName || 'N/A'}</td>
-            <td>{device.deviceType || 'N/A'}</td>
-            <td>{device.appearanceShortname || 'N/A'}</td>
+    <ComponentCard title="Devices" style={componentCardStyle}>
+      <Table borderless responsive style={tableStyle}>
+        <thead>
+          <tr>
+            <th style={{ ...headerCellStyle, width: '30%' }}>Device Name</th>
+            <th style={{ ...headerCellStyle, width: '30%' }}>Device Type</th>
+            <th style={{ ...headerCellStyle, width: '40%' }}>Appearance Shortname</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {deviceArray.map((device, index) => (
+            <tr key={index}>
+              <td style={cellStyle}>{device.deviceName || 'N/A'}</td>
+              <td style={cellStyle}>{device.deviceType || 'N/A'}</td>
+              <td style={cellStyle}>{device.appearanceShortname || 'N/A'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </ComponentCard>
   );
 };
 
@@ -67,22 +115,50 @@ export const renderGroupsTable = (groups) => {
   }
   
   return (
-    <Table>
-      <caption style={captionStyle}>Groups</caption>
+    <ComponentCard title="Groups" style={componentCardStyle}>
+      <Table borderless responsive style={tableStyle}>
+        <thead>
+          <tr>
+            <th style={{ ...headerCellStyle, width: '30%' }}>Group Name</th>
+            <th style={{ ...headerCellStyle, width: '70%' }}>Devices</th>
+          </tr>
+        </thead>
+        <tbody>
+          {groups.map((group, index) => (
+            <tr key={index}>
+              <td style={cellStyle}>{group.groupName}</td>
+              <td style={cellStyle}>
+                {group.devices.map((device, deviceIndex) => (
+                  <div key={deviceIndex}>
+                    {device.deviceName} ({device.appearanceShortname})
+                  </div>
+                ))}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </ComponentCard>
+  );
+};
+
+export const renderScenesTable = (scenes) => (
+  <ComponentCard title="Scenes" style={componentCardStyle}>
+    <Table borderless responsive style={tableStyle}>
       <thead>
         <tr>
-          <th>Group Name</th>
-          <th>Devices</th>
+          <th style={{ ...headerCellStyle, width: '30%' }}>Scene Name</th>
+          <th style={{ ...headerCellStyle, width: '70%' }}>Devices</th>
         </tr>
       </thead>
       <tbody>
-        {groups.map((group, index) => (
+        {scenes.map((scene, index) => (
           <tr key={index}>
-            <td>{group.groupName}</td>
-            <td>
-              {group.devices.map((device, deviceIndex) => (
-                <div key={deviceIndex}>
-                  {device.deviceName} ({device.appearanceShortname})
+            <td style={cellStyle}>{scene.sceneName}</td>
+            <td style={cellStyle}>
+              {scene.contents && scene.contents.map((content, contentIndex) => (
+                <div key={contentIndex}>
+                  {content.name}: {renderDeviceStatus(content)}
                 </div>
               ))}
             </td>
@@ -90,33 +166,7 @@ export const renderGroupsTable = (groups) => {
         ))}
       </tbody>
     </Table>
-  );
-};
-
-export const renderScenesTable = (scenes) => (
-  <Table>
-    <caption style={captionStyle}>Scenes</caption>
-    <thead>
-      <tr>
-        <th>Scene Name</th>
-        <th>Devices</th>
-      </tr>
-    </thead>
-    <tbody>
-      {scenes.map((scene, index) => (
-        <tr key={index}>
-          <td>{scene.sceneName}</td>
-          <td>
-            {scene.contents && scene.contents.map((content, contentIndex) => (
-              <div key={contentIndex}>
-                {content.name}: {renderDeviceStatus(content)}
-              </div>
-            ))}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </Table>
+  </ComponentCard>
 );
 
 const renderDeviceStatus = (content) => {
@@ -149,29 +199,40 @@ const renderDeviceStatus = (content) => {
 };
 
 export const renderRemoteControlsTable = (remoteControls) => (
-  <Table>
-    <caption style={captionStyle}>Remote Controls</caption>
-    <thead>
-      <tr>
-        <th>Remote Name</th>
-        <th>Links</th>
-      </tr>
-    </thead>
-    <tbody>
-      {remoteControls.map((remote, index) => (
-        <tr key={index}>
-          <td>{remote.remoteName}</td>
-          <td>
-            {remote.links.length === 0 ? '(None)' : (
-              remote.links.map((link, i) => (
-                <div key={i}>
-                  {renderLinkInfo(link)}
-                </div>
-              ))
-            )}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </Table>
+  <div>
+    <div className="component-card-title">Remote Controls</div>
+    {remoteControls.map((remote, index) => (
+      <ComponentCard key={index} title={remote.remoteName} style={componentCardStyle}>
+        <Table borderless responsive style={tableStyle}>
+          <thead>
+            <tr>
+              <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Button</th>
+              <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Type</th>
+              <th style={{ ...headerCellStyle, width: '30%' }}>Name</th>
+              <th style={{ ...headerCellStyle, width: '20%' }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {remote.links.map((link, i) => (
+              <tr key={i}>
+                <td style={{ ...cellStyle, textAlign: 'center' }}>{link.linkIndex + 1}</td>
+                <td style={{ ...cellStyle, textAlign: 'center' }}>
+                  <span
+                    style={{
+                      ...customBadgeStyle,
+                      backgroundColor: getLinkTypeColor(link.linkType)
+                    }}
+                  >
+                    {getTypeString(link.linkType)}
+                  </span>
+                </td>
+                <td style={cellStyle}>{link.linkName}</td>
+                <td style={cellStyle}>{link.action || 'N/A'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </ComponentCard>
+    ))}
+  </div>
 );

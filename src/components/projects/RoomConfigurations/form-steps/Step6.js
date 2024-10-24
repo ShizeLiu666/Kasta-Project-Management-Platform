@@ -23,6 +23,7 @@ const Step6 = forwardRef(({
   projectRoomId
 }, ref) => {
   const [error, setError] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const processedData = useMemo(() => {
     if (!splitData) return null;
@@ -70,9 +71,17 @@ const Step6 = forwardRef(({
     }
   };
 
-  const handleUploadConfig = () => {
+  const handleUploadConfig = async () => {
     if (jsonResult) {
-      submitJson(jsonResult);
+      setIsUploading(true);
+      try {
+        await submitJson(jsonResult);
+        // 上传成功后，可以在这里添加一些成功提示
+      } catch (err) {
+        setError("Failed to upload configuration: " + err.message);
+      } finally {
+        setIsUploading(false);
+      }
     } else {
       setError("No JSON content to upload");
     }
@@ -112,15 +121,15 @@ const Step6 = forwardRef(({
                   onClick={handleDownloadJson}
                   disabled={!jsonResult}
                   icon={<FileDownloadOutlinedIcon />}
-                  color="#6c757d"  // secondary color
+                  color="#6c757d"
                 >
                   Download JSON File
                 </CustomButton>
                 <CustomButton
                   onClick={handleUploadConfig}
-                  disabled={!jsonResult}
+                  disabled={isUploading}
                   icon={<CloudUploadIcon />}
-                  color="#fbcd0b"  // secondary color
+                  color="#fbcd0b"
                 >
                   Upload Configuration
                 </CustomButton>

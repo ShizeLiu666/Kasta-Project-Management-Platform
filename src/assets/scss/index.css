@@ -7,7 +7,6 @@ body {
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* overflow: visible !important; */
 }
 
 code {
@@ -24,3 +23,4 @@ font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
   width: 50px; /* 设定你想要的宽度 */
   height: auto; /* 自动调整高度，保持比例 */
 }
+
