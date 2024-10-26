@@ -206,9 +206,9 @@ function validatePowerPointTypeOperations(
   );
 
   // 调试输出每个设备的类型
-  deviceNames.forEach((name) => {
-    console.log(`Device: ${name}, Type: ${deviceNameToType[name]}`);
-  });
+  // deviceNames.forEach((name) => {
+  //   console.log(`Device: ${name}, Type: ${deviceNameToType[name]}`);
+  // });
 
   // 如果有设备名在 `deviceNameToType` 中找不到类型
   if (deviceTypes.has(undefined)) {

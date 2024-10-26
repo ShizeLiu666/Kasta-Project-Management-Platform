@@ -133,14 +133,14 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
     }
   }, [roomDetails]);
 
-  useEffect(() => {
-    if (config) {
-      console.log('Config:', JSON.stringify(config, null, 2));
-      if (config.devices) {
-        console.log('Devices:', JSON.stringify(config.devices, null, 2));
-      }
-    }
-  }, [config]);
+  // useEffect(() => {
+  //   if (config) {
+  //     console.log('Config:', JSON.stringify(config, null, 2));
+  //     if (config.devices) {
+  //       console.log('Devices:', JSON.stringify(config.devices, null, 2));
+  //     }
+  //   }
+  // }, [config]);
 
   const processDevices = (devices) => {
     if (Array.isArray(devices)) {
@@ -318,7 +318,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                   <>
                     {config.devices && (
                       <div>
-                        {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))}
+                        {/* {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))} */}
                         {renderDevicesTable(processDevices(config.devices))}
                       </div>
                     )}

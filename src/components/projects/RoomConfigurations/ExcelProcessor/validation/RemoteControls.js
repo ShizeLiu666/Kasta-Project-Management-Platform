@@ -10,7 +10,6 @@ const deviceModelToKeyCount = {
     "4 Output Module": 4
 };
 
-//! 检查 'NAME' 是否缺少冒号
 function checkNamePrefix(line, errors) {
     if (!line.startsWith("NAME:")) {
         errors.push(
@@ -21,9 +20,7 @@ function checkNamePrefix(line, errors) {
     return true;
 }
 
-//! 验证遥控设备的名称
 function validateRemoteControlName(remoteControlName, errors, registeredRemoteControlNames) {
-    //! 检查遥控设备名称是否为空
     if (!remoteControlName) {
         errors.push(
             `KASTA REMOTE CONTROL: The line with 'NAME:' is missing a device name. Please enter a valid device name.`
@@ -31,7 +28,6 @@ function validateRemoteControlName(remoteControlName, errors, registeredRemoteCo
         return false;
     }
 
-    //! 检查遥控设备名称中是否包含不允许的特殊字符，允许空格
     if (/[^a-zA-Z0-9_ ]/.test(remoteControlName)) {
         errors.push(
             `KASTA REMOTE CONTROL: The device name '${remoteControlName}' contains special characters. Only letters, numbers, underscores, and spaces are allowed.`
@@ -43,29 +39,25 @@ function validateRemoteControlName(remoteControlName, errors, registeredRemoteCo
     return true;
 }
 
-//! 获取设备的键位数
 function getKeyCountFromDeviceName(deviceName, deviceNameToType) {
     const deviceType = deviceNameToType[deviceName];
     if (!deviceType) {
-        return null; // 未找到设备类型
+        return null;
     }
 
     if (deviceType.includes("Remote Control")) {
-        // 提取括号中的内容如 "1 Push Panel"
         const modelMatch = deviceType.match(/\((.*?)\)/);
         if (modelMatch && modelMatch[1]) {
             const model = modelMatch[1];
             return deviceModelToKeyCount[model] || null;
         }
     } else {
-        // 对于 "5 Input Module"、"6 Input Module"、"4 Output Module"
         return deviceModelToKeyCount[deviceType] || null;
     }
 
     return null;
 }
 
-//! 检查指令行格式是否正确，并且验证 "DEVICE"、"GROUP"、"SCENE" 的存在性
 function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount) {
     const match = line.match(/^(\d+):\s*(.*)$/);
     if (!match) {
@@ -94,14 +86,8 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
     return match;
 }
 
-//! 验证 DEVICE 指令的格式
 function validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType) {
-    if (!deviceNameToType) {
-        // console.error('deviceNameToType is undefined');
-        return false;
-    }
-
-    const deviceMatch = command.match(/^DEVICE\s+(\S+)(?:\s+-\s+(\S+(?:\s+\S+)?))?$/);
+    const deviceMatch = command.match(/^DEVICE\s+(\S+)(?:\s+-\s+(\S+))?$/);
     if (!deviceMatch) {
         errors.push(
             `KASTA REMOTE CONTROL: The DEVICE command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'DEVICE <device_name>' with an optional operation after ' - '.`
@@ -119,32 +105,43 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
 
     const deviceType = deviceNameToType[deviceName];
     if (!deviceType) {
-        // console.error(`Device type for ${deviceName} is undefined`);
+        errors.push(
+            `KASTA REMOTE CONTROL: The device type for '${deviceName}' in '${currentRemoteControlName}' is undefined.`
+        );
         return false;
     }
 
     const operation = deviceMatch[2];
-
-    if (deviceType === "PowerPoint Type (Two-Way)") {
-        if (operation) {
-            const operationParts = operation.split(/\s+/);
-            if (operationParts.length !== 2) {
+    if (operation) {
+        if (deviceType.includes("Fan Type")) {
+            if (!['FAN', 'LAMP', 'WHOLE'].includes(operation.toUpperCase())) {
                 errors.push(
-                    `KASTA REMOTE CONTROL: The operation '${operation}' for PowerPoint Type (Two-Way) device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected format: 'ON/OFF ON/OFF'.`
+                    `KASTA REMOTE CONTROL: The operation '${operation}' for Fan Type device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'FAN', 'LAMP', or 'WHOLE'.`
                 );
                 return false;
             }
-
-            const [leftOperation, rightOperation] = operationParts;
-            if (!['ON', 'OFF'].includes(leftOperation.toUpperCase()) || !['ON', 'OFF'].includes(rightOperation.toUpperCase())) {
+        } else if (deviceType.includes("Curtain Type")) {
+            if (!['OPEN', 'CLOSE', 'WHOLE'].includes(operation.toUpperCase())) {
                 errors.push(
-                    `KASTA REMOTE CONTROL: The operation '${operation}' for PowerPoint Type (Two-Way) device '${deviceName}' in '${currentRemoteControlName}' is invalid. Both operations must be either 'ON' or 'OFF'.`
+                    `KASTA REMOTE CONTROL: The operation '${operation}' for Curtain Type device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'OPEN', 'CLOSE', or 'WHOLE'.`
                 );
                 return false;
             }
-        }
-    } else {
-        if (operation && !['ON', 'OFF'].includes(operation.toUpperCase())) {
+        } else if (deviceType === "PowerPoint Type (Two-Way)") {
+            if (!['LEFT', 'RIGHT', 'WHOLE'].includes(operation.toUpperCase())) {
+                errors.push(
+                    `KASTA REMOTE CONTROL: The operation '${operation}' for PowerPoint Type (Two-Way) device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'LEFT', 'RIGHT', or 'WHOLE'.`
+                );
+                return false;
+            }
+        } else if (deviceType === "4 Output Module") {
+            if (!['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'WHOLE'].includes(operation.toUpperCase())) {
+                errors.push(
+                    `KASTA REMOTE CONTROL: The operation '${operation}' for 4 Output Module device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'FIRST', 'SECOND', 'THIRD', 'FOURTH', or 'WHOLE'.`
+                );
+                return false;
+            }
+        } else if (!['ON', 'OFF'].includes(operation.toUpperCase())) {
             errors.push(
                 `KASTA REMOTE CONTROL: The operation '${operation}' for device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'ON' or 'OFF'.`
             );
@@ -155,62 +152,91 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
     return true;
 }
 
-//! 验证 GROUP 指令的格式
 function validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames) {
-    // 先检查是否有可选操作 '-'
-    let groupName, operationPart;
-    
-    if (command.includes(' - ')) {
-        [groupName, operationPart] = command.split(/\s+-\s+/);
-        groupName = groupName.replace(/^GROUP\s+/, '').trim(); // 移除 'GROUP ' 并修剪前后空格
-    } else {
-        groupName = command.replace(/^GROUP\s+/, '').trim(); // 没有 '-' 的情况，取到命令末尾并修剪前后空格
-    }
-
-    if (!registeredGroupNames.has(groupName)) {
+    const groupMatch = command.match(/^GROUP\s+(.+?)(?:\s+-\s+(.+))?$/);
+    if (!groupMatch) {
         errors.push(
-            `KASTA REMOTE CONTROL: The GROUP name '${groupName}' in '${currentRemoteControlName}' does not exist.`
+            `KASTA REMOTE CONTROL: The GROUP command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'GROUP <group_name>' or 'GROUP <group_name> - <action>'.`
         );
         return false;
     }
 
-    // 如果有操作部分，可以进行进一步验证（如果需要的话）
-    if (operationPart) {
-        // 处理操作部分的逻辑
+    const fullGroupName = groupMatch[1].trim();
+    const operation = groupMatch[2];
+
+    let groupNameToCheck;
+    if (operation) {
+        // If there's an operation, we check the group name before the '-'
+        groupNameToCheck = fullGroupName;
+    } else {
+        // If there's no operation, we check the entire string after 'GROUP'
+        groupNameToCheck = fullGroupName;
+    }
+
+    if (!registeredGroupNames.has(groupNameToCheck)) {
+        errors.push(
+            `KASTA REMOTE CONTROL: The GROUP name '${groupNameToCheck}' in '${currentRemoteControlName}' does not exist.`
+        );
+        return false;
+    }
+
+    if (operation) {
+        // TODO: 在这里添加对组操作的验证（如果将来需要的话）
+        // console.log(`Group operation: ${operation} for group ${groupNameToCheck}`);
     }
 
     return true;
 }
 
-//! 验证 SCENE 指令的格式
 function validateSceneCommand(command, errors, currentRemoteControlName, registeredSceneNames) {
-    // 先检查是否有可选操作 '-'
-    let sceneName, operationPart;
-    
-    if (command.includes(' - ')) {
-        [sceneName, operationPart] = command.split(/\s+-\s+/);
-        sceneName = sceneName.replace(/^SCENE\s+/, '').trim(); // 移除 'SCENE ' 并修剪前后空格
-    } else {
-        sceneName = command.replace(/^SCENE\s+/, '').trim(); // 没有 '-' 的情况，取到命令末尾并修剪前后空格
-    }
-
-    if (!registeredSceneNames.has(sceneName)) {
+    const sceneMatch = command.match(/^SCENE\s+(.+?)(?:\s+-\s+(.+))?$/);
+    if (!sceneMatch) {
         errors.push(
-            `KASTA REMOTE CONTROL: The SCENE name '${sceneName}' in '${currentRemoteControlName}' does not exist.`
+            `KASTA REMOTE CONTROL: The SCENE command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'SCENE <scene_name>' or 'SCENE <scene_name> - <action>'.`
         );
         return false;
     }
 
-    // 如果有操作部分，可以进行进一步验证（如果需要的话）
-    if (operationPart) {
-        // 处理操作部分的逻辑
+    const fullSceneName = sceneMatch[1].trim();
+    const operation = sceneMatch[2];
+
+    let sceneNameToCheck;
+    if (operation) {
+        // If there's an operation, we check the scene name before the '-'
+        sceneNameToCheck = fullSceneName;
+    } else {
+        // If there's no operation, we check the entire string after 'SCENE'
+        sceneNameToCheck = fullSceneName;
+    }
+
+    if (!registeredSceneNames.has(sceneNameToCheck)) {
+        errors.push(
+            `KASTA REMOTE CONTROL: The SCENE name '${sceneNameToCheck}' in '${currentRemoteControlName}' does not exist.`
+        );
+        return false;
+    }
+
+    if (operation) {
+        // TODO: 在这里添加对场景操作的验证（如果将来需要的话）
+        // console.log(`Scene operation: ${operation} for scene ${sceneNameToCheck}`);
     }
 
     return true;
 }
 
-//! 验证遥控设备数据
 export function validateRemoteControls(remoteControlDataArray, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames) {
+    console.log("deviceNameToType:");
+    console.log(JSON.stringify(deviceNameToType, null, 2));
+
+    console.log("registeredDeviceNames:");
+    console.log(JSON.stringify(Array.from(registeredDeviceNames), null, 2));
+
+    console.log("registeredGroupNames:");
+    console.log(JSON.stringify(Array.from(registeredGroupNames), null, 2));
+
+    console.log("registeredSceneNames:");
+    console.log(JSON.stringify(Array.from(registeredSceneNames), null, 2));
+
     const errors = [];
     const registeredRemoteControlNames = new Set();
     let currentRemoteControlName = null;
@@ -219,19 +245,17 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
     remoteControlDataArray.forEach((line) => {
         line = line.trim();
 
-        // 跳过 "LINK" 开头的行
         if (line.startsWith("LINK")) {
             return;
         }
 
-        // 处理 "NAME" 开头的行
         if (line.startsWith("NAME")) {
             if (!checkNamePrefix(line, errors)) return;
             
             currentRemoteControlName = line.substring(5).trim();
 
             if (!validateRemoteControlName(currentRemoteControlName, errors, registeredRemoteControlNames)) {
-                currentRemoteControlName = null; // 重置currentRemoteControlName
+                currentRemoteControlName = null;
                 return;
             }
 
@@ -239,13 +263,12 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
                 errors.push(
                     `KASTA REMOTE CONTROL: The device name '${currentRemoteControlName}' is not recognized.`
                 );
-                currentRemoteControlName = null; // 重置currentRemoteControlName
+                currentRemoteControlName = null;
                 return;
             }
 
             const deviceType = deviceNameToType[currentRemoteControlName];
 
-            // 检查设备类型是否为 Remote Control / 5 Input Module / 6 Input Module / 4 Output Module
             if (
                 !deviceType.includes("Remote Control") &&
                 deviceType !== "5 Input Module" &&
@@ -255,18 +278,17 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
                 errors.push(
                     `KASTA REMOTE CONTROL: The device '${currentRemoteControlName}' is of type '${deviceType}', which is not supported. Only 'Remote Control', '5 Input Module', '6 Input Module', and '4 Output Module' types are allowed.`
                 );
-                currentRemoteControlName = null; // 重置currentRemoteControlName
+                currentRemoteControlName = null;
                 return;
             }
 
-            // 获取设备的最大键位数
             maxKeyCount = getKeyCountFromDeviceName(currentRemoteControlName, deviceNameToType);
 
             if (maxKeyCount === null || maxKeyCount === 0) {
                 errors.push(
                     `KASTA REMOTE CONTROL: Unable to determine the key count for device '${currentRemoteControlName}'.`
                 );
-                currentRemoteControlName = null; // 重置currentRemoteControlName
+                currentRemoteControlName = null;
                 return;
             }
         } else if (currentRemoteControlName) {
@@ -275,18 +297,14 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
         
             const command = match[2];
             if (command.startsWith("DEVICE")) {
-                validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames);
+                validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType);
             } else if (command.startsWith("GROUP")) {
                 validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames);
             } else if (command.startsWith("SCENE")) {
                 validateSceneCommand(command, errors, currentRemoteControlName, registeredSceneNames);
             }
         }
-                
     });
-
-    // console.log('================================================================')
-    // console.log("Errors found:", errors);
 
     return errors;
 }
