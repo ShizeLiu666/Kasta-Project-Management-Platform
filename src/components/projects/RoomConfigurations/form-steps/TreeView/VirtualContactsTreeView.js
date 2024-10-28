@@ -16,13 +16,13 @@ const VirtualContactsTreeView = () => {
           <CustomTreeItem itemId="channel-syntax" label="Channel Syntax">
             <CustomTreeItem 
               itemId="basic-format" 
-              label="<channel_number_1~4>: Terminal_<name>"
-              copyText="<channel_number_1~4>: Terminal_<name>"
+              label="<channel_number_1~4>: <virtual_name>"
+              copyText="<channel_number_1~4>: <virtual_name>"
             />
             <CustomTreeItem 
               itemId="action-format" 
-              label="<channel_number_1~4>: Terminal_<name> - <action>"
-              copyText="<channel_number_1~4>: Terminal_<name> - <action>"
+              label="<channel_number_1~4>: <virtual_name> - <action>"
+              copyText="<channel_number_1~4>: <virtual_name> - <action>"
             />
           </CustomTreeItem>
           <CustomTreeItem itemId="actions" label="Supported Actions">

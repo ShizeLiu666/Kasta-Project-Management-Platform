@@ -10,6 +10,7 @@ import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
 import { validateGroups } from "../ExcelProcessor/validation/Groups";
 import "./steps.scss"
+import GroupsTreeView from './TreeView/GroupsTreeView';
 
 // Function to format error messages
 const formatErrors = (errors) => {
@@ -146,6 +147,10 @@ const Groups = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
               </TableContainer>
             </>
           )}
+
+          <div style={{ marginTop: "20px" }}>
+            <GroupsTreeView />
+          </div>
         </div>
       </div>
     </div>

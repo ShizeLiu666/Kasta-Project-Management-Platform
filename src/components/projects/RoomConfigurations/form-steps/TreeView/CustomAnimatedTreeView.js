@@ -75,7 +75,7 @@ export const CustomTreeItem = React.forwardRef(({ copyText, label, ...props }, r
 
 export const CustomTreeViewContainer = ({ children, defaultExpandedItems = [] }) => {
   return (
-    <Box sx={{ minHeight: 352, minWidth: 250 }}>
+    <Box sx={{ minHeight: 20, minWidth: 250 }}>
       <SimpleTreeView defaultExpandedItems={defaultExpandedItems}>
         {children}
       </SimpleTreeView>

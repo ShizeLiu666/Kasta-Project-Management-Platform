@@ -144,7 +144,6 @@ const Devices = forwardRef(({ splitData, onValidate }, ref) => {
 
           {/* DevicesTreeView 移到这里，始终显示 */}
           <div style={{ marginTop: "20px" }}>
-            <h4>Currently Supported Device Types and Models:</h4>
             <DevicesTreeView />
           </div>
         </div>
