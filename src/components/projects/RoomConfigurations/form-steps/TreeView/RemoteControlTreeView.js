@@ -1,7 +1,7 @@
 import React from 'react';
 import TreeMenu from 'react-simple-tree-menu';
 import './TreeView.scss';
-import './RemoteControlTreeView.scss';
+// import './RemoteControlTreeView.scss';
 
 const createTreeData = () => {
   return [

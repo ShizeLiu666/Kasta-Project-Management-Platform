@@ -4,7 +4,8 @@ import * as XLSX from "xlsx"; // 导入 xlsx 库
 import exampleFile from "../../../../assets/excel/example.xlsx"; // 导入示例文件
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
-import TreeView from './TreeView/TreeView';  // 导入新的 TreeView 组件
+// import TreeView from './TreeView/TreeView';  // 导入新的 TreeView 组件
+import DevicesTreeView from './TreeView/DevicesTreeView';
 
 // Helper functions moved from Step2
 function extractTextFromSheet(sheet) {
@@ -48,9 +49,17 @@ function splitJsonFile(content) {
     groups: "KASTA GROUP",
     scenes: "KASTA SCENE",
     remoteControls: "REMOTE CONTROL LINK",
+    virtualContacts: "VIRTUAL DRY CONTACT"  // 添加新的部分
   };
 
-  const splitData = { devices: [], groups: [], scenes: [], remoteControls: [] };
+  const splitData = { 
+    devices: [], 
+    groups: [], 
+    scenes: [], 
+    remoteControls: [],
+    virtualContacts: []  // 添加新的数组
+  };
+  
   let currentKey = null;
 
   content.forEach((line) => {
@@ -111,13 +120,17 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
         );
 
         if (programmingDetailsSheet) {
-          // 检查是否包含所需的关键词
           const sheet = workbook.Sheets[programmingDetailsSheet];
           const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
           const sheetText = sheetData.flat().join(" ").toLowerCase();
           
           const requiredKeyword = "kasta device";
-          const optionalKeywords = ["kasta group", "kasta scene", "remote control link"];
+          const optionalKeywords = [
+            "kasta group", 
+            "kasta scene", 
+            "remote control link",
+            "virtual dry contact"  // 添加新的可选关键词
+          ];
           
           if (!sheetText.includes(requiredKeyword)) {
             setFile(selectedFile);
@@ -126,13 +139,17 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
             setErrorMessage(`Excel file is missing the required keyword: KASTA DEVICE`);
             setFileContent(null);
           } else {
-            const presentOptionalKeywords = optionalKeywords.filter(keyword => sheetText.includes(keyword));
+            const presentOptionalKeywords = optionalKeywords.filter(keyword => 
+              sheetText.includes(keyword)
+            );
             
             if (presentOptionalKeywords.length === 0) {
               setFile(selectedFile);
               setIsValidFile(true);
               setHasProgrammingDetails(false);
-              setErrorMessage(`Excel file must contain at least one of: KASTA GROUP, KASTA SCENE, or REMOTE CONTROL LINK`);
+              setErrorMessage(
+                `Excel file must contain at least one of: KASTA GROUP, KASTA SCENE, REMOTE CONTROL LINK, or VIRTUAL DRY CONTACT`
+              );
               setFileContent(null);
             } else {
               setFile(selectedFile);
@@ -264,6 +281,7 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                   <li style={{ marginLeft: "20px" }}>KASTA GROUP</li>
                   <li style={{ marginLeft: "20px" }}>KASTA SCENE</li>
                   <li style={{ marginLeft: "20px" }}>REMOTE CONTROL LINK</li>
+                  <li style={{ marginLeft: "20px" }}>VIRTUAL DRY CONTACT</li>
                 </ul>
                 ( Please refer to the{" "}
                 <a
@@ -276,7 +294,7 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
               </FormText>
             </div>
             {/* 使用新的 TreeView 组件 */}
-            <TreeView />
+            <DevicesTreeView />
 
         
           </form>

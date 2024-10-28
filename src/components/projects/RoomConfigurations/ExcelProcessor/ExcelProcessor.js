@@ -8,7 +8,7 @@ const AllDeviceTypes = {
     "Relay Type": ["KBSKTREL", "S2400IB2", "S2400IBH", "RM1440BH", "KBSKTR2400"],
     "Curtain Type": ["C300IBH"],
     "Fan Type": ["FC150A2"],
-    "RGB Type": ["KB8RGBG", "KB36RGBS", "KB9TWG", "KB12RGBD", "KB12RGBG"],
+    // "RGB Type": ["KB8RGBG", "KB36RGBS", "KB9TWG", "KB12RGBD", "KB12RGBG"],
     "PowerPoint Type": {
         "Single-Way": ["H1PPWVBX"],
         "Two-Way": ["K2PPHB", "H2PPHB", "H2PPWHB"]

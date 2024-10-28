@@ -25,7 +25,7 @@ const formatErrors = (errors) => {
 };
 
 // Step5 function component
-const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames, onValidate }, ref) => {
+const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames, onValidate }, ref) => {
   const [remoteControlErrors, setRemoteControlErrors] = useState(null);
   const [success, setSuccess] = useState(false);
   const [remoteControlData, setRemoteControlData] = useState({});
@@ -137,12 +137,12 @@ const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, 
 
                 <TablePagination
                   component="div"
-                  count={Object.values(remoteControlData).flat().length}
+                  count={Object.keys(remoteControlData).length}  // 改为只计算 Remote Control Name 的数量
                   page={page}
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
-                  rowsPerPageOptions={[5, 10, 25]}
+                  rowsPerPageOptions={[5, 10]}
                   style={{
                     alignItems: "center",
                     display: "flex",
@@ -164,4 +164,4 @@ const Step5 = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, 
   );
 });
 
-export default Step5;
+export default RemoteControls;

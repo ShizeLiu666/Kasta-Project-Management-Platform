@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
 import { Alert, AlertTitle } from "@mui/material";
+// import { Button } from "reactstrap";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,60 +9,54 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
-import { validateGroups } from "../ExcelProcessor/validation/Groups";
+import { validateDevices } from "../ExcelProcessor/validation/Devices";
 import "./steps.scss"
+import DevicesTreeView from './TreeView/DevicesTreeView';
 
-// Function to format error messages
+// 导入设备类型格式图片
+// import deviceTypesFormatImage from '../../../../assets/excel/device_format/device_types.png';
+
+// 格式化错误信息的函数
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
-    return errors.split('KASTA GROUP:')
+    return errors.split('KASTA DEVICE:')
       .filter(error => error.trim())
-      .map(error => error.trim().replace(/^:\s*/, '')); // Remove any remaining colon and spaces
+      .map(error => error.trim().replace(/^:\s*/, '')); // 去掉可能残留的冒号和空格
   }
   return errors;
 };
 
-// Step3 function component
-const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
-  const [groupErrors, setGroupErrors] = useState(null);
+// Step2 function component
+const Devices = forwardRef(({ splitData, onValidate }, ref) => {
+  const [deviceErrors, setDeviceErrors] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [groupData, setGroupData] = useState({});
+  const [deviceNameToType, setDeviceNameToType] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  // const [showFormatImage, setShowFormatImage] = useState(false);
   const hasValidated = useRef(false);
 
   useEffect(() => {
-    if (!splitData || !splitData.groups || !deviceNameToType || hasValidated.current) {
+    if (!splitData || !splitData.devices || hasValidated.current) {
       return;
     }
 
-    const { errors } = validateGroups(splitData.groups, deviceNameToType);
+    const { errors: deviceErrors, deviceNameToType } = validateDevices(splitData.devices);
 
-    if (errors.length > 0) {
-      setGroupErrors(formatErrors(errors));
+    if (deviceErrors.length > 0) {
+      setDeviceErrors(formatErrors(deviceErrors));
       setSuccess(false);
-      onValidate(false, errors);
+      onValidate(false, deviceErrors);
+      // setShowFormatImage(true);
     } else {
-      // Create an object with group names as keys and device lists as values
-      const groupDevices = {};
-      splitData.groups.forEach(line => {
-        if (line.startsWith('NAME:')) {
-          const groupName = line.substring(5).trim();
-          groupDevices[groupName] = [];
-        } else if (line && !line.startsWith('DEVICE CONTROL')) {
-          const lastGroup = Object.keys(groupDevices).pop();
-          if (lastGroup) {
-            groupDevices[lastGroup].push(line.trim());
-          }
-        }
-      });
-      setGroupData(groupDevices);
+      setDeviceNameToType(deviceNameToType);
       setSuccess(true);
-      onValidate(true, { groupData: groupDevices });
+      onValidate(true, { deviceNameToType, groupData: splitData.groups });
+      // setShowFormatImage(false);
     }
 
     hasValidated.current = true;
-  }, [splitData, deviceNameToType, onValidate]);
+  }, [splitData, onValidate]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -82,24 +77,27 @@ const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
   }));
 
   return (
-    <div className="step step3 mt-5">
+    <div className="step step2 mt-5">
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
-          {groupErrors && (
+          {deviceErrors && (
             <Alert severity="error" style={{ marginTop: "10px" }}>
               <AlertTitle>Error</AlertTitle>
               <ul>
-                {groupErrors.map((error, index) => (
+                {deviceErrors.map((error, index) => (
                   <li key={index}>{error}</li>
                 ))}
               </ul>
+              <p>
+                Please refer to the "Currently Supported Device Types and Models" section below for correct formatting.
+              </p>
             </Alert>
           )}
 
           {success && (
             <>
               <Alert severity="success" style={{ marginTop: "10px" }}>
-                <AlertTitle>The following groups have been identified:</AlertTitle>
+                <AlertTitle>The following devices have been identified:</AlertTitle>
               </Alert>
 
               <TableContainer component={Paper} style={{ marginTop: "20px" }}>
@@ -107,23 +105,20 @@ const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
                   <TableHead>
                     <TableRow>
                       <TableCell>
-                        <strong>Group Name</strong>
+                        <strong>Device Name</strong>
                       </TableCell>
                       <TableCell>
-                        <strong>Device Control</strong>
+                        <strong>Device Type</strong>
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(groupData)
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map(([groupName, devices]) => (
-                        <TableRow key={groupName}>
-                          <TableCell>{groupName}</TableCell>
-                          <TableCell>{devices.join(", ")}</TableCell>
+                    {Object.entries(deviceNameToType)
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map(([deviceName, deviceType]) => (
+                        <TableRow key={deviceName}>
+                          <TableCell>{deviceName}</TableCell>
+                          <TableCell>{deviceType}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
@@ -131,7 +126,7 @@ const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
 
                 <TablePagination
                   component="div"
-                  count={Object.keys(groupData).length}
+                  count={Object.keys(deviceNameToType).length}
                   page={page}
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
@@ -146,10 +141,16 @@ const Step3 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
               </TableContainer>
             </>
           )}
+
+          {/* DevicesTreeView 移到这里，始终显示 */}
+          <div style={{ marginTop: "20px" }}>
+            <h4>Currently Supported Device Types and Models:</h4>
+            <DevicesTreeView />
+          </div>
         </div>
       </div>
     </div>
   );
 });
 
-export default Step3;
+export default Devices;

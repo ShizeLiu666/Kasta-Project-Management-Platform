@@ -28,8 +28,8 @@ const formatErrors = (errors) => {
   return errors;
 };
 
-// Step4 function component
-const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
+// Scenes function component
+const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
   const [sceneErrors, setSceneErrors] = useState(null);
   const [success, setSuccess] = useState(false);
   const [sceneData, setSceneData] = useState({});
@@ -197,4 +197,4 @@ const Step4 = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
   );
 });
 
-export default Step4;
+export default Scenes;
