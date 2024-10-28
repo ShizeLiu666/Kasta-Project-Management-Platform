@@ -1,6 +1,7 @@
 import React from 'react';
 import TreeMenu from 'react-simple-tree-menu';
 import './TreeView.scss';
+import './RemoteControlTreeView.scss';
 
 const createTreeData = () => {
   return [
@@ -16,6 +17,10 @@ const createTreeData = () => {
               key: 'fan',
               label: 'Fan Type',
               nodes: [
+                { 
+                  key: 'fan-simple', 
+                  label: 'DEVICE <device_name>    (Default operation: FAN)'
+                },
                 { key: 'fan-fan', label: 'DEVICE <device_name> - FAN' },
                 { key: 'fan-lamp', label: 'DEVICE <device_name> - LAMP' },
                 { key: 'fan-whole', label: 'DEVICE <device_name> - WHOLE' },
@@ -25,6 +30,10 @@ const createTreeData = () => {
               key: 'curtain',
               label: 'Curtain Type',
               nodes: [
+                { 
+                  key: 'curtain-simple', 
+                  label: 'DEVICE <device_name>    (Default operation: OPEN)'
+                },
                 { key: 'curtain-open', label: 'DEVICE <device_name> - OPEN' },
                 { key: 'curtain-close', label: 'DEVICE <device_name> - CLOSE' },
                 { key: 'curtain-whole', label: 'DEVICE <device_name> - WHOLE' },
@@ -34,6 +43,10 @@ const createTreeData = () => {
               key: 'powerpoint',
               label: 'PowerPoint Type (Two-Way)',
               nodes: [
+                { 
+                  key: 'powerpoint-simple', 
+                  label: 'DEVICE <device_name>    (Default operation: WHOLE)'
+                },
                 { key: 'powerpoint-left', label: 'DEVICE <device_name> - LEFT' },
                 { key: 'powerpoint-right', label: 'DEVICE <device_name> - RIGHT' },
                 { key: 'powerpoint-whole', label: 'DEVICE <device_name> - WHOLE' },
@@ -43,6 +56,10 @@ const createTreeData = () => {
               key: 'output-module',
               label: '4 Output Module',
               nodes: [
+                { 
+                  key: 'output-simple', 
+                  label: 'DEVICE <device_name>    (Default operation: FIRST)'
+                },
                 { key: 'output-first', label: 'DEVICE <device_name> - FIRST' },
                 { key: 'output-second', label: 'DEVICE <device_name> - SECOND' },
                 { key: 'output-third', label: 'DEVICE <device_name> - THIRD' },
@@ -54,8 +71,10 @@ const createTreeData = () => {
               key: 'other-devices',
               label: 'Other Devices',
               nodes: [
-                { key: 'other-on', label: 'DEVICE <device_name> - ON' },
-                { key: 'other-off', label: 'DEVICE <device_name> - OFF' },
+                { 
+                  key: 'other-simple', 
+                  label: 'DEVICE <device_name>'
+                },
               ],
             },
           ],
@@ -86,7 +105,10 @@ const RemoteControlTreeView = () => {
 
   const renderItem = ({ hasNodes, isOpen, level, label, toggleNode }) => {
     return (
-      <div className={`tree-node level-${level}`} onClick={toggleNode}>
+      <div 
+        className={`tree-node level-${level}`} 
+        onClick={toggleNode}
+      >
         {hasNodes && (
           <span className="toggle-icon">{isOpen ? '▼' : '▶'}</span>
         )}

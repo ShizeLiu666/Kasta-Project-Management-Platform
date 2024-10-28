@@ -68,3 +68,16 @@
 .rstm-tree-item {
     border-color: rgba(0, 0, 0, 0.1);
 }
+
+.default-note {
+  color: #8c8c8c;  // 或者其他灰色色值，如 #666666, rgba(0,0,0,0.45) 等
+  margin-left: 8px;
+}
+
+.tree-node {
+  .default-note {
+    color: #8c8c8c;
+    margin-left: 8px;
+    font-style: italic;
+  }
+}

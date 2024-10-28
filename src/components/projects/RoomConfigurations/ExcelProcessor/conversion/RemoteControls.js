@@ -12,7 +12,7 @@ function getRcIndex(deviceType, operation) {
             case "WHOLE":
                 return 2;
             default:
-                return 1; // 默认为 CLOSE
+                return 0; // 默认为 OPEN
         }
     }
     
