@@ -1,5 +1,4 @@
 import { 
-    getDeviceNameToAppearanceShortname,
     getDeviceNameToType,
     getRegisteredDevices 
 } from './Devices';
@@ -12,17 +11,14 @@ const PULSE_MAPPING = {
     'REVERS': 4
 };
 
-export function processVirtualContacts(splitData) {
+export function processVirtualContacts(virtualContactsContent) {
     const registeredDeviceNames = getRegisteredDevices();
     const deviceNameToType = getDeviceNameToType();
     
-    console.log("getDeviceNameToAppearanceShortname:", getDeviceNameToAppearanceShortname);
-
-    const virtualContactsContent = splitData.outputs || [];
     const outputsMap = new Map();
     let currentDevice = null;
 
-    // 检查 registeredDeviceNames 中的 4 Output Module 类型设备
+    // 预处理所有 4 Output Module 类型的设备
     registeredDeviceNames.forEach(deviceName => {
         if (deviceNameToType[deviceName] === "4 Output Module") {
             outputsMap.set(deviceName, {
@@ -36,22 +32,19 @@ export function processVirtualContacts(splitData) {
         }
     });
 
-    // 直接处理配置
-    virtualContactsContent.forEach(line => {
+    // 处理配置数据
+    (virtualContactsContent || []).forEach(line => {
         line = line.trim();
 
         if (line.startsWith("NAME:")) {
-            // 遇到新设备名称时，创建新的设备配置
+            // 只设置当前设备名称，不再重复创建配置
             currentDevice = line.replace("NAME:", "").trim();
-            outputsMap.set(currentDevice, {
-                deviceName: currentDevice,
-                virtualDryContacts: Array(4).fill(null).map((_, index) => ({
-                    channel: index,
-                    pulse: 0,
-                    virtualName: ""
-                }))
-            });
-        } else if (currentDevice) {
+            // 检查设备是否存在且是否为4 Output Module
+            if (!outputsMap.has(currentDevice)) {
+                console.warn(`设备 ${currentDevice} 不是已注册的4 Output Module设备`);
+                currentDevice = null; // 重置currentDevice，避免处理未注册设备的配置
+            }
+        } else if (currentDevice && outputsMap.has(currentDevice)) {
             const [channel, command] = line.split(":").map(part => part.trim());
             const channelNumber = parseInt(channel, 10) - 1;
             

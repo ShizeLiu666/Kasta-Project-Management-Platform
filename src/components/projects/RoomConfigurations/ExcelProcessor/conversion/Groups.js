@@ -1,7 +1,8 @@
 import { getDeviceNameToAppearanceShortname } from './Devices';
 
-export function processGroups(splitData) {
-    const groupsContent = splitData.groups || [];
+export function processGroups(groupsContent) {
+    if (!groupsContent) return { groups: [] };
+    
     const groupsData = [];
     let currentGroupName = null;
     let currentDevices = [];
@@ -33,7 +34,6 @@ export function processGroups(splitData) {
         }
     });
 
-    // 添加最后一个组
     if (currentGroupName) {
         groupsData.push({
             groupName: currentGroupName,

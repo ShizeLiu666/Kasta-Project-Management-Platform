@@ -13,8 +13,9 @@ export function resetRegisteredDevices() {
     registeredDevices = [];
 }
 
-export function processDevices(splitData) {
-    const devicesContent = splitData.devices || [];
+export function processDevices(devicesContent) {
+    if (!devicesContent) return { devices: [] };
+    
     const devicesData = [];
     let currentShortname = null;
 
@@ -46,7 +47,8 @@ export function processDevices(splitData) {
             } else if (typeof models === 'object') {
                 for (const subType in models) {
                     const subModelArray = models[subType];
-                    if (Array.isArray(subModelArray) && subModelArray.some(model => isModelMatching(model, shortnameForMatching))) {
+                    if (Array.isArray(subModelArray) && 
+                        subModelArray.some(model => isModelMatching(model, shortnameForMatching))) {
                         deviceType = `${dtype} (${subType})`;
                         break;
                     }

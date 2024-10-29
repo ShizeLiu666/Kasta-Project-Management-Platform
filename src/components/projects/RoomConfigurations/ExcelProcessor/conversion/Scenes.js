@@ -186,8 +186,9 @@ export function parseSceneContent(sceneName, contentLines) {
     return contents;
 }
 
-export function processScenes(splitData) {
-    const scenesContent = splitData.scenes || [];
+export function processScenes(scenesContent) {
+    if (!scenesContent) return { scenes: [] };
+    
     const scenesData = {};
     let currentScene = null;
 

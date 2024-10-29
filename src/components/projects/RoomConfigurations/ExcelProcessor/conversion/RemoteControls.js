@@ -62,8 +62,9 @@ function getRcIndex(deviceType, operation) {
     return 1; // 默认值，用于其他设备类型
 }
 
-export function processRemoteControls(splitData) {
-    const remoteControlsContent = splitData.remoteControls || [];
+export function processRemoteControls(remoteControlsContent) {
+    if (!remoteControlsContent) return { remoteControls: [] };
+    
     const remoteControlsData = [];
     let currentRemote = null;
     let currentLinks = [];

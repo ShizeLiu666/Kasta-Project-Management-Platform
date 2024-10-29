@@ -30,11 +30,11 @@ const Step6 = forwardRef(({
 
     try {
       resetDeviceNameToType();
-      const devicesResult = processDevices(splitData);
-      const groupsResult = processGroups(splitData); 
-      const scenesResult = processScenes(splitData);
-      const remoteControlsResult = processRemoteControls(splitData);
-      const virtualContactsResult = processVirtualContacts(splitData);
+      const devicesResult = processDevices(splitData.devices);
+      const groupsResult = processGroups(splitData.groups);
+      const scenesResult = processScenes(splitData.scenes);
+      const remoteControlsResult = processRemoteControls(splitData.remoteControls);
+      const virtualContactsResult = processVirtualContacts(splitData.outputs);
 
       return {
         devices: devicesResult.devices,
