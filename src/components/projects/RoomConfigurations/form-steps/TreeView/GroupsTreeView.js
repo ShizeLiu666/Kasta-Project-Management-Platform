@@ -17,7 +17,7 @@ const GroupsTreeView = () => {
     );
 
     return (
-        <CustomTreeViewContainer defaultExpandedItems={[]}>
+        <CustomTreeViewContainer defaultExpandedItems={['groups']}>
             <CustomTreeItem itemId="groups" label="Supported Group Formats">
                 <CustomTreeItem itemId="name-format" label="Group Name Format">
                     <CustomTreeItem

@@ -37,11 +37,11 @@ const VirtualContacts = forwardRef(({
   const hasValidated = useRef(false);
 
   useEffect(() => {
-    if (!splitData || !splitData.virtualContacts || !deviceNameToType || hasValidated.current) {
+    if (!splitData || !splitData.outputs || !deviceNameToType || hasValidated.current) {
       return;
     }
 
-    const errors = validateVirtualContacts(splitData.virtualContacts, deviceNameToType, registeredDeviceNames);
+    const errors = validateVirtualContacts(splitData.outputs, deviceNameToType, registeredDeviceNames);
 
     if (errors.length > 0) {
       setVirtualContactErrors(formatErrors(errors));
@@ -51,7 +51,7 @@ const VirtualContacts = forwardRef(({
       const virtualContactData = {};
       let currentContact = null;
 
-      splitData.virtualContacts.forEach(line => {
+      splitData.outputs.forEach(line => {
         if (line.startsWith('NAME:')) {
           currentContact = line.substring(5).trim();
           virtualContactData[currentContact] = [];

@@ -18,6 +18,8 @@ import curtainFormatImage from '../../../../assets/excel/scene_format/curtain_ty
 import fanFormatImage from '../../../../assets/excel/scene_format/fan_type.png';
 import powerpointFormatImage from '../../../../assets/excel/scene_format/powerpoint_type.png';
 
+import ScenesTreeView from "./TreeView/ScenesTreeView";
+
 // Format error messages function
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
@@ -151,25 +153,76 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
                         <strong>Scene Name</strong>
                       </TableCell>
                       <TableCell>
-                        <strong>Controlled Devices and Actions</strong>
+                        <strong>Device Control</strong>
+                      </TableCell>
+                      <TableCell>
+                        <strong>Actions</strong>
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(sceneData)
+                    {Object.entries(sceneData || {})
                       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                       .map(([sceneName, devices]) => (
-                        <TableRow key={sceneName}>
-                          <TableCell>{sceneName}</TableCell>
-                          <TableCell>
-                            {devices.map((device, index) => (
-                              <React.Fragment key={index}>
-                                {device}
-                                {index < devices.length - 1 && <br />}
-                              </React.Fragment>
-                            ))}
-                          </TableCell>
-                        </TableRow>
+                        devices?.map((device, index) => {
+                          if (!device) return null;
+
+                          let devicePart, actionPart;
+
+                          // 处理风扇类型
+                          if (device.includes('FAN')) {
+                            devicePart = device.match(/^(FAN\d+)/)?.[1];
+                            actionPart = device.replace(devicePart, '').trim();
+                          }
+                          // 处理窗帘类型
+                          else if (device.includes('CURTAIN')) {
+                            const curtainMatch = device.match(/^(CURTAIN_[0-9,\s]+)(.+)/i);
+                            if (curtainMatch) {
+                              devicePart = curtainMatch[1].trim();
+                              actionPart = curtainMatch[2].trim();
+                            }
+                          }
+                          // 处理电源插座类型
+                          else if (device.includes('PPT')) {
+                            const pptMatch = device.match(/^(PPT_?\d+)(.+)/);
+                            if (pptMatch) {
+                              devicePart = pptMatch[1].trim();
+                              actionPart = pptMatch[2].trim();
+                            }
+                          }
+                          // 处理其他类型（如调光器、继电器等）
+                          else {
+                            const match = device.match(/^([^A-Z]+)(.*)/);
+                            if (match) {
+                              devicePart = match[1];
+                              actionPart = match[2];
+                            }
+                          }
+
+                          if (!devicePart) return null;
+
+                          // 格式化设备名称，移除多余空格
+                          const formattedDevices = devicePart.split(',')
+                            .map(d => d.trim())
+                            .filter(Boolean)
+                            .join(', ');
+
+                          return (
+                            <TableRow key={`${sceneName}-${index}`}>
+                              {index === 0 && (
+                                <TableCell rowSpan={devices.length}>
+                                  {sceneName}
+                                </TableCell>
+                              )}
+                              <TableCell>
+                                {formattedDevices}
+                              </TableCell>
+                              <TableCell>
+                                {actionPart?.trim() || ''}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
                       ))}
                   </TableBody>
                 </Table>
@@ -191,6 +244,10 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
               </TableContainer>
             </>
           )}
+
+          <div style={{ marginTop: "20px" }}>
+            <ScenesTreeView />
+          </div>
         </div>
       </div>
     </div>

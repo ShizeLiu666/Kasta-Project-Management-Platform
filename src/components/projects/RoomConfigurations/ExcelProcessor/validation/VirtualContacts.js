@@ -133,13 +133,13 @@ function validateTerminalCommand(command, errors, currentContactName) {
 }
 
 // 主验证函数
-export function validateVirtualContacts(virtualContactsDataArray, deviceNameToType, registeredDeviceNames) {
+export function validateVirtualContacts(outputsDataArray, deviceNameToType, registeredDeviceNames) {
     const errors = [];
-    const registeredContactNames = new Set();  // 添加跟踪已注册的虚拟干接点名称
+    const registeredContactNames = new Set();
     let currentContactName = null;
-    const usedChannels = new Map(); // 用于跟踪每个虚拟干接点已使用的通道
+    const usedChannels = new Map();
 
-    virtualContactsDataArray.forEach((line) => {
+    outputsDataArray.forEach((line) => {
         line = line.trim();
 
         if (line.startsWith("NAME")) {

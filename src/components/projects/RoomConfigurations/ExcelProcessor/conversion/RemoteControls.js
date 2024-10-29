@@ -12,7 +12,7 @@ function getRcIndex(deviceType, operation) {
             case "WHOLE":
                 return 2;
             default:
-                return 0; // 默认为 OPEN
+                return 2; // 默认为 WHOLE
         }
     }
     
@@ -55,7 +55,7 @@ function getRcIndex(deviceType, operation) {
             case "WHOLE":
                 return 4;
             default:
-                return 0; // 默认为第一通道
+                return 4; // 默认为WHOLE
         }
     }
     

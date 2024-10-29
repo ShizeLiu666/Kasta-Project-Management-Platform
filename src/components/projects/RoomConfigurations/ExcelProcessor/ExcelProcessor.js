@@ -2,6 +2,7 @@ import { processDevices, resetDeviceNameToType, getDeviceNameToType } from './co
 import { processGroups } from './conversion/Groups';
 import { processScenes } from './conversion/Scenes';
 import { processRemoteControls } from './conversion/RemoteControls';
+import { processVirtualContacts } from './conversion/VirtualContacts';
 
 const AllDeviceTypes = {
     "Dimmer Type": ["KBSKTDIM", "D300IB", "D300IB2", "DH10VIB", "DM300BH", "D0-10IB", "DDAL"],
@@ -76,7 +77,6 @@ function determineDeviceType(deviceName) {
     const originalDeviceName = deviceName.trim().replace(',', '');
 
     if (!originalDeviceName) {
-        // console.error(`Error: Detected empty or invalid device name: '${originalDeviceName}'`);
         throw new Error("Device name can not be empty.");
     }
 
@@ -89,15 +89,24 @@ function determineDeviceType(deviceName) {
 }
 
 export function splitJsonFile(inputData) {
+    console.log("ExcelProcessor - Received Input Data:", inputData);
+    
     const content = inputData["programming details"] || [];
     const splitKeywords = {
         devices: "KASTA DEVICE",
         groups: "KASTA GROUP",
         scenes: "KASTA SCENE",
-        remoteControls: "REMOTE CONTROL LINK"
+        remoteControls: "REMOTE CONTROL LINK",
+        outputs: "VIRTUAL DRY CONTACT"
     };
 
-    const splitData = { devices: [], groups: [], scenes: [], remoteControls: [] };
+    const splitData = {
+        devices: [],
+        groups: [],
+        scenes: [],
+        remoteControls: [],
+        outputs: []
+    };
     let currentKey = null;
 
     content.forEach(line => {
@@ -108,12 +117,27 @@ export function splitJsonFile(inputData) {
         if (currentKey) splitData[currentKey].push(line);
     });
 
-    return {
+    console.log("ExcelProcessor - Outputs:", splitData.outputs);
+
+    const result = {
         ...processDevices(splitData),
         ...processGroups(splitData),
         ...processScenes(splitData),
-        ...processRemoteControls(splitData)
+        ...processRemoteControls(splitData),
+        ...processVirtualContacts(splitData)
     };
+    
+    return result;
 }
 
-export { resetDeviceNameToType, processDevices, processGroups, processScenes, processRemoteControls, AllDeviceTypes, determineDeviceType, sceneOutputTemplates };
+export {
+    resetDeviceNameToType,
+    processDevices,
+    processGroups,
+    processScenes,
+    processRemoteControls,
+    processVirtualContacts,
+    AllDeviceTypes,
+    determineDeviceType,
+    sceneOutputTemplates
+};

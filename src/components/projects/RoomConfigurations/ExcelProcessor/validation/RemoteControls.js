@@ -225,17 +225,17 @@ function validateSceneCommand(command, errors, currentRemoteControlName, registe
 }
 
 export function validateRemoteControls(remoteControlDataArray, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames) {
-    console.log("deviceNameToType:");
-    console.log(JSON.stringify(deviceNameToType, null, 2));
+    // console.log("deviceNameToType:");
+    // console.log(JSON.stringify(deviceNameToType, null, 2));
 
-    console.log("registeredDeviceNames:");
-    console.log(JSON.stringify(Array.from(registeredDeviceNames), null, 2));
+    // console.log("registeredDeviceNames:");
+    // console.log(JSON.stringify(Array.from(registeredDeviceNames), null, 2));
 
-    console.log("registeredGroupNames:");
-    console.log(JSON.stringify(Array.from(registeredGroupNames), null, 2));
+    // console.log("registeredGroupNames:");
+    // console.log(JSON.stringify(Array.from(registeredGroupNames), null, 2));
 
-    console.log("registeredSceneNames:");
-    console.log(JSON.stringify(Array.from(registeredSceneNames), null, 2));
+    // console.log("registeredSceneNames:");
+    // console.log(JSON.stringify(Array.from(registeredSceneNames), null, 2));
 
     const errors = [];
     const registeredRemoteControlNames = new Set();

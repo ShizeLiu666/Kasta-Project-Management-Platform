@@ -49,7 +49,7 @@ function splitJsonFile(content) {
     groups: "KASTA GROUP",
     scenes: "KASTA SCENE",
     remoteControls: "REMOTE CONTROL LINK",
-    virtualContacts: "VIRTUAL DRY CONTACT"  // 添加新的部分
+    outputs: "VIRTUAL DRY CONTACT"  // 改为 outputs
   };
 
   const splitData = { 
@@ -57,7 +57,7 @@ function splitJsonFile(content) {
     groups: [], 
     scenes: [], 
     remoteControls: [],
-    virtualContacts: []  // 添加新的数组
+    outputs: []  // 改为 outputs
   };
   
   let currentKey = null;
@@ -206,6 +206,7 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
     }
 
     const splitData = splitJsonFile(allTextData["programming details"]);
+    console.log("Outputs data:", splitData.outputs);
     onValidate(true, splitData);
     return true;
   };

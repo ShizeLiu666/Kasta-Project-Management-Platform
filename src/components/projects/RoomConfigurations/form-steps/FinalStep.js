@@ -6,6 +6,7 @@ import {
   processGroups,
   processScenes,
   processRemoteControls,
+  processVirtualContacts,
   resetDeviceNameToType
 } from "../ExcelProcessor/ExcelProcessor";
 import CustomButton from '../../../CustomButton';
@@ -18,7 +19,6 @@ const Step6 = forwardRef(({
   groupData,
   sceneData,
   remoteControlData,
-  // onValidate,
   submitJson,
   projectRoomId
 }, ref) => {
@@ -34,12 +34,14 @@ const Step6 = forwardRef(({
       const groupsResult = processGroups(splitData); 
       const scenesResult = processScenes(splitData);
       const remoteControlsResult = processRemoteControls(splitData);
+      const virtualContactsResult = processVirtualContacts(splitData);
 
       return {
-        ...devicesResult,
-        ...groupsResult,
-        ...scenesResult,
-        ...remoteControlsResult
+        devices: devicesResult.devices,
+        groups: groupsResult.groups,
+        scenes: scenesResult.scenes,
+        remoteControls: remoteControlsResult.remoteControls,
+        outputs: virtualContactsResult.outputs
       };
     } catch (err) {
       setError(err.message);
@@ -52,14 +54,6 @@ const Step6 = forwardRef(({
   }, [processedData]);
 
   const success = Boolean(jsonResult);
-
-  // useEffect(() => {
-  //   if (processedData) {
-  //     onValidate(true, processedData);
-  //   } else if (error) {
-  //     onValidate(false, error);
-  //   }
-  // }, [processedData, error, onValidate]);
 
   const handleDownloadJson = () => {
     if (jsonResult) {
@@ -76,7 +70,6 @@ const Step6 = forwardRef(({
       setIsUploading(true);
       try {
         await submitJson(jsonResult);
-        // 上传成功后，可以在这里添加一些成功提示
       } catch (err) {
         setError("Failed to upload configuration: " + err.message);
       } finally {
@@ -111,7 +104,7 @@ const Step6 = forwardRef(({
                   type="textarea"
                   value={jsonResult}
                   readOnly
-                  rows={20}
+                  rows={30}
                   style={{ fontFamily: "monospace" }}
                 />
               </FormGroup>

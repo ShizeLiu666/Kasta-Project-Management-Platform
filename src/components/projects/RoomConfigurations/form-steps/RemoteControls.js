@@ -11,7 +11,7 @@ import TablePagination from "@mui/material/TablePagination";
 import { validateRemoteControls } from "../ExcelProcessor/validation/RemoteControls";
 import "./steps.scss"
 
-import RemoteControlTreeView from './TreeView/RemoteControlTreeView';
+import RemoteControlTreeView from './TreeView/RemoteControlsTreeView';
 
 // Format error messages function
 const formatErrors = (errors) => {
@@ -155,7 +155,6 @@ const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDevi
 
           {/* 添加新的 RemoteControlTreeView 组件 */}
           <div style={{ marginTop: "20px" }}>
-            <h4>Supported Remote Control Formats:</h4>
             <RemoteControlTreeView />
           </div>
         </div>

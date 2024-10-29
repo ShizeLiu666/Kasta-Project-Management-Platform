@@ -25,7 +25,7 @@ const VirtualContactsTreeView = () => {
               copyText="<channel_number_1~4>: <virtual_name> - <action>"
             />
           </CustomTreeItem>
-          <CustomTreeItem itemId="actions" label="Supported Actions">
+          <CustomTreeItem itemId="actions" label="Supported Pulse Actions">
             <CustomTreeItem 
               itemId="action-normal" 
               label="NORMAL (default if not specified)"

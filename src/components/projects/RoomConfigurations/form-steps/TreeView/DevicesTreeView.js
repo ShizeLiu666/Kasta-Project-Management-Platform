@@ -20,7 +20,7 @@ const DevicesTreeView = () => {
   };
 
   return (
-    <CustomTreeViewContainer defaultExpandedItems={[]}> {/* 设置为空数组，默认都是关闭状态 */}
+    <CustomTreeViewContainer defaultExpandedItems={['devices']}>
       <CustomTreeItem itemId="devices" label="Supported Devices">
         {Object.entries(AllDeviceTypes).map(([deviceType, models]) => (
           <CustomTreeItem
