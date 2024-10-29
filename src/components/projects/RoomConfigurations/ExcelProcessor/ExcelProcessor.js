@@ -3,6 +3,7 @@ import { processGroups } from './conversion/Groups';
 import { processScenes } from './conversion/Scenes';
 import { processRemoteControls } from './conversion/RemoteControls';
 import { processVirtualContacts } from './conversion/VirtualContacts';
+import { validateDevices } from './validation/Devices';
 
 const AllDeviceTypes = {
     "Dimmer Type": ["KBSKTDIM", "D300IB", "D300IB2", "DH10VIB", "DM300BH", "D0-10IB", "DDAL"],
@@ -119,12 +120,20 @@ export function splitJsonFile(inputData) {
 
     console.log("ExcelProcessor - Outputs:", splitData.outputs);
 
+    const deviceDataArray = splitData.devices;
+    const { deviceNameToType, registeredDeviceNames } = validateDevices(deviceDataArray);
+    const virtualContactsResult = processVirtualContacts(
+        splitData,
+        registeredDeviceNames,
+        deviceNameToType
+    );
+
     const result = {
         ...processDevices(splitData),
         ...processGroups(splitData),
         ...processScenes(splitData),
         ...processRemoteControls(splitData),
-        ...processVirtualContacts(splitData)
+        ...virtualContactsResult
     };
     
     return result;

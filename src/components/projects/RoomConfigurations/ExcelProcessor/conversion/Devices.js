@@ -2,16 +2,23 @@ import { AllDeviceTypes } from '../ExcelProcessor';
 
 let deviceNameToType = {};
 let deviceNameToAppearanceShortname = {};
+let registeredDevices = [];
 
 export function resetDeviceNameToType() {
     deviceNameToType = {};
     deviceNameToAppearanceShortname = {};
 }
 
+export function resetRegisteredDevices() {
+    registeredDevices = [];
+}
+
 export function processDevices(splitData) {
     const devicesContent = splitData.devices || [];
     const devicesData = [];
     let currentShortname = null;
+
+    resetRegisteredDevices();
 
     function isModelMatching(model, shortname) {
         return shortname && (model.includes(shortname) || shortname.includes(model));
@@ -58,6 +65,7 @@ export function processDevices(splitData) {
 
             deviceNameToType[line] = deviceType;
             deviceNameToAppearanceShortname[line] = currentShortname;
+            registeredDevices.push(line);
         }
     });
 
@@ -70,4 +78,8 @@ export function getDeviceNameToType() {
 
 export function getDeviceNameToAppearanceShortname() {
     return deviceNameToAppearanceShortname;
+}
+
+export function getRegisteredDevices() {
+    return registeredDevices;
 }

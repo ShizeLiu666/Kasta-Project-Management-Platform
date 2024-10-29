@@ -1,3 +1,9 @@
+import { 
+    getDeviceNameToAppearanceShortname,
+    getDeviceNameToType,
+    getRegisteredDevices 
+} from './Devices';
+
 const PULSE_MAPPING = {
     'NORMAL': 0,
     '1SEC': 1,
@@ -7,9 +13,28 @@ const PULSE_MAPPING = {
 };
 
 export function processVirtualContacts(splitData) {
+    const registeredDeviceNames = getRegisteredDevices();
+    const deviceNameToType = getDeviceNameToType();
+    
+    console.log("getDeviceNameToAppearanceShortname:", getDeviceNameToAppearanceShortname);
+
     const virtualContactsContent = splitData.outputs || [];
     const outputsMap = new Map();
     let currentDevice = null;
+
+    // 检查 registeredDeviceNames 中的 4 Output Module 类型设备
+    registeredDeviceNames.forEach(deviceName => {
+        if (deviceNameToType[deviceName] === "4 Output Module") {
+            outputsMap.set(deviceName, {
+                deviceName: deviceName,
+                virtualDryContacts: Array(4).fill(null).map((_, index) => ({
+                    channel: index,
+                    pulse: 0,
+                    virtualName: ""
+                }))
+            });
+        }
+    });
 
     // 直接处理配置
     virtualContactsContent.forEach(line => {
