@@ -14,7 +14,8 @@ import {
   renderDevicesTable,
   renderGroupsTable,
   renderScenesTable,
-  renderRemoteControlsTable
+  renderRemoteControlsTable,
+  renderVirtualContactsTable
 } from './ConfigTables';
 import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config';
@@ -318,13 +319,13 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                   <>
                     {config.devices && (
                       <div>
-                        {/* {console.log('Rendering devices:', JSON.stringify(config.devices, null, 2))} */}
                         {renderDevicesTable(processDevices(config.devices))}
                       </div>
                     )}
                     {config.groups && renderGroupsTable(config.groups)}
                     {config.scenes && renderScenesTable(config.scenes)}
                     {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
+                    {config.outputs && renderVirtualContactsTable(config.outputs)}
                   </>
                 )}
               </>

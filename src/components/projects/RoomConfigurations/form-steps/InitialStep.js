@@ -206,7 +206,7 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
     }
 
     const splitData = splitJsonFile(allTextData["programming details"]);
-    console.log("Outputs data:", splitData.outputs);
+    // console.log("Outputs data:", splitData.outputs);
     onValidate(true, splitData);
     return true;
   };

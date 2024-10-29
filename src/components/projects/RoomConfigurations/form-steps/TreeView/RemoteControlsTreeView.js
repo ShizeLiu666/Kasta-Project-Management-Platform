@@ -83,7 +83,7 @@ const RemoteControlsTreeView = () => {
           <CustomTreeItem itemId="output-module" label="4 Output Module">
             <CustomTreeItem
               itemId="output-simple"
-              label="DEVICE <device_name>    (Default operation: FIRST)"
+              label="DEVICE <device_name>    (Default operation: WHOLE)"
               copyText="DEVICE <device_name>"
             />
             <CustomTreeItem

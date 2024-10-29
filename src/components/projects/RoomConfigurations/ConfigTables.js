@@ -4,12 +4,12 @@ import ComponentCard from '../../AuthCodeManagement/ComponentCard';
 
 // eslint-disable-next-line no-unused-vars
 const captionStyle = {
-    captionSide: 'top',
-    fontWeight: 'bold',
-    fontSize: '1.2em',
-    marginBottom: '10px',
-    textAlign: 'left',
-    color: '#007bff'
+  captionSide: 'top',
+  fontWeight: 'bold',
+  fontSize: '1.2em',
+  marginBottom: '10px',
+  textAlign: 'left',
+  color: '#007bff'
 };
 
 const getTypeString = (type) => {
@@ -82,9 +82,9 @@ export const renderDevicesTable = (devices) => {
   if (!devices || (Array.isArray(devices) && devices.length === 0) || Object.keys(devices).length === 0) {
     return <p>No devices available.</p>;
   }
-  
+
   const deviceArray = Array.isArray(devices) ? devices : Object.values(devices);
-  
+
   return (
     <ComponentCard title="Devices" style={componentCardStyle}>
       <Table borderless responsive style={tableStyle}>
@@ -113,7 +113,7 @@ export const renderGroupsTable = (groups) => {
   if (!groups || groups.length === 0) {
     return <p>No groups available.</p>;
   }
-  
+
   return (
     <ComponentCard title="Groups" style={componentCardStyle}>
       <Table borderless responsive style={tableStyle}>
@@ -188,12 +188,12 @@ const renderDeviceStatus = (content) => {
       return `Position: ${content.statusConditions.position}`;
     }
   }
-  
+
   if (content.status !== undefined) {
     // 普通设备（如继电器）
     return content.status ? 'ON' : 'OFF';
   }
-  
+
   // 未知类型
   return 'Unknown status';
 };
@@ -236,3 +236,55 @@ export const renderRemoteControlsTable = (remoteControls) => (
     ))}
   </div>
 );
+
+// 首先添加一个新的常量来映射脉冲值到显示文本
+const PULSE_MAPPING = {
+  0: 'NORMAL',
+  1: '1SEC',
+  2: '6SEC',
+  3: '9SEC',
+  4: 'REVERS'
+};
+
+// 添加新的表格渲染函数
+export const renderVirtualContactsTable = (outputs) => {
+  if (!outputs || outputs.length === 0) {
+    return <p>No virtual contacts available.</p>;
+  }
+
+  return (
+    <div>
+      <div className="component-card-title">Virtual Dry Contacts</div>
+      {outputs.map((output, index) => (
+        <ComponentCard 
+          key={index} 
+          title={output.deviceName} 
+          style={componentCardStyle}
+        >
+          <Table borderless responsive style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={{ ...headerCellStyle, width: '15%' }}>Channel</th>
+                <th style={{ ...headerCellStyle, width: '45%' }}>Virtual Name</th>
+                <th style={{ ...headerCellStyle, width: '40%' }}>Pulse Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {output.virtualDryContacts.map((contact, contactIndex) => (
+                <tr key={contactIndex}>
+                  <td style={cellStyle}>{contact.channel + 1}</td>
+                  <td style={cellStyle}>
+                    {contact.virtualName || <span style={{ color: '#999' }}>-</span>}
+                  </td>
+                  <td style={cellStyle}>
+                    {PULSE_MAPPING[contact.pulse]}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </ComponentCard>
+      ))}
+    </div>
+  );
+};
