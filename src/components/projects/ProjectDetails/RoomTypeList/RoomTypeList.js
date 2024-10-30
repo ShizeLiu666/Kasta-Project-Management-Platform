@@ -4,8 +4,8 @@ import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
 import { CircularProgress } from "@mui/material";
-import SearchComponent from "../../ProjectList/SearchComponent";
-import { getToken } from '../../../auth/auth';
+import CustomSearchBar from '../../../CustomSearchBar';
+import { getToken } from '../../../auth';
 import axiosInstance from '../../../../config'; 
 import CustomButton from '../../../CustomButton';
 
@@ -17,6 +17,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filteredRoomTypes, setFilteredRoomTypes] = useState([]);
 
   useEffect(() => {
     const fetchRoomTypes = async () => {
@@ -35,6 +36,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
 
         if (response.data.success) {
           setRoomTypes(response.data.data);
+          setFilteredRoomTypes(response.data.data);
         } else {
           console.error("Error fetching room types:", response.data.errorMsg);
         }
@@ -48,16 +50,22 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
     fetchRoomTypes();
   }, [projectId]);
 
-  const filteredRoomTypes = roomTypes.filter((roomType) =>
-    roomType.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filterRoomTypes = (searchValue) => {
+    return roomTypes.filter((roomType) =>
+      roomType.name.toLowerCase().includes(searchValue.toLowerCase())
+    );
+  };
 
   const handleRoomTypeCreated = (newRoomType) => {
-    setRoomTypes([...roomTypes, newRoomType]);
+    const updatedRoomTypes = [...roomTypes, newRoomType];
+    setRoomTypes(updatedRoomTypes);
+    setFilteredRoomTypes(filterRoomTypes(searchTerm));
   };
 
   const handleRoomTypeDeleted = (deletedRoomTypeId) => {
-    setRoomTypes(roomTypes.filter(roomType => roomType.projectRoomId !== deletedRoomTypeId));
+    const updatedRoomTypes = roomTypes.filter(roomType => roomType.projectRoomId !== deletedRoomTypeId);
+    setRoomTypes(updatedRoomTypes);
+    setFilteredRoomTypes(filterRoomTypes(searchTerm));
   };
 
   const handleEditRoomType = (roomType) => {
@@ -76,14 +84,16 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
       roomType.projectRoomId,
       roomType.name,
       userRole,
-      roomType.projectRoomId  // 添加这一行
+      roomType.projectRoomId
     );
   };
 
   const handleRoomTypeUpdated = (updatedRoomType) => {
-    setRoomTypes(roomTypes.map(roomType => 
+    const updatedRoomTypes = roomTypes.map(roomType => 
       roomType.projectRoomId === updatedRoomType.projectRoomId ? updatedRoomType : roomType
-    ));
+    );
+    setRoomTypes(updatedRoomTypes);
+    setFilteredRoomTypes(filterRoomTypes(searchTerm));
   };
 
   if (loading) {
@@ -101,10 +111,15 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
           marginBottom: "10px",
         }}
       >
-        <SearchComponent
+        <CustomSearchBar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           placeholder="Search Room Types..."
+          filterKey="name"
+          onFilter={(value) => {
+            const filtered = filterRoomTypes(value);
+            setFilteredRoomTypes(filtered);
+          }}
         />
         <CustomButton
           type="create"
@@ -126,6 +141,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
           userRole={userRole}
         />
       ))}
+      
       {selectedRoomType && (
         <>
           <EditRoomTypeModal

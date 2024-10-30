@@ -29,6 +29,23 @@ const CustomModal = ({
     const [showErrorAlert, setShowErrorAlert] = useState(false);
 
     useEffect(() => {
+        const handleKeyPress = (event) => {
+            if (event.key === 'Enter' && isOpen && !disabled && !isSubmitting) {
+                event.preventDefault();
+                onSubmit();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('keypress', handleKeyPress);
+        }
+
+        return () => {
+            document.removeEventListener('keypress', handleKeyPress);
+        };
+    }, [isOpen, onSubmit, disabled, isSubmitting]);
+
+    useEffect(() => {
         if (isOpen) {
             setShowSuccessAlert(false);
             setShowErrorAlert(false);

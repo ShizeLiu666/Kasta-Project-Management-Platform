@@ -7,9 +7,13 @@ import './FullLayout.css';
 
 const FullLayout = () => {
   const [userType, setUserType] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   useEffect(() => {
-    // 从 localStorage 获取用户详情
     const userDetails = JSON.parse(localStorage.getItem('userDetails'));
     if (userDetails && userDetails.userType) {
       setUserType(userDetails.userType);
@@ -18,16 +22,12 @@ const FullLayout = () => {
 
   return (
     <main>
-      {/********header**********/}
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <div className="pageWrapper d-lg-flex content-container">
-        {/********Sidebar**********/}
-        <aside className="sidebarArea shadow" id="sidebarArea">
-          <Sidebar userType={userType} />
+        <aside className={`sidebarArea shadow ${sidebarOpen ? 'showSidebar' : ''}`} id="sidebarArea">
+          <Sidebar userType={userType} toggleSidebar={toggleSidebar} />
         </aside>
-        {/********Content Area**********/}
         <div className="contentArea">
-          {/********Middle Content**********/}
           <Container className="p-4" fluid>
             <Outlet />
           </Container>

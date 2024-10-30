@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Spinner, Alert, Badge } from 'reactstrap';
 import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth/auth';
+import { getToken } from '../../../auth';
 import defaultAvatar from '../../../../assets/images/users/normal_user.jpg'; // 请确保有一个默认头像图片
 import ComponentCard from '../../../AuthCodeManagement/ComponentCard';
 import InviteMemberModal from './InviteMemberModal';

@@ -64,7 +64,7 @@ import { createBrowserRouter } from "react-router-dom";
 import FullLayout from "../layouts/FullLayout.js";
 
 /***** Pages ****/
-import LoginPage from "../components/auth/LoginPage";
+import LoginPage from "../components/Login/LoginPage";
 import ProjectListComponent from "../components/projects/ProjectList/ProjectListComponent";
 import Profile from "../components/profile/profile";
 import AuthCodeManagement from "../components/AuthCodeManagement/AuthCodeManagement";

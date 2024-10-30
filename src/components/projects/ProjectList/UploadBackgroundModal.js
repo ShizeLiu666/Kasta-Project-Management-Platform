@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import axiosInstance from '../../../config';
-import { getToken } from '../../auth/auth';
+import { getToken } from '../../auth';
 import CustomModal from '../../CustomModal';
 
 const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess, project }) => {

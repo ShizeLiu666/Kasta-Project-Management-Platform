@@ -4,7 +4,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory, { PaginationProvider, PaginationListStandalone, SizePerPageDropdownStandalone } from 'react-bootstrap-table2-paginator';
 import ToolkitProvider from 'react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit';
 import ComponentCard from './ComponentCard';
-import { getToken } from '../auth/auth';
+import { getToken } from '../auth';
 import axiosInstance from '../../config';
 import CreateAuthCodeModal from './CreateAuthCodeModal';
 import EditAuthCodeModal from './EditAuthCodeModal';
@@ -15,6 +15,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';  // 导入 ContentCopyIcon
 import CustomAlert from '../CustomAlert';  // 导入 CustomAlert
 import CustomButton from '../CustomButton';
+import CustomSearchBar from '../CustomSearchBar';
 // import { backdropClasses } from '@mui/material';
 
 // const { SearchBar } = Search;
@@ -40,6 +41,8 @@ const AuthCodeManagement = () => {
     severity: 'success',
     duration: 2000  // 默认持续时间为 2 秒
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredAuthCodes, setFilteredAuthCodes] = useState([]);
 
   const fetchAuthCodes = useCallback(async () => {
     setLoading(true);
@@ -306,6 +309,20 @@ const AuthCodeManagement = () => {
     }
   }, [alert.isOpen, alert.duration]);
 
+  // 过滤授权码的函数
+  const filterAuthCodes = useCallback((searchValue) => {
+    return authCodes.filter((authCode) =>
+      authCode.code.toLowerCase().includes(searchValue.toLowerCase()) ||
+      (authCode.creator && authCode.creator.toLowerCase().includes(searchValue.toLowerCase())) ||
+      (authCode.usedBy && authCode.usedBy.toLowerCase().includes(searchValue.toLowerCase()))
+    );
+  }, [authCodes]);
+
+  // 当 authCodes 或 searchTerm 改变时更新过滤结果
+  useEffect(() => {
+    setFilteredAuthCodes(filterAuthCodes(searchTerm));
+  }, [authCodes, searchTerm, filterAuthCodes]);
+
   return (
     <div>
       <CustomAlert
@@ -322,25 +339,27 @@ const AuthCodeManagement = () => {
             <ComponentCard title="Authorization Code Management">
               <ToolkitProvider
                 keyField="code"
-                data={authCodes}
+                data={filteredAuthCodes} // 使用过滤后的数据
                 columns={columns}
               >
                 {(props) => (
                   <div>
                     <div className="d-flex justify-content-between mb-3">
-                      {/* 移除 SearchBar 组件 */}
-                      {/* 如果您想保留搜索框的样式但使其不可用，可以使用以下注释的代码 */}
-                      {/* <input 
-                        type="text" 
-                        placeholder="Search by Code... (Disabled)"
-                        disabled
-                        className="form-control"
-                        style={{ width: '300px' }}
-                      /> */}
+                      <CustomSearchBar
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        placeholder="Search Auth Code..."
+                        width="300px"
+                        showBorder={true}
+                        onFilter={(value) => {
+                          const filtered = filterAuthCodes(value);
+                          setFilteredAuthCodes(filtered);
+                        }}
+                      />
                       <CustomButton
                         type="create"
                         onClick={toggleCreateModal}
-                        style={{ marginLeft: 'auto' }}  // 这会将按钮推到右侧
+                        style={{ marginLeft: 'auto' }}
                       >
                         Create Auth Codes
                       </CustomButton>
@@ -358,12 +377,6 @@ const AuthCodeManagement = () => {
                             noDataIndication="No data available"
                             selectRow={selectRow}
                             classes="allow-selection"
-                            sortCaret={(order, column) => {
-                              if (!order) return (<span>&nbsp;&nbsp;↕</span>);
-                              else if (order === 'asc') return (<span>&nbsp;&nbsp;↑</span>);
-                              else if (order === 'desc') return (<span>&nbsp;&nbsp;↓</span>);
-                              return null;
-                            }}
                           />
                           <div className="d-flex justify-content-between align-items-center mt-3">
                             <SizePerPageDropdownStandalone {...paginationProps} className="custom-size-per-page"/>

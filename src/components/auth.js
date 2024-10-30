@@ -1,5 +1,5 @@
 import React from 'react';
-import axiosInstance from '../../config';
+import axiosInstance from '../config';
 import Alert from '@mui/material/Alert';
 import ReactDOM from 'react-dom';
 

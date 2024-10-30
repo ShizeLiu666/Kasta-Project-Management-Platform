@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { getUserDetails, getToken } from '../auth/auth';
+import { getUserDetails, getToken } from '../auth';
 import ProfileInfo from './ProfileInfo';
 import ProfileSettings from './ProfileSettings';
 import axiosInstance from '../../config';

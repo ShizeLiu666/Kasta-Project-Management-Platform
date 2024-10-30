@@ -7,14 +7,14 @@ import RoomConfigList from "../RoomConfigurations/RoomConfigList";
 import CreateProjectModal from "./CreateProjectModal";
 import DeleteProjectModal from "./DeleteProjectModal";
 import EditProjectModal from './EditProjectModal';
-import SearchComponent from "./SearchComponent";
-import { getToken } from '../../auth/auth';
+import { getToken } from '../../auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
 import CustomAlert from '../../CustomAlert';
 import InvitationModal from '../../UserInvitations/InvitationModal';
 import CustomButton from '../../CustomButton';
 import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
 import InviteMemberModal from '../ProjectDetails/ProjectMembers/InviteMemberModal';
+import CustomSearchBar from "../../CustomSearchBar";
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
@@ -47,6 +47,7 @@ const ProjectListComponent = () => {
   // });
   const [inviteMemberModalOpen, setInviteMemberModalOpen] = useState(false);
   const [selectedProjectForInvite, setSelectedProjectForInvite] = useState(null);
+  const [filteredProjects, setFilteredProjects] = useState([]);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -86,39 +87,10 @@ const ProjectListComponent = () => {
     }
   }, []);
 
-  // const fetchUserRole = useCallback(async () => {
-  //   try {
-  //     const token = getToken();
-  //     if (!token) {
-  //       console.error("No token found, please log in again.");
-  //       return;
-  //     }
-  
-  //     const response = await axiosInstance.get("/user/role", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  
-  //     if (response.data.success) {
-  //       setUserRole(response.data.data.role);
-  //     } else {
-  //       console.error("Error fetching user role:", response.data.errorMsg);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching user role:", error);
-  //   }
-  // }, []);
-
   useEffect(() => {
     fetchProjectList();
-    // 显示警告信息
-    // setWarningAlert(prev => ({ ...prev, isOpen: true }));
   }, [fetchProjectList]);
 
-  // const toggleModal = () => {
-  //   setModalOpen(!modalOpen);
-  // };
 
   const toggleCreateProjectModal = () => {
     setCreateProjectModalOpen(!createProjectModalOpen);
@@ -147,26 +119,6 @@ const ProjectListComponent = () => {
     }
   };
 
-  // const showAlert = (message, severity, duration = 3000) => {
-  //   setAlert({ isOpen: true, message, severity, duration });
-  // };
-
-  // const handlePasswordSubmit = async (password) => {
-  //   try {
-  //     if (password === selectedProject.password) {
-  //       showAlert(`Password for ${selectedProject.name} is correct!`, "success");
-  //       toggleModal();
-  //       setBreadcrumbPath(["Project List", "Project Details"]);
-  //       setShowRoomTypes(true);
-  //     } else {
-  //       showAlert(`Incorrect password for ${selectedProject.name}.`, "error");
-  //     }
-  //   } catch (error) {
-  //     showAlert("An error occurred. Please try again later.", "error");
-  //     console.error("Error verifying password:", error);
-  //   }
-  // };
-
   const handleBreadcrumbClick = () => {
     setBreadcrumbPath(["Project List"]);
     setShowRoomTypes(false);
@@ -178,10 +130,6 @@ const ProjectListComponent = () => {
     setSelectedRoomType({ id: roomTypeId, name: roomTypeName });
     setSelectedUserRole(userRole);  // 保存用户角色
   };
-
-  const filteredProjects = projects.filter((project) =>
-    project.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleUploadSuccess = (updatedProject) => {
     setProjects(prevProjects => 
@@ -226,6 +174,18 @@ const ProjectListComponent = () => {
     setSelectedProjectForInvite(project);
     setInviteMemberModalOpen(true);
   };
+
+  // 过滤项目的函数
+  const filterProjects = useCallback((searchValue) => {
+    return projects.filter((project) =>
+      project.name.toLowerCase().includes(searchValue.toLowerCase())
+    );
+  }, [projects]);
+
+  // 当 projects 或 searchTerm 改变时更新过滤结果
+  useEffect(() => {
+    setFilteredProjects(filterProjects(searchTerm));
+  }, [projects, searchTerm, filterProjects]);
 
   return (
     <div>
@@ -306,7 +266,16 @@ const ProjectListComponent = () => {
             width: "100%",
           }}
         >
-          <SearchComponent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <CustomSearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            placeholder="Search Project Name..."
+            filterKey="name"
+            onFilter={(value) => {
+              const filtered = filterProjects(value);
+              setFilteredProjects(filtered);
+            }}
+          />
 
           <CustomButton
             type="create"
@@ -330,7 +299,7 @@ const ProjectListComponent = () => {
                   onChangeBackground={toggleUploadBackgroundModal}
                   onLeaveProject={handleLeaveProject}
                   setMenuOpen={setMenuOpen}
-                  userRole={project.role}  // 确保这里使用正确的属性名
+                  userRole={project.role}
                   onInviteMember={handleInviteMember}
                 />
               </div>
@@ -360,15 +329,6 @@ const ProjectListComponent = () => {
           userRole={selectedUserRole}  // 传递用户角色
         />
       )}
-
-      {/* {selectedProject && (
-        <PasswordModal
-          isOpen={modalOpen}
-          toggle={toggleModal}
-          projectName={selectedProject.name}
-          onSubmit={handlePasswordSubmit}
-        />
-      )} */}
 
       <CreateProjectModal
         isOpen={createProjectModalOpen}

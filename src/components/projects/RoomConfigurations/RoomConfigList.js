@@ -17,7 +17,7 @@ import {
   renderRemoteControlsTable,
   renderVirtualContactsTable
 } from './ConfigTables';
-import { getToken } from '../../auth/auth';
+import { getToken } from '../../auth';
 import axiosInstance from '../../../config';
 import CustomAlert from '../../CustomAlert';
 import ComponentCard from '../../AuthCodeManagement/ComponentCard';

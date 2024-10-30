@@ -7,7 +7,7 @@ import "./LoginPage.css";
 import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { setToken, saveUsername, saveUserDetails } from './auth';
+import { setToken, saveUsername, saveUserDetails } from '../auth';
 import axiosInstance from '../../config';  // 路径可能需要调整
 import CustomAlert from '../CustomAlert';
 

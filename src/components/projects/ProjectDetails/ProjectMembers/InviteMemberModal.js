@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import CustomModal from '../../../CustomModal';
 import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth/auth';
+import { getToken } from '../../../auth';
 
 const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited }) => {
   const [account, setAccount] = useState('');

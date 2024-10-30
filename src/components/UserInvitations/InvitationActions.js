@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'reactstrap';
 import axiosInstance from '../../config';
-import { getToken } from '../auth/auth';
+import { getToken } from '../auth';
 
 const InvitationActions = ({ projectId, onActionComplete }) => {
   const handleAction = async (action) => {
