@@ -21,6 +21,11 @@ const navigation = [
     icon: 'bi-key',
     superUserOnly: true,
   },
+  {
+    title: "Testing",
+    href: "/admin/testing",
+    icon: 'bi-file-earmark-excel-fill',
+  },
 ];
 
 const Sidebar = ({ userType, toggleSidebar }) => {
