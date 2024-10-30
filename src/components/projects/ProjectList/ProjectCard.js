@@ -78,6 +78,39 @@ const ProjectCard = ({
     onInviteMember(project);
   };
 
+  const headerStyle = {
+    padding: "10px", 
+    display: "flex", 
+    justifyContent: "space-between", 
+    alignItems: "center",
+    borderBottom: '1px solid #e0e0e0',
+    minHeight: '50px',  // 确保最小高度
+  };
+
+  const titleContainerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,  // 允许子元素收缩
+    flex: 1,      // 占据剩余空间
+    marginRight: '10px',  // 与菜单按钮保持间距
+  };
+
+  const titleStyle = {
+    margin: 0,
+    fontWeight: "bold",
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '200px',  // 或其他合适的值
+  };
+
+  const subtitleStyle = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '100%',  // 使用百分比
+  };
+
   return (
     <Card
       className="blog-card"
@@ -94,15 +127,9 @@ const ProjectCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div style={{ 
-        padding: "10px", 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "center",
-        borderBottom: '1px solid #e0e0e0',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h6 style={{ margin: 0, fontWeight: "bold" }}>{project.name}</h6>
+      <div style={headerStyle}>
+        <div style={titleContainerStyle}>
+          <h6 style={titleStyle}>{project.name}</h6>
           {getRoleBadge(currentUserRole)}
         </div>
         <UncontrolledDropdown>
@@ -162,8 +189,8 @@ const ProjectCard = ({
       />
 
       <CardBody>
-        <CardSubtitle>Address: {project.address || 'None'}</CardSubtitle>
-        <CardSubtitle>Description: {project.des || 'None'}</CardSubtitle>
+        <CardSubtitle style={subtitleStyle}>Address: {project.address || 'None'}</CardSubtitle>
+        <CardSubtitle style={subtitleStyle}>Description: {project.des || 'None'}</CardSubtitle>
       </CardBody>
     </Card>
   );

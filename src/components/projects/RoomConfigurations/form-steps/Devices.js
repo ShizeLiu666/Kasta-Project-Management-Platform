@@ -88,9 +88,9 @@ const Devices = forwardRef(({ splitData, onValidate }, ref) => {
                   <li key={index}>{error}</li>
                 ))}
               </ul>
-              <p>
-                Please refer to the "Currently Supported Device Types and Models" section below for correct formatting.
-              </p>
+              <div style={{ marginTop: "10px" }}>
+                Please refer to the <strong>Supported Devices</strong> below for the correct format.
+              </div>
             </Alert>
           )}
 

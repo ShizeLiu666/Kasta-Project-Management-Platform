@@ -98,9 +98,9 @@ const VirtualContacts = forwardRef(({
                   <li key={index}>{error}</li>
                 ))}
               </ul>
-              <p>
-                Please refer to the "Supported Virtual Contact Formats" section below for correct formatting examples.
-              </p>
+              <div style={{ marginTop: "10px" }}>
+                Please refer to the <strong>Supported Virtual Contact Formats</strong> below for the correct format.
+              </div>
             </Alert>
           )}
 

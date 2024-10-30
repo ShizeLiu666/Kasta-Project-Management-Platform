@@ -94,6 +94,9 @@ const Groups = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
                   <li key={index}>{error}</li>
                 ))}
               </ul>
+              <div style={{ marginTop: "10px" }}>
+                Please refer to the <strong>Supported Group Control Formats</strong> below for the correct format.
+              </div>
             </Alert>
           )}
 

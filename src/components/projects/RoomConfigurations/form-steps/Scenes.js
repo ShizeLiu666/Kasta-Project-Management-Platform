@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
 import { Alert, AlertTitle } from "@mui/material";
-import { Button } from "reactstrap";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,12 +10,6 @@ import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
 import { validateScenes } from "../ExcelProcessor/validation/Scenes";
 import "./steps.scss"
-
-import dimmerFormatImage from '../../../../assets/excel/scene_format/dimmer_type.png';
-import relayFormatImage from '../../../../assets/excel/scene_format/relay_type.png';
-import curtainFormatImage from '../../../../assets/excel/scene_format/curtain_type.png';
-import fanFormatImage from '../../../../assets/excel/scene_format/fan_type.png';
-import powerpointFormatImage from '../../../../assets/excel/scene_format/powerpoint_type.png';
 
 import ScenesTreeView from "./TreeView/ScenesTreeView";
 
@@ -37,16 +30,7 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
   const [sceneData, setSceneData] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [showFormatImages, setShowFormatImages] = useState(false);
   const hasValidated = useRef(false);
-
-  const formatImages = {
-    'Dimmer': dimmerFormatImage,
-    'Relay': relayFormatImage,
-    'Curtain': curtainFormatImage,
-    'Fan': fanFormatImage,
-    'PowerPoint': powerpointFormatImage,
-  };
 
   useEffect(() => {
     if (!splitData || !splitData.scenes || !deviceNameToType || hasValidated.current) {
@@ -59,7 +43,6 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
       setSceneErrors(formatErrors(errors));
       setSuccess(false);
       onValidate(false, errors);
-      setShowFormatImages(true);
     } else {
       // Create an object with scene names as keys and devices/actions as values
       const sceneDevices = {};
@@ -75,7 +58,6 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
       setSceneData(sceneDevices);
       setSuccess(true);
       onValidate(true, { sceneData: sceneDevices });
-      setShowFormatImages(false);
     }
 
     hasValidated.current = true;
@@ -122,20 +104,9 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
                   </li>
                 ))}
               </ul>
-              <Button onClick={() => setShowFormatImages(!showFormatImages)} variant="outlined" size="sm" sx={{ mt: 1 }}>
-                {showFormatImages ? "Hide Format Images" : "Show Format Images"}
-              </Button>
-              {showFormatImages && (
-                <div style={{ marginTop: "20px" }}>
-                  <h5>Correct device type formats:</h5>
-                  {Object.entries(formatImages).map(([deviceType, imageSrc]) => (
-                    <div key={deviceType} style={{ marginBottom: "20px" }}>
-                      <h6>{deviceType}</h6>
-                      <img src={imageSrc} alt={`${deviceType} format`} style={{ maxWidth: "100%" }} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div style={{ marginTop: "10px" }}>
+                Please refer to the <strong>Supported Scene Control Formats</strong> below for the correct format.
+              </div>
             </Alert>
           )}
 

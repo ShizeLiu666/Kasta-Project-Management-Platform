@@ -95,9 +95,9 @@ const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDevi
                   <li key={index}>{error}</li>
                 ))}
               </ul>
-              <p>
-                Please refer to the "Supported Remote Control Formats" section below for correct formatting examples.
-              </p>
+              <div style={{ marginTop: "10px" }}>
+                Please refer to the <strong>Supported Remote Control Formats</strong> below for the correct format.
+              </div>
             </Alert>
           )}
 

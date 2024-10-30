@@ -26,6 +26,9 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         },
       });
 
+      console.log('Project Members Response:', response.data);
+      console.log('Project Members Data:', response.data.data);
+
       if (response.data.success) {
         const sortedMembers = response.data.data.sort((a, b) => {
           if (a.role === 'OWNER') return -1;
@@ -39,6 +42,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         setError(response.data.errorMsg);
       }
     } catch (err) {
+      console.error('Error fetching members:', err);
       setError('Failed to fetch project members');
     } finally {
       setLoading(false);
@@ -123,7 +127,11 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                         alt="avatar"
                         width="45"
                         height="45"
-                        onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
+                        onError={(e) => { 
+                          console.log('Avatar load error for member:', member);
+                          e.target.onerror = null;
+                          e.target.src = defaultAvatar;
+                        }}
                       />
                       <div className="ms-3">
                         <h6 className="mb-0">{member.account || member.username}</h6>

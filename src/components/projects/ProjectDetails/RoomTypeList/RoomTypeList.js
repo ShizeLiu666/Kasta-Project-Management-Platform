@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import RoomElement from "./RoomElement";
 import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
@@ -19,36 +19,36 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRoomTypes, setFilteredRoomTypes] = useState([]);
 
-  useEffect(() => {
-    const fetchRoomTypes = async () => {
-      try {
-        const token = getToken();
-        if (!token) {
-          alert("No token found, please log in again.");
-          return;
-        }
-
-        const response = await axiosInstance.get(`/project-rooms/${projectId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.data.success) {
-          setRoomTypes(response.data.data);
-          setFilteredRoomTypes(response.data.data);
-        } else {
-          console.error("Error fetching room types:", response.data.errorMsg);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching room types:", error);
-        setLoading(false);
+  const fetchRoomTypes = useCallback(async () => {
+    try {
+      const token = getToken();
+      if (!token) {
+        alert("No token found, please log in again.");
+        return;
       }
-    };
 
-    fetchRoomTypes();
+      const response = await axiosInstance.get(`/project-rooms/${projectId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        setRoomTypes(response.data.data);
+        setFilteredRoomTypes(response.data.data);
+      } else {
+        console.error("Error fetching room types:", response.data.errorMsg);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching room types:", error);
+      setLoading(false);
+    }
   }, [projectId]);
+
+  useEffect(() => {
+    fetchRoomTypes();
+  }, [fetchRoomTypes]);
 
   const filterRoomTypes = (searchValue) => {
     return roomTypes.filter((roomType) =>
@@ -56,16 +56,14 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
     );
   };
 
-  const handleRoomTypeCreated = (newRoomType) => {
-    const updatedRoomTypes = [...roomTypes, newRoomType];
-    setRoomTypes(updatedRoomTypes);
-    setFilteredRoomTypes(filterRoomTypes(searchTerm));
+  const handleRoomTypeCreated = async (newRoomType) => {
+    await fetchRoomTypes();
+    setCreateModalOpen(false);
   };
 
-  const handleRoomTypeDeleted = (deletedRoomTypeId) => {
-    const updatedRoomTypes = roomTypes.filter(roomType => roomType.projectRoomId !== deletedRoomTypeId);
-    setRoomTypes(updatedRoomTypes);
-    setFilteredRoomTypes(filterRoomTypes(searchTerm));
+  const handleRoomTypeDeleted = async (deletedRoomTypeId) => {
+    await fetchRoomTypes();
+    setDeleteModalOpen(false);
   };
 
   const handleEditRoomType = (roomType) => {
@@ -88,12 +86,9 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
     );
   };
 
-  const handleRoomTypeUpdated = (updatedRoomType) => {
-    const updatedRoomTypes = roomTypes.map(roomType => 
-      roomType.projectRoomId === updatedRoomType.projectRoomId ? updatedRoomType : roomType
-    );
-    setRoomTypes(updatedRoomTypes);
-    setFilteredRoomTypes(filterRoomTypes(searchTerm));
+  const handleRoomTypeUpdated = async (updatedRoomType) => {
+    await fetchRoomTypes();
+    setEditModalOpen(false);
   };
 
   if (loading) {
