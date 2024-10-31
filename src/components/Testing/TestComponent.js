@@ -44,7 +44,10 @@ const TestComponent = () => {
       title: 'Device Type',
       type: 'dropdown',
       source: deviceTypes,
-      allowInvalid: false
+      allowInvalid: false,
+      strict: true,
+      autoWrapRow: true,
+      autoWrapCol: true
     },
     {
       title: 'Appearance Shortname',
@@ -99,6 +102,10 @@ const TestComponent = () => {
     });
   };
 
+  // 检查 AllDeviceTypes 的内容
+  console.log('AllDeviceTypes:', AllDeviceTypes);
+  console.log('deviceTypes:', deviceTypes);
+
   return (
     <ComponentCard title="Device Configuration">
       <Row>
@@ -127,33 +134,49 @@ const TestComponent = () => {
             </Button>
           </div>
 
-          <HotTable
-            data={data}
-            columns={columns}
-            colHeaders={['Device Type *', 'Appearance Shortname *', 'Device Name *']}
-            rowHeaders={true}
-            height="auto"
-            licenseKey="non-commercial-and-evaluation"
-            stretchH="all"
-            width="100%"
-            afterChange={(changes, source) => {
-              if (changes && source !== 'loadData') {
-                const [row, prop, oldValue, newValue] = changes[0];
-                if (prop === 0) { // 如果改变的是 Device Type
-                  const hot = changes[0].instance;
-                  if (hot && typeof hot.setDataAtCell === 'function') {
-                    hot.setDataAtCell(row, 1, '');
-                  } else {
-                    // 使用 setData 来更新整个数据
-                    const newData = [...data];
-                    newData[row][1] = '';
-                    setData(newData);
+          <div style={{ 
+            minHeight: '400px',  // 确保有足够的高度
+            width: '100%',
+            position: 'relative' // 确保下拉菜单定位正确
+          }}>
+            <HotTable
+              data={data}
+              columns={columns}
+              colHeaders={['Device Type *', 'Appearance Shortname *', 'Device Name *']}
+              rowHeaders={true}
+              licenseKey="non-commercial-and-evaluation"
+              stretchH="all"
+              width="100%"
+              height={300}
+              autoWrapRow={true}
+              autoWrapCol={true}
+              dropdownMenu={true}
+              contextMenu={true}
+              afterChange={(changes, source) => {
+                if (changes && source !== 'loadData') {
+                  const [row, prop, oldValue, newValue] = changes[0];
+                  if (prop === 0) { // 如果改变的是 Device Type
+                    const hot = changes[0].instance;
+                    if (hot && typeof hot.setDataAtCell === 'function') {
+                      hot.setDataAtCell(row, 1, '');
+                    } else {
+                      // 使用 setData 来更新整个数据
+                      const newData = [...data];
+                      newData[row][1] = '';
+                      setData(newData);
+                    }
                   }
+                  console.log(`Cell changed: row ${row}, ${prop}, from ${oldValue} to ${newValue}`);
                 }
-                console.log(`Cell changed: row ${row}, ${prop}, from ${oldValue} to ${newValue}`);
-              }
-            }}
-          />
+              }}
+              afterRender={() => {
+                console.log('Table rendered');
+                console.log('Available device types:', deviceTypes);
+              }}
+              minSpareRows={1}
+              minRows={5}
+            />
+          </div>
         </Col>
       </Row>
     </ComponentCard>
