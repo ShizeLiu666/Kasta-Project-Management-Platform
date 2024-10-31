@@ -1,4 +1,5 @@
 import { getDeviceNameToType } from './Devices';
+import { processRemoteParameters } from './RemoteParameters';
 
 function getRcIndex(deviceType, operation) {
     const upperOperation = operation ? operation.toUpperCase() : '';
@@ -62,8 +63,10 @@ function getRcIndex(deviceType, operation) {
     return 1; // 默认值，用于其他设备类型
 }
 
-export function processRemoteControls(remoteControlsContent) {
+export function processRemoteControls(remoteControlsContent, remoteParametersContent) {
     if (!remoteControlsContent) return { remoteControls: [] };
+    
+    const { parameters } = processRemoteParameters(remoteParametersContent);
     
     const remoteControlsData = [];
     let currentRemote = null;
@@ -76,7 +79,16 @@ export function processRemoteControls(remoteControlsContent) {
 
         if (line.startsWith("NAME:")) {
             if (currentRemote) {
-                remoteControlsData.push({ remoteName: currentRemote, links: currentLinks });
+                const parameterValues = {};
+                parameters.forEach((param, key) => {
+                    parameterValues[key.toLowerCase()] = param.value;
+                });
+                
+                remoteControlsData.push({
+                    remoteName: currentRemote,
+                    links: currentLinks,
+                    parameters: parameterValues
+                });
             }
             currentRemote = line.replace("NAME:", "").trim();
             currentLinks = [];
@@ -122,7 +134,16 @@ export function processRemoteControls(remoteControlsContent) {
     });
 
     if (currentRemote) {
-        remoteControlsData.push({ remoteName: currentRemote, links: currentLinks });
+        const parameterValues = {};
+        parameters.forEach((param, key) => {
+            parameterValues[key.toLowerCase()] = param.value;
+        });
+        
+        remoteControlsData.push({
+            remoteName: currentRemote,
+            links: currentLinks,
+            parameters: parameterValues
+        });
     }
 
     return { remoteControls: remoteControlsData };

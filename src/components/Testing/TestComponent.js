@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Row, Col, Button } from 'reactstrap';
-import { getToken } from '../auth';
-import axiosInstance from '../../config';
+// import { getToken } from '../auth';
+// import axiosInstance from '../../config';
 import CustomAlert from '../CustomAlert';
 import ComponentCard from '../AuthCodeManagement/ComponentCard';
 import { HotTable } from '@handsontable/react';
@@ -28,7 +28,7 @@ const getAppearanceShortnames = (deviceType) => {
 };
 
 const TestComponent = () => {
-  const [loading, setLoading] = useState(false);
+//   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
     isOpen: false,
     message: '',

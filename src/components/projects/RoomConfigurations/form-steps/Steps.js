@@ -21,6 +21,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
   const [groupData, setGroupData] = useState(null);
   const [sceneData, setSceneData] = useState(null);
   const [remoteControlData, setRemoteControlData] = useState(null);
+  const [remoteParameterData, setRemoteParameterData] = useState(null);
   const [splitData, setSplitData] = useState(null);
   const [registeredDeviceNames, setRegisteredDeviceNames] = useState(new Set());
   const [registeredGroupNames, setRegisteredGroupNames] = useState(new Set());
@@ -64,6 +65,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
   const handleStep6Validation = (isValid, data) => {
     if (isValid) {
       setRemoteControlData(data.remoteControlData);
+      setRemoteParameterData(data.parameters);
     }
   };
 
@@ -113,6 +115,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
     }
     if (currentStep === 6) {
       setRemoteControlData(null);
+      setRemoteParameterData(null);
     }
   };
 
@@ -175,6 +178,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
         groupData={groupData}
         sceneData={sceneData}
         remoteControlData={remoteControlData}
+        remoteParameterData={remoteParameterData}
         virtualContactData={virtualContactData}
         submitJson={submitJson}
         projectRoomId={projectRoomId}

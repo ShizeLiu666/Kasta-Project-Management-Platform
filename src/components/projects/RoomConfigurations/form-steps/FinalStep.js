@@ -33,7 +33,10 @@ const Step6 = forwardRef(({
       const devicesResult = processDevices(splitData.devices);
       const groupsResult = processGroups(splitData.groups);
       const scenesResult = processScenes(splitData.scenes);
-      const remoteControlsResult = processRemoteControls(splitData.remoteControls);
+      const remoteControlsResult = processRemoteControls(
+        splitData.remoteControls, 
+        splitData.remoteParameters
+      );
       const virtualContactsResult = processVirtualContacts(splitData.outputs);
 
       return {

@@ -198,9 +198,53 @@ const renderDeviceStatus = (content) => {
   return 'Unknown status';
 };
 
+// 添加默认参数映射
+const DEFAULT_PARAMETER_VALUES = {
+  backlight: 1,          // ENABLED
+  backlight_color: 3,    // BLUE
+  backlight_timeout: 1,  // 1MIN
+  beep: 1,              // ENABLED
+  night_light: 15       // MEDIUM
+};
+
+// 添加参数值到显示文本的映射
+const PARAMETER_DISPLAY = {
+  backlight: {
+    0: 'DISABLED',
+    1: 'ENABLED'
+  },
+  backlight_color: {
+    1: 'WHITE',
+    2: 'GREEN',
+    3: 'BLUE'
+  },
+  backlight_timeout: {
+    0: '30S',
+    1: '1MIN',
+    2: '2MIN',
+    3: '3MIN',
+    4: '5MIN',
+    5: '10MIN',
+    6: 'NEVER'
+  },
+  beep: {
+    0: 'DISABLED',
+    1: 'ENABLED'
+  },
+  night_light: {
+    0: 'DISABLED',
+    10: 'LOW',
+    15: 'MEDIUM',
+    20: 'HIGH'
+  }
+};
+
+// 修改远程控制表格渲染函数
 export const renderRemoteControlsTable = (remoteControls) => (
   <div>
     <div className="component-card-title">Remote Controls</div>
+
+    {/* 遥控器列表 */}
     {remoteControls.map((remote, index) => (
       <ComponentCard key={index} title={remote.remoteName} style={componentCardStyle}>
         <Table borderless responsive style={tableStyle}>
@@ -217,12 +261,10 @@ export const renderRemoteControlsTable = (remoteControls) => (
               <tr key={i}>
                 <td style={{ ...cellStyle, textAlign: 'center' }}>{link.linkIndex + 1}</td>
                 <td style={{ ...cellStyle, textAlign: 'center' }}>
-                  <span
-                    style={{
-                      ...customBadgeStyle,
-                      backgroundColor: getLinkTypeColor(link.linkType)
-                    }}
-                  >
+                  <span style={{
+                    ...customBadgeStyle,
+                    backgroundColor: getLinkTypeColor(link.linkType)
+                  }}>
                     {getTypeString(link.linkType)}
                   </span>
                 </td>
@@ -234,6 +276,39 @@ export const renderRemoteControlsTable = (remoteControls) => (
         </Table>
       </ComponentCard>
     ))}
+
+<ComponentCard style={componentCardStyle} title="Remote Parameters">
+      <Table borderless responsive style={tableStyle}>
+        <thead>
+          <tr>
+            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT</th>
+            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT COLOR</th>
+            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT TIMEOUT</th>
+            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BEEP</th>
+            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>NIGHT LIGHT</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style={{ ...cellStyle, textAlign: 'center' }}>
+              {PARAMETER_DISPLAY.backlight[remoteControls[0]?.parameters?.backlight ?? DEFAULT_PARAMETER_VALUES.backlight]}
+            </td>
+            <td style={{ ...cellStyle, textAlign: 'center' }}>
+              {PARAMETER_DISPLAY.backlight_color[remoteControls[0]?.parameters?.backlight_color ?? DEFAULT_PARAMETER_VALUES.backlight_color]}
+            </td>
+            <td style={{ ...cellStyle, textAlign: 'center' }}>
+              {PARAMETER_DISPLAY.backlight_timeout[remoteControls[0]?.parameters?.backlight_timeout ?? DEFAULT_PARAMETER_VALUES.backlight_timeout]}
+            </td>
+            <td style={{ ...cellStyle, textAlign: 'center' }}>
+              {PARAMETER_DISPLAY.beep[remoteControls[0]?.parameters?.beep ?? DEFAULT_PARAMETER_VALUES.beep]}
+            </td>
+            <td style={{ ...cellStyle, textAlign: 'center' }}>
+              {PARAMETER_DISPLAY.night_light[remoteControls[0]?.parameters?.night_light ?? DEFAULT_PARAMETER_VALUES.night_light]}
+            </td>
+          </tr>
+        </tbody>
+      </Table>
+    </ComponentCard>
   </div>
 );
 

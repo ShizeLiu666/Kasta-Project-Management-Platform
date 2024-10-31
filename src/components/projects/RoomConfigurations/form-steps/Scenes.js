@@ -157,7 +157,7 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
-                  rowsPerPageOptions={[5, 10, 25]}
+                  rowsPerPageOptions={[2, 5, 10]}
                   style={{
                     alignItems: "center",
                     display: "flex",

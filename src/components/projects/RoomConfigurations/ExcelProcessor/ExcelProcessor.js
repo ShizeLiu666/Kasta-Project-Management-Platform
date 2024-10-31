@@ -3,6 +3,8 @@ import { processGroups } from './conversion/Groups';
 import { processScenes } from './conversion/Scenes';
 import { processRemoteControls } from './conversion/RemoteControls';
 import { processVirtualContacts } from './conversion/VirtualContacts';
+import { processRemoteParameters } from './conversion/RemoteParameters';
+import { validateRemoteParameters } from './validation/RemoteParameters';
 
 const AllDeviceTypes = {
     "Dimmer Type": ["KBSKTDIM", "D300IB", "D300IB2", "DH10VIB", "DM300BH", "D0-10IB", "DDAL"],
@@ -88,6 +90,15 @@ function determineDeviceType(deviceName) {
     }
 }
 
+// 处理遥控器参数的函数
+function handleRemoteParameters(remoteParametersContent) {
+    const { errors, parameters } = validateRemoteParameters(remoteParametersContent);
+    if (errors && errors.length > 0) {
+        return { errors, parameters: null };
+    }
+    return processRemoteParameters(remoteParametersContent, parameters);
+}
+
 export {
     resetDeviceNameToType,
     processDevices,
@@ -95,6 +106,9 @@ export {
     processScenes,
     processRemoteControls,
     processVirtualContacts,
+    processRemoteParameters,
+    validateRemoteParameters,
+    handleRemoteParameters,
     AllDeviceTypes,
     determineDeviceType,
     sceneOutputTemplates

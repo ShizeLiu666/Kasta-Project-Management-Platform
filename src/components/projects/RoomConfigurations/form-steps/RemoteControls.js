@@ -9,11 +9,13 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
 import { validateRemoteControls } from "../ExcelProcessor/validation/RemoteControls";
+import { validateRemoteParameters } from "../ExcelProcessor/validation/RemoteParameters";
 import "./steps.scss"
 
 import RemoteControlTreeView from './TreeView/RemoteControlsTreeView';
+import RemoteParameters from './RemoteParameters';
+import RemoteParametersTreeView from './TreeView/RemoteParametersTreeView';
 
-// Format error messages function
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
     return errors.split('Remote Control')
@@ -24,42 +26,62 @@ const formatErrors = (errors) => {
   return errors.sort();
 };
 
-// Step5 function component
 const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames, onValidate }, ref) => {
   const [remoteControlErrors, setRemoteControlErrors] = useState(null);
+  const [parameterErrors, setParameterErrors] = useState(null);
   const [success, setSuccess] = useState(false);
   const [remoteControlData, setRemoteControlData] = useState({});
+  const [parameterData, setParameterData] = useState(null);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(2);
   const hasValidated = useRef(false);
+  const [remoteControlSuccess, setRemoteControlSuccess] = useState(false);
+  const [parameterSuccess, setParameterSuccess] = useState(false);
 
   useEffect(() => {
     if (!splitData || !splitData.remoteControls || !deviceNameToType || hasValidated.current) {
       return;
     }
 
-    const errors = validateRemoteControls(splitData.remoteControls, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames);
+    const rcErrors = validateRemoteControls(splitData.remoteControls, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames);
+    const { errors: pErrors, parameters } = validateRemoteParameters(splitData.remoteParameters || []);
 
-    if (errors.length > 0) {
-      setRemoteControlErrors(formatErrors(errors));
-      setSuccess(false);
-      onValidate(false, errors);
-    } else {
-      const remoteControlData = {};
+    setRemoteControlErrors(rcErrors.length > 0 ? formatErrors(rcErrors) : null);
+    setParameterErrors(pErrors.length > 0 ? pErrors : null);
+
+    const rcSuccess = rcErrors.length === 0;
+    const pSuccess = pErrors.length === 0;
+    
+    setRemoteControlSuccess(rcSuccess);
+    setParameterSuccess(pSuccess);
+    setSuccess(rcSuccess && pSuccess);
+
+    let newRemoteControlData = {};
+
+    if (rcSuccess) {
+      newRemoteControlData = {};
       let currentRemoteControl = null;
 
       splitData.remoteControls.forEach(line => {
         if (line.startsWith('NAME:')) {
           currentRemoteControl = line.substring(5).trim();
-          remoteControlData[currentRemoteControl] = [];
+          newRemoteControlData[currentRemoteControl] = [];
         } else if (currentRemoteControl && /^\d+:/.test(line)) {
-          remoteControlData[currentRemoteControl].push(line.trim());
+          newRemoteControlData[currentRemoteControl].push(line.trim());
         }
       });
 
-      setRemoteControlData(remoteControlData);
-      setSuccess(true);
-      onValidate(true, { remoteControlData });
+      setRemoteControlData(newRemoteControlData);
+    }
+
+    if (pSuccess) {
+      setParameterData({ parameters });
+    }
+
+    if (rcSuccess && pSuccess) {
+      onValidate(true, { remoteControlData: newRemoteControlData, parameters });
+    } else {
+      onValidate(false, { remoteControlErrors: rcErrors, parameterErrors: pErrors });
     }
 
     hasValidated.current = true;
@@ -90,18 +112,18 @@ const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDevi
           {remoteControlErrors && (
             <Alert severity="error" style={{ marginTop: "10px" }}>
               <AlertTitle>Error</AlertTitle>
-              <ul>
-                {remoteControlErrors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
-              <div style={{ marginTop: "10px" }}>
-                Please refer to the <strong>Supported Remote Control Formats</strong> below for the correct format.
+              <div>
+                <strong>Remote Control Errors:</strong>
+                <ul>
+                  {remoteControlErrors.map((error, index) => (
+                    <li key={`rc-${index}`}>{error}</li>
+                  ))}
+                </ul>
               </div>
             </Alert>
           )}
 
-          {success && (
+          {remoteControlSuccess && (
             <>
               <Alert severity="success" style={{ marginTop: "10px" }}>
                 <AlertTitle>The following remote controls have been identified:</AlertTitle>
@@ -137,12 +159,12 @@ const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDevi
 
                 <TablePagination
                   component="div"
-                  count={Object.keys(remoteControlData).length}  // 改为只计算 Remote Control Name 的数量
+                  count={Object.keys(remoteControlData).length}
                   page={page}
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
-                  rowsPerPageOptions={[5, 10]}
+                  rowsPerPageOptions={[2, 5, 10]}
                   style={{
                     alignItems: "center",
                     display: "flex",
@@ -153,9 +175,18 @@ const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDevi
             </>
           )}
 
-          {/* 添加新的 RemoteControlTreeView 组件 */}
           <div style={{ marginTop: "20px" }}>
             <RemoteControlTreeView />
+          </div>
+
+          <RemoteParameters 
+            parameterErrors={parameterErrors}
+            parameterData={parameterData}
+            success={parameterSuccess}
+          />
+
+          <div style={{ marginTop: "20px" }}>
+            <RemoteParametersTreeView />
           </div>
         </div>
       </div>

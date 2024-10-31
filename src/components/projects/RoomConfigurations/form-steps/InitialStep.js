@@ -49,7 +49,8 @@ function splitJsonFile(content) {
     groups: "KASTA GROUP",
     scenes: "KASTA SCENE",
     remoteControls: "REMOTE CONTROL LINK",
-    outputs: "VIRTUAL DRY CONTACT"  // 改为 outputs
+    outputs: "VIRTUAL DRY CONTACT",
+    remoteParameters: "REMOTE CONTROL PARAMETER"  // 添加新的关键字
   };
 
   const splitData = { 
@@ -57,7 +58,8 @@ function splitJsonFile(content) {
     groups: [], 
     scenes: [], 
     remoteControls: [],
-    outputs: []  // 改为 outputs
+    outputs: [],
+    remoteParameters: []  // 添加新的数组
   };
   
   let currentKey = null;
