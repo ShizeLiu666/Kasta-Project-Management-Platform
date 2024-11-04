@@ -6,9 +6,14 @@ import CloseIcon from '@mui/icons-material/Close'; // 确保已安装 @mui/icons
 
 const navigation = [
   {
-    title: "Projects",
-    href: "/admin/projects",
+    title: "Project",
+    href: "/admin/project",
     icon: 'bi-folder2-open',
+  },
+  {
+    title: "Network",
+    href: "/admin/network",
+    icon: 'bi-house-door',
   },
   {
     title: "Profile",

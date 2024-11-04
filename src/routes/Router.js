@@ -69,6 +69,7 @@ import ProjectListComponent from "../components/projects/ProjectList/ProjectList
 import Profile from "../components/profile/profile";
 import AuthCodeManagement from "../components/AuthCodeManagement/AuthCodeManagement";
 // import TestComponent from "../components/Testing/TestComponent";
+import NetworkComponent from "../components/Network/NetworkComponent";
 
 /*****Routes******/
 const router = createBrowserRouter([
@@ -84,8 +85,9 @@ const router = createBrowserRouter([
     path: "/admin",
     element: <FullLayout />,
     children: [
-      { index: true, element: <Navigate to="/admin/projects" /> },
-      { path: "projects", element: <ProjectListComponent /> },
+      { index: true, element: <Navigate to="/admin/project" /> },
+      { path: "project", element: <ProjectListComponent /> },
+      { path: "network", element: <NetworkComponent /> },
       { path: "profile", element: <Profile /> },
       { path: "auth-code-management", element: <AuthCodeManagement /> },
       // { path: "testing", element: <TestComponent /> },

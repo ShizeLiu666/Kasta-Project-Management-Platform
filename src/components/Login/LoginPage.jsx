@@ -88,7 +88,7 @@ const LoginPage = () => {
 
               showAlert("Login successful! Redirecting...", "success");
               setTimeout(() => {
-                navigate("/admin/projects");
+                navigate("/admin/project");
               }, 1000);
             } else {
               // Normal user - 不允许登录
