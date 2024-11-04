@@ -31,11 +31,45 @@ const StyledTreeItem = styled(TreeItem)({
 export const CustomTreeItem = React.forwardRef(({ copyText, label, ...props }, ref) => {
   const [alertOpen, setAlertOpen] = React.useState(false);
 
+  const fallbackCopyTextToClipboard = (text) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        setAlertOpen(true);
+      }
+    } catch (err) {
+      console.error('Fallback: Copy failed', err);
+    }
+
+    document.body.removeChild(textArea);
+  };
+
   const handleCopy = (event) => {
     if (copyText) {
       event.stopPropagation();
-      navigator.clipboard.writeText(copyText);
-      setAlertOpen(true);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(copyText)
+          .then(() => {
+            setAlertOpen(true);
+          })
+          .catch(err => {
+            console.error('Copy failed: ', err);
+            fallbackCopyTextToClipboard(copyText);
+          });
+      } else {
+        fallbackCopyTextToClipboard(copyText);
+      }
     }
   };
 
