@@ -69,7 +69,7 @@ import ProjectListComponent from "../components/projects/ProjectList/ProjectList
 import Profile from "../components/profile/profile";
 import AuthCodeManagement from "../components/AuthCodeManagement/AuthCodeManagement";
 // import TestComponent from "../components/Testing/TestComponent";
-import NetworkComponent from "../components/Network/NetworkComponent";
+import NetworkComponent from "../components/Network/NetworkList/NetworkComponent.js";
 
 /*****Routes******/
 const router = createBrowserRouter([

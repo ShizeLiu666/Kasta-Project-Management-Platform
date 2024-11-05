@@ -61,9 +61,7 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
       if (response.data.success) {
         setSuccessAlert("Project created successfully!");
         fetchProjects();
-        setTimeout(() => {
-          toggle();
-        }, 2000);
+        toggle();
       } else {
         setError(response.data.errorMsg || "Error creating project.");
       }

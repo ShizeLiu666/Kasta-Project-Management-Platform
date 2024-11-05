@@ -1,0 +1,45 @@
+.network-table {
+    width: 100%;
+    // border-collapse: separate;
+    // border-spacing: 0;
+
+    .MuiTableHead-root {
+        .MuiTableRow-root {
+            .MuiTableCell-head {
+                background-color: #f8f9fa;
+                font-weight: 600;
+                font-size: 0.875rem;
+                padding: 1rem;
+                border-bottom: 2px solid #dee2e6;
+            }
+        }
+    }
+
+    .MuiTableBody-root {
+        .MuiTableRow-root {
+            transition: background-color 0.2s ease;
+            
+            .MuiTableCell-body {
+                padding: 1rem;
+                font-size: 0.875rem;
+                color: #495057;
+                border-bottom: 1px solid #dee2e6;
+                background-color: transparent;
+
+                &.selectable-text {
+                    cursor: pointer;
+                    user-select: text;
+                }
+
+                &.actions-cell {
+                    cursor: default;
+                    user-select: none;
+                }
+            }
+
+            .MuiTouchRipple-root {
+                display: none;
+            }
+        }
+    }
+}
