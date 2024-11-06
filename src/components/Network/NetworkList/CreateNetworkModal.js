@@ -8,19 +8,19 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
   const [networkData, setNetworkData] = useState({
     meshName: '',
     passphrase: '',
-    isCurrentNetwork: false
+    // isCurrentNetwork: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
-    const value = e.target.type === 'select-one' 
+    /* const value = e.target.type === 'select-one' 
       ? e.target.value === 'true' 
-      : e.target.value;
+      : e.target.value; */
 
     setNetworkData({
       ...networkData,
-      [e.target.name]: value
+      [e.target.name]: e.target.value
     });
   };
 
@@ -45,7 +45,7 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
 
       if (createResponse.data.success) {
         console.log('Created network response:', createResponse.data);
-        if (networkData.isCurrentNetwork && currentNetworkId) {
+        /* if (networkData.isCurrentNetwork && currentNetworkId) {
           try {
             await axiosInstance.put('/networks/selected', [{
               networkId: currentNetworkId,
@@ -56,13 +56,13 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
           } catch (switchError) {
             console.error('Error updating previous current network:', switchError);
           }
-        }
+        } */
 
         onSuccess('Network created successfully');
         setNetworkData({
           meshName: '',
           passphrase: '',
-          isCurrentNetwork: false
+          // isCurrentNetwork: false
         });
         toggle();
       } else {
@@ -99,7 +99,16 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
           />
         </FormGroup>
         <FormGroup>
-          <Label for="passphrase">Passphrase</Label>
+          <Label for="passphrase">
+            Passphrase
+            <span style={{ 
+              color: '#dc3545', 
+              fontSize: '0.875rem',
+              marginLeft: '8px' 
+            }}>
+              *Cannot be modified after creation
+            </span>
+          </Label>
           <Input
             type="text"
             name="passphrase"
@@ -109,7 +118,7 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
             placeholder="Enter passphrase"
           />
         </FormGroup>
-        <FormGroup>
+        {/* <FormGroup>
           <Label for="isCurrentNetwork">Set as Current Network</Label>
           <Input
             type="select"
@@ -118,15 +127,13 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
             value={networkData.isCurrentNetwork}
             onChange={handleChange}
           >
-            <option value={false}>No</option>
             <option value={true}>Yes</option>
+            <option value={false}>No</option>
           </Input>
-          {networkData.isCurrentNetwork && (
-            <small className="text-muted">
-              This will change your current network to the newly created one.
-            </small>
-          )}
-        </FormGroup>
+        </FormGroup> */}
+        <small className="text-muted" style={{ display: 'block', marginTop: '10px' }}>
+          Note: The newly created network will automatically become your current network.
+        </small>
       </Form>
     </CustomModal>
   );

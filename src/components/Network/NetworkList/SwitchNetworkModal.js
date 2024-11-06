@@ -65,9 +65,6 @@ const SwitchNetworkModal = ({ isOpen, toggle, network, currentNetworkId, onSucce
       error={error}
     >
       <p>Are you sure you want to switch to network "{network?.meshName}"?</p>
-      <p style={{ color: '#6c757d', fontSize: '0.9em' }}>
-        This will set "{network?.meshName}" as your current network.
-      </p>
     </CustomModal>
   );
 };

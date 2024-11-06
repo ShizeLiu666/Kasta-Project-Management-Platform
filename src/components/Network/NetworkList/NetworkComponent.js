@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
 import Table from '@mui/material/Table';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -23,6 +26,7 @@ import StarIcon from '@mui/icons-material/Star';
 import './NetworkComponent.scss';
 import SwitchNetworkModal from './SwitchNetworkModal';
 import EditNetworkModal from './EditNetworkModal';
+import NetworkDetails from '../NetworkDetails/NetworkDetails';
 
 const NetworkComponent = () => {
   const [networks, setNetworks] = useState([]);
@@ -40,6 +44,8 @@ const NetworkComponent = () => {
   const [currentNetworkId, setCurrentNetworkId] = useState(null);
   const [switchModalOpen, setSwitchModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [showNetworkDetails, setShowNetworkDetails] = useState(false);
+  const [activeNetwork, setActiveNetwork] = useState(null);
 
   // 获取网络列表并检查当前网络
   const fetchNetworks = async () => {
@@ -155,18 +161,24 @@ const NetworkComponent = () => {
     handleOperationSuccess(message);
   };
 
-  // 处理行点击事件
-  const handleRowClick = (event, network) => {
+  // 处理网络点击
+  const handleNetworkClick = (event, network) => {
     // 检查是否正在选择文本
     const isSelectingText = window.getSelection().toString().length > 0;
     // 检查是否点击了操作按钮区域
     const isActionCell = event.target.closest('.actions-cell');
-    
-    // 如果不是选择文本且不是点击操作按钮，则触发登录
+
+    // 如果不是选择文本且不是点击操作按钮，则进入网络详情
     if (!isSelectingText && !isActionCell) {
-      console.log('Login to network:', network);
-      // TODO: 实现登录逻辑
+      setActiveNetwork(network);
+      setShowNetworkDetails(true);
     }
+  };
+
+  // 处理返回网络列表
+  const handleBackToList = () => {
+    setShowNetworkDetails(false);
+    setActiveNetwork(null);
   };
 
   return (
@@ -180,179 +192,204 @@ const NetworkComponent = () => {
       <Row>
         <Col md="12">
           <ComponentCard title="Network Management">
-            <div className="d-flex justify-content-between mb-3">
-              <CustomSearchBar
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                placeholder="Search Network Name..."
-                width="300px"
-                showBorder={true}
-                onFilter={(value) => {
-                  const filtered = filterNetworks(value);
-                  setFilteredNetworks(filtered);
+            <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+              <Link
+                color="inherit"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleBackToList();
                 }}
-              />
-              <CustomButton
-                type="create"
-                onClick={() => setIsModalOpen(true)}
-                style={{ marginLeft: 'auto' }}
+                sx={{ cursor: 'pointer' }}
               >
-                Create Network
-              </CustomButton>
-            </div>
+                Networks
+              </Link>
+              {showNetworkDetails && (
+                <Typography color="text.primary">
+                  {activeNetwork?.meshName}
+                </Typography>
+              )}
+            </Breadcrumbs>
 
-            <TableContainer
-              component={Paper}
-              sx={{
-                boxShadow: 'none',  // 移除阴影
-                border: '1px solid #dee2e6'  // 可选：添加简单边框
-              }}
-            >
-              <Table
-                className="network-table"
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Network Name</TableCell>
-                    <TableCell>Network ID</TableCell>
-                    <TableCell>Passphrase</TableCell>
-                    <TableCell sx={{ width: '250px' }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredNetworks.map((network) => (
-                    <TableRow
-                      key={network.networkId}
-                      className="network-row"
-                      onClick={(e) => handleRowClick(e, network)}
-                      sx={{
-                        backgroundColor: network.isCurrentNetwork ? '#f8f9fa' : 'inherit',
-                        '&:hover': {
-                          backgroundColor: '#f0f0f0',
-                          cursor: 'pointer',
-                        },
-                      }}
-                    >
-                      <TableCell className="selectable-text">
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          {network.meshName}
-                          {network.isCurrentNetwork && (
-                            <StarIcon sx={{ 
-                              color: '#ffc107',
-                              marginLeft: '8px',
-                              fontSize: '20px'
-                            }} />
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="selectable-text">
-                        {network.networkId}
-                      </TableCell>
-                      <TableCell className="selectable-text">
-                        {network.passphrase}
-                      </TableCell>
-                      <TableCell className="actions-cell">
-                        <div className="d-flex">
-                          <Button
-                            startIcon={<StarIcon />}
-                            onClick={() => !network.isCurrentNetwork && handleSwitchClick(network)}
-                            sx={{
-                              color: network.isCurrentNetwork ? '#ccc' : '#6c757d',
-                              textTransform: 'none',
-                              '&:hover': { 
-                                backgroundColor: 'transparent',
-                                cursor: network.isCurrentNetwork ? 'not-allowed' : 'pointer'
-                              },
-                              marginRight: '10px',
-                              pointerEvents: network.isCurrentNetwork ? 'none' : 'auto'
-                            }}
-                            disabled={network.isCurrentNetwork}
-                          >
-                            Switch
-                          </Button>
-                          <Button
-                            startIcon={<SendIcon />}
-                            onClick={() => handleInviteClick(network)}
-                            sx={{
-                              color: '#28a745',
-                              textTransform: 'none',
-                              '&:hover': { backgroundColor: 'transparent' },
-                              marginRight: '10px'
-                            }}
-                          >
-                            Invite
-                          </Button>
-                          <Button
-                            startIcon={<EditIcon />}
-                            onClick={() => handleEditClick(network)}
-                            sx={{
-                              color: '#007bff',
-                              textTransform: 'none',
-                              '&:hover': { backgroundColor: 'transparent' },
-                              marginRight: '10px'
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            startIcon={<DeleteForeverIcon />}
-                            onClick={() => handleDeleteClick(network)}
-                            sx={{
-                              color: '#dc3545',
-                              textTransform: 'none',
-                              '&:hover': { backgroundColor: 'transparent' }
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            {!showNetworkDetails ? (
+              // 网络列表视图
+              <>
+                <div className="d-flex justify-content-between mb-3">
+                  <CustomSearchBar
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    placeholder="Search Network Name..."
+                    width="300px"
+                    showBorder={true}
+                    onFilter={(value) => {
+                      const filtered = filterNetworks(value);
+                      setFilteredNetworks(filtered);
+                    }}
+                  />
+                  <CustomButton
+                    type="create"
+                    onClick={() => setIsModalOpen(true)}
+                    style={{ marginLeft: 'auto' }}
+                  >
+                    Create Network
+                  </CustomButton>
+                </div>
+
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    boxShadow: 'none',  // 移除阴影
+                    border: '1px solid #dee2e6'  // 可选：添加简单边框
+                  }}
+                >
+                  <Table
+                    className="network-table"
+                  >
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Network Name</TableCell>
+                        <TableCell>Network ID</TableCell>
+                        <TableCell>Passphrase</TableCell>
+                        <TableCell sx={{ width: '250px' }}>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredNetworks.map((network) => (
+                        <TableRow
+                          key={network.networkId}
+                          className="network-row"
+                          onClick={(e) => handleNetworkClick(e, network)}
+                          sx={{
+                            backgroundColor: network.isCurrentNetwork ? '#f8f9fa' : 'inherit',
+                            '&:hover': {
+                              backgroundColor: '#f0f0f0',
+                              cursor: 'pointer',
+                            },
+                          }}
+                        >
+                          <TableCell className="selectable-text">
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              {network.meshName}
+                              {network.isCurrentNetwork && (
+                                <StarIcon sx={{
+                                  color: '#ffc107',
+                                  marginLeft: '8px',
+                                  fontSize: '20px'
+                                }} />
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="selectable-text">
+                            {network.networkId}
+                          </TableCell>
+                          <TableCell className="selectable-text">
+                            {network.passphrase}
+                          </TableCell>
+                          <TableCell className="actions-cell">
+                            <div className="d-flex">
+                              <Button
+                                startIcon={<StarIcon />}
+                                onClick={() => !network.isCurrentNetwork && handleSwitchClick(network)}
+                                sx={{
+                                  color: network.isCurrentNetwork ? '#ccc' : '#6c757d',
+                                  textTransform: 'none',
+                                  '&:hover': {
+                                    backgroundColor: 'transparent',
+                                    cursor: network.isCurrentNetwork ? 'not-allowed' : 'pointer'
+                                  },
+                                  marginRight: '10px',
+                                  pointerEvents: network.isCurrentNetwork ? 'none' : 'auto'
+                                }}
+                                disabled={network.isCurrentNetwork}
+                              >
+                                Switch
+                              </Button>
+                              <Button
+                                startIcon={<SendIcon />}
+                                onClick={() => handleInviteClick(network)}
+                                sx={{
+                                  color: '#28a745',
+                                  textTransform: 'none',
+                                  '&:hover': { backgroundColor: 'transparent' },
+                                  marginRight: '10px'
+                                }}
+                              >
+                                Invite
+                              </Button>
+                              <Button
+                                startIcon={<EditIcon />}
+                                onClick={() => handleEditClick(network)}
+                                sx={{
+                                  color: '#007bff',
+                                  textTransform: 'none',
+                                  '&:hover': { backgroundColor: 'transparent' },
+                                  marginRight: '10px'
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                startIcon={<DeleteForeverIcon />}
+                                onClick={() => handleDeleteClick(network)}
+                                sx={{
+                                  color: '#dc3545',
+                                  textTransform: 'none',
+                                  '&:hover': { backgroundColor: 'transparent' }
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
+            ) : (
+              // 使用新的 NetworkDetails 组件
+              <NetworkDetails network={activeNetwork} />
+            )}
           </ComponentCard>
         </Col>
-
-        <CreateNetworkModal
-          isOpen={isModalOpen}
-          toggle={toggleModal}
-          onSuccess={handleCreateSuccess}
-          currentNetworkId={currentNetworkId}
-        />
-
-        <DeleteNetworkModal
-          isOpen={deleteModalOpen}
-          toggle={() => {
-            setDeleteModalOpen(false);
-            setSelectedNetwork(null);
-          }}
-          network={selectedNetwork}
-          onDelete={handleDeleteSuccess}
-        />
-
-        <SwitchNetworkModal
-          isOpen={switchModalOpen}
-          toggle={() => {
-            setSwitchModalOpen(false);
-            setSelectedNetwork(null);
-          }}
-          network={selectedNetwork}
-          currentNetworkId={currentNetworkId}
-          onSuccess={handleSwitchSuccess}
-        />
-
-        <EditNetworkModal
-          isOpen={editModalOpen}
-          toggle={() => {
-            setEditModalOpen(false);
-            setSelectedNetwork(null);
-          }}
-          network={selectedNetwork}
-          onSuccess={handleOperationSuccess}
-        />
       </Row>
+
+      {/* 保持原有的模态框 */}
+      <CreateNetworkModal
+        isOpen={isModalOpen}
+        toggle={toggleModal}
+        onSuccess={handleCreateSuccess}
+        currentNetworkId={currentNetworkId}
+      />
+      <DeleteNetworkModal
+        isOpen={deleteModalOpen}
+        toggle={() => {
+          setDeleteModalOpen(false);
+          setSelectedNetwork(null);
+        }}
+        network={selectedNetwork}
+        onDelete={handleDeleteSuccess}
+      />
+      <SwitchNetworkModal
+        isOpen={switchModalOpen}
+        toggle={() => {
+          setSwitchModalOpen(false);
+          setSelectedNetwork(null);
+        }}
+        network={selectedNetwork}
+        currentNetworkId={currentNetworkId}
+        onSuccess={handleSwitchSuccess}
+      />
+      <EditNetworkModal
+        isOpen={editModalOpen}
+        toggle={() => {
+          setEditModalOpen(false);
+          setSelectedNetwork(null);
+        }}
+        network={selectedNetwork}
+        onSuccess={handleOperationSuccess}
+      />
     </div>
   );
 };
