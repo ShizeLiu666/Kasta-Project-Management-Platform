@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Spinner, Alert, Badge } from 'reactstrap';
+import { Spinner, Alert } from 'reactstrap';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
 import defaultAvatar from '../../../../assets/images/users/normal_user.jpg'; // 请确保有一个默认头像图片
@@ -7,6 +18,8 @@ import ComponentCard from '../../../AuthCodeManagement/ComponentCard';
 import InviteMemberModal from './InviteMemberModal';
 import LeaveProjectModal from './LeaveProjectModal';
 import CustomButton from '../../../CustomButton';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import RemoveMemberModal from './RemoveMemberModal';
 
 const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
   const [members, setMembers] = useState([]);
@@ -14,6 +27,8 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
   const [error, setError] = useState(null);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
 
   const fetchMembers = useCallback(async () => {
     try {
@@ -53,22 +68,47 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
     fetchMembers();
   }, [fetchMembers]);
 
-  const getStatusBadge = (status) => {
+  const getStatusChip = (status) => {
     let color;
+    let label = status;
+    let backgroundColor;
+    let textColor;
+
     switch (status) {
       case 'ACCEPT':
-        color = 'success';
+        backgroundColor = '#28a745';  // 使用和 invite 相同的绿色
+        textColor = '#fff';
         break;
       case 'REJECT':
-        color = 'danger';
+        color = 'error';
         break;
       case 'WAITING':
-        color = 'warning';
+        backgroundColor = '#FCB249'; 
+        textColor = '#fff';
         break;
       default:
-        color = 'secondary';
+        color = 'default';
     }
-    return <Badge color={color} style={{ borderRadius: '4px'}}>{status}</Badge>;
+
+    return (
+      <Chip 
+        label={label} 
+        color={color}
+        size="small"
+        sx={{ 
+          borderRadius: '4px',
+          minWidth: '80px',
+          justifyContent: 'center',
+          ...(backgroundColor && {
+            backgroundColor,
+            color: textColor,
+            '&:hover': {
+              backgroundColor: backgroundColor
+            }
+          })
+        }} 
+      />
+    );
   };
 
   const cardTitle = (
@@ -100,53 +140,176 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
     onLeaveProject();
   };
 
+  const handleRemoveSuccess = () => {
+    fetchMembers();  // 重新获取成员列表
+  };
+
   return (
     <>
       <ComponentCard title={cardTitle}>
         {loading ? (
-          <Spinner color="primary" />
+          <Box display="flex" justifyContent="center" p={3}>
+            <Spinner color="primary" />
+          </Box>
         ) : error ? (
           <Alert color="danger">{error}</Alert>
         ) : (
-          <Table className="no-wrap mt-3 align-middle" responsive borderless>
-            <thead>
-              <tr>
-                <th style={{ width: '40%' }}>Account</th>
-                <th style={{ width: '30%' }}>Role</th>
-                <th style={{ width: '30%' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member, index) => (
-                <tr key={index} className="border-top">
-                  <td style={{ width: '40%' }}>
-                    <div className="d-flex align-items-center p-2">
-                      <img
-                        src={member.headPic || defaultAvatar}
-                        className="rounded-circle"
-                        alt="avatar"
-                        width="45"
-                        height="45"
-                        onError={(e) => { 
-                          console.log('Avatar load error for member:', member);
-                          e.target.onerror = null;
-                          e.target.src = defaultAvatar;
+          <TableContainer 
+            component={Paper} 
+            sx={{ 
+              boxShadow: 'none',
+              border: '1px solid #dee2e6',
+              borderRadius: '8px',
+              width: '100%',  // 固定容器宽度
+              '& .MuiTable-root': {
+                tableLayout: 'fixed',  // 固定表格布局
+                width: '100%'
+              }
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell 
+                    sx={{ 
+                      width: '37.5%',  // 账户列占 40%
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    Account
+                  </TableCell>
+                  <TableCell 
+                    sx={{ 
+                      width: '20%',  // 角色列占 20%
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Role
+                  </TableCell>
+                  <TableCell 
+                    sx={{ 
+                      width: '20%',  // 状态列占 20%
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Status
+                  </TableCell>
+                  {userRole === 'OWNER' && (
+                    <TableCell 
+                      sx={{ 
+                        width: '22.5%',  // 操作列占 20%
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      Actions
+                    </TableCell>
+                  )}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {members.map((member, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      '&:hover': { backgroundColor: '#f8f9fa' }
+                    }}
+                  >
+                    <TableCell sx={{ width: '40%' }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        overflow: 'hidden'  // 确保内容不会溢出
+                      }}>
+                        <Avatar
+                          src={member.headPic || defaultAvatar}
+                          sx={{ 
+                            width: 40,
+                            height: 40,
+                            flexShrink: 0  // 防止头像被压缩
+                          }}
+                          imgProps={{
+                            onError: (e) => {
+                              e.target.onerror = null;
+                              e.target.src = defaultAvatar;
+                            }
+                          }}
+                        />
+                        <Box sx={{ ml: 2 }}>
+                          <Typography 
+                            variant="subtitle2" 
+                            sx={{ 
+                              fontWeight: 600,
+                              fontSize: { xs: '0.875rem', sm: '1rem' }  // 响应式字体大小
+                            }}
+                          >
+                            {member.account || member.username}
+                          </Typography>
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{ 
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                            }}
+                          >
+                            {member.nickname || member.nickName}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={member.role}
+                        size="small"
+                        sx={{ 
+                          borderRadius: '4px',
+                          backgroundColor: member.role === 'OWNER' ? '#FE0760' : 'default',
+                          color: member.role === 'OWNER' ? '#fff' : 'inherit'
                         }}
                       />
-                      <div className="ms-3">
-                        <h6 className="mb-0">{member.account || member.username}</h6>
-                        <span className="text-muted">{member.nickname || member.nickName}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ width: '30%' }}>{member.role}</td>
-                  <td style={{ width: '30%' }}>
-                    {member.role !== 'OWNER' && getStatusBadge(member.memberStatus)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+                    </TableCell>
+                    <TableCell>
+                      {member.role !== 'OWNER' && getStatusChip(member.memberStatus)}
+                    </TableCell>
+                    
+                    {userRole === 'OWNER' && (
+                      <TableCell>
+                        {member.role !== 'OWNER' && (
+                          <CustomButton
+                            type="remove"
+                            onClick={() => {
+                              setSelectedMember(member);
+                              setRemoveModalOpen(true);
+                            }}
+                            icon={<PersonRemoveIcon sx={{ fontSize: '16px' }} />}
+                            color="#f62d51"
+                            style={{
+                              minWidth: 'auto',
+                              height: '24px',
+                              padding: '0 8px',
+                              fontSize: '0.8125rem',
+                              fontWeight: 'normal',
+                              borderRadius: '4px',
+                              marginLeft: '0',
+                              marginRight: '0'
+                            }}
+                          >
+                            Remove
+                          </CustomButton>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </ComponentCard>
       <InviteMemberModal
@@ -160,6 +323,16 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         toggle={() => setLeaveModalOpen(!leaveModalOpen)}
         projectId={projectId}
         onLeaveSuccess={handleLeaveProjectSuccess}
+      />
+      <RemoveMemberModal
+        isOpen={removeModalOpen}
+        toggle={() => {
+          setRemoveModalOpen(false);
+          setSelectedMember(null);
+        }}
+        member={selectedMember}
+        projectId={projectId}
+        onMemberRemoved={handleRemoveSuccess}
       />
     </>
   );

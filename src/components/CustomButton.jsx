@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from 'reactstrap';
 import AddIcon from '@mui/icons-material/Add';
 import SendIcon from '@mui/icons-material/Send';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 
 const buttonTypes = {
   create: {
@@ -16,6 +17,10 @@ const buttonTypes = {
   leave: {
     icon: <LogoutIcon />,
     color: "#dc3545"  // danger color
+  },
+  remove: {
+    icon: <PersonRemoveIcon />,
+    color: "#f62d51"
   }
 };
 
@@ -28,16 +33,39 @@ const CustomButton = ({
   allowedRoles,
   style = {},
   icon,
+  disabled,
   ...props 
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [buttonWidth, setButtonWidth] = useState(null);
+  const buttonRef = React.useRef(null);
+  
   const buttonConfig = type ? buttonTypes[type] : {};
   const buttonColor = color || buttonConfig.color || "#fbcd0b";
   const buttonIcon = icon || buttonConfig.icon;
 
-  // 如果指定了 allowedRoles 和 userRole，才进行角色检查
+  React.useEffect(() => {
+    if (buttonRef.current) {
+      setButtonWidth(buttonRef.current.offsetWidth);
+    }
+  }, [children]);
+
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
     return null;
   }
+
+  const handleClick = async (e) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      await onClick?.(e);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+    }
+  };
 
   const buttonStyle = {
     backgroundColor: buttonColor,
@@ -47,25 +75,48 @@ const CustomButton = ({
     textTransform: "none",
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center', // 确保内容居中
+    justifyContent: 'center',
     transition: 'all 0.3s ease',
     borderRadius: '4px',
-    padding: '6px 12px', // 添加一些内边距
-    minWidth: '120px', // 设置最小宽度以确保按钮不会太窄
-    height: '40px', // 设置固定高度
+    padding: '6px 12px',
+    minWidth: '120px',
+    height: '40px',
+    width: buttonWidth ? `${buttonWidth}px` : 'auto',
+    opacity: (isLoading || disabled) ? 0.7 : 1,
+    cursor: (isLoading || disabled) ? 'not-allowed' : 'pointer',
     ...style
+  };
+
+  const contentStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden'
   };
 
   return (
     <Button
+      ref={buttonRef}
       color="primary"
-      onClick={onClick}
+      onClick={handleClick}
       style={buttonStyle}
       className="custom-button"
+      disabled={isLoading || disabled}
       {...props}
     >
-      {buttonIcon && <span style={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>{buttonIcon}</span>}
-      <span>{children}</span>
+      {buttonIcon && (
+        <span style={{ 
+          marginRight: '8px', 
+          display: 'flex', 
+          alignItems: 'center',
+          opacity: isLoading ? 0.7 : 1
+        }}>
+          {buttonIcon}
+        </span>
+      )}
+      <span style={contentStyle}>{isLoading ? 'Processing...' : children}</span>
     </Button>
   );
 };

@@ -24,7 +24,7 @@ const ProjectListComponent = () => {
     isOpen: false,
     message: "",
     severity: "info",
-    duration: 3000
+    duration: 2000
   });
   const [breadcrumbPath, setBreadcrumbPath] = useState(["Project List"]);
   const [showRoomTypes, setShowRoomTypes] = useState(false);
@@ -145,7 +145,7 @@ const ProjectListComponent = () => {
       isOpen: true,
       message: `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} invitation for project ${projectId}`,
       severity: "success",
-      duration: 3000
+      duration: 2000
     });
   };
 
@@ -162,7 +162,7 @@ const ProjectListComponent = () => {
       isOpen: true,
       message: 'Successfully left the project',
       severity: 'success',
-      duration: 3000
+      duration: 2000
     });
   };
 
@@ -381,7 +381,7 @@ const ProjectListComponent = () => {
               isOpen: true,
               message: response?.errorMsg || 'Failed to leave the project',
               severity: 'error',
-              duration: 3000
+              duration: 2000
             });
           }
         }}
