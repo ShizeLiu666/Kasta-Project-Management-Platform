@@ -101,14 +101,18 @@ const ProjectCard = ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: '200px',  // 或其他合适的值
+    maxWidth: '200px',
+    transition: 'color 0.3s ease',
+    // color: isHovered ? '#000000' : '#000000',
   };
 
   const subtitleStyle = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: '100%',  // 使用百分比
+    maxWidth: '100%',
+    transition: 'color 0.3s ease',
+    // color: isHovered ? '#757575' : '#757575',
   };
 
   return (
@@ -188,9 +192,16 @@ const ProjectCard = ({
         }}
       />
 
-      <CardBody>
-        <CardSubtitle style={subtitleStyle}>Address: {project.address || 'None'}</CardSubtitle>
-        <CardSubtitle style={subtitleStyle}>Description: {project.des || 'None'}</CardSubtitle>
+      <CardBody style={{ 
+        transition: 'background-color 0.3s ease',
+        backgroundColor: isHovered ? '#f8f9fa' : 'transparent'
+      }}>
+        <CardSubtitle style={subtitleStyle}>
+          Address: {project.address || 'None'}
+        </CardSubtitle>
+        <CardSubtitle style={{...subtitleStyle, marginTop: '8px'}}>
+          Description: {project.des || 'None'}
+        </CardSubtitle>
       </CardBody>
     </Card>
   );
