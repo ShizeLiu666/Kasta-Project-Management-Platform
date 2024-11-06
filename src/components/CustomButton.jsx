@@ -16,7 +16,7 @@ const buttonTypes = {
   },
   leave: {
     icon: <LogoutIcon />,
-    color: "#dc3545"  // danger color
+    color: "#dc3545"
   },
   remove: {
     icon: <PersonRemoveIcon />,
@@ -24,7 +24,7 @@ const buttonTypes = {
   }
 };
 
-const CustomButton = ({ 
+const CustomButton = React.forwardRef(({ 
   type,
   color,
   onClick, 
@@ -35,7 +35,7 @@ const CustomButton = ({
   icon,
   disabled,
   ...props 
-}) => {
+}, ref) => {
   const [isLoading, setIsLoading] = useState(false);
   const [buttonWidth, setButtonWidth] = useState(null);
   const buttonRef = React.useRef(null);
@@ -98,7 +98,7 @@ const CustomButton = ({
 
   return (
     <Button
-      ref={buttonRef}
+      innerRef={ref || buttonRef}
       color="primary"
       onClick={handleClick}
       style={buttonStyle}
@@ -119,9 +119,11 @@ const CustomButton = ({
       <span style={contentStyle}>{isLoading ? 'Processing...' : children}</span>
     </Button>
   );
-};
+});
 
-// 添加一个样式标签到组件中
+CustomButton.displayName = 'CustomButton';
+
+// 添加样式
 const style = document.createElement('style');
 style.textContent = `
   .custom-button:hover {
@@ -133,4 +135,5 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// 确保导出的是组件本身
 export default CustomButton;
