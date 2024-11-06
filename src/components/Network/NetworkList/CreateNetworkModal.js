@@ -36,6 +36,7 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
     }
 
     try {
+      console.log('Creating network with data:', networkData);
       const createResponse = await axiosInstance.post('/networks', networkData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -43,6 +44,7 @@ const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => 
       });
 
       if (createResponse.data.success) {
+        console.log('Created network response:', createResponse.data);
         if (networkData.isCurrentNetwork && currentNetworkId) {
           try {
             await axiosInstance.put('/networks/selected', [{

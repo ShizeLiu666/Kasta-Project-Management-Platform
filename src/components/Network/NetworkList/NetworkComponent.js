@@ -19,7 +19,6 @@ import EditIcon from '@mui/icons-material/EditNote';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteNetworkModal from './DeleteNetworkModal';
-import SyncIcon from '@mui/icons-material/Sync';
 import StarIcon from '@mui/icons-material/Star';
 import './NetworkComponent.scss';
 import SwitchNetworkModal from './SwitchNetworkModal';
@@ -255,7 +254,7 @@ const NetworkComponent = () => {
                       <TableCell className="actions-cell">
                         <div className="d-flex">
                           <Button
-                            startIcon={<SyncIcon />}
+                            startIcon={<StarIcon />}
                             onClick={() => !network.isCurrentNetwork && handleSwitchClick(network)}
                             sx={{
                               color: network.isCurrentNetwork ? '#ccc' : '#6c757d',
