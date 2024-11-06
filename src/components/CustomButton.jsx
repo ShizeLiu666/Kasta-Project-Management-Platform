@@ -136,4 +136,5 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// 确保导出的是组件本身
 export default CustomButton;

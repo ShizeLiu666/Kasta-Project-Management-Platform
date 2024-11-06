@@ -28,6 +28,7 @@ const LoginPage = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false); // Toggle Forgot Password form
   const usernameInputRef = useRef(null);
   const passwordInputRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -131,6 +132,8 @@ const LoginPage = () => {
   };
 
   const handleLogin = async () => {
+    if (isLoading) return;
+    
     if (!username.trim()) {
       showAlert("Please enter a username", "error");
       return;
@@ -141,19 +144,23 @@ const LoginPage = () => {
       return;
     }
 
-    let loginResult = await attemptLogin(username, false);
+    setIsLoading(true);
+    try {
+      let loginResult = await attemptLogin(username, false);
 
-    if (!loginResult.success) {
-      // 尝试更改第一个字母的大小写
-      const alteredUsername = username.charAt(0) === username.charAt(0).toLowerCase()
-        ? username.charAt(0).toUpperCase() + username.slice(1)
-        : username.charAt(0).toLowerCase() + username.slice(1);
+      if (!loginResult.success) {
+        const alteredUsername = username.charAt(0) === username.charAt(0).toLowerCase()
+          ? username.charAt(0).toUpperCase() + username.slice(1)
+          : username.charAt(0).toLowerCase() + username.slice(1);
 
-      loginResult = await attemptLogin(alteredUsername, true);
-    }
+        loginResult = await attemptLogin(alteredUsername, true);
+      }
 
-    if (!loginResult.success && !loginResult.isServerError) {
-      showAlert("Incorrect username or password. Please check your credentials.", "error");
+      if (!loginResult.success && !loginResult.isServerError) {
+        showAlert("Incorrect username or password. Please check your credentials.", "error");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -329,11 +336,13 @@ const LoginPage = () => {
                                   backgroundColor: "#fbcd0b",
                                   borderColor: "#fbcd0b",
                                   fontWeight: "bold",
+                                  opacity: isLoading ? 0.7 : 1,
                                 }}
                                 type="submit"
                                 onClick={handleLogin}
+                                disabled={isLoading}
                               >
-                                Log in
+                                {isLoading ? "Logging in..." : "Log in"}
                               </Button>
                             </div>
 
