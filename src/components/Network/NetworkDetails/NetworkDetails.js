@@ -2,6 +2,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import NetworkMember from './NetworkMember';
 
 const NetworkDetails = ({ network }) => {
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -57,7 +58,7 @@ const NetworkDetails = ({ network }) => {
       </Box>
 
       <Box sx={{ p: 2 }}>
-        {selectedTab === 0 && <PlaceholderComponent title="Members" />}
+        {selectedTab === 0 && <NetworkMember networkId={network.networkId} />}
         {selectedTab === 1 && <PlaceholderComponent title="Devices" />}
         {selectedTab === 2 && <PlaceholderComponent title="Groups" />}
         {selectedTab === 3 && <PlaceholderComponent title="Room" />}

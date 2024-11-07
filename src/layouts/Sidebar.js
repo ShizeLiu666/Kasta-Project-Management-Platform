@@ -24,16 +24,16 @@ const navigation = [
     allowedUserTypes: [99999, 1, 0],
   },
   {
-    title: "Profile",
-    href: "/admin/profile",
-    icon: 'bi-person-circle',
-    allowedUserTypes: [99999, 1, 0],
-  },
-  {
     title: "AuthCode",
     href: "/admin/auth-code-management",
     icon: 'bi-key',
     allowedUserTypes: [99999],
+  },
+  {
+    title: "Profile",
+    href: "/admin/profile",
+    icon: 'bi-person-circle',
+    allowedUserTypes: [99999, 1, 0],
   },
   // {
   //   title: "Testing",

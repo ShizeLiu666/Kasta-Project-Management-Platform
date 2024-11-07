@@ -3,7 +3,7 @@ import { Row, Col } from 'reactstrap';
 import ComponentCard from '../AuthCodeManagement/ComponentCard';
 import Carousel from 'react-material-ui-carousel';
 import { Paper } from '@mui/material';
-import kastaImage from '../../assets/images/CarouseItems/kasta.png';
+import kastaImage from '../../assets/images/CarouseItems/kasta.jpg';
 import kastaSolutionImage from '../../assets/images/CarouseItems/kasta_solution.jpg';
 import { getUserDetails } from '../auth';
 import UserInfo from './UserInfo';

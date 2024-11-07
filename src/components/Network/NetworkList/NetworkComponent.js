@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col } from 'reactstrap';
+import { Row, Col, Breadcrumb, BreadcrumbItem } from 'reactstrap';
 import Table from '@mui/material/Table';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -191,25 +188,41 @@ const NetworkComponent = () => {
       />
       <Row>
         <Col md="12">
-          <ComponentCard title="Network Management">
-            <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-              <Link
-                color="inherit"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleBackToList();
-                }}
-                sx={{ cursor: 'pointer' }}
-              >
-                Networks
-              </Link>
-              {showNetworkDetails && (
-                <Typography color="text.primary">
-                  {activeNetwork?.meshName}
-                </Typography>
-              )}
-            </Breadcrumbs>
+          <ComponentCard showTitle={false}>
+            <Row>
+              <Col>
+                <Breadcrumb>
+                  <BreadcrumbItem>
+                    {showNetworkDetails ? (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleBackToList();
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "blue",
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                          padding: 0,
+                          font: "inherit",
+                        }}
+                      >
+                        Networks
+                      </button>
+                    ) : (
+                      "Networks"
+                    )}
+                  </BreadcrumbItem>
+                  {showNetworkDetails && (
+                    <BreadcrumbItem active>
+                      {activeNetwork?.meshName}
+                    </BreadcrumbItem>
+                  )}
+                </Breadcrumb>
+              </Col>
+            </Row>
 
             {!showNetworkDetails ? (
               // 网络列表视图
