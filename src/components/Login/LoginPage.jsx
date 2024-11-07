@@ -60,7 +60,6 @@ const LoginPage = () => {
       if (response.data && response.data.success) {
         const { token, username: loggedInUsername } = response.data.data;
 
-        // 获取用户详情
         try {
           const userDetailResponse = await axiosInstance.get('/users/detail', {
             headers: { Authorization: `Bearer ${token}` }
@@ -69,47 +68,34 @@ const LoginPage = () => {
           if (userDetailResponse.data && userDetailResponse.data.success) {
             const userDetails = userDetailResponse.data.data;
             
-            // 检查用户类型
-            if (userDetails.userType !== 0) {
-              // Project user - 允许登录
-              setToken(token, rememberMe);
-              saveUsername(loggedInUsername, rememberMe);
-              saveUserDetails(userDetails);
-              
-              // 设置 axios 默认 headers
-              axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            setToken(token, rememberMe);
+            saveUsername(loggedInUsername, rememberMe);
+            saveUserDetails(userDetails);
+            
+            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-              if (rememberMe) {
-                localStorage.setItem('rememberedUsername', username);
-                localStorage.setItem('rememberedPassword', password);
-              } else {
-                localStorage.removeItem('rememberedUsername');
-                localStorage.removeItem('rememberedPassword');
-              }
-
-              showAlert("Login successful! Redirecting...", "success");
-              setTimeout(() => {
-                navigate("/admin/project");
-              }, 1000);
+            if (rememberMe) {
+              localStorage.setItem('rememberedUsername', username);
+              localStorage.setItem('rememberedPassword', password);
             } else {
-              // Normal user - 不允许登录
-              showAlert(
-                "This platform is currently only open to Project users. Normal user access is coming soon.\n\n" +
-                "If you previously registered as a project user on our website, please send your account details to jackliu@haneco.com.au for permission update.\n\n" +
-                "Thank you for your cooperation.",
-                "warning",
-                15000
-              );
+              localStorage.removeItem('rememberedUsername');
+              localStorage.removeItem('rememberedPassword');
             }
+
+            showAlert("Login successful! Redirecting...", "success");
+            setTimeout(() => {
+              // const redirectPath = userDetails.userType !== 0 ? "/admin/project" : "/admin/network";
+              const redirectPath = "/admin/dashboard";
+              navigate(redirectPath);
+            }, 1000);
+            
+            return { success: true };
           }
         } catch (detailError) {
           console.error("Error fetching user details:", detailError);
           showAlert("An error occurred while fetching user details. Please try again.", "error");
         }
-
-        return { success: true };
       } else {
-        // 登录失败处理
         if (isSecondAttempt) {
           showAlert(response.data.errorMsg || "Login failed", "error");
         }

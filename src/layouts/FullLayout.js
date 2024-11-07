@@ -15,17 +15,32 @@ const FullLayout = () => {
 
   useEffect(() => {
     const userDetails = JSON.parse(localStorage.getItem('userDetails'));
-    if (userDetails && userDetails.userType) {
-      setUserType(userDetails.userType);
+    // console.log('User Details:', userDetails);
+
+    if (userDetails && typeof userDetails.userType !== 'undefined') {
+      setUserType(Number(userDetails.userType));
+      // console.log('Setting user type:', Number(userDetails.userType));
+    } else {
+      // console.log('No user type found in userDetails');
+      setUserType(0);
     }
   }, []);
+
+  // useEffect(() => {
+  //   console.log('Current userType:', userType);
+  // }, [userType]);
 
   return (
     <main>
       <Header toggleSidebar={toggleSidebar} />
       <div className="pageWrapper d-lg-flex content-container">
         <aside className={`sidebarArea shadow ${sidebarOpen ? 'showSidebar' : ''}`} id="sidebarArea">
-          <Sidebar userType={userType} toggleSidebar={toggleSidebar} />
+          {userType !== null && (
+            <Sidebar 
+              userType={userType} 
+              toggleSidebar={toggleSidebar} 
+            />
+          )}
         </aside>
         <div className="contentArea">
           <Container className="p-4" fluid>

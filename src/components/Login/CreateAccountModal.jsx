@@ -38,8 +38,8 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   const [userRole, setUserRole] = useState(null);
 
   const userRoleOptions = [
-    { value: "project", label: "Project", icon: <EngineeringIcon fontSize = "medium"/> },
-    { value: "normal", label: "Normal", icon: <PersonIcon fontSize = "medium" />, disabled: true }
+    { value: "project", label: "Project", icon: <EngineeringIcon fontSize="medium" /> },
+    { value: "normal", label: "Normal", icon: <PersonIcon fontSize="medium" /> }
   ];
 
   useEffect(() => {

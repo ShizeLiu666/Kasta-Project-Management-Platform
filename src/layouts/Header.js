@@ -92,7 +92,7 @@ const Header = ({ toggleSidebar }) => {
   return (
     <Navbar dark expand="md" className="fix-header header-background">
       <div className="d-flex align-items-center">
-        <NavbarBrand href="/admin/projects">
+        <NavbarBrand href="/admin/dashboard">
           <img src={kasta_logo} alt="logo" className="logo" />
         </NavbarBrand>
         <Button
