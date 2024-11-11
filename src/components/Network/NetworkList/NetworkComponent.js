@@ -7,23 +7,46 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import axiosInstance from '../../../config';
 import { getToken } from '../../auth';
 import ComponentCard from '../../AuthCodeManagement/ComponentCard';
-import CustomButton from '../../CustomButton';
+// import CustomButton from '../../CustomButton';
 import CreateNetworkModal from './CreateNetworkModal';
 import CustomAlert from '../../CustomAlert';
 import CustomSearchBar from '../../CustomSearchBar';
-import EditIcon from '@mui/icons-material/EditNote';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import SendIcon from '@mui/icons-material/Send';
+// import EditIcon from '@mui/icons-material/EditNote';
+// import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+// import SendIcon from '@mui/icons-material/Send';
 import DeleteNetworkModal from './DeleteNetworkModal';
-import StarIcon from '@mui/icons-material/Star';
+// import StarIcon from '@mui/icons-material/Star';
 import './NetworkComponent.scss';
 import SwitchNetworkModal from './SwitchNetworkModal';
 import EditNetworkModal from './EditNetworkModal';
 import NetworkDetails from '../NetworkDetails/NetworkDetails';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+// import RefreshIcon from '@mui/icons-material/Refresh';
+import RefreshButton from '../../RefreshButton';
+import TablePagination from '@mui/material/TablePagination';
+
+// 修改日期格式化函数
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  
+  // 检查日期是否有效
+  if (isNaN(date.getTime())) return '';
+  
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(date);
+};
 
 const NetworkComponent = () => {
   const [networks, setNetworks] = useState([]);
@@ -43,6 +66,10 @@ const NetworkComponent = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [showNetworkDetails, setShowNetworkDetails] = useState(false);
   const [activeNetwork, setActiveNetwork] = useState(null);
+  const [orderDirection, setOrderDirection] = useState('desc');
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // 获取网络列表并检查当前网络
   const fetchNetworks = async () => {
@@ -62,6 +89,13 @@ const NetworkComponent = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+      });
+
+      console.log('GET /networks Response:', {
+        success: response.data.success,
+        data: response.data.data,
+        errorMsg: response.data.errorMsg,
+        errorCode: response.data.errorCode
       });
 
       if (response.data.success) {
@@ -128,19 +162,19 @@ const NetworkComponent = () => {
     handleOperationSuccess(message);
   };
 
-  const handleEditClick = (network) => {
-    setSelectedNetwork(network);
-    setEditModalOpen(true);
-  };
+  // const handleEditClick = (network) => {
+  //   setSelectedNetwork(network);
+  //   setEditModalOpen(true);
+  // };
 
-  const handleDeleteClick = (network) => {
-    setSelectedNetwork(network);
-    setDeleteModalOpen(true);
-  };
+  // const handleDeleteClick = (network) => {
+  //   setSelectedNetwork(network);
+  //   setDeleteModalOpen(true);
+  // };
 
-  const handleInviteClick = (network) => {
-    console.log('Send invite to network:', network);
-  };
+  // const handleInviteClick = (network) => {
+  //   console.log('Send invite to network:', network);
+  // };
 
   // 修改删除成功的处理函数
   const handleDeleteSuccess = (message) => {
@@ -148,10 +182,10 @@ const NetworkComponent = () => {
   };
 
   // 处理切换网络
-  const handleSwitchClick = (network) => {
-    setSelectedNetwork(network);
-    setSwitchModalOpen(true);
-  };
+  // const handleSwitchClick = (network) => {
+  //   setSelectedNetwork(network);
+  //   setSwitchModalOpen(true);
+  // };
 
   // 处理切换成功
   const handleSwitchSuccess = (message) => {
@@ -176,6 +210,37 @@ const NetworkComponent = () => {
   const handleBackToList = () => {
     setShowNetworkDetails(false);
     setActiveNetwork(null);
+  };
+
+  const handleSort = () => {
+    const isAsc = orderDirection === 'asc';
+    setOrderDirection(isAsc ? 'desc' : 'asc');
+    
+    const sortedNetworks = [...filteredNetworks].sort((a, b) => {
+      if (!a.createData) return 1;
+      if (!b.createData) return -1;
+      const comparison = new Date(a.createData) - new Date(b.createData);
+      return isAsc ? -comparison : comparison;
+    });
+    
+    setFilteredNetworks(sortedNetworks);
+  };
+
+  const handleRefresh = async () => {
+    setIsLoading(true);  // 开始加载
+    await fetchNetworks();
+    setTimeout(() => {
+      setIsLoading(false);  // 结束加载
+    }, 500);  // 添加小延迟使动画效果更明显
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
@@ -228,31 +293,32 @@ const NetworkComponent = () => {
               // 网络列表视图
               <>
                 <div className="d-flex justify-content-between mb-3">
-                  <CustomSearchBar
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    placeholder="Search Network Name..."
-                    width="300px"
-                    showBorder={true}
-                    onFilter={(value) => {
-                      const filtered = filterNetworks(value);
-                      setFilteredNetworks(filtered);
-                    }}
-                  />
-                  <CustomButton
-                    type="create"
-                    onClick={() => setIsModalOpen(true)}
-                    style={{ marginLeft: 'auto' }}
-                  >
-                    Create Network
-                  </CustomButton>
+                  <div className="d-flex align-items-center">
+                    <CustomSearchBar
+                      searchTerm={searchTerm}
+                      setSearchTerm={setSearchTerm}
+                      placeholder="Search Network Name..."
+                      width="300px"
+                      showBorder={true}
+                      onFilter={(value) => {
+                        const filtered = filterNetworks(value);
+                        setFilteredNetworks(filtered);
+                      }}
+                    />
+                    <RefreshButton 
+                      onClick={handleRefresh}
+                      isLoading={isLoading}
+                    />
+                  </div>
                 </div>
 
                 <TableContainer
                   component={Paper}
                   sx={{
-                    boxShadow: 'none',  // 移除阴影
-                    border: '1px solid #dee2e6'  // 可选：添加简单边框
+                    boxShadow: 'none',
+                    border: '1px solid #dee2e6',
+                    opacity: isLoading ? 0.6 : 1,
+                    transition: 'opacity 0.3s'
                   }}
                 >
                   <Table
@@ -263,101 +329,87 @@ const NetworkComponent = () => {
                         <TableCell>Network Name</TableCell>
                         <TableCell>Network ID</TableCell>
                         <TableCell>Passphrase</TableCell>
-                        <TableCell sx={{ width: '250px' }}>Actions</TableCell>
+                        <TableCell 
+                          onClick={handleSort}
+                          style={{ cursor: 'pointer' }}
+                          sx={{
+                            '&:hover': { backgroundColor: '#f5f5f5' }
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            Create Time
+                            {orderDirection === 'asc' 
+                              ? <ArrowDropUpIcon sx={{ fontSize: 20 }} />
+                              : <ArrowDropDownIcon sx={{ fontSize: 20 }} />
+                            }
+                          </div>
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {filteredNetworks.map((network) => (
-                        <TableRow
-                          key={network.networkId}
-                          className="network-row"
-                          onClick={(e) => handleNetworkClick(e, network)}
-                          sx={{
-                            backgroundColor: network.isCurrentNetwork ? '#f8f9fa' : 'inherit',
-                            '&:hover': {
-                              backgroundColor: '#f0f0f0',
-                              cursor: 'pointer',
-                            },
-                          }}
-                        >
-                          <TableCell className="selectable-text">
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              {network.meshName}
-                              {network.isCurrentNetwork && (
-                                <StarIcon sx={{
-                                  color: '#ffc107',
-                                  marginLeft: '8px',
-                                  fontSize: '20px'
-                                }} />
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="selectable-text">
-                            {network.networkId}
-                          </TableCell>
-                          <TableCell className="selectable-text">
-                            {network.passphrase}
-                          </TableCell>
-                          <TableCell className="actions-cell">
-                            <div className="d-flex">
-                              <Button
-                                startIcon={<StarIcon />}
-                                onClick={() => !network.isCurrentNetwork && handleSwitchClick(network)}
-                                sx={{
-                                  color: network.isCurrentNetwork ? '#ccc' : '#6c757d',
-                                  textTransform: 'none',
-                                  '&:hover': {
-                                    backgroundColor: 'transparent',
-                                    cursor: network.isCurrentNetwork ? 'not-allowed' : 'pointer'
-                                  },
-                                  marginRight: '10px',
-                                  pointerEvents: network.isCurrentNetwork ? 'none' : 'auto'
-                                }}
-                                disabled={network.isCurrentNetwork}
-                              >
-                                Switch
-                              </Button>
-                              <Button
-                                startIcon={<SendIcon />}
-                                onClick={() => handleInviteClick(network)}
-                                sx={{
-                                  color: '#28a745',
-                                  textTransform: 'none',
-                                  '&:hover': { backgroundColor: 'transparent' },
-                                  marginRight: '10px'
-                                }}
-                              >
-                                Invite
-                              </Button>
-                              <Button
-                                startIcon={<EditIcon />}
-                                onClick={() => handleEditClick(network)}
-                                sx={{
-                                  color: '#007bff',
-                                  textTransform: 'none',
-                                  '&:hover': { backgroundColor: 'transparent' },
-                                  marginRight: '10px'
-                                }}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                startIcon={<DeleteForeverIcon />}
-                                onClick={() => handleDeleteClick(network)}
-                                sx={{
-                                  color: '#dc3545',
-                                  textTransform: 'none',
-                                  '&:hover': { backgroundColor: 'transparent' }
-                                }}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {filteredNetworks
+                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        .map((network) => (
+                          <TableRow
+                            key={network.networkId}
+                            className="network-row"
+                            onClick={(e) => handleNetworkClick(e, network)}
+                            sx={{
+                              backgroundColor: network.isCurrentNetwork ? '#f8f9fa' : 'inherit',
+                              '&:hover': {
+                                backgroundColor: '#f0f0f0',
+                                cursor: 'pointer',
+                              },
+                            }}
+                          >
+                            <TableCell className="selectable-text">
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {network.meshName}
+                                {network.isCurrentNetwork && (
+                                  <span style={{
+                                    color: '#fbcd0b',
+                                    marginLeft: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    * Current Network
+                                  </span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="selectable-text">
+                              {network.networkId}
+                            </TableCell>
+                            <TableCell className="selectable-text">
+                              {network.passphrase}
+                            </TableCell>
+                            <TableCell className="selectable-text">
+                              {formatDate(network.createData)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
+                  
+                  <TablePagination
+                    component="div"
+                    count={filteredNetworks.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[1, 5, 10, 25]}
+                    labelRowsPerPage="Rows per page"
+                    labelDisplayedRows={({ from, to, count }) => 
+                      `${from}-${to} of ${count}`
+                    }
+                    sx={{
+                      borderTop: '1px solid #dee2e6',
+                      '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                        margin: 0,
+                      }
+                    }}
+                  />
                 </TableContainer>
               </>
             ) : (
@@ -403,6 +455,18 @@ const NetworkComponent = () => {
         network={selectedNetwork}
         onSuccess={handleOperationSuccess}
       />
+      <style>
+        {`
+          @keyframes spin {
+            from {
+              transform: rotate(0deg);
+            }
+            to {
+              transform: rotate(360deg);
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };

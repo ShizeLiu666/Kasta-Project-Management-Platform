@@ -1,23 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Spinner } from 'reactstrap';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Chip from '@mui/material/Chip';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import axiosInstance from '../../../config';
 import { getToken } from '../../auth';
 import CustomAlert from '../../CustomAlert';
 import CustomButton from '../../CustomButton';
 import InviteMemberModal from './InviteMemberModal';
-import defaultAvatar from '../../../assets/images/users/normal_user.jpg';
+import MemberTable from '../../MemberTable';
 
 const NetworkMember = ({ networkId }) => {
   const [members, setMembers] = useState([]);
@@ -91,49 +80,6 @@ const NetworkMember = ({ networkId }) => {
     }
   }, [networkId, fetchMembers]);
 
-  const getStatusChip = (status) => {
-    let color;
-    let label = status;
-    let backgroundColor;
-    let textColor;
-
-    switch (status) {
-      case 'ACCEPT':
-        backgroundColor = '#28a745';
-        textColor = '#fff';
-        break;
-      case 'REJECT':
-        color = 'error';
-        break;
-      case 'WAITING':
-        backgroundColor = '#FCB249';
-        textColor = '#fff';
-        break;
-      default:
-        color = 'default';
-    }
-
-    return (
-      <Chip 
-        label={label} 
-        color={color}
-        size="small"
-        sx={{ 
-          borderRadius: '4px',
-          minWidth: '80px',
-          justifyContent: 'center',
-          ...(backgroundColor && {
-            backgroundColor,
-            color: textColor,
-            '&:hover': {
-              backgroundColor: backgroundColor
-            }
-          })
-        }} 
-      />
-    );
-  };
-
   const handleInviteMember = (response) => {
     if (response.success) {
       setAlert({
@@ -163,151 +109,43 @@ const NetworkMember = ({ networkId }) => {
         autoHideDuration={alert.duration}
       />
 
-      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-        <CustomButton
-          type="invite"
-          onClick={() => setInviteModalOpen(true)}
-          allowedRoles={['OWNER']}
-          userRole={currentUserRole}
-        >
-          Invite Member
-        </CustomButton>
-      </div>
+      {false && (
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+          <CustomButton
+            type="invite"
+            onClick={() => setInviteModalOpen(true)}
+            allowedRoles={['OWNER']}
+            userRole={currentUserRole}
+          >
+            Invite Member
+          </CustomButton>
+        </div>
+      )}
 
       {loading ? (
         <Box display="flex" justifyContent="center" p={3}>
           <Spinner color="primary" />
         </Box>
       ) : (
-        <TableContainer 
-          component={Paper} 
-          sx={{ 
-            boxShadow: 'none',
-            border: '1px solid #dee2e6',
-            borderRadius: '8px',
-            width: '100%',
-            '& .MuiTable-root': {
-              tableLayout: 'fixed',
-              width: '100%'
-            }
+        <MemberTable
+          members={members}
+          currentUserRole={currentUserRole}
+          showActions={true}
+          onRemoveMember={(member) => {
+            // TODO: 处理移除成员的逻辑
+            console.log('Remove member:', member);
           }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: '37.5%', fontWeight: 'bold' }}>Account</TableCell>
-                <TableCell sx={{ width: '20%', fontWeight: 'bold' }}>Role</TableCell>
-                <TableCell sx={{ width: '20%', fontWeight: 'bold' }}>Status</TableCell>
-                {currentUserRole === 'OWNER' && (
-                  <TableCell sx={{ width: '22.5%', fontWeight: 'bold' }}>Actions</TableCell>
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {members.map((member, index) => (
-                <TableRow
-                  key={index}
-                  sx={{
-                    '&:last-child td, &:last-child th': { border: 0 },
-                    '&:hover': { backgroundColor: '#f8f9fa' }
-                  }}
-                >
-                  <TableCell>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      overflow: 'hidden'
-                    }}>
-                      <Avatar
-                        src={member.headPic || defaultAvatar}
-                        sx={{ 
-                          width: 40,
-                          height: 40,
-                          flexShrink: 0
-                        }}
-                        imgProps={{
-                          onError: (e) => {
-                            e.target.onerror = null;
-                            e.target.src = defaultAvatar;
-                          }
-                        }}
-                      />
-                      <Box sx={{ ml: 2 }}>
-                        <Typography 
-                          variant="subtitle2" 
-                          sx={{ 
-                            fontWeight: 600,
-                            fontSize: { xs: '0.875rem', sm: '1rem' }
-                          }}
-                        >
-                          {member.account}
-                        </Typography>
-                        <Typography 
-                          variant="body2" 
-                          color="text.secondary"
-                          sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.875rem' }
-                          }}
-                        >
-                          {member.nickname}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={member.role}
-                      size="small"
-                      sx={{ 
-                        borderRadius: '4px',
-                        backgroundColor: member.role === 'OWNER' ? '#FE0760' : 'default',
-                        color: member.role === 'OWNER' ? '#fff' : 'inherit'
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {member.role !== 'OWNER' && getStatusChip(member.memberStatus)}
-                  </TableCell>
-                  
-                  {currentUserRole === 'OWNER' && (
-                    <TableCell>
-                      {member.role !== 'OWNER' && (
-                        <CustomButton
-                          type="remove"
-                          onClick={() => {
-                            // TODO: 处理移除成员的逻辑
-                          }}
-                          icon={<PersonRemoveIcon sx={{ fontSize: '16px' }} />}
-                          color="#f62d51"
-                          style={{
-                            minWidth: 'auto',
-                            height: '24px',
-                            padding: '0 8px',
-                            fontSize: '0.8125rem',
-                            fontWeight: 'normal',
-                            borderRadius: '4px',
-                            marginLeft: '0',
-                            marginRight: '0'
-                          }}
-                        >
-                          Remove
-                        </CustomButton>
-                      )}
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        />
       )}
 
-      <InviteMemberModal
-        isOpen={inviteModalOpen}
-        toggle={() => setInviteModalOpen(false)}
-        networkId={networkId}
-        onMemberInvited={handleInviteMember}
-      />
+      {false && (
+        <InviteMemberModal
+          isOpen={inviteModalOpen}
+          toggle={() => setInviteModalOpen(false)}
+          networkId={networkId}
+          onMemberInvited={handleInviteMember}
+        />
+      )}
     </div>
   );
 };

@@ -15,6 +15,7 @@ import CustomButton from '../../CustomButton';
 import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
 import InviteMemberModal from '../ProjectDetails/ProjectMembers/InviteMemberModal';
 import CustomSearchBar from "../../CustomSearchBar";
+import RefreshButton from '../../RefreshButton';
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
@@ -48,6 +49,7 @@ const ProjectListComponent = () => {
   const [inviteMemberModalOpen, setInviteMemberModalOpen] = useState(false);
   const [selectedProjectForInvite, setSelectedProjectForInvite] = useState(null);
   const [filteredProjects, setFilteredProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -187,6 +189,14 @@ const ProjectListComponent = () => {
     setFilteredProjects(filterProjects(searchTerm));
   }, [projects, searchTerm, filterProjects]);
 
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    await fetchProjectList();
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  };
+
   return (
     <div>
       {/* <CustomAlert
@@ -266,16 +276,22 @@ const ProjectListComponent = () => {
             width: "100%",
           }}
         >
-          <CustomSearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            placeholder="Search Project Name..."
-            filterKey="name"
-            onFilter={(value) => {
-              const filtered = filterProjects(value);
-              setFilteredProjects(filtered);
-            }}
-          />
+          <div className="d-flex align-items-center">
+            <CustomSearchBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              placeholder="Search Project Name..."
+              filterKey="name"
+              onFilter={(value) => {
+                const filtered = filterProjects(value);
+                setFilteredProjects(filtered);
+              }}
+            />
+            <RefreshButton 
+              onClick={handleRefresh}
+              isLoading={isLoading}
+            />
+          </div>
 
           <CustomButton
             type="create"
