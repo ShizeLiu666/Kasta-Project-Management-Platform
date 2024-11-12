@@ -1,3 +1,9 @@
+const POWER_OPERATIONS = {
+    ON: "ON",
+    OFF: "OFF",
+    UNSELECT: "UNSELECT"
+};
+
 //! Check for 'NAME' without a colon
 function checkNamePrefix(line, errors) {
   if (!line.startsWith("NAME:")) {
@@ -178,16 +184,15 @@ function validatePowerPointTypeOperations(
   sceneName,
   deviceNameToType
 ) {
-  // 找到第一个 ON 或 OFF 之前的部分作为设备名
+  // 找到第一个操作符（ON, OFF, UNSELECT）之前的部分作为设备名
   const deviceNames = [];
   let operationIndex = -1;
 
   for (let i = 0; i < parts.length; i++) {
-    if (["ON", "OFF"].includes(parts[i].toUpperCase())) {
+    if (Object.values(POWER_OPERATIONS).includes(parts[i].toUpperCase())) {
       operationIndex = i;
       break;
     } else {
-      // 去除设备名称中的逗号和空格
       deviceNames.push(parts[i].replace(/,$/, "").trim());
     }
   }
@@ -195,22 +200,12 @@ function validatePowerPointTypeOperations(
   // 获取操作部分
   const operationParts = parts.slice(operationIndex);
 
-  // 调试输出
-  // console.log("Device Names:", deviceNames);
-  // console.log("Operation Parts:", operationParts);
-  // console.log("deviceNameToType:", deviceNameToType);
-
   // 检查设备类型是否一致
   const deviceTypes = new Set(
     deviceNames.map((name) => deviceNameToType[name])
   );
 
-  // 调试输出每个设备的类型
-  // deviceNames.forEach((name) => {
-  //   console.log(`Device: ${name}, Type: ${deviceNameToType[name]}`);
-  // });
-
-  // 如果有设备名在 `deviceNameToType` 中找不到类型
+  // 验证设备存在性
   if (deviceTypes.has(undefined)) {
     errors.push(
       `KASTA SCENE [${sceneName}]: One or more devices in the instruction "${parts.join(
@@ -220,46 +215,43 @@ function validatePowerPointTypeOperations(
     return;
   }
 
+  // 验证设备类型一致性
   if (deviceTypes.size > 1) {
     errors.push(
-      `KASTA SCENE [${sceneName}]: Devices in the same batch must be of the same type. The instruction "${parts.join(
-        " "
-      )}" contains mixed types.`
+      `KASTA SCENE [${sceneName}]: Devices in the same batch must be of the same type.`
     );
     return;
   }
 
   const deviceType = deviceTypes.values().next().value;
+  const operationString = deviceNames.join(", ") + " " + operationParts.join(" ");
 
-  // 构建操作字符串
-  const operationString =
-    deviceNames.join(", ") + " " + operationParts.join(" ");
-
-  const singlePPTPattern = /^PPT\d+\s+(ON|OFF)$/i;
-  const twoWayPPTPattern = /^PPT_\d+\s+(ON|OFF)\s+(ON|OFF)$/i;
-  const groupSingleWayPPTPattern = /^PPT_\d+(,\s*PPT_\d+)*\s+(ON|OFF)$/i;
-  const groupTwoWayPPTPattern = /^PPT_\d+(,\s*PPT_\d+)*\s+(ON|OFF)\s+(ON|OFF)$/i;
+  // 新的正则表达式模式
+  const singleWayPattern = /^PPT\d+\s+(ON|OFF)$/i;
+  const twoWayPattern = /^PPT_\d+\s+((ON\s+ON)|(ON\s+OFF)|(OFF\s+ON)|UNSELECT)$/i;
 
   let isValid = false;
 
   if (deviceType === "PowerPoint Type (Single-Way)") {
-    isValid =
-      singlePPTPattern.test(operationString) ||
-      groupSingleWayPPTPattern.test(operationString);
+    isValid = singleWayPattern.test(operationString);
+    if (!isValid) {
+      errors.push([
+        `KASTA SCENE [${sceneName}]: Invalid Single-Way PowerPoint operation. The operation string "${operationString}" is not valid. Supported formats are:`,
+        "- DEVICE_NAME ON",
+        "- DEVICE_NAME OFF"
+      ]);
+    }
   } else if (deviceType === "PowerPoint Type (Two-Way)") {
-    isValid =
-      twoWayPPTPattern.test(operationString) ||
-      groupTwoWayPPTPattern.test(operationString);
-  }
-
-  if (!isValid) {
-    errors.push([
-      `KASTA SCENE [${sceneName}]: Invalid POWERPOINT operation. The operation string "${operationString}" is not valid for device type "${deviceType}". Supported formats are:`,
-      "- DEVICE_NAME ON (Single-way ON)",
-      "- DEVICE_NAME ON ON (Two-way ON ON)",
-      "- DEVICE_NAME OFF OFF (Two-way OFF OFF)",
-      "- DEVICE_NAME_1, DEVICE_NAME_ ON OFF (Group ON OFF)"
-    ]);
+    isValid = twoWayPattern.test(operationString);
+    if (!isValid) {
+      errors.push([
+        `KASTA SCENE [${sceneName}]: Invalid Two-Way PowerPoint operation. The operation string "${operationString}" is not valid. Supported formats are:`,
+        "- DEVICE_NAME ON ON",
+        "- DEVICE_NAME ON OFF",
+        "- DEVICE_NAME OFF ON",
+        "- DEVICE_NAME UNSELECT"
+      ]);
+    }
   }
 }
 
@@ -295,47 +287,81 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
   let operation = null;
   let isFanOperation = false;
 
-  function isValidOperation(part) {
-    const normalizedPart = part.toLowerCase();
-    return ["on", "off", "turn on", "turn off", "open", "close"].includes(normalizedPart);
+  function isValidOperation(part, deviceType) {
+    const normalizedPart = part.toUpperCase();
+    
+    // PowerPoint Type 特殊处理
+    if (deviceType && deviceType.includes("PowerPoint Type")) {
+        if (deviceType.includes("Single-Way")) {
+            return ["ON", "OFF"].includes(normalizedPart);
+        }
+        // Two-Way 的处理在 validatePowerPointTypeOperations 中完成
+        return true;
+    }
+    
+    // 其他设备类型的常规处理
+    return ["ON", "OFF", "TURN ON", "TURN OFF", "OPEN", "CLOSE"].includes(normalizedPart);
   }
 
   function normalizeOperation(operation) {
-    operation = operation.toLowerCase().trim();
-    if (operation === 'on' || operation === 'turn on') {
-        return 'ON';
-    } else if (operation === 'off' || operation === 'turn off') {
-        return 'OFF';
+    operation = operation.toUpperCase().trim();
+    switch(operation) {
+        case "ON":
+        case "TURN ON":
+            return POWER_OPERATIONS.ON;
+        case "OFF":
+        case "TURN OFF":
+            return POWER_OPERATIONS.OFF;
+        case "UNSELECT":
+            return POWER_OPERATIONS.UNSELECT;
+        default:
+            return operation;
     }
-    return operation.toUpperCase(); // 对于其他操作，保持大写
   }
 
   // Step 1 & 2: Identify devices and operation
   let deviceNameProvided = false;
   let operationParts = [];
   let i = 0;
+
+  // 添加 currentDeviceType 变量
+  let currentDeviceType = null;
+
   while (i < parts.length) {
     const part = parts[i];
     const nextPart = parts[i + 1];
     
-    if (isValidOperation(part) || (part.toLowerCase() === "turn" && nextPart && isValidOperation(part + " " + nextPart))) {
-      if (!operation) {
-        operation = normalizeOperation(part + (nextPart && part.toLowerCase() === "turn" ? " " + nextPart : ""));
-        operationParts.push(operation);
-        i += (part.toLowerCase() === "turn" ? 2 : 1);
-        continue;
-      }
+    // 如果已有设备名称，获取其类型
+    if (deviceNames.length > 0 && deviceNames[0].length > 0) {
+      currentDeviceType = deviceNameToType[deviceNames[0][0]];
+    }
+    
+    // 检查是否是 "TURN ON" 或 "TURN OFF"
+    if (part.toUpperCase() === "TURN" && nextPart && ["ON", "OFF"].includes(nextPart.toUpperCase())) {
+        if (!operation) {
+            operation = normalizeOperation(nextPart);
+            operationParts.push(operation);
+            i += 2;
+            continue;
+        }
+    } else if (isValidOperation(part, currentDeviceType)) {
+        if (!operation) {
+            operation = normalizeOperation(part);
+            operationParts.push(operation);
+            i++;
+            continue;
+        }
     } else if (/^\+\d+%$/.test(part)) {
-      operationParts.push(part);
+        operationParts.push(part);
     } else if (operation && ["RELAY", "SPEED"].includes(part.toUpperCase())) {
-      isFanOperation = true;
-      operationParts.push(part);
+        isFanOperation = true;
+        operationParts.push(part);
     } else {
-      if (deviceNames.length === 0) {
-        deviceNames.push([]);
-      }
-      deviceNames[0].push(part.replace(",", ""));
-      deviceNameProvided = true;
+        if (deviceNames.length === 0) {
+            deviceNames.push([]);
+        }
+        deviceNames[0].push(part.replace(",", ""));
+        deviceNameProvided = true;
     }
     i++;
   }
@@ -348,9 +374,16 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
   }
 
   if (!operation) {
-    errors.push(
-      `KASTA SCENE [${sceneName}]: No valid operation (ON, OFF, OPEN, CLOSE) found in the instruction: "${parts.join(" ")}". Unable to determine command.`
-    );
+    const deviceType = deviceNameToType[deviceNames[0][0]];
+    if (deviceType && deviceType.includes("PowerPoint Type (Single-Way)")) {
+        errors.push(
+            `KASTA SCENE [${sceneName}]: Single-Way PowerPoint only supports ON/OFF operations. Invalid instruction: "${parts.join(" ")}"`
+        );
+    } else {
+        errors.push(
+            `KASTA SCENE [${sceneName}]: No valid operation found in the instruction: "${parts.join(" ")}". Unable to determine command.`
+        );
+    }
     return;
   }
 
@@ -387,13 +420,7 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
 
     const instruction = parts.join(" ");
     // Allow PowerPoint Types to be treated in a special case
-    if (
-      simplifiedTypesInBatch.size > 1 &&
-      !(
-        simplifiedTypesInBatch.has("PowerPoint") &&
-        simplifiedTypesInBatch.size === 1
-      )
-    ) {
+    if (simplifiedTypesInBatch.size > 1) {
       const containsDimmerAndRelay =
         simplifiedTypesInBatch.has("Dimmer") &&
         simplifiedTypesInBatch.has("Relay");
@@ -403,7 +430,7 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
         return;
       } else {
         errors.push(
-          `KASTA SCENE [${sceneName}]: Devices in the same batch must be of the same type, except Dimmer Type and Relay Type can coexist when performing the same ON/OFF operation without dimming. The problematic instruction was: "${instruction}".`
+          `KASTA SCENE [${sceneName}]: Devices in the same batch must be of the same type. The problematic instruction was: "${instruction}".`
         );
         return;
       }

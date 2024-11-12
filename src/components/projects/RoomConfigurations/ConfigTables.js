@@ -158,7 +158,7 @@ export const renderScenesTable = (scenes) => (
             <td style={cellStyle}>
               {scene.contents && scene.contents.map((content, contentIndex) => (
                 <div key={contentIndex}>
-                  {content.name}: {renderDeviceStatus(content)}
+                  {content.deviceName || content.name}: {renderDeviceStatus(content)}
                 </div>
               ))}
             </td>
@@ -170,31 +170,34 @@ export const renderScenesTable = (scenes) => (
 );
 
 const renderDeviceStatus = (content) => {
+  // PowerPoint Type 处理
+  if (content.deviceType && content.deviceType.includes("PowerPoint Type")) {
+    if (content.deviceType.includes("Single-Way")) {
+      return `Status: ${content.status}`;
+    } else if (content.deviceType.includes("Two-Way")) {
+      return `Right: ${content.rightStatus}, Left: ${content.leftStatus}`;
+    }
+  }
+
+  // 原有的其他设备类型处理
   if (content.statusConditions) {
     if (content.statusConditions.leftPowerOnOff !== undefined) {
-      // 双路插座
       return `Left: ${content.statusConditions.leftPowerOnOff ? 'ON' : 'OFF'}, Right: ${content.statusConditions.rightPowerOnOff ? 'ON' : 'OFF'}`;
     } else if (content.statusConditions.rightPowerOnOff !== undefined) {
-      // 单路插座
       return `Power: ${content.statusConditions.rightPowerOnOff ? 'ON' : 'OFF'}`;
     } else if (content.statusConditions.level !== undefined) {
-      // 调光器
       return `Level: ${content.statusConditions.level}`;
     } else if (content.statusConditions.speed !== undefined) {
-      // 风扇
       return `Speed: ${content.statusConditions.speed}, Relay: ${content.statusConditions.relay ? 'ON' : 'OFF'}`;
     } else if (content.statusConditions.position !== undefined) {
-      // 窗帘
       return `Position: ${content.statusConditions.position}`;
     }
   }
 
   if (content.status !== undefined) {
-    // 普通设备（如继电器）
     return content.status ? 'ON' : 'OFF';
   }
 
-  // 未知类型
   return 'Unknown status';
 };
 

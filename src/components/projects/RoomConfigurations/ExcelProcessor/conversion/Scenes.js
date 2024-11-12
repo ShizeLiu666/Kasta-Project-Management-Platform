@@ -96,27 +96,44 @@ function handleDryContactType(parts) {
 
 function handlePowerPointType(parts, deviceType) {
     const contents = [];
+    
+    // 找到第一个操作符的位置
+    const operationIndex = parts.findIndex(part => 
+        ["ON", "OFF", "UNSELECT"].includes(part.toUpperCase())
+    );
+    
+    if (operationIndex === -1) return contents;
+    
+    const deviceNames = parts.slice(0, operationIndex);
+    const operations = parts.slice(operationIndex);
 
-    if (deviceType.includes("Two-Way")) {
-        // 查找操作指令的索引
-        let rightPowerIndex = parts.findIndex(part => part.toUpperCase() === "ON" || part.toUpperCase() === "OFF");
-        let leftPowerIndex = parts.findIndex((part, index) => index > rightPowerIndex && (part.toUpperCase() === "ON" || part.toUpperCase() === "OFF"));
-
-        if (rightPowerIndex === -1 || leftPowerIndex === -1) {
-            // console.warn(`Invalid operation format for Two-Way PowerPoint Type: ${parts.join(" ")}`);
-            return contents;
-        }
-
-        const rightPower = parts[rightPowerIndex].toUpperCase() === "ON";
-        const leftPower = parts[leftPowerIndex].toUpperCase() === "ON";
-
-        parts.slice(0, rightPowerIndex).forEach(deviceName => {
-            contents.push(sceneOutputTemplates["PowerPoint Type"]["Two-Way"](deviceName.trim().replace(",", ""), rightPower, leftPower));
+    if (deviceType.includes("Single-Way")) {
+        // 处理 Single-Way PowerPoint
+        deviceNames.forEach(deviceName => {
+            contents.push({
+                deviceName: deviceName.trim().replace(",", ""),
+                deviceType: "PowerPoint Type (Single-Way)",
+                status: operations[0].toUpperCase()  // "ON" 或 "OFF"
+            });
         });
-    } else if (deviceType.includes("Single-Way")) {
-        const power = parts[parts.length - 1].toUpperCase() === "ON"; // 转换为布尔值
-        parts.slice(0, -1).forEach(deviceName => {
-            contents.push(sceneOutputTemplates["PowerPoint Type"]["Single-Way"](deviceName.trim().replace(",", ""), power));
+    } else if (deviceType.includes("Two-Way")) {
+        // 处理 Two-Way PowerPoint
+        deviceNames.forEach(deviceName => {
+            if (operations[0].toUpperCase() === "UNSELECT") {
+                contents.push({
+                    deviceName: deviceName.trim().replace(",", ""),
+                    deviceType: "PowerPoint Type (Two-Way)",
+                    rightStatus: "UNSELECT",
+                    leftStatus: "UNSELECT"
+                });
+            } else {
+                contents.push({
+                    deviceName: deviceName.trim().replace(",", ""),
+                    deviceType: "PowerPoint Type (Two-Way)",
+                    rightStatus: operations[0].toUpperCase(),  // "ON" 或 "OFF"
+                    leftStatus: operations[1] ? operations[1].toUpperCase() : "OFF"  // "ON" 或 "OFF"
+                });
+            }
         });
     }
 
