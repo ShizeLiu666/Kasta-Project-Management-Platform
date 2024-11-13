@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import InitialStep from "./InitialStep";
 import Devices from "./Devices";          
-import VirtualContacts from "./VirtualContacts";  
+import OutputModules from "./OutputModules";  
 import Groups from "./Groups";           
 import Scenes from "./Scenes";           
 import RemoteControls from "./RemoteControls";   
@@ -12,7 +12,7 @@ import "./steps.scss";
 const Steps = ({ projectRoomId, submitJson }) => {
   const initialStepRef = useRef(null);
   const devicesRef = useRef(null);
-  const virtualContactsRef = useRef(null);
+  const outputModulesRef = useRef(null);
   const groupsRef = useRef(null);
   const scenesRef = useRef(null);
   const remoteControlsRef = useRef(null);
@@ -26,8 +26,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
   const [registeredDeviceNames, setRegisteredDeviceNames] = useState(new Set());
   const [registeredGroupNames, setRegisteredGroupNames] = useState(new Set());
   const [registeredSceneNames, setRegisteredSceneNames] = useState(new Set());
-  const [virtualContactData, setVirtualContactData] = useState(null);
-  // const [finalJsonData, setFinalJsonData] = useState(null);
+  const [outputModuleData, setOutputModuleData] = useState(null);
 
   const handleStep1Validation = (isValid, data) => {
     if (isValid) {
@@ -44,7 +43,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
 
   const handleStep3Validation = (isValid, data) => {
     if (isValid) {
-      setVirtualContactData(data.virtualContactData);  // 处理虚拟干接点数据
+      setOutputModuleData(data.outputModuleData);  // 处理虚拟干接点数据
     }
   };
 
@@ -77,7 +76,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
       return devicesRef.current.isValidated();
     }
     if (currentStep === 2) {
-      return virtualContactsRef.current.isValidated();
+      return outputModulesRef.current.isValidated();
     }
     if (currentStep === 3) {
       return groupsRef.current.isValidated();
@@ -103,7 +102,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
       setRegisteredDeviceNames(new Set());
     }
     if (currentStep === 3) {
-      setVirtualContactData(null);
+      setOutputModuleData(null);
     }
     if (currentStep === 4) {
       setGroupData(null);
@@ -130,9 +129,9 @@ const Steps = ({ projectRoomId, submitJson }) => {
       /> 
     },
     { 
-      name: "Virtual Contacts", 
-      component: <VirtualContacts 
-        ref={virtualContactsRef}
+      name: "Output Modules", 
+      component: <OutputModules 
+        ref={outputModulesRef}
         splitData={splitData}
         deviceNameToType={deviceData}
         registeredDeviceNames={registeredDeviceNames}
@@ -179,7 +178,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
         sceneData={sceneData}
         remoteControlData={remoteControlData}
         remoteParameterData={remoteParameterData}
-        virtualContactData={virtualContactData}
+        outputModuleData={outputModuleData}
         submitJson={submitJson}
         projectRoomId={projectRoomId}
       /> 

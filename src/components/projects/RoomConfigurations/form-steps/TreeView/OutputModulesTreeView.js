@@ -4,10 +4,10 @@ import {
   CustomTreeViewContainer 
 } from './CustomAnimatedTreeView';
 
-const VirtualContactsTreeView = () => {
+const OutputModulesTreeView = () => {
   return (
-    <CustomTreeViewContainer defaultExpandedItems={['virtual-contacts']}>
-      <CustomTreeItem itemId="virtual-contacts" label="Supported Virtual Contact Formats">
+    <CustomTreeViewContainer defaultExpandedItems={['output-modules']}>
+      <CustomTreeItem itemId="output-modules" label="Supported Output Module Formats">
         <CustomTreeItem 
           itemId="device-type" 
           label={<span><span style={{ color: 'red' }}>*</span> Only supports devices of type "4 Output Module"</span>}
@@ -16,13 +16,13 @@ const VirtualContactsTreeView = () => {
           <CustomTreeItem itemId="channel-syntax" label="Channel Syntax">
             <CustomTreeItem 
               itemId="basic-format" 
-              label="<channel_number_1~4>: <virtual_name>"
-              copyText="<channel_number_1~4>: <virtual_name>"
+              label="<channel_number_1~4>: <channel_name>"
+              copyText="<channel_number_1~4>: <channel_name>"
             />
             <CustomTreeItem 
               itemId="action-format" 
-              label="<channel_number_1~4>: <virtual_name> - <action>"
-              copyText="<channel_number_1~4>: <virtual_name> - <action>"
+              label="<channel_number_1~4>: <channel_name> - <action>"
+              copyText="<channel_number_1~4>: <channel_name> - <action>"
             />
           </CustomTreeItem>
           <CustomTreeItem itemId="actions" label="Supported Pulse Actions">
@@ -58,4 +58,4 @@ const VirtualContactsTreeView = () => {
   );
 };
 
-export default VirtualContactsTreeView;
+export default OutputModulesTreeView;

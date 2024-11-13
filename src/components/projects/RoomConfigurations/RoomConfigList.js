@@ -13,9 +13,9 @@ import Steps from "./form-steps/Steps";
 import {
   renderDevicesTable,
   renderGroupsTable,
-  renderScenesTable,
+  renderOutputModulesTable,
   renderRemoteControlsTable,
-  renderVirtualContactsTable
+  renderScenesTable
 } from './ConfigTables';
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config';
@@ -325,7 +325,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                     {config.groups && renderGroupsTable(config.groups)}
                     {config.scenes && renderScenesTable(config.scenes)}
                     {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
-                    {config.outputs && renderVirtualContactsTable(config.outputs)}
+                    {config.outputs && renderOutputModulesTable(config.outputs)}
                   </>
                 )}
               </>

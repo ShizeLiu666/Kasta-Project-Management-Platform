@@ -365,7 +365,7 @@ export const renderRemoteControlsTable = (remoteControls) => (
   </div>
 );
 
-// 首先添加一个新的常量来映射脉冲值到显示文本
+// 修改常量名称
 const PULSE_MAPPING = {
   0: 'NORMAL',
   1: '1SEC',
@@ -374,45 +374,53 @@ const PULSE_MAPPING = {
   4: 'REVERS'
 };
 
-// 添加新的表格渲染函数
-export const renderVirtualContactsTable = (outputs) => {
-  if (!outputs || outputs.length === 0) {
-    return <p>No virtual contacts available.</p>;
+// 修改函数名和内部实现
+export const renderOutputModulesTable = (outputs) => {
+  // 检查 outputs 是否为有效数组
+  if (!outputs || !Array.isArray(outputs) || outputs.length === 0) {
+    return <p>No output modules available.</p>;
   }
 
   return (
     <div>
-      <div className="component-card-title">Virtual Dry Contacts</div>
-      {outputs.map((output, index) => (
-        <ComponentCard
-          key={index}
-          title={output.deviceName}
-          style={componentCardStyle}
-        >
-          <Table borderless responsive style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={{ ...headerCellStyle, width: '15%' }}>Channel</th>
-                <th style={{ ...headerCellStyle, width: '45%' }}>Virtual Name</th>
-                <th style={{ ...headerCellStyle, width: '40%' }}>Pulse Mode</th>
-              </tr>
-            </thead>
-            <tbody>
-              {output.virtualDryContacts.map((contact, contactIndex) => (
-                <tr key={contactIndex}>
-                  <td style={cellStyle}>{contact.channel + 1}</td>
-                  <td style={cellStyle}>
-                    {contact.virtualName || <span style={{ color: '#999' }}>-</span>}
-                  </td>
-                  <td style={cellStyle}>
-                    {PULSE_MAPPING[contact.pulse]}
-                  </td>
+      <div className="component-card-title">Output Modules</div>
+      {outputs.map((output, index) => {
+        // 检查每个 output 对象的结构
+        if (!output || !output.outputs || !Array.isArray(output.outputs)) {
+          return null;
+        }
+
+        return (
+          <ComponentCard
+            key={index}
+            title={output.deviceName || 'Unknown Device'}
+            style={componentCardStyle}
+          >
+            <Table borderless responsive style={tableStyle}>
+              <thead>
+                <tr>
+                  <th style={{ ...headerCellStyle, width: '15%' }}>Channel</th>
+                  <th style={{ ...headerCellStyle, width: '45%' }}>Channel Name</th>
+                  <th style={{ ...headerCellStyle, width: '40%' }}>Pulse Mode</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </ComponentCard>
-      ))}
+              </thead>
+              <tbody>
+                {output.outputs.map((outputChannel, channelIndex) => (
+                  <tr key={channelIndex}>
+                    <td style={cellStyle}>{(outputChannel?.channel ?? channelIndex) + 1}</td>
+                    <td style={cellStyle}>
+                      {outputChannel?.outputName || <span style={{ color: '#999' }}>-</span>}
+                    </td>
+                    <td style={cellStyle}>
+                      {PULSE_MAPPING[outputChannel?.pulse ?? 0]}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </ComponentCard>
+        );
+      })}
     </div>
   );
 };

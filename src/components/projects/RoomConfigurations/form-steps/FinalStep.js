@@ -6,7 +6,7 @@ import {
   processGroups,
   processScenes,
   processRemoteControls,
-  processVirtualContacts,
+  processOutputModules,
   resetDeviceNameToType
 } from "../ExcelProcessor/ExcelProcessor";
 import CustomButton from '../../../CustomButton';
@@ -37,14 +37,14 @@ const Step6 = forwardRef(({
         splitData.remoteControls, 
         splitData.remoteParameters
       );
-      const virtualContactsResult = processVirtualContacts(splitData.outputs);
+      const outputModulesResult = processOutputModules(splitData.outputs);
 
       return {
         devices: devicesResult.devices,
         groups: groupsResult.groups,
         scenes: scenesResult.scenes,
         remoteControls: remoteControlsResult.remoteControls,
-        outputs: virtualContactsResult.outputs
+        outputs: outputModulesResult.outputs
       };
     } catch (err) {
       setError(err.message);

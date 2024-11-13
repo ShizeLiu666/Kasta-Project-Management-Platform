@@ -49,7 +49,7 @@ function splitJsonFile(content) {
     groups: "KASTA GROUP",
     scenes: "KASTA SCENE",
     remoteControls: "REMOTE CONTROL LINK",
-    outputs: "VIRTUAL DRY CONTACT",
+    outputs: "OUTPUT MODULE",
     remoteParameters: "REMOTE CONTROL PARAMETER"  // 添加新的关键字
   };
 

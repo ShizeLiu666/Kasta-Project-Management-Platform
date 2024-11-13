@@ -11,7 +11,7 @@ const PULSE_MAPPING = {
     'REVERS': 4
 };
 
-export function processVirtualContacts(virtualContactsContent) {
+export function processOutputModules(outputModulesContent) {
     const registeredDeviceNames = getRegisteredDevices();
     const deviceNameToType = getDeviceNameToType();
     
@@ -23,26 +23,24 @@ export function processVirtualContacts(virtualContactsContent) {
         if (deviceNameToType[deviceName] === "4 Output Module") {
             outputsMap.set(deviceName, {
                 deviceName: deviceName,
-                virtualDryContacts: Array(4).fill(null).map((_, index) => ({
+                outputs: Array(4).fill(null).map((_, index) => ({
                     channel: index,
                     pulse: 0,
-                    virtualName: ""
+                    outputName: ""
                 }))
             });
         }
     });
 
     // 处理配置数据
-    (virtualContactsContent || []).forEach(line => {
+    (outputModulesContent || []).forEach(line => {
         line = line.trim();
 
         if (line.startsWith("NAME:")) {
-            // 只设置当前设备名称，不再重复创建配置
             currentDevice = line.replace("NAME:", "").trim();
-            // 检查设备是否存在且是否为4 Output Module
             if (!outputsMap.has(currentDevice)) {
-                console.warn(`设备 ${currentDevice} 不是已注册的4 Output Module设备`);
-                currentDevice = null; // 重置currentDevice，避免处理未注册设备的配置
+                console.warn(`Device ${currentDevice} is not a registered 4 Output Module device`);
+                currentDevice = null;
             }
         } else if (currentDevice && outputsMap.has(currentDevice)) {
             const [channel, command] = line.split(":").map(part => part.trim());
@@ -58,10 +56,10 @@ export function processVirtualContacts(virtualContactsContent) {
             }
 
             const deviceConfig = outputsMap.get(currentDevice);
-            deviceConfig.virtualDryContacts[channelNumber] = {
+            deviceConfig.outputs[channelNumber] = {
                 channel: channelNumber,
                 pulse: PULSE_MAPPING[action] || 0,
-                virtualName: terminalCommand
+                outputName: terminalCommand
             };
         }
     });

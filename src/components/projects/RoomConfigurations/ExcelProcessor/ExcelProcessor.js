@@ -2,7 +2,7 @@ import { processDevices, resetDeviceNameToType, getDeviceNameToType } from './co
 import { processGroups } from './conversion/Groups';
 import { processScenes } from './conversion/Scenes';
 import { processRemoteControls } from './conversion/RemoteControls';
-import { processVirtualContacts } from './conversion/VirtualContacts';
+import { processOutputModules } from './conversion/OutputModules';
 import { processRemoteParameters } from './conversion/RemoteParameters';
 import { validateRemoteParameters } from './validation/RemoteParameters';
 
@@ -105,7 +105,7 @@ export {
     processGroups,
     processScenes,
     processRemoteControls,
-    processVirtualContacts,
+    processOutputModules,
     processRemoteParameters,
     validateRemoteParameters,
     handleRemoteParameters,
