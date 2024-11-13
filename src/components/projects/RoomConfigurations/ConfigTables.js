@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table } from 'reactstrap';
 import ComponentCard from '../../AuthCodeManagement/ComponentCard';
+import { getDeviceNameToType } from './ExcelProcessor/conversion/Devices';
 
 // eslint-disable-next-line no-unused-vars
 const captionStyle = {
@@ -76,6 +77,13 @@ const cardHeaderStyle = {
   color: 'black',
   padding: '5px 10px',
   fontSize: '1.2em'
+};
+
+// 添加 Input Module 相关常量
+const INPUT_MODULE_TYPES = ["5 Input Module", "6 Input Module"];
+const INPUT_ACTION_DISPLAY = {
+  0: 'MOMENTARY',
+  1: 'TOGGLE'
 };
 
 export const renderDevicesTable = (devices) => {
@@ -247,71 +255,113 @@ export const renderRemoteControlsTable = (remoteControls) => (
   <div>
     <div className="component-card-title">Remote Controls</div>
 
-    {/* 遥控器列表 */}
-    {remoteControls.map((remote, index) => (
-      <ComponentCard key={index} title={remote.remoteName} style={componentCardStyle}>
-        <Table borderless responsive style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Button</th>
-              <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Type</th>
-              <th style={{ ...headerCellStyle, width: '30%' }}>Name</th>
-              <th style={{ ...headerCellStyle, width: '20%' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {remote.links.map((link, i) => (
-              <tr key={i}>
-                <td style={{ ...cellStyle, textAlign: 'center' }}>{link.linkIndex + 1}</td>
-                <td style={{ ...cellStyle, textAlign: 'center' }}>
-                  <span style={{
-                    ...customBadgeStyle,
-                    backgroundColor: getLinkTypeColor(link.linkType)
-                  }}>
-                    {getTypeString(link.linkType)}
-                  </span>
-                </td>
-                <td style={cellStyle}>{link.linkName}</td>
-                <td style={cellStyle}>{link.action || 'N/A'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </ComponentCard>
-    ))}
+    {remoteControls.map((remote, index) => {
+      const deviceType = getDeviceNameToType()[remote.remoteName];
+      const isInputModule = INPUT_MODULE_TYPES.includes(deviceType);
+      const channelCount = isInputModule ? 
+        (deviceType === "5 Input Module" ? 5 : 6) : 0;
 
-<ComponentCard style={componentCardStyle} title="Remote Parameters">
-      <Table borderless responsive style={tableStyle}>
-        <thead>
-          <tr>
-            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT</th>
-            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT COLOR</th>
-            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT TIMEOUT</th>
-            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BEEP</th>
-            <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>NIGHT LIGHT</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style={{ ...cellStyle, textAlign: 'center' }}>
-              {PARAMETER_DISPLAY.backlight[remoteControls[0]?.parameters?.backlight ?? DEFAULT_PARAMETER_VALUES.backlight]}
-            </td>
-            <td style={{ ...cellStyle, textAlign: 'center' }}>
-              {PARAMETER_DISPLAY.backlight_color[remoteControls[0]?.parameters?.backlight_color ?? DEFAULT_PARAMETER_VALUES.backlight_color]}
-            </td>
-            <td style={{ ...cellStyle, textAlign: 'center' }}>
-              {PARAMETER_DISPLAY.backlight_timeout[remoteControls[0]?.parameters?.backlight_timeout ?? DEFAULT_PARAMETER_VALUES.backlight_timeout]}
-            </td>
-            <td style={{ ...cellStyle, textAlign: 'center' }}>
-              {PARAMETER_DISPLAY.beep[remoteControls[0]?.parameters?.beep ?? DEFAULT_PARAMETER_VALUES.beep]}
-            </td>
-            <td style={{ ...cellStyle, textAlign: 'center' }}>
-              {PARAMETER_DISPLAY.night_light[remoteControls[0]?.parameters?.night_light ?? DEFAULT_PARAMETER_VALUES.night_light]}
-            </td>
-          </tr>
-        </tbody>
-      </Table>
-    </ComponentCard>
+      return (
+        <ComponentCard key={index} title={remote.remoteName} style={componentCardStyle}>
+          <Table borderless responsive style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={{ ...headerCellStyle, width: '10%', textAlign: 'center' }}>
+                  {isInputModule ? 'Input Channel' : 'Button'}
+                </th>
+                <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Type</th>
+                <th style={{ ...headerCellStyle, width: '25%' }}>Name</th>
+                <th style={{ ...headerCellStyle, width: '15%' }}>Action</th>
+                {isInputModule && (
+                  <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Input Action</th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {isInputModule ?
+                Array.from({ length: channelCount }, (_, i) => {
+                  const link = remote.links.find(l => l.linkIndex === i);
+                  return (
+                    <tr key={i}>
+                      <td style={{ ...cellStyle, textAlign: 'center' }}>{i + 1}</td>
+                      <td style={{ ...cellStyle, textAlign: 'center' }}>
+                        {link ? (
+                          <span style={{
+                            ...customBadgeStyle,
+                            backgroundColor: getLinkTypeColor(link.linkType)
+                          }}>
+                            {getTypeString(link.linkType)}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#999' }}>N/A</span>
+                        )}
+                      </td>
+                      <td style={cellStyle}>{link ? link.linkName : 'N/A'}</td>
+                      <td style={cellStyle}>{link?.action || 'N/A'}</td>
+                      <td style={{ ...cellStyle, textAlign: 'center' }}>               
+                        {INPUT_ACTION_DISPLAY[remote.inputActions[i]]}
+                      </td>
+                    </tr>
+                  );
+                })
+                : remote.links.map((link, i) => (
+                  // 原有的非 Input Module 显示逻辑
+                  <tr key={i}>
+                    <td style={{ ...cellStyle, textAlign: 'center' }}>{link.linkIndex + 1}</td>
+                    <td style={{ ...cellStyle, textAlign: 'center' }}>
+                      <span style={{
+                        ...customBadgeStyle,
+                        backgroundColor: getLinkTypeColor(link.linkType)
+                      }}>
+                        {getTypeString(link.linkType)}
+                      </span>
+                    </td>
+                    <td style={cellStyle}>{link.linkName}</td>
+                    <td style={cellStyle}>{link.action || 'N/A'}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </ComponentCard>
+      );
+    })}
+
+    {/* 只有非 Input Module 才显示参数表 */}
+    {remoteControls.length > 0 &&
+      !INPUT_MODULE_TYPES.includes(getDeviceNameToType()[remoteControls[0].remoteName]) && (
+        <ComponentCard style={componentCardStyle} title="Remote Parameters">
+          <Table borderless responsive style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT</th>
+                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT COLOR</th>
+                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT TIMEOUT</th>
+                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BEEP</th>
+                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>NIGHT LIGHT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ ...cellStyle, textAlign: 'center' }}>
+                  {PARAMETER_DISPLAY.backlight[remoteControls[0]?.parameters?.backlight ?? DEFAULT_PARAMETER_VALUES.backlight]}
+                </td>
+                <td style={{ ...cellStyle, textAlign: 'center' }}>
+                  {PARAMETER_DISPLAY.backlight_color[remoteControls[0]?.parameters?.backlight_color ?? DEFAULT_PARAMETER_VALUES.backlight_color]}
+                </td>
+                <td style={{ ...cellStyle, textAlign: 'center' }}>
+                  {PARAMETER_DISPLAY.backlight_timeout[remoteControls[0]?.parameters?.backlight_timeout ?? DEFAULT_PARAMETER_VALUES.backlight_timeout]}
+                </td>
+                <td style={{ ...cellStyle, textAlign: 'center' }}>
+                  {PARAMETER_DISPLAY.beep[remoteControls[0]?.parameters?.beep ?? DEFAULT_PARAMETER_VALUES.beep]}
+                </td>
+                <td style={{ ...cellStyle, textAlign: 'center' }}>
+                  {PARAMETER_DISPLAY.night_light[remoteControls[0]?.parameters?.night_light ?? DEFAULT_PARAMETER_VALUES.night_light]}
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+        </ComponentCard>
+      )}
   </div>
 );
 
@@ -334,9 +384,9 @@ export const renderVirtualContactsTable = (outputs) => {
     <div>
       <div className="component-card-title">Virtual Dry Contacts</div>
       {outputs.map((output, index) => (
-        <ComponentCard 
-          key={index} 
-          title={output.deviceName} 
+        <ComponentCard
+          key={index}
+          title={output.deviceName}
           style={componentCardStyle}
         >
           <Table borderless responsive style={tableStyle}>

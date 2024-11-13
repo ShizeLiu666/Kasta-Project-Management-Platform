@@ -138,57 +138,46 @@ const ScenesTreeView = () => {
 
         {/* PowerPoint Type */}
         <CustomTreeItem itemId="scenes-powerpoint" label="PowerPoint Type">
+          {/* Single-Way PowerPoint */}
           <CustomTreeItem itemId="scenes-powerpoint-single" label="Single-Way PowerPoint">
-            <CustomTreeItem itemId="scenes-powerpoint-single-device" label="Single Device Control">
-              <CustomTreeItem
-                itemId="scenes-powerpoint-single-device-on"
-                label="<device_name> ON"
-                copyText="<device_name> ON"
-              />
-              <CustomTreeItem
-                itemId="scenes-powerpoint-single-device-off"
-                label="<device_name> OFF"
-                copyText="<device_name> OFF"
-              />
-            </CustomTreeItem>
-            <CustomTreeItem itemId="scenes-powerpoint-single-group" label="Group Device Control">
-              <CustomTreeItem
-                itemId="scenes-powerpoint-single-group-on"
-                label="<device_name>, <device_name> ON"
-                copyText="<device_name>, <device_name> ON"
-              />
-              <CustomTreeItem
-                itemId="scenes-powerpoint-single-group-off"
-                label="<device_name>, <device_name> OFF"
-                copyText="<device_name>, <device_name> OFF"
-              />
-            </CustomTreeItem>
+
+            <CustomTreeItem
+              itemId="scenes-powerpoint-single-device-on"
+              label="<device_name> ON"
+              copyText="<device_name> ON"
+            />
+            <CustomTreeItem
+              itemId="scenes-powerpoint-single-device-off"
+              label="<device_name> OFF"
+              copyText="<device_name> OFF"
+            />
+
           </CustomTreeItem>
+
+          {/* Two-Way PowerPoint */}
           <CustomTreeItem itemId="scenes-powerpoint-two" label="Two-Way PowerPoint">
-            <CustomTreeItem itemId="scenes-powerpoint-two-device" label="Single Device Control">
-              <CustomTreeItem
-                itemId="scenes-powerpoint-two-device-on"
-                label="<device_name> ON ON"
-                copyText="<device_name> ON ON"
-              />
-              <CustomTreeItem
-                itemId="scenes-powerpoint-two-device-off"
-                label="<device_name> OFF OFF"
-                copyText="<device_name> OFF OFF"
-              />
-            </CustomTreeItem>
-            <CustomTreeItem itemId="scenes-powerpoint-two-group" label="Group Device Control">
-              <CustomTreeItem
-                itemId="scenes-powerpoint-two-group-on"
-                label="<device_name>, <device_name> ON ON"
-                copyText="<device_name>, <device_name> ON ON"
-              />
-              <CustomTreeItem
-                itemId="scenes-powerpoint-two-group-off"
-                label="<device_name>, <device_name> OFF OFF"
-                copyText="<device_name>, <device_name> OFF OFF"
-              />
-            </CustomTreeItem>
+
+            <CustomTreeItem
+              itemId="scenes-powerpoint-two-device-on-on"
+              label="<device_name> ON ON"
+              copyText="<device_name> ON ON"
+            />
+            <CustomTreeItem
+              itemId="scenes-powerpoint-two-device-on-off"
+              label="<device_name> ON OFF"
+              copyText="<device_name> ON OFF"
+            />
+            <CustomTreeItem
+              itemId="scenes-powerpoint-two-device-off-on"
+              label="<device_name> OFF ON"
+              copyText="<device_name> OFF ON"
+            />
+            <CustomTreeItem
+              itemId="scenes-powerpoint-two-device-unselect"
+              label="<device_name> UNSELECT"
+              copyText="<device_name> UNSELECT"
+            />
+
           </CustomTreeItem>
         </CustomTreeItem>
 
