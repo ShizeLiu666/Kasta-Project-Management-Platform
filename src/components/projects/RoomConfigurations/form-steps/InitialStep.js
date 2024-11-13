@@ -285,7 +285,6 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                   <li style={{ marginLeft: "20px" }}>GROUP</li>
                   <li style={{ marginLeft: "20px" }}>SCENE</li>
                   <li style={{ marginLeft: "20px" }}>REMOTE CONTROL LINK</li>
-                  <li style={{ marginLeft: "20px" }}>VIRTUAL DRY CONTACT</li>
                 </ul>
                 ( Please refer to the{" "}
                 <a
