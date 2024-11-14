@@ -24,6 +24,10 @@ import ComponentCard from '../../AuthCodeManagement/ComponentCard';
 import CustomButton from '../../CustomButton';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import UpdateAuthCodeModal from './UpdateAuthCodeModal';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import ConfigurationGuidelines from './guidelines/ConfigurationGuidelines';
 
 const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   const [config, setConfig] = useState(null);
@@ -37,6 +41,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [updateAuthCodeModalOpen, setUpdateAuthCodeModalOpen] = useState(false);
+  const [showGuidelines, setShowGuidelines] = useState(false);
 
   const showAlert = (message, severity, duration = 3000) => {
     setAlert({ isOpen: true, message, severity, duration });
@@ -230,21 +235,41 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
               <Box
                 display="flex"
                 justifyContent="space-between"
-                alignItems="center"
+                alignItems="flex-start"
                 className="room-config-title"
               >
-                <Box display="flex" flexDirection="column">
-                  <span style={{ fontSize: '18px', fontWeight: '500', marginRight: '10px' }}>
-                    {roomTypeName}
-                  </span>
-                  {roomDetails && (
-                    <span style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
-                      Authorization Code: {roomDetails.authorizationCode} | Remaining Uses: {10 - roomDetails.count}
+                <Box display="flex" flexDirection="column" style={{ flex: 1 }}>
+                  <Box display="flex" alignItems="center" justifyContent="space-between" style={{ width: '50%' }}>
+                    <span style={{ fontSize: '18px', fontWeight: '500' }}>
+                      {roomTypeName}
                     </span>
+                  </Box>
+                  {roomDetails && (
+                    <Box display="flex" alignItems="center" style={{ marginTop: '5px' }}>
+                      <span style={{ fontSize: '14px', color: '#666' }}>
+                        Authorization Code: {roomDetails.authorizationCode} | Remaining Uses: {10 - roomDetails.count}
+                      </span>
+                      <Tooltip title="Configuration Guidelines">
+                        <IconButton
+                          onClick={() => setShowGuidelines(true)}
+                          size="medium"
+                          sx={{
+                            color: '#fbcd0b',
+                            ml: 1,
+                            padding: '4px',
+                            '&:hover': {
+                              color: '#e3b900',
+                            },
+                          }}
+                        >
+                          <HelpOutlineIcon fontSize="medium"/>
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   )}
                 </Box>
 
-                <Box display="flex" alignItems="center" justifyContent="flex-end" width="50%">
+                <Box display="flex" alignItems="center">
                   {!isEditing ? (
                     <>
                       {config && config !== "{}" && Object.keys(config).length > 0 && (
@@ -343,6 +368,11 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
             toggle={() => setUpdateAuthCodeModalOpen(false)}
             projectRoomId={projectRoomId}
             onSuccess={handleUpdateAuthCodeSuccess}
+          />
+
+          <ConfigurationGuidelines
+            open={showGuidelines}
+            onClose={() => setShowGuidelines(false)}
           />
         </Col>
       </Row>

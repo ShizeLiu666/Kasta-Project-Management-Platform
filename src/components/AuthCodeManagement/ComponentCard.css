@@ -6,11 +6,20 @@
 }
 
 .component-card-title {
-    border-bottom: 1px solid #eee;
-    padding: 15px 20px;
-    margin-bottom: 0;
-    font-size: 18px;
-    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.component-card-title-content {
+    flex: 1;
+}
+
+.component-card-header-action {
+    margin-left: 1rem;
 }
 
 .component-card-body {
