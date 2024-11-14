@@ -1,6 +1,17 @@
 import React, { useEffect } from 'react';
-import { Modal, ModalHeader, ModalBody, Table } from 'reactstrap';
-import InvitationItem from './InvitationItem';
+import { Modal } from 'reactstrap';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Typography
+} from '@mui/material';
+import InvitationActions from './InvitationActions';
 
 const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
   useEffect(() => {
@@ -10,49 +21,109 @@ const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
   }, [invitations, isOpen, toggle]);
 
   const modalStyle = {
-    maxWidth: '800px',  // 增加最大宽度
-    width: '90%',       // 响应式宽度
+    maxWidth: '800px',
+    width: '90%',
     margin: '1.75rem auto'
-  };
-
-  const tableStyle = {
-    minWidth: '650px',  // 设置最小宽度
-    tableLayout: 'fixed' // 固定表格布局
-  };
-
-  const columnStyles = {
-    projectName: { width: '30%' },
-    address: { width: '45%' },
-    actions: { width: '25%' }
   };
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} centered style={modalStyle}>
-      <ModalHeader toggle={toggle}>Your Invitations</ModalHeader>
-      <ModalBody>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Your Invitations
+        </Typography>
+        
         {invitations.length === 0 ? (
-          <p>You have no pending invitations.</p>
+          <Typography>You have no pending invitations.</Typography>
         ) : (
-          <Table responsive hover style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={columnStyles.projectName}>Project Name</th>
-                <th style={columnStyles.address}>Address</th>
-                <th style={columnStyles.actions}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invitations.map(invitation => (
-                <InvitationItem 
-                  key={invitation.projectId} 
-                  invitation={invitation} 
-                  onActionComplete={onActionComplete}
-                />
-              ))}
-            </tbody>
-          </Table>
+          <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
+            <Table sx={{ minWidth: 650 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell 
+                    sx={{ 
+                      width: '35%',
+                      fontWeight: 600
+                    }}
+                  >
+                    Project Name
+                  </TableCell>
+                  <TableCell 
+                    sx={{ 
+                      width: '40%',
+                      fontWeight: 600
+                    }}
+                  >
+                    Address
+                  </TableCell>
+                  <TableCell 
+                    align="right"
+                    sx={{ 
+                      width: '25%',
+                      fontWeight: 600,
+                      pr: 3  // 增加右侧padding以对齐按钮
+                    }}
+                  >
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {invitations.map((invitation) => (
+                  <TableRow
+                    key={invitation.projectId}
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell
+                      sx={{
+                        maxWidth: 0,  // 启用文本溢出
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {invitation.name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        maxWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {invitation.address}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right" sx={{ pr: 3 }}>
+                      <InvitationActions
+                        projectId={invitation.projectId}
+                        onActionComplete={onActionComplete}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
-      </ModalBody>
+      </Box>
     </Modal>
   );
 };

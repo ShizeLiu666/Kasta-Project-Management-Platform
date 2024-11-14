@@ -7,7 +7,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Chip from '@mui/material/Chip';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -68,47 +67,30 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
     fetchMembers();
   }, [fetchMembers]);
 
-  const getStatusChip = (status) => {
-    let color;
-    let label = status;
-    let backgroundColor;
-    let textColor;
-
+  // Status Text
+  const getStatusText = (status) => {
     switch (status) {
       case 'ACCEPT':
-        backgroundColor = '#28a745';  // 使用和 invite 相同的绿色
-        textColor = '#fff';
-        break;
+        return { 
+          color: '#4CAF50',
+          fontWeight: 450
+        };
       case 'REJECT':
-        color = 'error';
-        break;
+        return { 
+          color: '#F44336',
+          fontWeight: 450
+        };
       case 'WAITING':
-        backgroundColor = '#FCB249'; 
-        textColor = '#fff';
-        break;
+        return { 
+          color: '#FFC107',
+          fontWeight: 450
+        };
       default:
-        color = 'default';
+        return { 
+          color: '#000',
+          fontWeight: 450
+        };
     }
-
-    return (
-      <Chip 
-        label={label} 
-        color={color}
-        size="small"
-        sx={{ 
-          borderRadius: '4px',
-          minWidth: '80px',
-          justifyContent: 'center',
-          ...(backgroundColor && {
-            backgroundColor,
-            color: textColor,
-            '&:hover': {
-              backgroundColor: backgroundColor
-            }
-          })
-        }} 
-      />
-    );
   };
 
   const cardTitle = (
@@ -144,6 +126,27 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
     fetchMembers();  // 重新获取成员列表
   };
 
+  // Role Style
+  const getRoleStyle = (role) => {
+    switch (role) {
+      case 'OWNER':
+        return { 
+          color: '#fbcd0b',
+          fontWeight: 450
+        };
+      case 'VISITOR':
+        return { 
+          color: '#bdbdbd',
+          fontWeight: 450
+        };
+      default:
+        return { 
+          color: '#bdbdbd',
+          fontWeight: 450
+        };
+    }
+  };
+
   return (
     <>
       <ComponentCard title={cardTitle}>
@@ -172,7 +175,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                 <TableRow>
                   <TableCell 
                     sx={{ 
-                      width: '37.5%',  // 账户列占 40%
+                      width: '45%',  // 增加账户列宽度，因为现在包含了角色信息
                       fontWeight: 'bold',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
@@ -183,16 +186,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                   </TableCell>
                   <TableCell 
                     sx={{ 
-                      width: '20%',  // 角色列占 20%
-                      fontWeight: 'bold',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Role
-                  </TableCell>
-                  <TableCell 
-                    sx={{ 
-                      width: '20%',  // 状态列占 20%
+                      width: '27.5%',
                       fontWeight: 'bold',
                       whiteSpace: 'nowrap'
                     }}
@@ -202,7 +196,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                   {userRole === 'OWNER' && (
                     <TableCell 
                       sx={{ 
-                        width: '22.5%',  // 操作列占 20%
+                        width: '27.5%',
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap'
                       }}
@@ -221,18 +215,19 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                       '&:hover': { backgroundColor: '#f8f9fa' }
                     }}
                   >
-                    <TableCell sx={{ width: '40%' }}>
+                    <TableCell sx={{ width: '57.5%' }}>
                       <Box sx={{ 
                         display: 'flex', 
                         alignItems: 'center',
-                        overflow: 'hidden'  // 确保内容不会溢出
+                        overflow: 'hidden',
+                        maxWidth: '100%'
                       }}>
                         <Avatar
                           src={member.headPic || defaultAvatar}
                           sx={{ 
                             width: 40,
                             height: 40,
-                            flexShrink: 0  // 防止头像被压缩
+                            flexShrink: 0
                           }}
                           imgProps={{
                             onError: (e) => {
@@ -241,21 +236,49 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                             }
                           }}
                         />
-                        <Box sx={{ ml: 2 }}>
-                          <Typography 
-                            variant="subtitle2" 
-                            sx={{ 
-                              fontWeight: 600,
-                              fontSize: { xs: '0.875rem', sm: '1rem' }  // 响应式字体大小
-                            }}
-                          >
-                            {member.account || member.username}
-                          </Typography>
+                        <Box sx={{ 
+                          ml: 2,
+                          minWidth: 0,
+                          flex: 1
+                        }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            maxWidth: '100%'
+                          }}>
+                            <Typography 
+                              variant="subtitle2" 
+                              sx={{ 
+                                fontWeight: 600,
+                                fontSize: { xs: '0.875rem', sm: '1rem' },
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '60%'
+                              }}
+                            >
+                              {member.account || member.username}
+                            </Typography>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                ml: 1,
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                flexShrink: 0,
+                                ...getRoleStyle(member.role)
+                              }}
+                            >
+                              ({member.role})
+                            </Typography>
+                          </Box>
                           <Typography 
                             variant="body2" 
                             color="text.secondary"
                             sx={{ 
-                              fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             {member.nickname || member.nickName}
@@ -264,18 +287,12 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Chip 
-                        label={member.role}
-                        size="small"
-                        sx={{ 
-                          borderRadius: '4px',
-                          backgroundColor: member.role === 'OWNER' ? '#FE0760' : 'default',
-                          color: member.role === 'OWNER' ? '#fff' : 'inherit'
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {member.role !== 'OWNER' && getStatusChip(member.memberStatus)}
+                      <Typography 
+                        variant="body2" 
+                        sx={getStatusText(member.memberStatus)}
+                      >
+                        {member.memberStatus}
+                      </Typography>
                     </TableCell>
                     
                     {userRole === 'OWNER' && (

@@ -43,10 +43,10 @@ const InvitationActions = ({ projectId, onActionComplete }) => {
   };
 
   const buttonStyle = {
-    minWidth: '80px',  // 设置固定最小宽度
-    maxWidth: '80px',  // 设置固定最大宽度
+    minWidth: '100px',  // 设置固定最小宽度
+    maxWidth: '100px',  // 设置固定最大宽度
     height: '32px',
-    padding: '4px 8px',
+    // padding: '4px 8px',
     fontSize: '0.875rem',  // 14px
     whiteSpace: 'nowrap',  // 防止文字换行
     overflow: 'hidden',
@@ -68,7 +68,7 @@ const InvitationActions = ({ projectId, onActionComplete }) => {
         type="invite"
         onClick={() => handleAction('accept')}
         disabled={isProcessing}
-        icon={<CheckIcon sx={{ fontSize: '16px' }} />}
+        icon={<CheckIcon sx={{ fontSize: '12px' }} />}
         style={buttonStyle}
       >
         Accept
@@ -77,7 +77,7 @@ const InvitationActions = ({ projectId, onActionComplete }) => {
         type="remove"
         onClick={() => handleAction('reject')}
         disabled={isProcessing}
-        icon={<CloseIcon sx={{ fontSize: '16px' }} />}
+        icon={<CloseIcon sx={{ fontSize: '12px' }} />}
         style={buttonStyle}
       >
         Reject
