@@ -75,8 +75,17 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
 
   // Email validation
   const validateEmail = (email) => {
+    // 基本格式验证
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    if (!emailRegex.test(email)) {
+      return false;
+    }
+
+    // 获取域名部分（@后面的部分）
+    const [, domain] = email.split('@');
+    
+    // 检查域名是否全为小写
+    return domain === domain.toLowerCase();
   };
 
   const validatePassword = (password) => {
@@ -115,10 +124,17 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
+    
     if (value === "") {
       setEmailError("");
     } else if (!validateEmail(value)) {
-      setEmailError("* Invalid email format");
+      // 检查是否包含大写域名
+      const [, domain] = value.split('@');
+      if (domain && domain !== domain.toLowerCase()) {
+        setEmailError("* Email domain must be lowercase (e.g., @gmail.com)");
+      } else {
+        setEmailError("* Invalid email format");
+      }
     } else {
       setEmailError("");
     }
@@ -221,13 +237,23 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   // Handle sending verification code
   const handleSendVerificationCode = async (e) => {
     e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      setEmailError("* Invalid email format");
+      return;
+    }
+
+    // 确保邮箱地址是小写的
+    const normalizedEmail = email.toLowerCase();
+    setEmail(normalizedEmail);
+
     setEmailError("");
     setPasswordError("");
     setConfirmPasswordError("");
 
     if (!isValidForm) return;
 
-    await sendVerificationCodeWithFeedback(email);
+    await sendVerificationCodeWithFeedback(normalizedEmail);
   };
 
   const handleBack = (e) => {
