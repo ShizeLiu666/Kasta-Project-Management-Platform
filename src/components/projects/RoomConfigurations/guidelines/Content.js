@@ -382,7 +382,7 @@ export const content = {
       underscore: '下划线 (_)',
       noSpaces: '不允许使用空格',
       uniqueName: '每个设备名称必须唯一，且不能与设备型号冲突',
-      closeButton: '关闭',
+      closeButton: 'CLOSE',
   
       // Group Configuration
       groupConfig: '组配置',
@@ -659,12 +659,12 @@ export const content = {
           ]
         },
         rules: [
-          '设备类型必须是"4路输出模块"',
-          '每个���出模块必须有唯一的名称',
+          '设备类型必须是"4输出模块"',
+          '每个4输出模块必须有唯一的名称',
           '通道号必须在1-4之间',
           '通道名称不能包含空格',
           '每个通道在每个模块中只能使用一次',
-          '动作是可选的（默认为NORMAL）',
+          '动作是可选的(默认为NORMAL)',
           '只允许使用支持的动作',
           '命令格式必须准确'
         ]
