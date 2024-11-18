@@ -29,6 +29,13 @@ const CustomModal = ({
     const [showErrorAlert, setShowErrorAlert] = useState(false);
 
     useEffect(() => {
+        if (!isOpen) {
+            setShowSuccessAlert(false);
+            setShowErrorAlert(false);
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
         const handleKeyPress = (event) => {
             if (event.key === 'Enter' && isOpen && !disabled && !isSubmitting) {
                 event.preventDefault();
@@ -44,6 +51,12 @@ const CustomModal = ({
             document.removeEventListener('keypress', handleKeyPress);
         };
     }, [isOpen, onSubmit, disabled, isSubmitting]);
+
+    const handleToggle = () => {
+        setShowSuccessAlert(false);
+        setShowErrorAlert(false);
+        toggle();
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -72,11 +85,11 @@ const CustomModal = ({
         <>
             <Modal 
                 isOpen={isOpen} 
-                toggle={toggle} 
+                toggle={handleToggle}
                 centered
                 scrollable
             >
-                <ModalHeader toggle={toggle}>{title}</ModalHeader>
+                <ModalHeader toggle={handleToggle}>{title}</ModalHeader>
                 <ModalBody>
                     {children}
                 </ModalBody>
@@ -93,7 +106,7 @@ const CustomModal = ({
                     <CustomButton 
                         type={cancelButtonType}
                         color={cancelButtonColor}
-                        onClick={toggle}
+                        onClick={handleToggle}
                     >
                         {cancelText}
                     </CustomButton>

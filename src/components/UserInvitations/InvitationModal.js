@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from 'reactstrap';
 import {
   Table,
@@ -9,16 +9,17 @@ import {
   TableRow,
   Paper,
   Box,
-  Typography
+  Typography,
+  Stack
 } from '@mui/material';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import DangerousIcon from '@mui/icons-material/Dangerous';
 import InvitationActions from './InvitationActions';
+import CustomButton from '../CustomButton';
+import { handleBulkInvitationAction } from './InvitationActions';
 
 const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
-  useEffect(() => {
-    if (invitations.length === 0 && isOpen) {
-      toggle();
-    }
-  }, [invitations, isOpen, toggle]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const modalStyle = {
     maxWidth: '800px',
@@ -26,12 +27,63 @@ const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
     margin: '1.75rem auto'
   };
 
+  const handleBulkAction = async (action) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      await handleBulkInvitationAction(action, onActionComplete);
+    } finally {
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 500);
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} toggle={toggle} centered style={modalStyle}>
       <Box sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Your Invitations
-        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mb: 2 
+        }}>
+          <Typography variant="h6">
+            Your Invitations
+          </Typography>
+          
+          {invitations.length > 0 && (
+            <Stack direction="row" spacing={1}>
+              <CustomButton
+                type="invite"
+                onClick={() => handleBulkAction('accept')}
+                disabled={isProcessing}
+                icon={<DoneAllIcon sx={{ fontSize: '16px' }} />}
+                style={{
+                  minWidth: '140px',
+                  height: '32px',
+                  fontSize: '0.875rem'
+                }}
+              >
+                Accept All
+              </CustomButton>
+              <CustomButton
+                type="remove"
+                onClick={() => handleBulkAction('reject')}
+                disabled={isProcessing}
+                icon={<DangerousIcon sx={{ fontSize: '16px' }} />}
+                style={{
+                  minWidth: '140px',
+                  height: '32px',
+                  fontSize: '0.875rem'
+                }}
+              >
+                Reject All
+              </CustomButton>
+            </Stack>
+          )}
+        </Box>
         
         {invitations.length === 0 ? (
           <Typography>You have no pending invitations.</Typography>

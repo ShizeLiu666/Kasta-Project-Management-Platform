@@ -15,6 +15,9 @@ import CustomButton from '../../CustomButton';
 import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
 import InviteMemberModal from '../ProjectDetails/ProjectMembers/InviteMemberModal';
 import CustomSearchBar from "../../CustomSearchBar";
+import Badge from '@mui/material/Badge';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import IconButton from '@mui/material/IconButton';
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
@@ -72,13 +75,6 @@ const ProjectListComponent = () => {
 
         const pendingInvites = allProjects.filter(project => project.memberStatus === 'WAITING');
         setPendingInvitations(pendingInvites);
-
-        // Only open the invitation modal if there are pending invitations
-        if (pendingInvites.length > 0) {
-          setInvitationModalOpen(true);
-        } else {
-          setInvitationModalOpen(false);
-        }
       } else {
         console.error("Error fetching projects:", response.data.errorMsg);
       }
@@ -141,9 +137,17 @@ const ProjectListComponent = () => {
 
   const handleInvitationAction = (action, projectId) => {
     fetchProjectList();
+    
+    // 如果是批量操作（projectId 为 null），则关闭弹窗
+    if (!projectId) {
+      setInvitationModalOpen(false);
+    }
+    
     setAlert({
       isOpen: true,
-      message: `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} invitation for project ${projectId}`,
+      message: projectId 
+        ? `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} invitation for project ${projectId}`
+        : `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} all invitations`,
       severity: "success",
       duration: 2000
     });
@@ -277,12 +281,33 @@ const ProjectListComponent = () => {
             }}
           />
 
-          <CustomButton
-            type="create"
-            onClick={toggleCreateProjectModal}
-          >
-            Create New Project
-          </CustomButton>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <IconButton 
+              onClick={() => setInvitationModalOpen(true)}
+              sx={{ 
+                color: pendingInvitations.length > 0 ? '#fbcd0b' : 'action.disabled'
+              }}
+            >
+              <Badge 
+                badgeContent={pendingInvitations.length} 
+                color="error"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    backgroundColor: '#f62d51'
+                  }
+                }}
+              >
+                <NotificationsIcon fontSize="large"/>
+              </Badge>
+            </IconButton>
+
+            <CustomButton
+              type="create"
+              onClick={toggleCreateProjectModal}
+            >
+              Create New Project
+            </CustomButton>
+          </div>
         </div>
       )}
 
