@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, FormGroup, Label, Input } from "reactstrap";
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config'; 
-import CustomModal from '../../CustomModal';
+import CustomModal from '../../CustomComponents/CustomModal';
 
 const EditNetworkModal = ({ isOpen, toggle, onSuccess, network }) => {
   const [formData, setFormData] = useState({

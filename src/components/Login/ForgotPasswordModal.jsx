@@ -4,7 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import rotateLockIcon from "../../assets/icons/rotate-lock.png";
 import axiosInstance from '../../config'; 
-import CustomAlert from '../CustomAlert';
+import CustomAlert from '../CustomComponents/CustomAlert';
 
 const ForgotPasswordModal = ({ handleBackToLogin }) => {
   const [email, setEmail] = useState("");

@@ -3,7 +3,7 @@ import { Form, FormGroup, Label } from 'reactstrap';
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
-import CustomModal from '../../CustomModal';
+import CustomModal from '../../CustomComponents/CustomModal';
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config';
 

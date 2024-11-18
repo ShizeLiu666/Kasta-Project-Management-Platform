@@ -9,13 +9,13 @@ import DeleteProjectModal from "./DeleteProjectModal";
 import EditProjectModal from './EditProjectModal';
 import { getToken } from '../../auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
-import CustomAlert from '../../CustomAlert';
+import CustomAlert from '../../CustomComponents/CustomAlert';
 import InvitationModal from '../../UserInvitations/InvitationModal';
-import CustomButton from '../../CustomButton';
+import CustomButton from '../../CustomComponents/CustomButton';
 import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
 import InviteMemberModal from '../ProjectDetails/ProjectMembers/InviteMemberModal';
-import CustomSearchBar from "../../CustomSearchBar";
-import RefreshButton from '../../RefreshButton';
+import CustomSearchBar from "../../CustomComponents/CustomSearchBar";
+import RefreshButton from '../../CustomComponents/RefreshButton';
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);

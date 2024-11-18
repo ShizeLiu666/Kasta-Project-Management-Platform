@@ -3,7 +3,7 @@ import { Row, Col, Button } from 'reactstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory, { PaginationProvider, PaginationListStandalone, SizePerPageDropdownStandalone } from 'react-bootstrap-table2-paginator';
 import ToolkitProvider from 'react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit';
-import ComponentCard from './ComponentCard';
+import ComponentCard from '../CustomComponents/ComponentCard';
 import { getToken } from '../auth';
 import axiosInstance from '../../config';
 import CreateAuthCodeModal from './CreateAuthCodeModal';
@@ -13,9 +13,9 @@ import EditIcon from '@mui/icons-material/EditNote';  // 导入 EditIcon
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';  // 导入 ContentCopyIcon
-import CustomAlert from '../CustomAlert';  // 导入 CustomAlert
-import CustomButton from '../CustomButton';
-import CustomSearchBar from '../CustomSearchBar';
+import CustomAlert from '../CustomComponents/CustomAlert';  // 导入 CustomAlert
+import CustomButton from '../CustomComponents/CustomButton';
+import CustomSearchBar from '../CustomComponents/CustomSearchBar';
 // import { backdropClasses } from '@mui/material';
 
 // const { SearchBar } = Search;

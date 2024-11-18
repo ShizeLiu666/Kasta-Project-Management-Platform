@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 // import { Form, FormGroup, Label, Input } from "reactstrap";
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config'; 
-import CustomModal from '../../CustomModal';
+import CustomModal from '../../CustomComponents/CustomModal';
 
 const DeleteProjectModal = ({ isOpen, toggle, onDelete, project }) => {
   // const [password, setPassword] = useState("");

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
-import CustomModal from '../../../CustomModal';
+import CustomModal from '../../../CustomComponents/CustomModal';
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
 

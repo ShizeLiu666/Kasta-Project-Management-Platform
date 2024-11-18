@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../config';
 import { getToken } from '../auth';
-import CustomButton from '../CustomButton';
+import CustomButton from '../CustomComponents/CustomButton';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';

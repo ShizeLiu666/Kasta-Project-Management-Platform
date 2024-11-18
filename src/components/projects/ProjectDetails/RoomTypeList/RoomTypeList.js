@@ -4,10 +4,10 @@ import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
 import { CircularProgress } from "@mui/material";
-import CustomSearchBar from '../../../CustomSearchBar';
+import CustomSearchBar from '../../../CustomComponents/CustomSearchBar';
 import { getToken } from '../../../auth';
 import axiosInstance from '../../../../config'; 
-import CustomButton from '../../../CustomButton';
+import CustomButton from '../../../CustomComponents/CustomButton';
 
 const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const [roomTypes, setRoomTypes] = useState([]);

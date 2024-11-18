@@ -19,9 +19,9 @@ import {
 } from './ConfigTables';
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config';
-import CustomAlert from '../../CustomAlert';
-import ComponentCard from '../../AuthCodeManagement/ComponentCard';
-import CustomButton from '../../CustomButton';
+import CustomAlert from '../../CustomComponents/CustomAlert';
+import ComponentCard from '../../CustomComponents/ComponentCard';
+import CustomButton from '../../CustomComponents/CustomButton';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import UpdateAuthCodeModal from './UpdateAuthCodeModal';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';

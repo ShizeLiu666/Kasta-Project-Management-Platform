@@ -12,7 +12,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import CustomButton from './CustomButton';
-import defaultAvatar from '../assets/images/users/normal_user.jpg';
+import defaultAvatar from '../../assets/images/users/normal_user.jpg';
 import CustomSearchBar from './CustomSearchBar';
 
 const MemberTable = ({ 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col } from 'reactstrap';
-import ComponentCard from '../AuthCodeManagement/ComponentCard';
+import ComponentCard from '../CustomComponents/ComponentCard';
 import Carousel from 'react-material-ui-carousel';
 import { Paper } from '@mui/material';
 import kastaImage from '../../assets/images/CarouseItems/kasta.jpg';

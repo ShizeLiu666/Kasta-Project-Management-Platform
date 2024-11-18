@@ -4,7 +4,7 @@ import { getUserDetails, getToken } from '../auth';
 import ProfileInfo from './ProfileInfo';
 import ProfileSettings from './ProfileSettings';
 import axiosInstance from '../../config';
-import CustomAlert from '../CustomAlert';
+import CustomAlert from '../CustomComponents/CustomAlert';
 
 const Profile = () => {
   const [userDetails, setUserDetails] = useState(null);

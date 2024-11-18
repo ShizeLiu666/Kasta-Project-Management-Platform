@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
-import CustomModal from '../../../CustomModal';
+import CustomModal from '../../../CustomComponents/CustomModal';
 
 const filter = createFilterOptions();
 

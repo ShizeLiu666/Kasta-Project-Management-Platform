@@ -4,7 +4,7 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import { styled } from '@mui/material/styles';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CustomAlert from '../../../../CustomAlert';
+import CustomAlert from '../../../../CustomComponents/CustomAlert';
 
 const StyledTreeItem = styled(TreeItem)({
   '& .MuiTreeItem-label': {

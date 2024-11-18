@@ -3,10 +3,10 @@ import { Spinner } from 'reactstrap';
 import Box from '@mui/material/Box';
 import axiosInstance from '../../../config';
 import { getToken } from '../../auth';
-import CustomAlert from '../../CustomAlert';
-import CustomButton from '../../CustomButton';
+import CustomAlert from '../../CustomComponents/CustomAlert';
+import CustomButton from '../../CustomComponents/CustomButton';
 import InviteMemberModal from './InviteMemberModal';
-import MemberTable from '../../MemberTable';
+import MemberTable from '../../CustomComponents/MemberTable';
 
 const NetworkMember = ({ networkId }) => {
   const [members, setMembers] = useState([]);

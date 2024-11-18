@@ -9,7 +9,7 @@ import {
   processOutputModules,
   resetDeviceNameToType
 } from "../ExcelProcessor/ExcelProcessor";
-import CustomButton from '../../../CustomButton';
+import CustomButton from '../../../CustomComponents/CustomButton';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 

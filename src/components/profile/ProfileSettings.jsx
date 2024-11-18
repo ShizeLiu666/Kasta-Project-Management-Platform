@@ -15,7 +15,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axiosInstance from '../../config';
 import { getToken, saveUserDetails } from '../auth';
-import CustomButton from '../CustomButton';
+import CustomButton from '../CustomComponents/CustomButton';
 import DeleteAccountModal from './DeleteAccountModal';
 
 const ProfileSettings = ({ userDetails: initialUserDetails }) => {

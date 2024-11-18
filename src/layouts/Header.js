@@ -15,7 +15,7 @@ import kasta_logo from "../assets/images/logos/kasta_logo.png";
 import '../assets/scss/loader/Header.css';
 import { getUserDetails } from '../components/auth';
 import defaultAvatar from '../assets/images/users/normal_user.jpg';
-import CustomModal from '../components/CustomModal';
+import CustomModal from '../components/CustomComponents/CustomModal';
 
 const Header = ({ toggleSidebar }) => {
   const [isOpen, setIsOpen] = useState(false);
