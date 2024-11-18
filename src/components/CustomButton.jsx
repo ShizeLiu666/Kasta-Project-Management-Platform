@@ -116,7 +116,9 @@ const CustomButton = forwardRef(({
           {buttonIcon}
         </span>
       )}
-      <span style={contentStyle}>{isLoading ? 'Processing...' : children}</span>
+      <span style={contentStyle}>
+        {isLoading ? '...' : children}
+      </span>
     </Button>
   );
 });

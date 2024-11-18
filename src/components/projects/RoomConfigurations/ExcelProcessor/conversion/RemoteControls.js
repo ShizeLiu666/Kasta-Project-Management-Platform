@@ -1,6 +1,12 @@
 import { getDeviceNameToType } from './Devices';
 import { processRemoteParameters } from './RemoteParameters';
 
+const INPUT_MODULE_TYPES = ["5 Input Module", "6 Input Module"];
+const INPUT_MODULE_ACTIONS = {
+    'TOGGLE': 1,
+    'MOMENTARY': 0
+};
+
 function getRcIndex(deviceType, operation) {
     const upperOperation = operation ? operation.toUpperCase() : '';
 
@@ -71,6 +77,9 @@ export function processRemoteControls(remoteControlsContent, remoteParametersCon
     const remoteControlsData = [];
     let currentRemote = null;
     let currentLinks = [];
+    let isInputModule = false;
+    let deviceType = null;
+    let inputActions = null;
 
     remoteControlsContent.forEach(line => {
         line = line.trim();
@@ -80,18 +89,32 @@ export function processRemoteControls(remoteControlsContent, remoteParametersCon
         if (line.startsWith("NAME:")) {
             if (currentRemote) {
                 const parameterValues = {};
-                parameters.forEach((param, key) => {
-                    parameterValues[key.toLowerCase()] = param.value;
-                });
+                if (!isInputModule) {
+                    parameters.forEach((param, key) => {
+                        parameterValues[key.toLowerCase()] = param.value;
+                    });
+                }
                 
                 remoteControlsData.push({
                     remoteName: currentRemote,
                     links: currentLinks,
-                    parameters: parameterValues
+                    ...(isInputModule ? { 
+                        inputActions: inputActions 
+                    } : { 
+                        parameters: parameterValues 
+                    })
                 });
             }
             currentRemote = line.replace("NAME:", "").trim();
             currentLinks = [];
+            deviceType = getDeviceNameToType()[currentRemote];
+            isInputModule = INPUT_MODULE_TYPES.includes(deviceType);
+            
+            // 初始化 inputActions 数组，根据设备类型设置长度
+            if (isInputModule) {
+                const length = deviceType === "5 Input Module" ? 5 : 6;
+                inputActions = new Array(length).fill(INPUT_MODULE_ACTIONS.MOMENTARY);
+            }
         } else if (line.startsWith("LINK:")) {
             return;
         } else {
@@ -100,49 +123,73 @@ export function processRemoteControls(remoteControlsContent, remoteParametersCon
 
             const linkIndex = parseInt(parts[0].trim(), 10) - 1;
             let linkDescription = parts[1].trim();
-            let action = null;
+            let baseAction = null;
+
+            // 解析命令
+            if (linkDescription.includes(" + ")) {
+                // 处理 Input Module 的 TOGGLE/MOMENTARY
+                const [baseCommand, actionType] = linkDescription.split(" + ").map(s => s.trim());
+                linkDescription = baseCommand;
+                if (isInputModule && actionType.toUpperCase() === 'TOGGLE') {
+                    inputActions[linkIndex] = INPUT_MODULE_ACTIONS.TOGGLE;
+                }
+            }
 
             if (linkDescription.includes(" - ")) {
-                [linkDescription, action] = linkDescription.split(" - ");
-                action = action.trim();
+                [linkDescription, baseAction] = linkDescription.split(" - ");
+                baseAction = baseAction.trim();
             }
 
             let linkType = 0;
             let linkName = "";
-            let rc_index = 1; // 默认值为 1
+            let rc_index = 1;
 
             if (linkDescription.startsWith("SCENE")) {
-                linkType = 4; // 场景
+                linkType = 4;
                 linkName = linkDescription.replace("SCENE", "").trim();
-                rc_index = 0; // 场景控制
+                rc_index = 0;
             } else if (linkDescription.startsWith("GROUP")) {
-                linkType = 2; // 分组
+                linkType = 2;
                 linkName = linkDescription.replace("GROUP", "").trim();
-                rc_index = 32; // 分组控制
+                rc_index = 32;
             } else if (linkDescription.startsWith("DEVICE")) {
-                linkType = 1; // 设备
+                linkType = 1;
                 linkName = linkDescription.replace("DEVICE", "").trim();
                 const deviceType = getDeviceNameToType()[linkName];
-                rc_index = getRcIndex(deviceType, action);
+                rc_index = getRcIndex(deviceType, baseAction);
             }
 
             // 将 action 转换为大写
-            action = action ? action.toUpperCase() : null;
+            baseAction = baseAction ? baseAction.toUpperCase() : null;
 
-            currentLinks.push({ linkIndex, linkType, linkName, action, rc_index });
+            const linkData = {
+                linkIndex,
+                linkType,
+                linkName,
+                action: baseAction,
+                rc_index
+            };
+
+            currentLinks.push(linkData);
         }
     });
 
     if (currentRemote) {
         const parameterValues = {};
-        parameters.forEach((param, key) => {
-            parameterValues[key.toLowerCase()] = param.value;
-        });
+        if (!isInputModule) {
+            parameters.forEach((param, key) => {
+                parameterValues[key.toLowerCase()] = param.value;
+            });
+        }
         
         remoteControlsData.push({
             remoteName: currentRemote,
             links: currentLinks,
-            parameters: parameterValues
+            ...(isInputModule ? { 
+                inputActions: inputActions 
+            } : { 
+                parameters: parameterValues 
+            })
         });
     }
 

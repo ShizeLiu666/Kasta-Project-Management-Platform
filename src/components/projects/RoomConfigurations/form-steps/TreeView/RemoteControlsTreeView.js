@@ -123,6 +123,102 @@ const RemoteControlsTreeView = () => {
           </CustomTreeItem>
         </CustomTreeItem>
 
+        {/* Input Module */}
+        <CustomTreeItem itemId="input-module" label="Input Module (5/6 Input)">
+          {/* 基础设备绑定 */}
+          <CustomTreeItem itemId="input-basic" label="Basic Device Binding">
+            <CustomTreeItem
+              itemId="input-device-simple"
+              label="DEVICE <device_name>    (Default: MOMENTARY)"
+              copyText="DEVICE <device_name>"
+            />
+          </CustomTreeItem>
+
+          {/* 设备操作 */}
+          <CustomTreeItem itemId="input-device-operation" label="Device with Operation">
+            <CustomTreeItem
+              itemId="input-device-curtain"
+              label="Curtain Examples"
+            >
+              <CustomTreeItem
+                itemId="input-curtain-open"
+                label="DEVICE <device_name> - OPEN    (Default: MOMENTARY)"
+                copyText="DEVICE <device_name> - OPEN"
+              />
+              <CustomTreeItem
+                itemId="input-curtain-close"
+                label="DEVICE <device_name> - CLOSE    (Default: MOMENTARY)"
+                copyText="DEVICE <device_name> - CLOSE"
+              />
+            </CustomTreeItem>
+            
+            <CustomTreeItem
+              itemId="input-device-fan"
+              label="Fan Examples"
+            >
+              <CustomTreeItem
+                itemId="input-fan-fan"
+                label="DEVICE <device_name> - FAN    (Default: MOMENTARY)"
+                copyText="DEVICE <device_name> - FAN"
+              />
+              <CustomTreeItem
+                itemId="input-fan-lamp"
+                label="DEVICE <device_name> - LAMP    (Default: MOMENTARY)"
+                copyText="DEVICE <device_name> - LAMP"
+              />
+            </CustomTreeItem>
+          </CustomTreeItem>
+
+          {/* Input Action */}
+          <CustomTreeItem itemId="input-action" label="Device with Input Action">
+            <CustomTreeItem
+              itemId="input-toggle"
+              label="DEVICE <device_name> + TOGGLE"
+              copyText="DEVICE <device_name> + TOGGLE"
+            />
+            <CustomTreeItem
+              itemId="input-momentary"
+              label="DEVICE <device_name> + MOMENTARY    (Default)"
+              copyText="DEVICE <device_name> + MOMENTARY"
+            />
+          </CustomTreeItem>
+
+          {/* 组合操作 */}
+          <CustomTreeItem itemId="input-combined" label="Combined Operation and Input Action">
+            <CustomTreeItem
+              itemId="input-combined-curtain"
+              label="Curtain Examples"
+            >
+              <CustomTreeItem
+                itemId="input-curtain-open-toggle"
+                label="DEVICE <device_name> - OPEN + TOGGLE"
+                copyText="DEVICE <device_name> - OPEN + TOGGLE"
+              />
+              <CustomTreeItem
+                itemId="input-curtain-close-momentary"
+                label="DEVICE <device_name> - CLOSE + MOMENTARY"
+                copyText="DEVICE <device_name> - CLOSE + MOMENTARY"
+              />
+            </CustomTreeItem>
+            
+            <CustomTreeItem
+              itemId="input-combined-fan"
+              label="Fan Examples"
+            >
+              <CustomTreeItem
+                itemId="input-fan-fan-toggle"
+                label="DEVICE <device_name> - FAN + TOGGLE"
+                copyText="DEVICE <device_name> - FAN + TOGGLE"
+              />
+              <CustomTreeItem
+                itemId="input-fan-lamp-momentary"
+                label="DEVICE <device_name> - LAMP + MOMENTARY"
+                copyText="DEVICE <device_name> - LAMP + MOMENTARY"
+              />
+            </CustomTreeItem>
+          </CustomTreeItem>
+        </CustomTreeItem>
+
         {/* GROUP */}
         <CustomTreeItem itemId="group" label="Group">
           <CustomTreeItem

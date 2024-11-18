@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Spinner, Alert } from 'reactstrap';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
+import defaultAvatar from '../../../../assets/images/users/normal_user.jpg'; // 请确保有一个默认头像图片
 import ComponentCard from '../../../AuthCodeManagement/ComponentCard';
 import InviteMemberModal from './InviteMemberModal';
 import LeaveProjectModal from './LeaveProjectModal';
 import CustomButton from '../../../CustomButton';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import RemoveMemberModal from './RemoveMemberModal';
-// 导入新的 MemberTable 组件
-import MemberTable from '../../../MemberTable';
 
 const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
   const [members, setMembers] = useState([]);
@@ -20,7 +29,6 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
 
-  // fetchMembers 保持不变
   const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
@@ -31,6 +39,9 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      console.log('Project Members Response:', response.data);
+      console.log('Project Members Data:', response.data.data);
 
       if (response.data.success) {
         const sortedMembers = response.data.data.sort((a, b) => {
@@ -55,6 +66,32 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
+
+  // Status Text
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'ACCEPT':
+        return { 
+          color: '#4CAF50',
+          fontWeight: 450
+        };
+      case 'REJECT':
+        return { 
+          color: '#F44336',
+          fontWeight: 450
+        };
+      case 'WAITING':
+        return { 
+          color: '#FFC107',
+          fontWeight: 450
+        };
+      default:
+        return { 
+          color: '#000',
+          fontWeight: 450
+        };
+    }
+  };
 
   const cardTitle = (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
@@ -86,13 +123,28 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
   };
 
   const handleRemoveSuccess = () => {
-    fetchMembers();
+    fetchMembers();  // 重新获取成员列表
   };
 
-  // 处理移除成员的回调
-  const handleRemoveMember = (member) => {
-    setSelectedMember(member);
-    setRemoveModalOpen(true);
+  // Role Style
+  const getRoleStyle = (role) => {
+    switch (role) {
+      case 'OWNER':
+        return { 
+          color: '#fbcd0b',
+          fontWeight: 450
+        };
+      case 'VISITOR':
+        return { 
+          color: '#bdbdbd',
+          fontWeight: 450
+        };
+      default:
+        return { 
+          color: '#bdbdbd',
+          fontWeight: 450
+        };
+    }
   };
 
   return (
@@ -105,15 +157,178 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         ) : error ? (
           <Alert color="danger">{error}</Alert>
         ) : (
-          <MemberTable
-            members={members}
-            currentUserRole={userRole}
-            showActions={true}
-            onRemoveMember={handleRemoveMember}
-          />
+          <TableContainer 
+            component={Paper} 
+            sx={{ 
+              boxShadow: 'none',
+              border: '1px solid #dee2e6',
+              borderRadius: '8px',
+              width: '100%',  // 固定容器宽度
+              '& .MuiTable-root': {
+                tableLayout: 'fixed',  // 固定表格布局
+                width: '100%'
+              }
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell 
+                    sx={{ 
+                      width: '45%',  // 增加账户列宽度，因为现在包含了角色信息
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    Account
+                  </TableCell>
+                  <TableCell 
+                    sx={{ 
+                      width: '27.5%',
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Status
+                  </TableCell>
+                  {userRole === 'OWNER' && (
+                    <TableCell 
+                      sx={{ 
+                        width: '27.5%',
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      Actions
+                    </TableCell>
+                  )}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {members.map((member, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      '&:hover': { backgroundColor: '#f8f9fa' }
+                    }}
+                  >
+                    <TableCell sx={{ width: '57.5%' }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        overflow: 'hidden',
+                        maxWidth: '100%'
+                      }}>
+                        <Avatar
+                          src={member.headPic || defaultAvatar}
+                          sx={{ 
+                            width: 40,
+                            height: 40,
+                            flexShrink: 0
+                          }}
+                          imgProps={{
+                            onError: (e) => {
+                              e.target.onerror = null;
+                              e.target.src = defaultAvatar;
+                            }
+                          }}
+                        />
+                        <Box sx={{ 
+                          ml: 2,
+                          minWidth: 0,
+                          flex: 1
+                        }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            maxWidth: '100%'
+                          }}>
+                            <Typography 
+                              variant="subtitle2" 
+                              sx={{ 
+                                fontWeight: 600,
+                                fontSize: { xs: '0.875rem', sm: '1rem' },
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '60%'
+                              }}
+                            >
+                              {member.account || member.username}
+                            </Typography>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                ml: 1,
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                flexShrink: 0,
+                                ...getRoleStyle(member.role)
+                              }}
+                            >
+                              ({member.role})
+                            </Typography>
+                          </Box>
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{ 
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {member.nickname || member.nickName}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography 
+                        variant="body2" 
+                        sx={getStatusText(member.memberStatus)}
+                      >
+                        {member.memberStatus}
+                      </Typography>
+                    </TableCell>
+                    
+                    {userRole === 'OWNER' && (
+                      <TableCell>
+                        {member.role !== 'OWNER' && (
+                          <CustomButton
+                            type="remove"
+                            onClick={() => {
+                              setSelectedMember(member);
+                              setRemoveModalOpen(true);
+                            }}
+                            icon={<PersonRemoveIcon sx={{ fontSize: '16px' }} />}
+                            color="#f62d51"
+                            style={{
+                              minWidth: 'auto',
+                              height: '24px',
+                              padding: '0 8px',
+                              fontSize: '0.8125rem',
+                              fontWeight: 'normal',
+                              borderRadius: '4px',
+                              marginLeft: '0',
+                              marginRight: '0'
+                            }}
+                          >
+                            Remove
+                          </CustomButton>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </ComponentCard>
-
       <InviteMemberModal
         isOpen={inviteModalOpen}
         toggle={() => setInviteModalOpen(!inviteModalOpen)}

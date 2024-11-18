@@ -43,23 +43,23 @@ function processExcelToJson(fileContent) {
   return Object.keys(allTextData).length ? allTextData : null;
 }
 
-function splitJsonFile(content) {
-  const splitKeywords = {
-    devices: "KASTA DEVICE",
-    groups: "KASTA GROUP",
-    scenes: "KASTA SCENE",
-    remoteControls: "REMOTE CONTROL LINK",
-    outputs: "VIRTUAL DRY CONTACT",
-    remoteParameters: "REMOTE CONTROL PARAMETER"  // 添加新的关键字
-  };
+const splitKeywords = {
+  devices: ["KASTA DEVICE", "DEVICE"],
+  groups: ["KASTA GROUP", "GROUP"],
+  scenes: ["KASTA SCENE", "SCENE"],
+  remoteControls: ["REMOTE CONTROL LINK"],
+  outputs: ["OUTPUT MODULE"],
+  remoteParameters: ["REMOTE CONTROL PARAMETER"]
+};
 
+function splitJsonFile(content) {
   const splitData = { 
     devices: [], 
     groups: [], 
     scenes: [], 
     remoteControls: [],
     outputs: [],
-    remoteParameters: []  // 添加新的数组
+    remoteParameters: []
   };
   
   let currentKey = null;
@@ -67,11 +67,12 @@ function splitJsonFile(content) {
   content.forEach((line) => {
     line = line.trim();
 
-    if (Object.values(splitKeywords).includes(line)) {
-      currentKey = Object.keys(splitKeywords).find(
-        (key) => splitKeywords[key] === line
-      );
-      return;
+    // 修改关键字检查逻辑
+    for (const [key, keywords] of Object.entries(splitKeywords)) {
+      if (keywords.includes(line)) {
+        currentKey = key;
+        return;
+      }
     }
 
     if (currentKey) {
@@ -126,26 +127,26 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
           const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
           const sheetText = sheetData.flat().join(" ").toLowerCase();
           
-          const requiredKeyword = "kasta device";
+          const requiredKeywords = ["kasta device", "device"];
           const optionalKeywords = [
-            "kasta group", 
-            "kasta scene", 
-            "remote control link",
-            "virtual dry contact"  // 添加新的可选关键词
+            ["kasta group", "group"],
+            ["kasta scene", "scene"],
+            ["remote control link"],
+            ["virtual dry contact"]
           ];
           
-          if (!sheetText.includes(requiredKeyword)) {
+          if (!requiredKeywords.some(keyword => sheetText.includes(keyword))) {
             setFile(selectedFile);
             setIsValidFile(true);
             setHasProgrammingDetails(false);
-            setErrorMessage(`Excel file is missing the required keyword: KASTA DEVICE`);
+            setErrorMessage(`Excel file is missing the required keyword: KASTA DEVICE or DEVICE`);
             setFileContent(null);
           } else {
-            const presentOptionalKeywords = optionalKeywords.filter(keyword => 
-              sheetText.includes(keyword)
+            const hasOptionalKeyword = optionalKeywords.some(keywordGroup => 
+              keywordGroup.some(keyword => sheetText.includes(keyword))
             );
             
-            if (presentOptionalKeywords.length === 0) {
+            if (!hasOptionalKeyword) {
               setFile(selectedFile);
               setIsValidFile(true);
               setHasProgrammingDetails(false);
@@ -276,15 +277,14 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                 <span style={{ color: "red" }}>* </span>
                 The "Programming Details" sheet must include the following required keyword:
                 <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
-                  <li style={{ marginLeft: "20px" }}>KASTA DEVICE</li>
+                  <li style={{ marginLeft: "20px" }}>DEVICE</li>
                 </ul>
                 <span style={{ color: "red" }}>* </span>
                 And at least one of the following optional keywords:
                 <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
-                  <li style={{ marginLeft: "20px" }}>KASTA GROUP</li>
-                  <li style={{ marginLeft: "20px" }}>KASTA SCENE</li>
+                  <li style={{ marginLeft: "20px" }}>GROUP</li>
+                  <li style={{ marginLeft: "20px" }}>SCENE</li>
                   <li style={{ marginLeft: "20px" }}>REMOTE CONTROL LINK</li>
-                  <li style={{ marginLeft: "20px" }}>VIRTUAL DRY CONTACT</li>
                 </ul>
                 ( Please refer to the{" "}
                 <a

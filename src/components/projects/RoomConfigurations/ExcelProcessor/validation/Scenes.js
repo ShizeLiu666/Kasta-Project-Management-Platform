@@ -134,12 +134,26 @@ function validateFanTypeOperations(parts, errors, sceneName) {
   // 获取操作部分
   const operation = parts.slice(1).join(" ");
 
-  // 定义单风扇操作的合法模式
-  const singleFanPattern = /^[a-zA-Z0-9_]+ ON RELAY (ON|OFF)(?: SPEED \d+)?$/i;
+  // 定义单风扇操作的合法模式（修改正则表达式以限制速度范围）
+  const singleFanPattern = /^[a-zA-Z0-9_]+ ON RELAY (ON|OFF)(?: SPEED [1-3])?$/i;
   const singleFanOffPattern = /^[a-zA-Z0-9_]+ OFF RELAY OFF$/i;
 
   // 构建操作字符串
   const operationString = deviceName + " " + operation;
+
+  // 检查速度值是否在有效范围内
+  if (operation.toUpperCase().includes('SPEED')) {
+    const speedMatch = operation.match(/SPEED (\d+)/i);
+    if (speedMatch) {
+      const speedValue = parseInt(speedMatch[1]);
+      if (speedValue < 1 || speedValue > 3) {
+        errors.push(
+          `KASTA SCENE [${sceneName}]: Fan speed value must be between 1 and 3. Found: ${speedValue}`
+        );
+        return;
+      }
+    }
+  }
 
   // 检查操作字符串是否匹配合法模式
   if (
@@ -150,7 +164,7 @@ function validateFanTypeOperations(parts, errors, sceneName) {
       `KASTA SCENE [${sceneName}]: Fan Type operation '${operationString}' does not match any of the allowed formats. Accepted formats are:`,
       "- FAN_NAME ON RELAY ON (Single ON)",
       "- FAN_NAME OFF RELAY OFF (Single OFF)",
-      "- FAN_NAME ON RELAY ON SPEED X (Single ON with Speed, optional)"
+      "- FAN_NAME ON RELAY ON SPEED X (X must be 1-3)"
     ]);
   }
 }

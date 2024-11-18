@@ -8,30 +8,29 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
-import { validateVirtualContacts } from "../ExcelProcessor/validation/VirtualContacts";
+import { validateOutputModules } from "../ExcelProcessor/validation/OutputModules";
 import "./steps.scss";
-import VirtualContactsTreeView from './TreeView/VirtualContactsTreeView';
+import OutputModulesTreeView from './TreeView/OutputModulesTreeView';
 
-// 格式化错误消息
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
-    return errors.split('VIRTUAL DRY CONTACT')
+    return errors.split('OUTPUT MODULE')
       .filter(error => error.trim())
-      .map(error => 'VIRTUAL DRY CONTACT' + error.trim())
+      .map(error => 'OUTPUT MODULE' + error.trim())
       .sort();
   }
   return errors.sort();
 };
 
-const VirtualContacts = forwardRef(({
+const OutputModules = forwardRef(({
   splitData,
   deviceNameToType,
   registeredDeviceNames,
   onValidate
 }, ref) => {
-  const [virtualContactErrors, setVirtualContactErrors] = useState(null);
+  const [outputModuleErrors, setOutputModuleErrors] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [virtualContactData, setVirtualContactData] = useState({});
+  const [outputModuleData, setOutputModuleData] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const hasValidated = useRef(false);
@@ -41,28 +40,28 @@ const VirtualContacts = forwardRef(({
       return;
     }
 
-    const errors = validateVirtualContacts(splitData.outputs, deviceNameToType, registeredDeviceNames);
+    const errors = validateOutputModules(splitData.outputs, deviceNameToType, registeredDeviceNames);
 
     if (errors.length > 0) {
-      setVirtualContactErrors(formatErrors(errors));
+      setOutputModuleErrors(formatErrors(errors));
       setSuccess(false);
       onValidate(false, null);
     } else {
-      const virtualContactData = {};
-      let currentContact = null;
+      const outputModuleData = {};
+      let currentModule = null;
 
       splitData.outputs.forEach(line => {
         if (line.startsWith('NAME:')) {
-          currentContact = line.substring(5).trim();
-          virtualContactData[currentContact] = [];
-        } else if (currentContact && /^\d+:/.test(line)) {
-          virtualContactData[currentContact].push(line.trim());
+          currentModule = line.substring(5).trim();
+          outputModuleData[currentModule] = [];
+        } else if (currentModule && /^\d+:/.test(line)) {
+          outputModuleData[currentModule].push(line.trim());
         }
       });
 
-      setVirtualContactData(virtualContactData);
+      setOutputModuleData(outputModuleData);
       setSuccess(true);
-      onValidate(true, { virtualContactData });
+      onValidate(true, { outputModuleData });
     }
 
     hasValidated.current = true;
@@ -87,19 +86,19 @@ const VirtualContacts = forwardRef(({
   }));
 
   return (
-    <div className="step virtualContacts mt-5">
+    <div className="step outputModules mt-5">
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
-          {virtualContactErrors && (
+          {outputModuleErrors && (
             <Alert severity="error" style={{ marginTop: "10px" }}>
               <AlertTitle>Error</AlertTitle>
               <ul>
-                {virtualContactErrors.map((error, index) => (
+                {outputModuleErrors.map((error, index) => (
                   <li key={index}>{error}</li>
                 ))}
               </ul>
               <div style={{ marginTop: "10px" }}>
-                Please refer to the <strong>Supported Virtual Contact Formats</strong> below for the correct format.
+                Please refer to the <strong>Supported Output Module Formats</strong> below for the correct format.
               </div>
             </Alert>
           )}
@@ -107,36 +106,36 @@ const VirtualContacts = forwardRef(({
           {success && (
             <>
               <Alert severity="success" style={{ marginTop: "10px" }}>
-                <AlertTitle>The following virtual contacts have been identified:</AlertTitle>
+                <AlertTitle>The following output modules have been identified:</AlertTitle>
               </Alert>
 
               <TableContainer component={Paper} style={{ marginTop: "20px" }}>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell><strong>Virtual Contact Name</strong></TableCell>
+                      <TableCell><strong>Output Module Name</strong></TableCell>
                       <TableCell><strong>Channel</strong></TableCell>
-                      <TableCell><strong>Channel Name</strong></TableCell>
+                      <TableCell><strong>Output Name</strong></TableCell>
                       <TableCell><strong>Action</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(virtualContactData)
+                    {Object.entries(outputModuleData)
                       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map(([contactName, terminals]) => (
-                        terminals.map((terminal, index) => {
-                          const [terminalNumber, config] = terminal.split(':');
-                          const [terminalName, action] = config.trim().split(' - ');
+                      .map(([moduleName, channels]) => (
+                        channels.map((channel, index) => {
+                          const [channelNumber, config] = channel.split(':');
+                          const [outputName, action] = config.trim().split(' - ');
                           
                           return (
-                            <TableRow key={`${contactName}-${index}`}>
+                            <TableRow key={`${moduleName}-${index}`}>
                               {index === 0 && (
-                                <TableCell rowSpan={terminals.length}>
-                                  {contactName}
+                                <TableCell rowSpan={channels.length}>
+                                  {moduleName}
                                 </TableCell>
                               )}
-                              <TableCell>{terminalNumber}</TableCell>
-                              <TableCell>{terminalName.trim()}</TableCell>
+                              <TableCell>{channelNumber}</TableCell>
+                              <TableCell>{outputName.trim()}</TableCell>
                               <TableCell>{action ? action.trim() : 'NORMAL'}</TableCell>
                             </TableRow>
                           );
@@ -147,7 +146,7 @@ const VirtualContacts = forwardRef(({
 
                 <TablePagination
                   component="div"
-                  count={Object.keys(virtualContactData).length}  // 只计算 contact name 的数量
+                  count={Object.keys(outputModuleData).length}
                   page={page}
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
@@ -164,7 +163,7 @@ const VirtualContacts = forwardRef(({
           )}
 
           <div style={{ marginTop: "20px" }}>
-            <VirtualContactsTreeView />
+            <OutputModulesTreeView />
           </div>
         </div>
       </div>
@@ -172,4 +171,4 @@ const VirtualContacts = forwardRef(({
   );
 });
 
-export default VirtualContacts;
+export default OutputModules;

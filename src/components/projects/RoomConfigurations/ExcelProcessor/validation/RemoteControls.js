@@ -5,10 +5,13 @@ const deviceModelToKeyCount = {
     "4 Push Panel": 4,
     "5 Push Panel": 5,
     "6 Push Panel": 6,
-    "5 Input Module": 4,
-    "6 Input Module": 4,
+    "5 Input Module": 5,
+    "6 Input Module": 6,
     "4 Output Module": 4
 };
+
+const INPUT_MODULE_TYPES = ["5 Input Module", "6 Input Module"];
+const INPUT_MODULE_ACTIONS = ["TOGGLE", "MOMENTARY"];
 
 function checkNamePrefix(line, errors) {
     if (!line.startsWith("NAME:")) {
@@ -51,8 +54,8 @@ function getKeyCountFromDeviceName(deviceName, deviceNameToType) {
             const model = modelMatch[1];
             return deviceModelToKeyCount[model] || null;
         }
-    } else {
-        return deviceModelToKeyCount[deviceType] || null;
+    } else if (deviceType === "5 Input Module" || deviceType === "6 Input Module" || deviceType === "4 Output Module") {
+        return deviceModelToKeyCount[deviceType];
     }
 
     return null;
@@ -87,7 +90,9 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
 }
 
 function validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType) {
-    const deviceMatch = command.match(/^DEVICE\s+(\S+)(?:\s+-\s+(\S+))?$/);
+    const isInputModule = INPUT_MODULE_TYPES.includes(deviceNameToType[currentRemoteControlName]);
+    
+    const deviceMatch = command.match(/^DEVICE\s+(\S+)(?:\s+-\s+(\S+))?(?:\s+\+\s+(\S+))?$/);
     if (!deviceMatch) {
         errors.push(
             `KASTA REMOTE CONTROL: The DEVICE command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'DEVICE <device_name>' with an optional operation after ' - '.`
@@ -95,7 +100,8 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
         return false;
     }
 
-    const deviceName = deviceMatch[1];
+    const [, deviceName, operation, action] = deviceMatch;
+
     if (!registeredDeviceNames.has(deviceName)) {
         errors.push(
             `KASTA REMOTE CONTROL: The DEVICE name '${deviceName}' in '${currentRemoteControlName}' does not exist.`
@@ -111,7 +117,6 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
         return false;
     }
 
-    const operation = deviceMatch[2];
     if (operation) {
         if (deviceType.includes("Fan Type")) {
             if (!['FAN', 'LAMP', 'WHOLE'].includes(operation.toUpperCase())) {
@@ -134,55 +139,58 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
                 );
                 return false;
             }
-        } else if (deviceType === "4 Output Module") {
-            if (!['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'WHOLE'].includes(operation.toUpperCase())) {
-                errors.push(
-                    `KASTA REMOTE CONTROL: The operation '${operation}' for 4 Output Module device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'FIRST', 'SECOND', 'THIRD', 'FOURTH', or 'WHOLE'.`
-                );
-                return false;
-            }
-        } else if (!['ON', 'OFF'].includes(operation.toUpperCase())) {
+        }
+    }
+
+    if (isInputModule) {
+        if (action && !INPUT_MODULE_ACTIONS.includes(action.toUpperCase())) {
             errors.push(
-                `KASTA REMOTE CONTROL: The operation '${operation}' for device '${deviceName}' in '${currentRemoteControlName}' is invalid. Expected 'ON' or 'OFF'.`
+                `KASTA REMOTE CONTROL: The action '${action}' for Input Module in '${currentRemoteControlName}' is invalid. Expected 'TOGGLE' or 'MOMENTARY'.`
             );
             return false;
         }
+    } else if (action) {
+        errors.push(
+            `KASTA REMOTE CONTROL: Additional actions are only supported for Input Modules.`
+        );
+        return false;
     }
 
     return true;
 }
 
-function validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames) {
-    const groupMatch = command.match(/^GROUP\s+(.+?)(?:\s+-\s+(.+))?$/);
+function validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames, deviceNameToType) {
+    const isInputModule = INPUT_MODULE_TYPES.includes(deviceNameToType[currentRemoteControlName]);
+    
+    const groupMatch = command.match(/^GROUP\s+(.+?)(?:\s+\+\s+(\S+))?$/);
     if (!groupMatch) {
         errors.push(
-            `KASTA REMOTE CONTROL: The GROUP command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'GROUP <group_name>' or 'GROUP <group_name> - <action>'.`
+            `KASTA REMOTE CONTROL: The GROUP command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'GROUP <group_name>' with optional ' + <action>'.`
         );
         return false;
     }
 
-    const fullGroupName = groupMatch[1].trim();
-    const operation = groupMatch[2];
+    const [, groupName, action] = groupMatch;
 
-    let groupNameToCheck;
-    if (operation) {
-        // If there's an operation, we check the group name before the '-'
-        groupNameToCheck = fullGroupName;
-    } else {
-        // If there's no operation, we check the entire string after 'GROUP'
-        groupNameToCheck = fullGroupName;
-    }
-
-    if (!registeredGroupNames.has(groupNameToCheck)) {
+    if (!registeredGroupNames.has(groupName.trim())) {
         errors.push(
-            `KASTA REMOTE CONTROL: The GROUP name '${groupNameToCheck}' in '${currentRemoteControlName}' does not exist.`
+            `KASTA REMOTE CONTROL: The GROUP name '${groupName}' in '${currentRemoteControlName}' does not exist.`
         );
         return false;
     }
 
-    if (operation) {
-        // TODO: 在这里添加对组操作的验证（如果将来需要的话）
-        // console.log(`Group operation: ${operation} for group ${groupNameToCheck}`);
+    if (isInputModule) {
+        if (action && !INPUT_MODULE_ACTIONS.includes(action.toUpperCase())) {
+            errors.push(
+                `KASTA REMOTE CONTROL: The action '${action}' for Input Module in '${currentRemoteControlName}' is invalid. Expected 'TOGGLE' or 'MOMENTARY'.`
+            );
+            return false;
+        }
+    } else if (action) {
+        errors.push(
+            `KASTA REMOTE CONTROL: Additional actions are only supported for Input Modules. Found '${action}' in '${currentRemoteControlName}'.`
+        );
+        return false;
     }
 
     return true;
@@ -276,7 +284,7 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
                 deviceType !== "4 Output Module"
             ) {
                 errors.push(
-                    `KASTA REMOTE CONTROL: The device '${currentRemoteControlName}' is of type '${deviceType}', which is not supported. Only 'Remote Control', '5 Input Module', '6 Input Module', and '4 Output Module' types are allowed.`
+                    `KASTA REMOTE CONTROL: The device '${currentRemoteControlName}' is of type '${deviceType}', which is not supported. Only Remote Control types, 5 Input Module, 6 Input Module are allowed.`
                 );
                 currentRemoteControlName = null;
                 return;
@@ -299,7 +307,7 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
             if (command.startsWith("DEVICE")) {
                 validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType);
             } else if (command.startsWith("GROUP")) {
-                validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames);
+                validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames, deviceNameToType);
             } else if (command.startsWith("SCENE")) {
                 validateSceneCommand(command, errors, currentRemoteControlName, registeredSceneNames);
             }
