@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import axiosInstance from '../../../config';
 import { getToken } from '../../auth';
-import CustomModal from '../../CustomModal';
+import CustomModal from '../../CustomComponents/CustomModal';
 
 const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess, project }) => {
   const [file, setFile] = useState(null);
@@ -48,7 +48,7 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess, pro
             setSuccessAlert('');
             toggle();
             onUploadSuccess({...updateResponse.data.data, role: project.role});
-          }, 2000);
+          }, 1000);
         } else {
           setError(updateResponse.data.errorMsg || 'Failed to update project background.');
         }

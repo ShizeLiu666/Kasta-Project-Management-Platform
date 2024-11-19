@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardBody, CardSubtitle, Badge, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import DeleteIcon from '@mui/icons-material/DeleteForever';
@@ -18,14 +18,38 @@ const ProjectCard = ({
   onInviteMember,
   setMenuOpen,
   userRole,
+  currentMembers = []
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDropdownHovered, setIsDropdownHovered] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState(userRole);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  // 创建一个 ref 来引用下拉菜单容器
+  const menuContainerRef = useRef(null);
 
   useEffect(() => {
     setCurrentUserRole(userRole);
   }, [userRole]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // 检查点击是否在菜单容器外部
+      if (menuContainerRef.current && !menuContainerRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+        setMenuOpen(false);
+      }
+    };
+
+    // 只在菜单打开时添加事件监听
+    if (isDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isDropdownOpen, setMenuOpen]);
 
   const imageUrl = project.iconUrl || default_image;
 
@@ -46,10 +70,12 @@ const ProjectCard = ({
 
   const handleMenuClick = (event) => {
     event.stopPropagation();
+    setIsDropdownOpen(true);
     setMenuOpen(true);
   };
 
   const handleClose = () => {
+    setIsDropdownOpen(false);
     setMenuOpen(false);
   };
 
@@ -136,49 +162,70 @@ const ProjectCard = ({
           <h6 style={titleStyle}>{project.name}</h6>
           {getRoleBadge(currentUserRole)}
         </div>
-        <UncontrolledDropdown>
-          <DropdownToggle 
-            tag="span" 
-            onClick={handleMenuClick}
-            onMouseEnter={() => setIsDropdownHovered(true)}
-            onMouseLeave={() => setIsDropdownHovered(false)}
-            style={{
-              cursor: 'pointer',
-              padding: '8px 8px 14px 8px',
-              borderRadius: '75%',
-              backgroundColor: isDropdownHovered ? '#f1f1f1' : 'transparent',
-              transition: 'background-color 0.3s'
-            }}
-          >
-            <MoreHorizIcon style={{ fontSize: '30px', marginTop: '3px' }} />
-          </DropdownToggle>
-          <DropdownMenu end>
-            {currentUserRole === 'OWNER' ? [
-              <DropdownItem key="invite" onClick={handleInviteMember}>
-                <SendIcon fontSize="small" style={{marginRight:"8px", color: "#4CAF50"}}/>
-                Invite Member
-              </DropdownItem>,
-              <DropdownItem key="edit" onClick={handleEdit}>
-                <EditIcon style={{marginRight:"8px", color: "#007bff"}}/>
-                Edit
-              </DropdownItem>,
-              <DropdownItem key="change" onClick={handleChangeBackground}>
-                <WallpaperIcon fontSize="small" style={{marginRight:"8px", color: "grey"}}/>
-                Change Image
-              </DropdownItem>,
-              <DropdownItem key="remove" onClick={handleRemove}>
-                <DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>
-                Remove
-              </DropdownItem>
-            ] : null}
-            {currentUserRole === 'VISITOR' && (
-              <DropdownItem key="leave" onClick={handleLeaveProject}>
-                <LogoutIcon fontSize="small" style={{marginRight:"8px", color: "#dc3545"}}/>
-                Leave Project
-              </DropdownItem>
-            )}
-          </DropdownMenu>
-        </UncontrolledDropdown>
+        <div ref={menuContainerRef}>
+          <UncontrolledDropdown>
+            <DropdownToggle 
+              tag="span" 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMenuClick(e);
+              }}
+              onMouseEnter={() => setIsDropdownHovered(true)}
+              onMouseLeave={() => setIsDropdownHovered(false)}
+              style={{
+                cursor: 'pointer',
+                padding: '8px 8px 14px 8px',
+                borderRadius: '75%',
+                backgroundColor: isDropdownHovered ? '#f1f1f1' : 'transparent',
+                transition: 'background-color 0.3s'
+              }}
+            >
+              <MoreHorizIcon style={{ fontSize: '30px', marginTop: '3px' }} />
+            </DropdownToggle>
+            <DropdownMenu 
+              end 
+              onClick={(e) => e.stopPropagation()}
+              onMouseLeave={handleClose}
+            >
+              {currentUserRole === 'OWNER' ? [
+                <DropdownItem 
+                  key="invite" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleInviteMember();
+                  }}
+                >
+                  <SendIcon fontSize="small" style={{marginRight:"8px", color: "#4CAF50"}}/>
+                  Invite Member
+                </DropdownItem>,
+                <DropdownItem key="edit" onClick={handleEdit}>
+                  <EditIcon style={{marginRight:"8px", color: "#007bff"}}/>
+                  Edit
+                </DropdownItem>,
+                <DropdownItem key="change" onClick={handleChangeBackground}>
+                  <WallpaperIcon fontSize="small" style={{marginRight:"8px", color: "grey"}}/>
+                  Change Image
+                </DropdownItem>,
+                <DropdownItem key="remove" onClick={handleRemove}>
+                  <DeleteIcon style={{marginRight:"8px", color: "#F44336"}}/>
+                  Remove
+                </DropdownItem>
+              ] : null}
+              {currentUserRole === 'VISITOR' && (
+                <DropdownItem 
+                  key="leave" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLeaveProject();
+                  }}
+                >
+                  <LogoutIcon fontSize="small" style={{marginRight:"8px", color: "#dc3545"}}/>
+                  Leave Project
+                </DropdownItem>
+              )}
+            </DropdownMenu>
+          </UncontrolledDropdown>
+        </div>
       </div>
 
       <div

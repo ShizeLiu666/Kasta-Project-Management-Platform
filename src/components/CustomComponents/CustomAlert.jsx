@@ -2,7 +2,7 @@ import React from 'react';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 
-const CustomAlert = ({ isOpen, onClose, message, severity, autoHideDuration = 2500 }) => {
+const CustomAlert = ({ isOpen, onClose, message, severity, autoHideDuration = 1000 }) => {
   return (
     <Snackbar
       open={isOpen}

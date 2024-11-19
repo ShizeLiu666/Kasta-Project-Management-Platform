@@ -19,9 +19,9 @@ import {
 } from './ConfigTables';
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config';
-import CustomAlert from '../../CustomAlert';
-import ComponentCard from '../../AuthCodeManagement/ComponentCard';
-import CustomButton from '../../CustomButton';
+import CustomAlert from '../../CustomComponents/CustomAlert';
+import ComponentCard from '../../CustomComponents/ComponentCard';
+import CustomButton from '../../CustomComponents/CustomButton';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import UpdateAuthCodeModal from './UpdateAuthCodeModal';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -130,14 +130,14 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   }, [projectRoomId, fetchRoomDetail]);
 
   useEffect(() => {
-    if (roomDetails && roomDetails.count === 9) {
+    if (roomDetails && roomDetails.count === 9 && userRole === 'OWNER') {
       showAlert(
         "You have only one use remaining. Please prepare to update your authorization code.",
         "warning",
         null  // 设置为 null 使得警告不会自动消失
       );
     }
-  }, [roomDetails]);
+  }, [roomDetails, userRole]);
 
   // useEffect(() => {
   //   if (config) {
@@ -244,7 +244,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                       {roomTypeName}
                     </span>
                   </Box>
-                  {roomDetails && (
+                  {roomDetails && userRole === 'OWNER' && (
                     <Box display="flex" alignItems="center" style={{ marginTop: '5px' }}>
                       <span style={{ fontSize: '14px', color: '#666' }}>
                         Authorization Code: {roomDetails.authorizationCode} | Remaining Uses: {10 - roomDetails.count}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table } from 'reactstrap';
-import ComponentCard from '../../AuthCodeManagement/ComponentCard';
+import ComponentCard from '../../CustomComponents/ComponentCard';
 import { getDeviceNameToType } from './ExcelProcessor/conversion/Devices';
 
 // eslint-disable-next-line no-unused-vars

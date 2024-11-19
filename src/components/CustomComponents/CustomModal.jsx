@@ -27,13 +27,60 @@ const CustomModal = ({
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [showErrorAlert, setShowErrorAlert] = useState(false);
+    const [currentError, setCurrentError] = useState('');
+    const [currentSuccess, setCurrentSuccess] = useState('');
+
+    const clearAlerts = () => {
+        setShowSuccessAlert(false);
+        setShowErrorAlert(false);
+        setCurrentError('');
+        setCurrentSuccess('');
+    };
 
     useEffect(() => {
         if (!isOpen) {
-            setShowSuccessAlert(false);
-            setShowErrorAlert(false);
+            clearAlerts();
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (isOpen) {
+            if (error) {
+                setShowErrorAlert(true);
+                setCurrentError(error);
+                const timer = setTimeout(() => {
+                    setShowErrorAlert(false);
+                    setCurrentError('');
+                }, 1000);
+                return () => clearTimeout(timer);
+            } else {
+                setShowErrorAlert(false);
+                setCurrentError('');
+            }
+        }
+    }, [error, isOpen]);
+
+    useEffect(() => {
+        if (isOpen) {
+            if (successAlert) {
+                setShowSuccessAlert(true);
+                setCurrentSuccess(successAlert);
+                const timer = setTimeout(() => {
+                    setShowSuccessAlert(false);
+                    setCurrentSuccess('');
+                }, 1000);
+                return () => clearTimeout(timer);
+            } else {
+                setShowSuccessAlert(false);
+                setCurrentSuccess('');
+            }
+        }
+    }, [successAlert, isOpen]);
+
+    const handleToggle = () => {
+        clearAlerts();
+        toggle();
+    };
 
     useEffect(() => {
         const handleKeyPress = (event) => {
@@ -52,35 +99,6 @@ const CustomModal = ({
         };
     }, [isOpen, onSubmit, disabled, isSubmitting]);
 
-    const handleToggle = () => {
-        setShowSuccessAlert(false);
-        setShowErrorAlert(false);
-        toggle();
-    };
-
-    useEffect(() => {
-        if (isOpen) {
-            setShowSuccessAlert(false);
-            setShowErrorAlert(false);
-        }
-    }, [isOpen]);
-
-    useEffect(() => {
-        setShowSuccessAlert(!!successAlert);
-    }, [successAlert]);
-
-    useEffect(() => {
-        setShowErrorAlert(!!error);
-    }, [error]);
-
-    const handleCloseSuccessAlert = () => {
-        setShowSuccessAlert(false);
-    };
-
-    const handleCloseErrorAlert = () => {
-        setShowErrorAlert(false);
-    };
-
     return (
         <>
             <Modal 
@@ -88,6 +106,7 @@ const CustomModal = ({
                 toggle={handleToggle}
                 centered
                 scrollable
+                onClosed={clearAlerts}
             >
                 <ModalHeader toggle={handleToggle}>{title}</ModalHeader>
                 <ModalBody>
@@ -113,18 +132,18 @@ const CustomModal = ({
                 </ModalFooter>
             </Modal>
             <CustomAlert
-                isOpen={showSuccessAlert}
-                onClose={handleCloseSuccessAlert}
-                message={successAlert}
-                severity="success"
-                autoHideDuration={3000}
+                isOpen={showErrorAlert && isOpen}
+                onClose={() => setShowErrorAlert(false)}
+                message={currentError}
+                severity="error"
+                autoHideDuration={1000}
             />
             <CustomAlert
-                isOpen={showErrorAlert}
-                onClose={handleCloseErrorAlert}
-                message={error}
-                severity="error"
-                autoHideDuration={3000}
+                isOpen={showSuccessAlert && isOpen}
+                onClose={() => setShowSuccessAlert(false)}
+                message={currentSuccess}
+                severity="success"
+                autoHideDuration={1000}
             />
         </>
     );

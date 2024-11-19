@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getToken } from '../auth';
 import axiosInstance from '../../config'; 
-import CustomModal from '../CustomModal';
+import CustomModal from '../CustomComponents/CustomModal';
 
 const EditAuthCodeModal = ({ isOpen, toggle, authCode, onEditAuthCode }) => {
   const [error, setError] = useState("");

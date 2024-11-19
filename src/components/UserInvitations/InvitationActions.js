@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../config';
 import { getToken } from '../auth';
-import CustomButton from '../CustomButton';
+import CustomButton from '../CustomComponents/CustomButton';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';
 
-export const handleInvitationAction = async (projectId, action, onActionComplete) => {
+export const handleInvitationAction = async (projectId, projectName, action, onActionComplete) => {
   try {
     const token = getToken();
     const response = await axiosInstance.post(
@@ -20,17 +20,17 @@ export const handleInvitationAction = async (projectId, action, onActionComplete
     );
 
     if (response.data.success) {
-      console.log(`${action.charAt(0).toUpperCase() + action.slice(1)}ed invitation for project ${projectId}`);
-      onActionComplete(action, projectId);
+      console.log(`${action.charAt(0).toUpperCase() + action.slice(1)}ed invitation for project: ${projectName}`);
+      onActionComplete(action, projectId, null, projectName);
       return true;
     } else {
-      console.error(`Failed to ${action} invitation:`, response.data.errorMsg);
-      onActionComplete(action, projectId, response.data.errorMsg);
+      console.error(`Failed to ${action} invitation for ${projectName}:`, response.data.errorMsg);
+      onActionComplete(action, projectId, response.data.errorMsg, projectName);
       return false;
     }
   } catch (err) {
-    console.error(`Error ${action}ing invitation:`, err);
-    onActionComplete(action, projectId, err.message);
+    console.error(`Error ${action}ing invitation for ${projectName}:`, err);
+    onActionComplete(action, projectId, err.message, projectName);
     return false;
   }
 };
@@ -67,17 +67,17 @@ export const handleBulkInvitationAction = async (action, onActionComplete, onSuc
   }
 };
 
-const InvitationActions = ({ projectId, onActionComplete }) => {
+const InvitationActions = ({ projectId, projectName, onActionComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAction = async (action) => {
     if (isProcessing) return;
     
     setIsProcessing(true);
-    await handleInvitationAction(projectId, action, onActionComplete);
+    await handleInvitationAction(projectId, projectName, action, onActionComplete);
     setTimeout(() => {
       setIsProcessing(false);
-    }, 500);
+    }, 1000);
   };
 
   const buttonStyle = {

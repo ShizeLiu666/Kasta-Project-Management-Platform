@@ -10,12 +10,14 @@ import {
   Paper,
   Box,
   Typography,
-  Stack
+  Stack,
+  IconButton
 } from '@mui/material';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DangerousIcon from '@mui/icons-material/Dangerous';
+import CloseIcon from '@mui/icons-material/Close';
 import InvitationActions from './InvitationActions';
-import CustomButton from '../CustomButton';
+import CustomButton from '../CustomComponents/CustomButton';
 import { handleBulkInvitationAction } from './InvitationActions';
 
 const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
@@ -36,7 +38,7 @@ const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
     } finally {
       setTimeout(() => {
         setIsProcessing(false);
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -53,36 +55,52 @@ const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
             Your Invitations
           </Typography>
           
-          {invitations.length > 0 && (
-            <Stack direction="row" spacing={1}>
-              <CustomButton
-                type="invite"
-                onClick={() => handleBulkAction('accept')}
-                disabled={isProcessing}
-                icon={<DoneAllIcon sx={{ fontSize: '16px' }} />}
-                style={{
-                  minWidth: '140px',
-                  height: '32px',
-                  fontSize: '0.875rem'
-                }}
-              >
-                Accept All
-              </CustomButton>
-              <CustomButton
-                type="remove"
-                onClick={() => handleBulkAction('reject')}
-                disabled={isProcessing}
-                icon={<DangerousIcon sx={{ fontSize: '16px' }} />}
-                style={{
-                  minWidth: '140px',
-                  height: '32px',
-                  fontSize: '0.875rem'
-                }}
-              >
-                Reject All
-              </CustomButton>
-            </Stack>
-          )}
+          <Stack direction="row" spacing={1} alignItems="center">
+            {invitations.length > 0 && (
+              <>
+                <CustomButton
+                  color="#4CAF50"
+                  onClick={() => handleBulkAction('accept')}
+                  disabled={isProcessing}
+                  icon={<DoneAllIcon sx={{ fontSize: '16px' }} />}
+                  style={{
+                    minWidth: '140px',
+                    height: '32px',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  Accept All
+                </CustomButton>
+                <CustomButton
+                  color="#F44336"
+                  onClick={() => handleBulkAction('reject')}
+                  disabled={isProcessing}
+                  icon={<DangerousIcon sx={{ fontSize: '16px' }} />}
+                  style={{
+                    minWidth: '140px',
+                    height: '32px',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  Reject All
+                </CustomButton>
+              </>
+            )}
+            <IconButton
+              onClick={toggle}
+              sx={{
+                padding: '8px',
+                color: '#6c757d',
+                '&:hover': {
+                  backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                },
+                marginLeft: invitations.length === 0 ? 'auto' : '8px'
+              }}
+              size="small"
+            >
+              <CloseIcon sx={{ fontSize: '20px' }} />
+            </IconButton>
+          </Stack>
         </Box>
         
         {invitations.length === 0 ? (

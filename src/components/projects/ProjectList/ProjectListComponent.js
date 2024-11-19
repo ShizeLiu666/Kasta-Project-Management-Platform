@@ -9,12 +9,12 @@ import DeleteProjectModal from "./DeleteProjectModal";
 import EditProjectModal from './EditProjectModal';
 import { getToken } from '../../auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
-import CustomAlert from '../../CustomAlert';
+import CustomAlert from '../../CustomComponents/CustomAlert';
 import InvitationModal from '../../UserInvitations/InvitationModal';
-import CustomButton from '../../CustomButton';
+import CustomButton from '../../CustomComponents/CustomButton';
 import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
 import InviteMemberModal from '../ProjectDetails/ProjectMembers/InviteMemberModal';
-import CustomSearchBar from "../../CustomSearchBar";
+import CustomSearchBar from "../../CustomComponents/CustomSearchBar";
 import Badge from '@mui/material/Badge';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import IconButton from '@mui/material/IconButton';
@@ -27,7 +27,7 @@ const ProjectListComponent = () => {
     isOpen: false,
     message: "",
     severity: "info",
-    duration: 2000
+    duration: 1000
   });
   const [breadcrumbPath, setBreadcrumbPath] = useState(["Project List"]);
   const [showRoomTypes, setShowRoomTypes] = useState(false);
@@ -149,7 +149,7 @@ const ProjectListComponent = () => {
         ? `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} invitation for project ${projectId}`
         : `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} all invitations`,
       severity: "success",
-      duration: 2000
+      duration: 1000
     });
   };
 
@@ -166,7 +166,7 @@ const ProjectListComponent = () => {
       isOpen: true,
       message: 'Successfully left the project',
       severity: 'success',
-      duration: 2000
+      duration: 1000
     });
   };
 
@@ -406,7 +406,7 @@ const ProjectListComponent = () => {
               isOpen: true,
               message: response?.errorMsg || 'Failed to leave the project',
               severity: 'error',
-              duration: 2000
+              duration: 1000
             });
           }
         }}
@@ -415,15 +415,15 @@ const ProjectListComponent = () => {
       <InviteMemberModal
         isOpen={inviteMemberModalOpen}
         toggle={() => setInviteMemberModalOpen(false)}
-        projectId={selectedProjectForInvite?.projectId}  // 使用 projectId 而不是 id
+        projectId={selectedProjectForInvite?.projectId}
         onMemberInvited={(response) => {
-          // console.log('Invite Member Response:', response);
           if (response.success) {
             fetchProjectList();
           } else {
             console.error('Error inviting member:', response.errorMsg);
           }
         }}
+        currentMembers={selectedProjectForInvite?.members || []}
       />
     </div>
   );

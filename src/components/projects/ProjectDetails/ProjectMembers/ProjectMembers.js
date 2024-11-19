@@ -13,10 +13,10 @@ import Typography from '@mui/material/Typography';
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
 import defaultAvatar from '../../../../assets/images/users/normal_user.jpg'; // 请确保有一个默认头像图片
-import ComponentCard from '../../../AuthCodeManagement/ComponentCard';
+import ComponentCard from '../../../CustomComponents/ComponentCard';
 import InviteMemberModal from './InviteMemberModal';
 import LeaveProjectModal from './LeaveProjectModal';
-import CustomButton from '../../../CustomButton';
+import CustomButton from '../../../CustomComponents/CustomButton';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import RemoveMemberModal from './RemoveMemberModal';
 
@@ -334,6 +334,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         toggle={() => setInviteModalOpen(!inviteModalOpen)}
         projectId={projectId}
         onMemberInvited={fetchMembers}
+        currentMembers={members}
       />
       <LeaveProjectModal
         isOpen={leaveModalOpen}

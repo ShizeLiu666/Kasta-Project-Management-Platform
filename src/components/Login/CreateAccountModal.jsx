@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import "./CreateAccountModal.css";
 import CountryCodeSelect from "./CountryCodeSelect";
 import axiosInstance from '../../config';
-import CustomAlert from '../CustomAlert';
+import CustomAlert from '../CustomComponents/CustomAlert';
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import EngineeringIcon from '@mui/icons-material/Engineering';

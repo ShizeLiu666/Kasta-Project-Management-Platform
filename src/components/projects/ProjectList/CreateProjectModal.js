@@ -2,25 +2,28 @@ import React, { useState, useEffect } from "react";
 import { Form, FormGroup, Label, Input } from "reactstrap";
 import axiosInstance from '../../../config'; 
 import { getToken } from '../../auth';
-import CustomModal from '../../CustomModal';
+import CustomModal from '../../CustomComponents/CustomModal';
 
 const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
     des: "",
-    // password: ""  // 注释掉密码字段
   });
   const [error, setError] = useState("");
   const [successAlert, setSuccessAlert] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const resetState = () => {
+    setFormData({ name: "", address: "", des: "" });
+    setError("");
+    setSuccessAlert("");
+    setIsSubmitting(false);
+  };
+
   useEffect(() => {
     if (isOpen) {
-      setFormData({ name: "", address: "", des: "" });
-      setError("");
-      setSuccessAlert("");
-      setIsSubmitting(false);
+      resetState();
     }
   }, [isOpen]);
 
@@ -62,8 +65,9 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
         setSuccessAlert("Project created successfully!");
         fetchProjects();
         setTimeout(() => {
+          resetState();
           toggle();
-        }, 2000);
+        }, 1000);
       } else {
         setError(response.data.errorMsg || "Error creating project.");
       }
@@ -101,21 +105,6 @@ const CreateProjectModal = ({ isOpen, toggle, fetchProjects }) => {
             required
           />
         </FormGroup>
-        {/* 注释掉密码字段
-        <FormGroup>
-          <Label for="password">
-            <span style={{ color: "red" }}>*</span> Password:
-          </Label>
-          <Input
-            type="password"
-            name="password"
-            id="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
-        */}
         <FormGroup>
           <Label for="address">
             <span style={{ color: "red" }}>*</span> Address:

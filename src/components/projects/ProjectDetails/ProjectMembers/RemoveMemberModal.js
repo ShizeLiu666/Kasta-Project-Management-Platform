@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
-import CustomModal from '../../../CustomModal';
+import CustomModal from '../../../CustomComponents/CustomModal';
 
 const RemoveMemberModal = ({ isOpen, toggle, member, projectId, onMemberRemoved }) => {
     const [error, setError] = useState("");
