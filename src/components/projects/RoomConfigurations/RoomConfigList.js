@@ -10,13 +10,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteRoomConfigModal from "./DeleteRoomConfigModal";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import Steps from "./form-steps/Steps";
-import {
-  renderDevicesTable,
-  renderGroupsTable,
-  renderOutputModulesTable,
-  renderRemoteControlsTable,
-  renderScenesTable
-} from './ConfigTables';
+import { renderConfigTables } from './ConfigTables';
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config';
 import CustomAlert from '../../CustomComponents/CustomAlert';
@@ -341,17 +335,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
             ) : (
               <>
                 {config && config !== "{}" && (
-                  <>
-                    {config.devices && (
-                      <div>
-                        {renderDevicesTable(processDevices(config.devices))}
-                      </div>
-                    )}
-                    {config.groups && renderGroupsTable(config.groups)}
-                    {config.scenes && renderScenesTable(config.scenes)}
-                    {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
-                    {config.outputs && renderOutputModulesTable(config.outputs)}
-                  </>
+                  renderConfigTables(config)
                 )}
               </>
             )}

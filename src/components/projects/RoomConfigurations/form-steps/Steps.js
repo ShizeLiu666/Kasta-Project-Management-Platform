@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import InitialStep from "./InitialStep";
 import Devices from "./Devices";          
-import OutputModules from "./OutputModules";  
+import ModuleConfigurations from "./ModuleConfigurations";
 import Groups from "./Groups";           
 import Scenes from "./Scenes";           
 import RemoteControls from "./RemoteControls";   
@@ -129,8 +129,8 @@ const Steps = ({ projectRoomId, submitJson }) => {
       /> 
     },
     { 
-      name: "Output Modules", 
-      component: <OutputModules 
+      name: "Module Configurations", 
+      component: <ModuleConfigurations 
         ref={outputModulesRef}
         splitData={splitData}
         deviceNameToType={deviceData}

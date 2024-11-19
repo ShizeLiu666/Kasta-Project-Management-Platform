@@ -2,6 +2,7 @@ import React from 'react';
 import { Table } from 'reactstrap';
 import ComponentCard from '../../CustomComponents/ComponentCard';
 import { getDeviceNameToType } from './ExcelProcessor/conversion/Devices';
+import DeviceTable from './ConfigTables/DeviceTable';
 
 // eslint-disable-next-line no-unused-vars
 const captionStyle = {
@@ -82,6 +83,12 @@ const cardHeaderStyle = {
 // 添加 Input Module 相关常量
 const INPUT_MODULE_TYPES = ["5 Input Module", "6 Input Module"];
 const INPUT_ACTION_DISPLAY = {
+  0: 'MOMENTARY',
+  1: 'TOGGLE'
+};
+
+// 添加 Input Module 相关常量
+const INPUT_ACTION_MAPPING = {
   0: 'MOMENTARY',
   1: 'TOGGLE'
 };
@@ -251,64 +258,36 @@ const PARAMETER_DISPLAY = {
 };
 
 // 修改远程控制表格渲染函数
-export const renderRemoteControlsTable = (remoteControls) => (
-  <div>
-    <div className="component-card-title">Remote Controls</div>
+export const renderRemoteControlsTable = (remoteControls) => {
+  if (!remoteControls || !Array.isArray(remoteControls) || remoteControls.length === 0) {
+    return null;
+  }
 
-    {remoteControls.map((remote, index) => {
-      const deviceType = getDeviceNameToType()[remote.remoteName];
-      const isInputModule = INPUT_MODULE_TYPES.includes(deviceType);
-      const channelCount = isInputModule ? 
-        (deviceType === "5 Input Module" ? 5 : 6) : 0;
-
-      return (
-        <ComponentCard key={index} title={remote.remoteName} style={componentCardStyle}>
-          <Table borderless responsive style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={{ ...headerCellStyle, width: '10%', textAlign: 'center' }}>
-                  {isInputModule ? 'Input Channel' : 'Button'}
-                </th>
-                <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Type</th>
-                <th style={{ ...headerCellStyle, width: '25%' }}>Name</th>
-                <th style={{ ...headerCellStyle, width: '15%' }}>Action</th>
-                {isInputModule && (
-                  <th style={{ ...headerCellStyle, width: '15%', textAlign: 'center' }}>Input Action</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {isInputModule ?
-                Array.from({ length: channelCount }, (_, i) => {
-                  const link = remote.links.find(l => l.linkIndex === i);
-                  return (
-                    <tr key={i}>
-                      <td style={{ ...cellStyle, textAlign: 'center' }}>{i + 1}</td>
-                      <td style={{ ...cellStyle, textAlign: 'center' }}>
-                        {link ? (
-                          <span style={{
-                            ...customBadgeStyle,
-                            backgroundColor: getLinkTypeColor(link.linkType)
-                          }}>
-                            {getTypeString(link.linkType)}
-                          </span>
-                        ) : (
-                          <span style={{ color: '#999' }}>N/A</span>
-                        )}
-                      </td>
-                      <td style={cellStyle}>{link ? link.linkName : 'N/A'}</td>
-                      <td style={cellStyle}>{link?.action || 'N/A'}</td>
-                      <td style={{ ...cellStyle, textAlign: 'center' }}>               
-                        {INPUT_ACTION_DISPLAY[remote.inputActions[i]]}
-                      </td>
-                    </tr>
-                  );
-                })
-                : remote.links.map((link, i) => (
-                  // 原有的非 Input Module 显示逻辑
-                  <tr key={i}>
-                    <td style={{ ...cellStyle, textAlign: 'center' }}>{link.linkIndex + 1}</td>
-                    <td style={{ ...cellStyle, textAlign: 'center' }}>
+  return (
+    <div>
+      <div className="component-card-title">Remote Controls</div>
+      {remoteControls.map((remote, index) => {
+        if (!remote || !remote.links) return null;
+        
+        return (
+          <ComponentCard
+            key={index}
+            title={`${remote.remoteName} Configuration`}
+            style={componentCardStyle}
+          >
+            <Table borderless responsive style={tableStyle}>
+              <thead>
+                <tr>
+                  <th style={{ ...headerCellStyle, width: '20%' }}>Key</th>
+                  <th style={{ ...headerCellStyle, width: '20%' }}>Type</th>
+                  <th style={{ ...headerCellStyle, width: '60%' }}>Target</th>
+                </tr>
+              </thead>
+              <tbody>
+                {remote.links.map((link, linkIndex) => (
+                  <tr key={linkIndex}>
+                    <td style={cellStyle}>{link.linkIndex + 1}</td>
+                    <td style={cellStyle}>
                       <span style={{
                         ...customBadgeStyle,
                         backgroundColor: getLinkTypeColor(link.linkType)
@@ -316,54 +295,35 @@ export const renderRemoteControlsTable = (remoteControls) => (
                         {getTypeString(link.linkType)}
                       </span>
                     </td>
-                    <td style={cellStyle}>{link.linkName}</td>
-                    <td style={cellStyle}>{link.action || 'N/A'}</td>
+                    <td style={cellStyle}>
+                      {link.linkName}
+                      {link.action && ` - ${link.action}`}
+                    </td>
                   </tr>
                 ))}
-            </tbody>
-          </Table>
-        </ComponentCard>
-      );
-    })}
-
-    {/* 只有非 Input Module 才显示参数表 */}
-    {remoteControls.length > 0 &&
-      !INPUT_MODULE_TYPES.includes(getDeviceNameToType()[remoteControls[0].remoteName]) && (
-        <ComponentCard style={componentCardStyle} title="Remote Parameters">
-          <Table borderless responsive style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT</th>
-                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT COLOR</th>
-                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BACKLIGHT TIMEOUT</th>
-                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>BEEP</th>
-                <th style={{ ...headerCellStyle, width: '20%', textAlign: 'center' }}>NIGHT LIGHT</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ ...cellStyle, textAlign: 'center' }}>
-                  {PARAMETER_DISPLAY.backlight[remoteControls[0]?.parameters?.backlight ?? DEFAULT_PARAMETER_VALUES.backlight]}
-                </td>
-                <td style={{ ...cellStyle, textAlign: 'center' }}>
-                  {PARAMETER_DISPLAY.backlight_color[remoteControls[0]?.parameters?.backlight_color ?? DEFAULT_PARAMETER_VALUES.backlight_color]}
-                </td>
-                <td style={{ ...cellStyle, textAlign: 'center' }}>
-                  {PARAMETER_DISPLAY.backlight_timeout[remoteControls[0]?.parameters?.backlight_timeout ?? DEFAULT_PARAMETER_VALUES.backlight_timeout]}
-                </td>
-                <td style={{ ...cellStyle, textAlign: 'center' }}>
-                  {PARAMETER_DISPLAY.beep[remoteControls[0]?.parameters?.beep ?? DEFAULT_PARAMETER_VALUES.beep]}
-                </td>
-                <td style={{ ...cellStyle, textAlign: 'center' }}>
-                  {PARAMETER_DISPLAY.night_light[remoteControls[0]?.parameters?.night_light ?? DEFAULT_PARAMETER_VALUES.night_light]}
-                </td>
-              </tr>
-            </tbody>
-          </Table>
-        </ComponentCard>
-      )}
-  </div>
-);
+              </tbody>
+            </Table>
+            {remote.parameters && (
+              <div style={{ marginTop: '20px' }}>
+                <h6>Parameters</h6>
+                <Table borderless responsive style={tableStyle}>
+                  <tbody>
+                    {Object.entries(remote.parameters).map(([key, value], paramIndex) => (
+                      <tr key={paramIndex}>
+                        <td style={{ ...cellStyle, width: '50%' }}>{key.toUpperCase()}</td>
+                        <td style={{ ...cellStyle, width: '50%' }}>{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
+          </ComponentCard>
+        );
+      })}
+    </div>
+  );
+};
 
 // 修改常量名称
 const PULSE_MAPPING = {
@@ -421,6 +381,92 @@ export const renderOutputModulesTable = (outputs) => {
           </ComponentCard>
         );
       })}
+    </div>
+  );
+};
+
+// 添加 Input Modules 渲染函数
+export const renderInputModulesTable = (inputs) => {
+  if (!inputs || inputs.length === 0) {
+    return null;
+  }
+
+  return (
+    <div>
+      <div className="component-card-title">Input Modules</div>
+      {inputs.map((input, index) => (
+        <ComponentCard
+          key={index}
+          title={`${input.deviceName} Configuration`}
+          style={componentCardStyle}
+        >
+          <Table borderless responsive style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={{ ...headerCellStyle, width: '30%' }}>Channel</th>
+                <th style={{ ...headerCellStyle, width: '70%' }}>Action Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {input.inputActions.map((action, channelIndex) => (
+                <tr key={channelIndex}>
+                  <td style={cellStyle}>{channelIndex + 1}</td>
+                  <td style={cellStyle}>{INPUT_ACTION_MAPPING[action]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </ComponentCard>
+      ))}
+    </div>
+  );
+};
+
+// 添加 Remote Control Parameters 渲染函数
+export const renderRemoteControlParametersTable = (parameters) => {
+  if (!parameters || Object.keys(parameters).length === 0) {
+    return null;
+  }
+
+  return (
+    <div>
+      <div className="component-card-title">Remote Control Parameters</div>
+      <ComponentCard
+        title="Global Parameters"
+        style={componentCardStyle}
+      >
+        <Table borderless responsive style={tableStyle}>
+          <thead>
+            <tr>
+              <th style={{ ...headerCellStyle, width: '50%' }}>Parameter</th>
+              <th style={{ ...headerCellStyle, width: '50%' }}>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(parameters).map(([key, value], index) => (
+              <tr key={index}>
+                <td style={cellStyle}>{key.toUpperCase()}</td>
+                <td style={cellStyle}>{value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </ComponentCard>
+    </div>
+  );
+};
+
+// 修改主渲染函数
+export const renderConfigTables = (configData) => {
+  return (
+    <div>
+      <DeviceTable devices={configData.devices} />
+      {renderInputModulesTable(configData.inputs)}
+      {renderOutputModulesTable(configData.outputs)}
+      {renderGroupsTable(configData.groups)}
+      {renderScenesTable(configData.scenes)}
+      {renderRemoteControlParametersTable(configData.parameters)}
+      {renderRemoteControlsTable(configData.remoteControls)}
     </div>
   );
 };

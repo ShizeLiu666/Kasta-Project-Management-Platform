@@ -49,7 +49,9 @@ const splitKeywords = {
   scenes: ["KASTA SCENE", "SCENE"],
   remoteControls: ["REMOTE CONTROL LINK"],
   outputs: ["OUTPUT MODULE"],
-  remoteParameters: ["REMOTE CONTROL PARAMETER"]
+  remoteParameters: ["REMOTE CONTROL PARAMETER"],
+  dryContacts: ["DRY CONTACT", "VIRTUAL DRY CONTACT"],
+  inputs: ["INPUT MODULE"]
 };
 
 function splitJsonFile(content) {
@@ -59,7 +61,9 @@ function splitJsonFile(content) {
     scenes: [], 
     remoteControls: [],
     outputs: [],
-    remoteParameters: []
+    remoteParameters: [],
+    dryContacts: [],
+    inputs: []
   };
   
   let currentKey = null;
