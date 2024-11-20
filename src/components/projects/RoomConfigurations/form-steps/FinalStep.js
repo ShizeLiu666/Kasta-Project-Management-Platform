@@ -8,6 +8,7 @@ import {
   processRemoteControls,
   processOutputModules,
   processInputModules,
+  processDryContactModules,
   resetDeviceNameToType
 } from "../ExcelProcessor/ExcelProcessor";
 import CustomButton from '../../../CustomComponents/CustomButton';
@@ -40,6 +41,7 @@ const Step6 = forwardRef(({
       );
       const outputModulesResult = processOutputModules(splitData.outputs);
       const inputModulesResult = processInputModules(splitData.inputs);
+      const dryContactsResult = processDryContactModules(splitData.dryContacts);
 
       return {
         devices: devicesResult.devices,
@@ -47,7 +49,8 @@ const Step6 = forwardRef(({
         scenes: scenesResult.scenes,
         remoteControls: remoteControlsResult.remoteControls,
         outputs: outputModulesResult.outputs,
-        inputs: inputModulesResult.inputs
+        inputs: inputModulesResult.inputs,
+        dryContacts: dryContactsResult.dryContacts
       };
     } catch (err) {
       setError(err.message);

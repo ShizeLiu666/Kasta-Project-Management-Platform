@@ -242,7 +242,7 @@ function validatePowerPointTypeOperations(
 
   // 新的正则表达式模式
   const singleWayPattern = /^PPT\d+\s+(ON|OFF)$/i;
-  const twoWayPattern = /^PPT_\d+\s+((ON\s+ON)|(ON\s+OFF)|(OFF\s+ON)|UNSELECT)$/i;
+  const twoWayPattern = /^PPT_\d+\s+((ON|OFF|UNSELECT)\s+(ON|OFF|UNSELECT))$/i;
 
   let isValid = false;
 
@@ -257,13 +257,24 @@ function validatePowerPointTypeOperations(
     }
   } else if (deviceType === "PowerPoint Type (Two-Way)") {
     isValid = twoWayPattern.test(operationString);
+    
+    // 额外检查是否是 UNSELECT UNSELECT
+    const [leftState, rightState] = operationParts;
+    if (leftState === 'UNSELECT' && rightState === 'UNSELECT') {
+      isValid = false;
+    }
+
     if (!isValid) {
       errors.push([
         `KASTA SCENE [${sceneName}]: Invalid Two-Way PowerPoint operation. The operation string "${operationString}" is not valid. Supported formats are:`,
-        "- DEVICE_NAME ON ON",
         "- DEVICE_NAME ON OFF",
         "- DEVICE_NAME OFF ON",
-        "- DEVICE_NAME UNSELECT"
+        "- DEVICE_NAME ON UNSELECT",
+        "- DEVICE_NAME UNSELECT ON",
+        "- DEVICE_NAME OFF UNSELECT",
+        "- DEVICE_NAME UNSELECT OFF",
+        "- DEVICE_NAME ON ON",
+        "- DEVICE_NAME OFF OFF"
       ]);
     }
   }

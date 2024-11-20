@@ -48,10 +48,10 @@ const splitKeywords = {
   groups: ["KASTA GROUP", "GROUP"],
   scenes: ["KASTA SCENE", "SCENE"],
   remoteControls: ["REMOTE CONTROL LINK"],
-  outputs: ["OUTPUT MODULE"],
   remoteParameters: ["REMOTE CONTROL PARAMETER"],
-  dryContacts: ["DRY CONTACT", "VIRTUAL DRY CONTACT"],
-  inputs: ["INPUT MODULE"]
+  outputs: ["OUTPUT MODULE"],
+  inputs: ["INPUT MODULE"],
+  dryContacts: ["DRY CONTACT", "DRY CONTACT MODULE"],
 };
 
 function splitJsonFile(content) {
@@ -70,6 +70,10 @@ function splitJsonFile(content) {
 
   content.forEach((line) => {
     line = line.trim();
+
+    if (line.toUpperCase().includes('CONTROL CONTENT')) {
+      return;
+    }
 
     // 修改关键字检查逻辑
     for (const [key, keywords] of Object.entries(splitKeywords)) {

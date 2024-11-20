@@ -4,6 +4,7 @@ import { processScenes } from './conversion/Scenes';
 import { processRemoteControls } from './conversion/RemoteControls';
 import { processOutputModules } from './conversion/OutputModules';
 import { processInputModules } from './conversion/InputModules';
+import { processDryContactModules } from './conversion/DryContactModules';
 import { processRemoteParameters } from './conversion/RemoteParameters';
 import { validateRemoteParameters } from './validation/RemoteParameters';
 
@@ -106,6 +107,7 @@ export {
     processRemoteControls,
     processOutputModules,
     processInputModules,
+    processDryContactModules,
     processRemoteParameters,
     validateRemoteParameters,
     handleRemoteParameters,

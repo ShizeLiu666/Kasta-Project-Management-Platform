@@ -119,21 +119,21 @@ function handlePowerPointType(parts, deviceType) {
     } else if (deviceType.includes("Two-Way")) {
         // 处理 Two-Way PowerPoint
         deviceNames.forEach(deviceName => {
-            if (operations[0].toUpperCase() === "UNSELECT") {
-                contents.push({
-                    deviceName: deviceName.trim().replace(",", ""),
-                    deviceType: "PowerPoint Type (Two-Way)",
-                    rightStatus: "UNSELECT",
-                    leftStatus: "UNSELECT"
-                });
-            } else {
-                contents.push({
-                    deviceName: deviceName.trim().replace(",", ""),
-                    deviceType: "PowerPoint Type (Two-Way)",
-                    rightStatus: operations[0].toUpperCase(),  // "ON" 或 "OFF"
-                    leftStatus: operations[1] ? operations[1].toUpperCase() : "OFF"  // "ON" 或 "OFF"
-                });
+            const leftStatus = operations[0].toUpperCase();
+            const rightStatus = operations[1] ? operations[1].toUpperCase() : "OFF";
+            
+            // 检查是否是有效的组合
+            if (leftStatus === "UNSELECT" && rightStatus === "UNSELECT") {
+                console.warn("Invalid combination: UNSELECT UNSELECT is not allowed");
+                return;
             }
+
+            contents.push({
+                deviceName: deviceName.trim().replace(",", ""),
+                deviceType: "PowerPoint Type (Two-Way)",
+                leftStatus: leftStatus,   // ON, OFF, 或 UNSELECT
+                rightStatus: rightStatus  // ON, OFF, 或 UNSELECT
+            });
         });
     }
 

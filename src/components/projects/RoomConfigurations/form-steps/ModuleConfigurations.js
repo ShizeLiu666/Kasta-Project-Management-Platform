@@ -12,6 +12,7 @@ import { validateOutputModules } from "../ExcelProcessor/validation/OutputModule
 import "./steps.scss";
 import OutputModulesTreeView from './TreeView/OutputModulesTreeView';
 import InputModules from './InputModules';
+import DryContactModules from './DryContactModules';
 
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
@@ -158,6 +159,15 @@ const ModuleConfigurations = forwardRef(({
 
               <div style={{ marginTop: "40px" }}>
                 <InputModules
+                  splitData={splitData}
+                  deviceNameToType={deviceNameToType}
+                  registeredDeviceNames={registeredDeviceNames}
+                  onValidate={onValidate}
+                />
+              </div>
+
+              <div style={{ marginTop: "40px" }}>
+                <DryContactModules
                   splitData={splitData}
                   deviceNameToType={deviceNameToType}
                   registeredDeviceNames={registeredDeviceNames}
