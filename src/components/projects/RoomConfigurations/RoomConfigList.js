@@ -64,12 +64,12 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
           try {
             parsedConfig = JSON.parse(data.data.config);
           } catch (e) {
-            parsedConfig = data.data.config;
+            console.error('Error parsing config:', e);
+            parsedConfig = {};
           }
         } else {
-          parsedConfig = data.data.config;
+          parsedConfig = data.data.config || {};
         }
-
         setConfig(parsedConfig);
       } else {
         showAlert(`Error fetching room details: ${data.errorMsg}`, "error");
@@ -142,18 +142,18 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   //   }
   // }, [config]);
 
-  const processDevices = (devices) => {
-    if (Array.isArray(devices)) {
-      return devices;
-    }
-    if (typeof devices === 'object' && devices !== null) {
-      return Object.entries(devices).map(([key, value]) => ({
-        deviceName: key,
-        ...value
-      }));
-    }
-    return [];
-  };
+  // const processDevices = (devices) => {
+  //   if (Array.isArray(devices)) {
+  //     return devices;
+  //   }
+  //   if (typeof devices === 'object' && devices !== null) {
+  //     return Object.entries(devices).map(([key, value]) => ({
+  //       deviceName: key,
+  //       ...value
+  //     }));
+  //   }
+  //   return [];
+  // };
 
   const handleCloudUploadClick = () => {
     setIsEditing(true);
@@ -334,7 +334,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
               />
             ) : (
               <>
-                {config && config !== "{}" && (
+                {config && Object.keys(config).length > 0 && (
                   renderConfigTables(config)
                 )}
               </>

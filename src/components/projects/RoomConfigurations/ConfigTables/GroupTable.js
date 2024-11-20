@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Table,
   TableBody,
@@ -10,12 +10,13 @@ import {
   Box,
   Collapse,
   IconButton,
-  Typography,
+  Typography
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
+const GroupRow = ({ group }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isTextTruncated, setIsTextTruncated] = useState(false);
   const textRef = useRef(null);
 
@@ -30,16 +31,19 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
     checkTruncation();
     window.addEventListener('resize', checkTruncation);
     return () => window.removeEventListener('resize', checkTruncation);
-  }, [devices]);
+  }, [group]);
 
-  const deviceNames = devices.map(device => device.deviceName).join(', ');
+  const deviceNames = group.devices.map(device => device.deviceName).join(', ');
 
   return (
     <>
       <TableRow 
         sx={{
-          '& > *': { borderBottom: 'unset' },
+          '& > *': { borderBottom: '1px solid rgba(224, 224, 224, 1)' },
           backgroundColor: '#fff',
+          '& td': {
+            padding: '16px',
+          }
         }}
       >
         <TableCell 
@@ -47,18 +51,17 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
           scope="row"
           sx={{ 
             fontWeight: 'bold',
-            width: '30%',
+            width: '40%',
+            borderBottom: '1px solid rgba(224, 224, 224, 1)',
           }}
         >
-          {deviceType} ({devices.length})
-        </TableCell>
-        <TableCell sx={{ width: '30%' }}>
-          {devices[0].appearanceShortname}
+          {group.groupName} ({group.devices.length})
         </TableCell>
         <TableCell 
           sx={{ 
-            width: '40%',
+            width: '60%',
             position: 'relative',
+            borderBottom: '1px solid rgba(224, 224, 224, 1)',
           }}
         >
           <Box
@@ -75,7 +78,7 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
           {isTextTruncated && (
             <IconButton
               size="small"
-              onClick={onToggle}
+              onClick={() => setIsExpanded(!isExpanded)}
               sx={{
                 position: 'absolute',
                 right: 8,
@@ -91,10 +94,17 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
       {isTextTruncated && (
         <TableRow>
           <TableCell 
-            colSpan={3} 
+            colSpan={2} 
             sx={{ 
               py: 0,
               backgroundColor: '#fafafa',
+              borderBottom: '1px solid rgba(224, 224, 224, 1)',
+              '& .MuiCollapse-root': {
+                '& .MuiBox-root': {
+                  py: 2,
+                  px: 3,
+                }
+              }
             }}
           >
             <Collapse in={isExpanded} timeout="auto" unmountOnExit>
@@ -115,34 +125,13 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
   );
 };
 
-const DeviceTable = ({ devices }) => {
-  const [expandedTypes, setExpandedTypes] = React.useState(new Set());
-
-  const groupedDevices = useMemo(() => {
-    return devices.reduce((acc, device) => {
-      const type = device.deviceType;
-      if (!acc[type]) {
-        acc[type] = [];
-      }
-      acc[type].push(device);
-      return acc;
-    }, {});
-  }, [devices]);
-
-  const handleToggle = (deviceType) => {
-    setExpandedTypes(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(deviceType)) {
-        newSet.delete(deviceType);
-      } else {
-        newSet.add(deviceType);
-      }
-      return newSet;
-    });
-  };
+const GroupTable = ({ groups }) => {
+  if (!groups || groups.length === 0) {
+    return null;
+  }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', mt: 4}}>
       <Typography
         variant="h6"
         sx={{
@@ -155,13 +144,13 @@ const DeviceTable = ({ devices }) => {
             content: '""',
             width: '4px',
             height: '24px',
-            backgroundColor: '#fbcd0b',
+            backgroundColor: '#009688',
             marginRight: '12px',
             borderRadius: '4px'
           }
         }}
       >
-        Device Configuration
+        Group Configuration
       </Typography>
 
       <TableContainer 
@@ -181,40 +170,39 @@ const DeviceTable = ({ devices }) => {
                 sx={{ 
                   fontWeight: 'bold', 
                   backgroundColor: '#f8f9fa',
-                  width: '30%'
-                }}
-              >
-                Device Type
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '30%'
-                }}
-              >
-                Model
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
                   width: '40%'
                 }}
               >
-                Device Names
+                Group Name
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  fontWeight: 'bold', 
+                  backgroundColor: '#f8f9fa',
+                  width: '60%'
+                }}
+              >
+                Devices
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {Object.entries(groupedDevices).map(([deviceType, deviceList]) => (
-              <DeviceTypeRow
-                key={deviceType}
-                deviceType={deviceType}
-                devices={deviceList}
-                isExpanded={expandedTypes.has(deviceType)}
-                onToggle={() => handleToggle(deviceType)}
-              />
+            {groups.map((group, index) => (
+              <React.Fragment key={index}>
+                {index > 0 && (
+                  <TableRow>
+                    <TableCell 
+                      sx={{ 
+                        // height: '4px',
+                        padding: 0,
+                        border: 'none',
+                        backgroundColor: 'transparent'
+                      }} 
+                    />
+                  </TableRow>
+                )}
+                <GroupRow group={group} />
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
@@ -223,4 +211,4 @@ const DeviceTable = ({ devices }) => {
   );
 };
 
-export default DeviceTable;
+export default GroupTable;
