@@ -40,8 +40,8 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         },
       });
 
-      console.log('Project Members Response:', response.data);
-      console.log('Project Members Data:', response.data.data);
+      // console.log('Project Members Response:', response.data);
+      // console.log('Project Members Data:', response.data.data);
 
       if (response.data.success) {
         const sortedMembers = response.data.data.sort((a, b) => {
@@ -82,7 +82,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         };
       case 'WAITING':
         return { 
-          color: '#FFC107',
+          color: '#FF8D21',
           fontWeight: 450
         };
       default:
@@ -334,6 +334,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         toggle={() => setInviteModalOpen(!inviteModalOpen)}
         projectId={projectId}
         onMemberInvited={fetchMembers}
+        currentMembers={members}
       />
       <LeaveProjectModal
         isOpen={leaveModalOpen}

@@ -49,6 +49,14 @@ export const getUserDetails = () => {
     }
 };
 
+export const getCurrentUser = () => {
+  const userDetails = getUserDetails();
+  if (userDetails) {
+    return userDetails;
+  }
+  return null;
+};
+
 const showAlert = (severity, message) => {
   const alertContainer = document.createElement('div');
   document.body.appendChild(alertContainer);

@@ -78,6 +78,9 @@ export function validateGroups(groupDataArray, deviceNameToType) {
 
     groupDataArray.forEach((line) => {
         line = line.trim();
+        if (line.startsWith("CONTROL CONTENT")) {
+            return;
+          }
 
         if (line.startsWith('NAME')) {
             if (!checkNamePrefix(line, errors)) return;

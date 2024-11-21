@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CustomModal from '../../../CustomComponents/CustomModal';
 import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
@@ -8,10 +8,21 @@ const LeaveProjectModal = ({ isOpen, toggle, projectId, onLeaveSuccess }) => {
   const [error, setError] = useState('');
   const [successAlert, setSuccessAlert] = useState('');
 
-  const handleLeaveProject = async () => {
-    setIsSubmitting(true);
+  const clearState = () => {
     setError('');
     setSuccessAlert('');
+    setIsSubmitting(false);
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      clearState();
+    }
+  }, [isOpen]);
+
+  const handleLeaveProject = async () => {
+    setIsSubmitting(true);
+    clearState();
 
     try {
       const token = getToken();
@@ -23,18 +34,26 @@ const LeaveProjectModal = ({ isOpen, toggle, projectId, onLeaveSuccess }) => {
 
       if (response.data.success) {
         setSuccessAlert('You have successfully left the project.');
-        setTimeout(() => {
-          onLeaveSuccess({ success: true, data: response.data });
-          toggle();
-        }, 2000);
+        onLeaveSuccess({ success: true, data: response.data });
+        await Promise.all([
+          new Promise(resolve => setTimeout(resolve, 1000)),
+          new Promise(resolve => {
+            setTimeout(() => {
+              clearState();
+              toggle();
+              resolve();
+            }, 1000);
+          })
+        ]);
       } else {
         setError(response.data.errorMsg || 'Failed to leave the project');
-        onLeaveSuccess({ success: false, errorMsg: response.data.errorMsg || 'Failed to leave the project' });
+        onLeaveSuccess({ success: false, errorMsg: response.data.errorMsg });
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.errorMsg || err.message || 'An error occurred while leaving the project';
+      const errorMsg = err.response?.data?.errorMsg || 
+                      err.message || 
+                      'An error occurred while leaving the project';
       setError(errorMsg);
-      console.error('Error leaving project:', err);
       onLeaveSuccess({ success: false, errorMsg });
     } finally {
       setIsSubmitting(false);
@@ -49,7 +68,7 @@ const LeaveProjectModal = ({ isOpen, toggle, projectId, onLeaveSuccess }) => {
       onSubmit={handleLeaveProject}
       submitText="Leave Project"
       cancelText="Cancel"
-      submitButtonColor="#dc3545"  // danger color for the leave button
+      submitButtonColor="#dc3545"
       error={error}
       successAlert={successAlert}
       isSubmitting={isSubmitting}

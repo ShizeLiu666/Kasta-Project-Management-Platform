@@ -43,7 +43,8 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
         const validCodes = response.data.data.content
           .filter(code => 
             code.usageCount < 10 && 
-            (!code.usedBy || code.usedBy === currentUsername)
+            (!code.usedBy || code.usedBy === currentUsername) &&
+            code.valid === true
           )
           .map(code => ({
             code: code.code,
@@ -78,7 +79,8 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
           const validCodes = fullResponse.data.data.content
             .filter(code => 
               code.usageCount < 10 && 
-              (!code.usedBy || code.usedBy === currentUsername)
+              (!code.usedBy || code.usedBy === currentUsername) &&
+              code.valid === true
             )
             .map(code => ({
               code: code.code,

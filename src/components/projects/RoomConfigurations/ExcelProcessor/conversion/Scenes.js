@@ -97,7 +97,6 @@ function handleDryContactType(parts) {
 function handlePowerPointType(parts, deviceType) {
     const contents = [];
     
-    // 找到第一个操作符的位置
     const operationIndex = parts.findIndex(part => 
         ["ON", "OFF", "UNSELECT"].includes(part.toUpperCase())
     );
@@ -108,32 +107,33 @@ function handlePowerPointType(parts, deviceType) {
     const operations = parts.slice(operationIndex);
 
     if (deviceType.includes("Single-Way")) {
-        // 处理 Single-Way PowerPoint
         deviceNames.forEach(deviceName => {
             contents.push({
-                deviceName: deviceName.trim().replace(",", ""),
+                name: deviceName.trim().replace(",", ""),
                 deviceType: "PowerPoint Type (Single-Way)",
-                status: operations[0].toUpperCase()  // "ON" 或 "OFF"
+                statusConditions: {
+                    status: operations[0].toUpperCase() === "ON"
+                }
             });
         });
     } else if (deviceType.includes("Two-Way")) {
-        // 处理 Two-Way PowerPoint
         deviceNames.forEach(deviceName => {
-            if (operations[0].toUpperCase() === "UNSELECT") {
-                contents.push({
-                    deviceName: deviceName.trim().replace(",", ""),
-                    deviceType: "PowerPoint Type (Two-Way)",
-                    rightStatus: "UNSELECT",
-                    leftStatus: "UNSELECT"
-                });
-            } else {
-                contents.push({
-                    deviceName: deviceName.trim().replace(",", ""),
-                    deviceType: "PowerPoint Type (Two-Way)",
-                    rightStatus: operations[0].toUpperCase(),  // "ON" 或 "OFF"
-                    leftStatus: operations[1] ? operations[1].toUpperCase() : "OFF"  // "ON" 或 "OFF"
-                });
+            const leftStatus = operations[0].toUpperCase();
+            const rightStatus = operations[1] ? operations[1].toUpperCase() : "OFF";
+            
+            if (leftStatus === "UNSELECT" && rightStatus === "UNSELECT") {
+                console.warn("Invalid combination: UNSELECT UNSELECT is not allowed");
+                return;
             }
+
+            contents.push({
+                name: deviceName.trim().replace(",", ""),
+                deviceType: "PowerPoint Type (Two-Way)",
+                statusConditions: {
+                    leftStatus: leftStatus,
+                    rightStatus: rightStatus
+                }
+            });
         });
     }
 

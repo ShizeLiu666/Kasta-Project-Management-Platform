@@ -15,7 +15,9 @@ import CustomButton from '../../CustomComponents/CustomButton';
 import LeaveProjectModal from '../ProjectDetails/ProjectMembers/LeaveProjectModal';
 import InviteMemberModal from '../ProjectDetails/ProjectMembers/InviteMemberModal';
 import CustomSearchBar from "../../CustomComponents/CustomSearchBar";
-import RefreshButton from '../../CustomComponents/RefreshButton';
+import Badge from '@mui/material/Badge';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import IconButton from '@mui/material/IconButton';
 
 const ProjectListComponent = () => {
   const [projects, setProjects] = useState([]);
@@ -25,7 +27,7 @@ const ProjectListComponent = () => {
     isOpen: false,
     message: "",
     severity: "info",
-    duration: 2000
+    duration: 1000
   });
   const [breadcrumbPath, setBreadcrumbPath] = useState(["Project List"]);
   const [showRoomTypes, setShowRoomTypes] = useState(false);
@@ -49,7 +51,6 @@ const ProjectListComponent = () => {
   const [inviteMemberModalOpen, setInviteMemberModalOpen] = useState(false);
   const [selectedProjectForInvite, setSelectedProjectForInvite] = useState(null);
   const [filteredProjects, setFilteredProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchProjectList = useCallback(async () => {
     try {
@@ -74,13 +75,6 @@ const ProjectListComponent = () => {
 
         const pendingInvites = allProjects.filter(project => project.memberStatus === 'WAITING');
         setPendingInvitations(pendingInvites);
-
-        // Only open the invitation modal if there are pending invitations
-        if (pendingInvites.length > 0) {
-          setInvitationModalOpen(true);
-        } else {
-          setInvitationModalOpen(false);
-        }
       } else {
         console.error("Error fetching projects:", response.data.errorMsg);
       }
@@ -143,11 +137,19 @@ const ProjectListComponent = () => {
 
   const handleInvitationAction = (action, projectId) => {
     fetchProjectList();
+    
+    // 如果是批量操作（projectId 为 null），则关闭弹窗
+    if (!projectId) {
+      setInvitationModalOpen(false);
+    }
+    
     setAlert({
       isOpen: true,
-      message: `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} invitation for project ${projectId}`,
+      message: projectId 
+        ? `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} invitation for project ${projectId}`
+        : `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} all invitations`,
       severity: "success",
-      duration: 2000
+      duration: 1000
     });
   };
 
@@ -164,7 +166,7 @@ const ProjectListComponent = () => {
       isOpen: true,
       message: 'Successfully left the project',
       severity: 'success',
-      duration: 2000
+      duration: 1000
     });
   };
 
@@ -188,14 +190,6 @@ const ProjectListComponent = () => {
   useEffect(() => {
     setFilteredProjects(filterProjects(searchTerm));
   }, [projects, searchTerm, filterProjects]);
-
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    await fetchProjectList();
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-  };
 
   return (
     <div>
@@ -276,29 +270,44 @@ const ProjectListComponent = () => {
             width: "100%",
           }}
         >
-          <div className="d-flex align-items-center">
-            <CustomSearchBar
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              placeholder="Search Project Name..."
-              filterKey="name"
-              onFilter={(value) => {
-                const filtered = filterProjects(value);
-                setFilteredProjects(filtered);
-              }}
-            />
-            <RefreshButton 
-              onClick={handleRefresh}
-              isLoading={isLoading}
-            />
-          </div>
+          <CustomSearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            placeholder="Search Project Name..."
+            filterKey="name"
+            onFilter={(value) => {
+              const filtered = filterProjects(value);
+              setFilteredProjects(filtered);
+            }}
+          />
 
-          <CustomButton
-            type="create"
-            onClick={toggleCreateProjectModal}
-          >
-            Create New Project
-          </CustomButton>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <IconButton 
+              onClick={() => setInvitationModalOpen(true)}
+              sx={{ 
+                color: pendingInvitations.length > 0 ? '#fbcd0b' : 'action.disabled'
+              }}
+            >
+              <Badge 
+                badgeContent={pendingInvitations.length} 
+                color="error"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    backgroundColor: '#f62d51'
+                  }
+                }}
+              >
+                <NotificationsIcon fontSize="large"/>
+              </Badge>
+            </IconButton>
+
+            <CustomButton
+              type="create"
+              onClick={toggleCreateProjectModal}
+            >
+              Create New Project
+            </CustomButton>
+          </div>
         </div>
       )}
 
@@ -397,7 +406,7 @@ const ProjectListComponent = () => {
               isOpen: true,
               message: response?.errorMsg || 'Failed to leave the project',
               severity: 'error',
-              duration: 2000
+              duration: 1000
             });
           }
         }}
@@ -406,15 +415,15 @@ const ProjectListComponent = () => {
       <InviteMemberModal
         isOpen={inviteMemberModalOpen}
         toggle={() => setInviteMemberModalOpen(false)}
-        projectId={selectedProjectForInvite?.projectId}  // 使用 projectId 而不是 id
+        projectId={selectedProjectForInvite?.projectId}
         onMemberInvited={(response) => {
-          // console.log('Invite Member Response:', response);
           if (response.success) {
             fetchProjectList();
           } else {
             console.error('Error inviting member:', response.errorMsg);
           }
         }}
+        currentMembers={selectedProjectForInvite?.members || []}
       />
     </div>
   );

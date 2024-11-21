@@ -3,6 +3,8 @@ import { processGroups } from './conversion/Groups';
 import { processScenes } from './conversion/Scenes';
 import { processRemoteControls } from './conversion/RemoteControls';
 import { processOutputModules } from './conversion/OutputModules';
+import { processInputModules } from './conversion/InputModules';
+import { processDryContactModules } from './conversion/DryContactModules';
 import { processRemoteParameters } from './conversion/RemoteParameters';
 import { validateRemoteParameters } from './validation/RemoteParameters';
 
@@ -11,7 +13,6 @@ const AllDeviceTypes = {
     "Relay Type": ["KBSKTREL", "S2400IB2", "S2400IBH", "RM1440BH", "KBSKTR2400"],
     "Curtain Type": ["C300IBH"],
     "Fan Type": ["FC150A2"],
-    // "RGB Type": ["KB8RGBG", "KB36RGBS", "KB9TWG", "KB12RGBD", "KB12RGBG"],
     "PowerPoint Type": {
         "Single-Way": ["H1PPWVBX"],
         "Two-Way": ["K2PPHB", "H2PPHB", "H2PPWHB"]
@@ -26,7 +27,6 @@ const AllDeviceTypes = {
         "6 Push Panel": ["H6RSMB"]
     },
     "5 Input Module": ["5RSIBH"],
-    "6 Input Module": ["6RSIBH"],
     "4 Output Module": ["4OS2IBH"]
 };
 
@@ -106,6 +106,8 @@ export {
     processScenes,
     processRemoteControls,
     processOutputModules,
+    processInputModules,
+    processDryContactModules,
     processRemoteParameters,
     validateRemoteParameters,
     handleRemoteParameters,

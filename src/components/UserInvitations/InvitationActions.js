@@ -6,40 +6,78 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';
 
-const InvitationActions = ({ projectId, onActionComplete }) => {
+export const handleInvitationAction = async (projectId, projectName, action, onActionComplete) => {
+  try {
+    const token = getToken();
+    const response = await axiosInstance.post(
+      `/projects/${projectId}/${action}-invitation`, 
+      {}, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.success) {
+      console.log(`${action.charAt(0).toUpperCase() + action.slice(1)}ed invitation for project: ${projectName}`);
+      onActionComplete(action, projectId, null, projectName);
+      return true;
+    } else {
+      console.error(`Failed to ${action} invitation for ${projectName}:`, response.data.errorMsg);
+      onActionComplete(action, projectId, response.data.errorMsg, projectName);
+      return false;
+    }
+  } catch (err) {
+    console.error(`Error ${action}ing invitation for ${projectName}:`, err);
+    onActionComplete(action, projectId, err.message, projectName);
+    return false;
+  }
+};
+
+export const handleBulkInvitationAction = async (action, onActionComplete, onSuccess) => {
+  try {
+    const token = getToken();
+    const response = await axiosInstance.post(
+      `/projects/${action}-all`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.success) {
+      console.log(`Bulk ${action} completed successfully`);
+      onActionComplete(action);
+      if (onSuccess) {
+        onSuccess();
+      }
+      return true;
+    } else {
+      console.error(`Failed to ${action} all invitations:`, response.data.errorMsg);
+      onActionComplete(action, null, response.data.errorMsg);
+      return false;
+    }
+  } catch (err) {
+    console.error(`Error ${action}ing all invitations:`, err);
+    onActionComplete(action, null, err.message);
+    return false;
+  }
+};
+
+const InvitationActions = ({ projectId, projectName, onActionComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAction = async (action) => {
     if (isProcessing) return;
     
     setIsProcessing(true);
-    try {
-      const token = getToken();
-      const response = await axiosInstance.post(
-        `/projects/${projectId}/${action}-invitation`, 
-        {}, 
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        console.log(`${action.charAt(0).toUpperCase() + action.slice(1)}ed invitation for project ${projectId}`);
-        onActionComplete(action, projectId);
-      } else {
-        console.error(`Failed to ${action} invitation:`, response.data.errorMsg);
-        onActionComplete(action, projectId, response.data.errorMsg);
-      }
-    } catch (err) {
-      console.error(`Error ${action}ing invitation:`, err);
-      onActionComplete(action, projectId, err.message);
-    } finally {
-      setTimeout(() => {
-        setIsProcessing(false);
-      }, 500);
-    }
+    await handleInvitationAction(projectId, projectName, action, onActionComplete);
+    setTimeout(() => {
+      setIsProcessing(false);
+    }, 1000);
   };
 
   const buttonStyle = {

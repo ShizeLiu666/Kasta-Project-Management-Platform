@@ -10,13 +10,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteRoomConfigModal from "./DeleteRoomConfigModal";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import Steps from "./form-steps/Steps";
-import {
-  renderDevicesTable,
-  renderGroupsTable,
-  renderOutputModulesTable,
-  renderRemoteControlsTable,
-  renderScenesTable
-} from './ConfigTables';
+import { renderConfigTables } from './ConfigTables';
 import { getToken } from '../../auth';
 import axiosInstance from '../../../config';
 import CustomAlert from '../../CustomComponents/CustomAlert';
@@ -70,12 +64,12 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
           try {
             parsedConfig = JSON.parse(data.data.config);
           } catch (e) {
-            parsedConfig = data.data.config;
+            console.error('Error parsing config:', e);
+            parsedConfig = {};
           }
         } else {
-          parsedConfig = data.data.config;
+          parsedConfig = data.data.config || {};
         }
-
         setConfig(parsedConfig);
       } else {
         showAlert(`Error fetching room details: ${data.errorMsg}`, "error");
@@ -130,14 +124,14 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   }, [projectRoomId, fetchRoomDetail]);
 
   useEffect(() => {
-    if (roomDetails && roomDetails.count === 9) {
+    if (roomDetails && roomDetails.count === 9 && userRole === 'OWNER') {
       showAlert(
         "You have only one use remaining. Please prepare to update your authorization code.",
         "warning",
         null  // 设置为 null 使得警告不会自动消失
       );
     }
-  }, [roomDetails]);
+  }, [roomDetails, userRole]);
 
   // useEffect(() => {
   //   if (config) {
@@ -148,18 +142,18 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
   //   }
   // }, [config]);
 
-  const processDevices = (devices) => {
-    if (Array.isArray(devices)) {
-      return devices;
-    }
-    if (typeof devices === 'object' && devices !== null) {
-      return Object.entries(devices).map(([key, value]) => ({
-        deviceName: key,
-        ...value
-      }));
-    }
-    return [];
-  };
+  // const processDevices = (devices) => {
+  //   if (Array.isArray(devices)) {
+  //     return devices;
+  //   }
+  //   if (typeof devices === 'object' && devices !== null) {
+  //     return Object.entries(devices).map(([key, value]) => ({
+  //       deviceName: key,
+  //       ...value
+  //     }));
+  //   }
+  //   return [];
+  // };
 
   const handleCloudUploadClick = () => {
     setIsEditing(true);
@@ -244,7 +238,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                       {roomTypeName}
                     </span>
                   </Box>
-                  {roomDetails && (
+                  {roomDetails && userRole === 'OWNER' && (
                     <Box display="flex" alignItems="center" style={{ marginTop: '5px' }}>
                       <span style={{ fontSize: '14px', color: '#666' }}>
                         Authorization Code: {roomDetails.authorizationCode} | Remaining Uses: {10 - roomDetails.count}
@@ -340,18 +334,8 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
               />
             ) : (
               <>
-                {config && config !== "{}" && (
-                  <>
-                    {config.devices && (
-                      <div>
-                        {renderDevicesTable(processDevices(config.devices))}
-                      </div>
-                    )}
-                    {config.groups && renderGroupsTable(config.groups)}
-                    {config.scenes && renderScenesTable(config.scenes)}
-                    {config.remoteControls && renderRemoteControlsTable(config.remoteControls)}
-                    {config.outputs && renderOutputModulesTable(config.outputs)}
-                  </>
+                {config && Object.keys(config).length > 0 && (
+                  renderConfigTables(config)
                 )}
               </>
             )}

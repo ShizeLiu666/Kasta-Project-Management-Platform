@@ -48,7 +48,7 @@ const UploadBackgroundModal = ({ isOpen, toggle, projectId, onUploadSuccess, pro
             setSuccessAlert('');
             toggle();
             onUploadSuccess({...updateResponse.data.data, role: project.role});
-          }, 2000);
+          }, 1000);
         } else {
           setError(updateResponse.data.errorMsg || 'Failed to update project background.');
         }

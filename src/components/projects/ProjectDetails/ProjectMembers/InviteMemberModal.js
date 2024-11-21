@@ -1,24 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import CustomModal from '../../../CustomComponents/CustomModal';
 import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth';
+import { getToken, getUserDetails } from '../../../auth';
 
-const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited }) => {
+const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited, currentMembers = [] }) => {
   const [account, setAccount] = useState('');
   const [error, setError] = useState('');
   const [successAlert, setSuccessAlert] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const resetForm = () => {
+    setAccount('');
+    setError('');
+    setSuccessAlert('');
+    setIsSubmitting(false);
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
+
   const handleSubmit = async () => {
+    setError('');
+    setSuccessAlert('');
+
     if (!account.trim()) {
       setError('Please enter an account');
       return;
     }
 
+    const currentUser = getUserDetails();
+    if (currentUser && currentUser.username && 
+        account.trim().toLowerCase() === currentUser.username.toLowerCase()) {
+      setError('You cannot invite yourself to the project');
+      return;
+    }
+
+    if (Array.isArray(currentMembers)) {
+      const existingMember = currentMembers.find(
+        member => member.account?.toLowerCase() === account.trim().toLowerCase() ||
+                  member.username?.toLowerCase() === account.trim().toLowerCase()
+      );
+
+      if (existingMember) {
+        if (existingMember.memberStatus === 'WAITING') {
+          setError('This user has already been invited and is pending response');
+          return;
+        }
+        if (existingMember.memberStatus === 'ACCEPT') {
+          setError('This user is already a member of the project');
+          return;
+        }
+      }
+    }
+
     setIsSubmitting(true);
-    setError('');
-    setSuccessAlert('');
 
     try {
       const token = getToken();
@@ -34,19 +73,19 @@ const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited }) => {
 
       if (response.data.success) {
         setSuccessAlert('Member invited successfully');
-        onMemberInvited(response.data);  // 传递整个响应对象
+        onMemberInvited(response.data);
         setTimeout(() => {
           toggle();
-          setAccount('');
-        }, 2000);
+          resetForm();
+        }, 1000);
       } else {
         setError(response.data.errorMsg || 'Failed to invite member');
-        onMemberInvited(response.data);  // 即使失败也传递响应对象
+        onMemberInvited(response.data);
       }
     } catch (err) {
       setError('An error occurred while inviting the member');
       console.error('Error inviting member:', err);
-      onMemberInvited({ success: false, errorMsg: err.message });  // 传递错误信息
+      onMemberInvited({ success: false, errorMsg: err.message });
     } finally {
       setIsSubmitting(false);
     }
