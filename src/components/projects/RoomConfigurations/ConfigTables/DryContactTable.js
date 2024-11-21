@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,10 +8,16 @@ import {
   TableRow,
   Paper,
   Box,
+  Collapse,
+  IconButton,
   Typography,
 } from '@mui/material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 const DryContactTable = ({ dryContacts }) => {
+  const [isTableExpanded, setIsTableExpanded] = useState(true);
+
   if (!dryContacts || dryContacts.length === 0) {
     return null;
   }
@@ -48,62 +54,52 @@ const DryContactTable = ({ dryContacts }) => {
         }}
       >
         Dry Contact Configuration
+        <IconButton
+          size="small"
+          onClick={() => setIsTableExpanded(!isTableExpanded)}
+          sx={{ ml: 0.5 }}
+        >
+          {isTableExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        </IconButton>
       </Typography>
 
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          boxShadow: 'none',
-          '& .MuiTable-root': {
-            borderCollapse: 'separate',
-            borderSpacing: '0 4px',
-          }
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '50%'
-                }}
-              >
-                Device Name
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '50%'
-                }}
-              >
-                Dry Contact Action
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {dryContacts.map((contact) => (
-              <TableRow 
-                key={contact.deviceName}
-                sx={{ backgroundColor: '#fff' }}
-              >
-                <TableCell 
-                  component="th" 
-                  scope="row"
-                  sx={{ width: '50%' }}
-                >
-                  {contact.deviceName}
+      <Collapse in={isTableExpanded} timeout="auto" unmountOnExit>
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            boxShadow: 'none',
+            '& .MuiTable-root': {
+              borderCollapse: 'separate',
+              borderSpacing: '0 4px',
+            }
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa', width: '50%' }}>
+                  Device Name
                 </TableCell>
-                <TableCell sx={{ width: '50%' }}>
-                  {getPulseText(contact.pulse)}
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa', width: '50%' }}>
+                  Dry Contact Action
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {dryContacts.map((contact) => (
+                <TableRow key={contact.deviceName} sx={{ backgroundColor: '#fff' }}>
+                  <TableCell component="th" scope="row" sx={{ width: '50%' }}>
+                    {contact.deviceName}
+                  </TableCell>
+                  <TableCell sx={{ width: '50%' }}>
+                    {getPulseText(contact.pulse)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Collapse>
     </Box>
   );
 };

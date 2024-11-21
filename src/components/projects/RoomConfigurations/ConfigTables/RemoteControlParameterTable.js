@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,8 +8,12 @@ import {
   TableRow,
   Paper,
   Box,
-  Typography
+  Typography,
+  IconButton,
+  Collapse
 } from '@mui/material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 // 参数值映射
 const PARAMETER_DISPLAY = {
@@ -51,6 +55,8 @@ const getDisplayValue = (key, value) => {
 };
 
 const RemoteControlParameterTable = ({ parameters }) => {
+  const [isTableExpanded, setIsTableExpanded] = useState(true);
+
   if (!parameters || Object.keys(parameters).length === 0) {
     return null;
   }
@@ -76,63 +82,72 @@ const RemoteControlParameterTable = ({ parameters }) => {
         }}
       >
         Remote Control Parameters
+        <IconButton
+          size="small"
+          onClick={() => setIsTableExpanded(!isTableExpanded)}
+          sx={{ ml: 0.5 }}
+        >
+          {isTableExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        </IconButton>
       </Typography>
 
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          boxShadow: 'none',
-          '& .MuiTable-root': {
-            borderCollapse: 'separate',
-            borderSpacing: '0 4px',
-          }
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '50%'
-                }}
-              >
-                Parameter Name
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '50%'
-                }}
-              >
-                Value
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.entries(parameters).map(([key, value], index) => (
-              <TableRow
-                key={key}
-                sx={{
-                  backgroundColor: '#fff',
-                  '& td': {
-                    borderBottom: '1px solid rgba(224, 224, 224, 1)',
-                  }
-                }}
-              >
-                <TableCell sx={{ fontWeight: 'normal' }}>
-                  {key.toUpperCase()}
+      <Collapse in={isTableExpanded} timeout="auto" unmountOnExit>
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            boxShadow: 'none',
+            '& .MuiTable-root': {
+              borderCollapse: 'separate',
+              borderSpacing: '0 4px',
+            }
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '50%'
+                  }}
+                >
+                  Parameter Name
                 </TableCell>
-                <TableCell>
-                  {getDisplayValue(key, value)}
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '50%'
+                  }}
+                >
+                  Value
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {Object.entries(parameters).map(([key, value], index) => (
+                <TableRow
+                  key={key}
+                  sx={{
+                    backgroundColor: '#fff',
+                    '& td': {
+                      borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                    }
+                  }}
+                >
+                  <TableCell sx={{ fontWeight: 'normal' }}>
+                    {key.toUpperCase()}
+                  </TableCell>
+                  <TableCell>
+                    {getDisplayValue(key, value)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Collapse>
     </Box>
   );
 };

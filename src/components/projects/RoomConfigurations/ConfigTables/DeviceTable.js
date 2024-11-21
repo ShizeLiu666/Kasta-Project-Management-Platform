@@ -76,7 +76,7 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
             <IconButton
               size="small"
               onClick={onToggle}
-              sx={{
+              style={{
                 position: 'absolute',
                 right: 8,
                 top: '50%',
@@ -117,6 +117,7 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
 
 const DeviceTable = ({ devices }) => {
   const [expandedTypes, setExpandedTypes] = React.useState(new Set());
+  const [isTableExpanded, setIsTableExpanded] = useState(true);
 
   const groupedDevices = useMemo(() => {
     return devices.reduce((acc, device) => {
@@ -162,63 +163,72 @@ const DeviceTable = ({ devices }) => {
         }}
       >
         Device Configuration
+        <IconButton
+          size="small"
+          onClick={() => setIsTableExpanded(!isTableExpanded)}
+          sx={{ ml: 0.5 }}
+        >
+          {isTableExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        </IconButton>
       </Typography>
 
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          boxShadow: 'none',
-          '& .MuiTable-root': {
-            borderCollapse: 'separate',
-            borderSpacing: '0 4px',
-          }
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '30%'
-                }}
-              >
-                Device Type
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '30%'
-                }}
-              >
-                Model
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '40%'
-                }}
-              >
-                Device Names
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.entries(groupedDevices).map(([deviceType, deviceList]) => (
-              <DeviceTypeRow
-                key={deviceType}
-                deviceType={deviceType}
-                devices={deviceList}
-                isExpanded={expandedTypes.has(deviceType)}
-                onToggle={() => handleToggle(deviceType)}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Collapse in={isTableExpanded} timeout="auto" unmountOnExit>
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            boxShadow: 'none',
+            '& .MuiTable-root': {
+              borderCollapse: 'separate',
+              borderSpacing: '0 4px',
+            }
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '30%'
+                  }}
+                >
+                  Device Type
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '30%'
+                  }}
+                >
+                  Model
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '40%'
+                  }}
+                >
+                  Device Names
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Object.entries(groupedDevices).map(([deviceType, deviceList]) => (
+                <DeviceTypeRow
+                  key={deviceType}
+                  deviceType={deviceType}
+                  devices={deviceList}
+                  isExpanded={expandedTypes.has(deviceType)}
+                  onToggle={() => handleToggle(deviceType)}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Collapse>
     </Box>
   );
 };

@@ -97,7 +97,6 @@ function handleDryContactType(parts) {
 function handlePowerPointType(parts, deviceType) {
     const contents = [];
     
-    // 找到第一个操作符的位置
     const operationIndex = parts.findIndex(part => 
         ["ON", "OFF", "UNSELECT"].includes(part.toUpperCase())
     );
@@ -108,31 +107,32 @@ function handlePowerPointType(parts, deviceType) {
     const operations = parts.slice(operationIndex);
 
     if (deviceType.includes("Single-Way")) {
-        // 处理 Single-Way PowerPoint
         deviceNames.forEach(deviceName => {
             contents.push({
-                deviceName: deviceName.trim().replace(",", ""),
+                name: deviceName.trim().replace(",", ""),
                 deviceType: "PowerPoint Type (Single-Way)",
-                status: operations[0].toUpperCase()  // "ON" 或 "OFF"
+                statusConditions: {
+                    status: operations[0].toUpperCase() === "ON"
+                }
             });
         });
     } else if (deviceType.includes("Two-Way")) {
-        // 处理 Two-Way PowerPoint
         deviceNames.forEach(deviceName => {
             const leftStatus = operations[0].toUpperCase();
             const rightStatus = operations[1] ? operations[1].toUpperCase() : "OFF";
             
-            // 检查是否是有效的组合
             if (leftStatus === "UNSELECT" && rightStatus === "UNSELECT") {
                 console.warn("Invalid combination: UNSELECT UNSELECT is not allowed");
                 return;
             }
 
             contents.push({
-                deviceName: deviceName.trim().replace(",", ""),
+                name: deviceName.trim().replace(",", ""),
                 deviceType: "PowerPoint Type (Two-Way)",
-                leftStatus: leftStatus,   // ON, OFF, 或 UNSELECT
-                rightStatus: rightStatus  // ON, OFF, 或 UNSELECT
+                statusConditions: {
+                    leftStatus: leftStatus,
+                    rightStatus: rightStatus
+                }
             });
         });
     }

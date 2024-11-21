@@ -6,7 +6,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Box,
   Collapse,
   IconButton,
@@ -126,6 +125,8 @@ const GroupRow = ({ group }) => {
 };
 
 const GroupTable = ({ groups }) => {
+  const [isTableExpanded, setIsTableExpanded] = useState(true);
+
   if (!groups || groups.length === 0) {
     return null;
   }
@@ -151,62 +152,62 @@ const GroupTable = ({ groups }) => {
         }}
       >
         Group Configuration
+        <IconButton
+          size="small"
+          onClick={() => setIsTableExpanded(!isTableExpanded)}
+          sx={{ ml: 0.5 }}
+        >
+          {isTableExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        </IconButton>
       </Typography>
 
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          boxShadow: 'none',
-          '& .MuiTable-root': {
-            borderCollapse: 'separate',
-            borderSpacing: '0 4px',
-          }
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '40%'
-                }}
-              >
-                Group Name
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  backgroundColor: '#f8f9fa',
-                  width: '60%'
-                }}
-              >
-                Devices
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {groups.map((group, index) => (
-              <React.Fragment key={index}>
-                {index > 0 && (
-                  <TableRow>
-                    <TableCell 
-                      sx={{ 
-                        // height: '4px',
-                        padding: 0,
-                        border: 'none',
-                        backgroundColor: 'transparent'
-                      }} 
-                    />
-                  </TableRow>
-                )}
-                <GroupRow group={group} />
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Collapse in={isTableExpanded} timeout="auto" unmountOnExit>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '40%'
+                  }}
+                >
+                  Group Name
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '60%'
+                  }}
+                >
+                  Devices
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {groups.map((group, index) => (
+                <React.Fragment key={index}>
+                  {index > 0 && (
+                    <TableRow>
+                      <TableCell 
+                        sx={{ 
+                          // height: '4px',
+                          padding: 0,
+                          border: 'none',
+                          backgroundColor: 'transparent'
+                        }} 
+                      />
+                    </TableRow>
+                  )}
+                  <GroupRow group={group} />
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Collapse>
     </Box>
   );
 };
