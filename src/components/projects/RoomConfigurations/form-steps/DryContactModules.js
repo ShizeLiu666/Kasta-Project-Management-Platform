@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { validateDryContactModules } from "../ExcelProcessor/validation/DryContactModules";
 import "./steps.scss";
+import DryContactsTreeView from './TreeView/DryContactsTreeView';
 
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
@@ -82,18 +83,25 @@ const DryContactModules = forwardRef(({
     <>
       {dryContactErrors && (
         <Alert severity="error" style={{ marginTop: "10px" }}>
-          <AlertTitle>The following errors were found:</AlertTitle>
+          <AlertTitle>Error</AlertTitle>
           <ul>
             {dryContactErrors.map((error, index) => (
               <li key={index}>{error}</li>
             ))}
           </ul>
+          <div style={{ marginTop: "10px" }}>
+            Please refer to the <strong>Supported Dry Contact Module Formats</strong> below for the correct format.
+          </div>
         </Alert>
       )}
 
       {success && (
         <>
-          <TableContainer component={Paper}>
+          <Alert severity="success" style={{ marginTop: "10px" }}>
+            <AlertTitle>The following dry contact modules have been identified:</AlertTitle>
+          </Alert>
+
+          <TableContainer component={Paper} style={{ marginTop: "20px" }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -121,10 +129,19 @@ const DryContactModules = forwardRef(({
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[5, 10]}
+              style={{
+                alignItems: "center",
+                display: "flex",
+                margin: "10px 0",
+              }}
             />
           </TableContainer>
         </>
       )}
+
+      <div style={{ marginTop: "20px" }}>
+        <DryContactsTreeView />
+      </div>
     </>
   );
 });

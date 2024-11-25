@@ -1,10 +1,10 @@
 import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { Input, FormText, Button } from "reactstrap";
-import * as XLSX from "xlsx"; // 导入 xlsx 库
-import exampleFile from "../../../../assets/excel/example.xlsx"; // 导入示例文件
+import * as XLSX from "xlsx"; // Import xlsx library
+import exampleFile from "../../../../assets/excel/example.xlsx"; // Import example file
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
-// import TreeView from './TreeView/TreeView';  // 导入新的 TreeView 组件
+// import TreeView from './TreeView/TreeView';  // Import new TreeView component
 import DevicesTreeView from './TreeView/DevicesTreeView';
 
 // Helper functions moved from Step2
@@ -47,7 +47,7 @@ const splitKeywords = {
   devices: ["KASTA DEVICE", "DEVICE"],
   groups: ["KASTA GROUP", "GROUP"],
   scenes: ["KASTA SCENE", "SCENE"],
-  remoteControls: ["REMOTE CONTROL LINK"],
+  remoteControls: ["REMOTE CONTROL LINK", "REMOTE CONTROL"],
   remoteParameters: ["REMOTE CONTROL PARAMETER"],
   outputs: ["OUTPUT MODULE"],
   inputs: ["INPUT MODULE"],
@@ -67,7 +67,16 @@ function splitJsonFile(content) {
   };
   
   let currentKey = null;
+  let hasRemoteControl = false;
 
+  // First pass: check if REMOTE CONTROL LINK exists
+  content.forEach((line) => {
+    if (splitKeywords.remoteControls.some(keyword => line.includes(keyword))) {
+      hasRemoteControl = true;
+    }
+  });
+
+  // Second pass: process all content
   content.forEach((line) => {
     line = line.trim();
 
@@ -75,9 +84,21 @@ function splitJsonFile(content) {
       return;
     }
 
-    // 修改关键字检查逻辑
+    // Check for REMOTE CONTROL PARAMETER
+    if (splitKeywords.remoteParameters.some(keyword => line.includes(keyword))) {
+      if (!hasRemoteControl) {
+        console.warn("REMOTE CONTROL PARAMETER found but no REMOTE CONTROL LINK exists. This parameter will be ignored.");
+        return;
+      }
+    }
+
+    // Modify keyword check logic
     for (const [key, keywords] of Object.entries(splitKeywords)) {
       if (keywords.includes(line)) {
+        // Skip REMOTE CONTROL PARAMETER if no REMOTE CONTROL LINK exists
+        if (key === 'remoteParameters' && !hasRemoteControl) {
+          return;
+        }
         currentKey = key;
         return;
       }
@@ -91,7 +112,7 @@ function splitJsonFile(content) {
   return splitData;
 }
 
-// 使用 forwardRef 来暴露 isValidated 方法
+// Use forwardRef to expose isValidated method
 const Step1 = forwardRef(({ onValidate }, ref) => {
   const [file, setFile] = useState(null);
   const [isValidFile, setIsValidFile] = useState(false);
@@ -125,7 +146,6 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
 
-        // 查找包含 "Programming Details" 的工作表
         const programmingDetailsSheet = workbook.SheetNames.find(sheetName => 
           sheetName.toLowerCase().includes("programming details")
         );
@@ -135,6 +155,19 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
           const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
           const sheetText = sheetData.flat().join(" ").toLowerCase();
           
+          // Check for REMOTE CONTROL PARAMETER without REMOTE CONTROL LINK
+          const hasRemoteControl = sheetText.includes("remote control link");
+          const hasRemoteParameter = sheetText.includes("remote control parameter");
+          
+          if (hasRemoteParameter && !hasRemoteControl) {
+            setFile(selectedFile);
+            setIsValidFile(true);
+            setHasProgrammingDetails(false);
+            setErrorMessage("REMOTE CONTROL PARAMETER cannot be used without REMOTE CONTROL LINK");
+            setFileContent(null);
+            return;
+          }
+
           const requiredKeywords = ["kasta device", "device"];
           const optionalKeywords = [
             ["kasta group", "group"],
@@ -232,7 +265,7 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
         <div className="col col-lg-6">
           <form id="Form" className="form-horizontal mt-2">
             <div className="form-group content form-block-holder">
-              {/* 显示错误信息或成功信息 */}
+              {/* Display error message or success message */}
             {(isNextClicked || file) && (
               errorMessage ? (
                 <Alert severity="error" style={{ marginTop: "10px" }}>
@@ -276,35 +309,66 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
                 )}
               </div>
               <FormText>
-                <span style={{ color: "red" }}>* </span>
-                Only Excel files are accepted
-                <br />
-                <span style={{ color: "red" }}>* </span>
-                Must contain a "Programming Details" sheet
-                <br />
-                <span style={{ color: "red" }}>* </span>
-                The "Programming Details" sheet must include the following required keyword:
-                <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
-                  <li style={{ marginLeft: "20px" }}>DEVICE</li>
-                </ul>
-                <span style={{ color: "red" }}>* </span>
-                And at least one of the following optional keywords:
-                <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
-                  <li style={{ marginLeft: "20px" }}>GROUP</li>
-                  <li style={{ marginLeft: "20px" }}>SCENE</li>
-                  <li style={{ marginLeft: "20px" }}>REMOTE CONTROL LINK</li>
-                </ul>
-                ( Please refer to the{" "}
-                <a
-                  href={exampleFile}
-                  download="Example_Configuration_Details.xlsx"
-                >
-                  Example of Configuration Details
-                </a>{" "}
-                )
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ marginBottom: '10px' }}>
+                    <span style={{ color: "red" }}>* </span>
+                    Only Excel files are accepted
+                  </div>
+                  
+                  <div style={{ marginBottom: '10px' }}>
+                    <span style={{ color: "red" }}>* </span>
+                    Must contain a "Programming Details" sheet
+                  </div>
+
+                  <div style={{ marginBottom: '10px' }}>
+                    <span style={{ color: "red" }}>* </span>
+                    Required keyword:
+                    <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
+                      <li style={{ marginLeft: "20px" }}>
+                        <em><strong>DEVICE</strong></em>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: '10px' }}>
+                    <span style={{ color: "red" }}>* </span>
+                    Optional keywords (at least one required):
+                    <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
+                      <li style={{ marginLeft: "20px" }}><em><strong>GROUP</strong></em></li>
+                      <li style={{ marginLeft: "20px" }}><em><strong>SCENE</strong></em></li>
+                      <li style={{ marginLeft: "20px" }}><em><strong>REMOTE CONTROL LINK</strong></em></li>
+                    </ul>
+                  </div>
+
+                  <div style={{ marginBottom: '10px' }}>
+                    <span style={{ color: "blue" }}>† </span>
+                    Additional configuration keywords:
+                    <ul style={{ margin: "5px 0 5px 20px", padding: 0 }}>
+                      <li style={{ marginLeft: "20px" }}>
+                        <em><strong>REMOTE CONTROL PARAMETER</strong></em> (Available only when <em><strong>REMOTE CONTROL LINK</strong></em> exists, used for setting global remote control parameters)
+                      </li>
+                      <li style={{ marginLeft: "20px" }}>
+                        <em><strong>OUTPUT MODULE</strong></em> (Detailed configuration for devices with output modules)
+                      </li>
+                      <li style={{ marginLeft: "20px" }}>
+                        <em><strong>INPUT MODULE</strong></em> (Detailed configuration for devices with input modules)
+                      </li>
+                      <li style={{ marginLeft: "20px" }}>
+                        <em><strong>DRY CONTACT MODULE</strong></em> (Detailed configuration for devices with dry contact modules)
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    Please refer to the{" "}
+                    <a href={exampleFile} download="Example_Configuration_Details.xlsx">
+                      Example of Configuration Details
+                    </a>
+                  </div>
+                </div>
               </FormText>
             </div>
-            {/* 使用新的 TreeView 组件 */}
+            {/* Use new TreeView component */}
             <DevicesTreeView />
 
         
