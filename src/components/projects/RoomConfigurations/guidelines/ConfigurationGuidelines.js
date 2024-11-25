@@ -138,137 +138,64 @@ const RemoteControlDeclarationContent = ({ language }) => (
 const RemoteControlRulesContent = ({ language }) => (
   <ul style={{ margin: 0, paddingLeft: '20px' }}>
     <li>
-      {content[language].remoteControlConfig.commandFormat.title}
+      {content[language].remoteControlConfig.deviceTypes.title}
       <ul>
-        <li>{content[language].remoteControlConfig.commandFormat.format}</li>
-        {content[language].remoteControlConfig.commandFormat.notes.map((note, index) => (
-          <li key={index}>{note}</li>
+        {content[language].remoteControlConfig.deviceTypes.types.map((type, index) => (
+          <li key={index}>{type}</li>
         ))}
       </ul>
     </li>
     <li>
-      {content[language].remoteControlConfig.commandTypes.device.title}
+      {content[language].remoteControlConfig.commandFormat.title}
+      <ul>
+        <li>{content[language].remoteControlConfig.commandFormat.format}</li>
+        <li>{content[language].remoteControlConfig.commandFormat.example}</li>
+      </ul>
+    </li>
+    <li>
+      {content[language].remoteControlConfig.commandTypes.title}
       <ul>
         <li>
-          {content[language].remoteControlConfig.commandTypes.device.standard.title}
+          {content[language].remoteControlConfig.commandTypes.device.title}
           <ul>
-            <li>{content[language].remoteControlConfig.commandTypes.device.standard.format}</li>
-          </ul>
-        </li>
-        <li>
-          {content[language].remoteControlConfig.commandTypes.device.fan.title}
-          <ul>
-            {content[language].remoteControlConfig.commandTypes.device.fan.formats.map((format, index) => (
-              <li key={index}>{format}</li>
-            ))}
-          </ul>
-        </li>
-        <li>
-          {content[language].remoteControlConfig.commandTypes.device.curtain.title}
-          <ul>
-            {content[language].remoteControlConfig.commandTypes.device.curtain.formats.map((format, index) => (
-              <li key={index}>{format}</li>
-            ))}
-          </ul>
-        </li>
-        <li>
-          {content[language].remoteControlConfig.commandTypes.device.powerPoint.title}
-          <ul>
-            {content[language].remoteControlConfig.commandTypes.device.powerPoint.formats.map((format, index) => (
-              <li key={index}>{format}</li>
-            ))}
-          </ul>
-        </li>
-        <li>
-          {content[language].remoteControlConfig.commandTypes.device.outputModule.title}
-          <ul>
-            {content[language].remoteControlConfig.commandTypes.device.outputModule.formats.map((format, index) => (
-              <li key={index}>{format}</li>
-            ))}
-          </ul>
-        </li>
-        <li>
-          {content[language].remoteControlConfig.commandTypes.device.inputModule.title}
-          <ul>
+            <li>{content[language].remoteControlConfig.commandTypes.device.basic.format}</li>
             <li>
-              {content[language].remoteControlConfig.commandTypes.device.inputModule.basic.title}
+              {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.title}
               <ul>
-                <li>{content[language].remoteControlConfig.commandTypes.device.inputModule.basic.format}</li>
-              </ul>
-            </li>
-            <li>
-              {content[language].remoteControlConfig.commandTypes.device.inputModule.deviceOperation.title}
-              <ul>
-                <li>
-                  {content[language].remoteControlConfig.commandTypes.device.inputModule.deviceOperation.curtain.title}
-                  <ul>
-                    {content[language].remoteControlConfig.commandTypes.device.inputModule.deviceOperation.curtain.formats.map((format, index) => (
-                      <li key={index}>{format}</li>
-                    ))}
-                  </ul>
-                </li>
-                <li>
-                  {content[language].remoteControlConfig.commandTypes.device.inputModule.deviceOperation.fan.title}
-                  <ul>
-                    {content[language].remoteControlConfig.commandTypes.device.inputModule.deviceOperation.fan.formats.map((format, index) => (
-                      <li key={index}>{format}</li>
-                    ))}
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li>
-              {content[language].remoteControlConfig.commandTypes.device.inputModule.inputAction.title}
-              <ul>
-                {content[language].remoteControlConfig.commandTypes.device.inputModule.inputAction.formats.map((format, index) => (
+                {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.formats.map((format, index) => (
                   <li key={index}>{format}</li>
                 ))}
               </ul>
             </li>
             <li>
-              {content[language].remoteControlConfig.commandTypes.device.inputModule.combinedOperation.title}
+              {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.title}
               <ul>
-                <li>
-                  {content[language].remoteControlConfig.commandTypes.device.inputModule.combinedOperation.curtain.title}
-                  <ul>
-                    {content[language].remoteControlConfig.commandTypes.device.inputModule.combinedOperation.curtain.formats.map((format, index) => (
-                      <li key={index}>{format}</li>
-                    ))}
-                  </ul>
-                </li>
-                <li>
-                  {content[language].remoteControlConfig.commandTypes.device.inputModule.combinedOperation.fan.title}
-                  <ul>
-                    {content[language].remoteControlConfig.commandTypes.device.inputModule.combinedOperation.fan.formats.map((format, index) => (
-                      <li key={index}>{format}</li>
-                    ))}
-                  </ul>
-                </li>
+                {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.formats.map((format, index) => (
+                  <li key={index}>{format}</li>
+                ))}
               </ul>
             </li>
+          </ul>
+        </li>
+        <li>
+          {content[language].remoteControlConfig.commandTypes.group.title}
+          <ul>
+            <li>{content[language].remoteControlConfig.commandTypes.group.format}</li>
+          </ul>
+        </li>
+        <li>
+          {content[language].remoteControlConfig.commandTypes.scene.title}
+          <ul>
+            <li>{content[language].remoteControlConfig.commandTypes.scene.format}</li>
           </ul>
         </li>
       </ul>
     </li>
     <li>
-      {content[language].remoteControlConfig.commandTypes.group.title}
-      <ul>
-        {content[language].remoteControlConfig.commandTypes.group.formats.map((format, index) => (
-          <li key={index}>{format}</li>
-        ))}
-      </ul>
+      {content[language].remoteControlConfig.rules.map((rule, index) => (
+        <li key={index}>{rule}</li>
+      ))}
     </li>
-    <li>
-      {content[language].remoteControlConfig.commandTypes.scene.title}
-      <ul>
-        {content[language].remoteControlConfig.commandTypes.scene.formats.map((format, index) => (
-          <li key={index}>{format}</li>
-        ))}
-      </ul>
-    </li>
-    {content[language].remoteControlConfig.rules.map((rule, index) => (
-      <li key={`rule-${index}`}>{rule}</li>
-    ))}
   </ul>
 );
 
@@ -369,6 +296,102 @@ const RemoteParametersRulesContent = ({ language }) => (
   </ul>
 );
 
+// Input Module Configuration 内容组件
+const InputModuleDeclarationContent = ({ language }) => (
+  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+    <li>{content[language].inputModuleConfig.mustStartWith}</li>
+    <li>
+      {content[language].inputModuleConfig.deviceNamesCanContain}
+      <ul>
+        <li>{content[language].inputModuleConfig.letters}</li>
+        <li>{content[language].inputModuleConfig.numbers}</li>
+        <li>{content[language].inputModuleConfig.underscore}</li>
+        <li>{content[language].inputModuleConfig.spaces}</li>
+      </ul>
+    </li>
+    <li>
+      {content[language].inputModuleConfig.deviceTypes.title}
+      <ul>
+        {content[language].inputModuleConfig.deviceTypes.types.map((type, index) => (
+          <li key={index}>{type}</li>
+        ))}
+      </ul>
+    </li>
+  </ul>
+);
+
+const InputModuleRulesContent = ({ language }) => (
+  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+    <li>
+      {content[language].inputModuleConfig.channelFormat.title}
+      <ul>
+        <li>{content[language].inputModuleConfig.channelFormat.format}</li>
+        {content[language].inputModuleConfig.channelFormat.notes.map((note, index) => (
+          <li key={index}>{note}</li>
+        ))}
+      </ul>
+    </li>
+    <li>
+      {content[language].inputModuleConfig.actions.title}
+      <ul>
+        {content[language].inputModuleConfig.actions.types.map((action, index) => (
+          <li key={index}>{action}</li>
+        ))}
+      </ul>
+    </li>
+    {content[language].inputModuleConfig.rules.map((rule, index) => (
+      <li key={`rule-${index}`}>{rule}</li>
+    ))}
+  </ul>
+);
+
+// Dry Contact Module Configuration 内容组件
+const DryContactDeclarationContent = ({ language }) => (
+  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+    <li>{content[language].dryContactConfig.mustStartWith}</li>
+    <li>
+      {content[language].dryContactConfig.deviceNamesCanContain}
+      <ul>
+        <li>{content[language].dryContactConfig.letters}</li>
+        <li>{content[language].dryContactConfig.numbers}</li>
+        <li>{content[language].dryContactConfig.underscore}</li>
+        <li>{content[language].dryContactConfig.spaces}</li>
+      </ul>
+    </li>
+    <li>
+      {content[language].dryContactConfig.deviceTypes.title}
+      <ul>
+        {content[language].dryContactConfig.deviceTypes.types.map((type, index) => (
+          <li key={index}>{type}</li>
+        ))}
+      </ul>
+    </li>
+  </ul>
+);
+
+const DryContactRulesContent = ({ language }) => (
+  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+    <li>
+      {content[language].dryContactConfig.actionFormat.title}
+      <ul>
+        <li>{content[language].dryContactConfig.actionFormat.format}</li>
+        <li>{content[language].dryContactConfig.actionFormat.note}</li>
+      </ul>
+    </li>
+    <li>
+      {content[language].dryContactConfig.actions.title}
+      <ul>
+        {content[language].dryContactConfig.actions.types.map((action, index) => (
+          <li key={index}>{action}</li>
+        ))}
+      </ul>
+    </li>
+    {content[language].dryContactConfig.rules.map((rule, index) => (
+      <li key={`rule-${index}`}>{rule}</li>
+    ))}
+  </ul>
+);
+
 const ConfigurationGuidelines = ({ open, onClose }) => {
   const [language, setLanguage] = useState('en');
 
@@ -439,6 +462,45 @@ const ConfigurationGuidelines = ({ open, onClose }) => {
           sx={{ mb: 4 }}
         />
 
+        <h3>{content[language].outputModuleConfig.title}</h3>
+        <ConfigTable
+          keyword="OUTPUT MODULE"
+          leftColumn={{
+            title: content[language].outputModuleConfig.declaration,
+            content: <OutputModuleDeclarationContent language={language} />
+          }}
+          rightColumn={{
+            title: content[language].outputModuleConfig.configRules,
+            content: <OutputModuleRulesContent language={language} />
+          }}
+        />
+
+        <h3>{content[language].inputModuleConfig.title}</h3>
+        <ConfigTable
+          keyword="INPUT MODULE"
+          leftColumn={{
+            title: content[language].inputModuleConfig.declaration,
+            content: <InputModuleDeclarationContent language={language} />
+          }}
+          rightColumn={{
+            title: content[language].inputModuleConfig.configRules,
+            content: <InputModuleRulesContent language={language} />
+          }}
+        />
+
+        <h3>{content[language].dryContactConfig.title}</h3>
+        <ConfigTable
+          keyword="DRY CONTACT MODULE"
+          leftColumn={{
+            title: content[language].dryContactConfig.declaration,
+            content: <DryContactDeclarationContent language={language} />
+          }}
+          rightColumn={{
+            title: content[language].dryContactConfig.configRules,
+            content: <DryContactRulesContent language={language} />
+          }}
+        />
+
         <h3>{content[language].groupConfig}</h3>
         <ConfigTable
           keyword="GROUP"
@@ -476,19 +538,6 @@ const ConfigurationGuidelines = ({ open, onClose }) => {
           rightColumn={{
             title: content[language].remoteControlConfig.configRules,
             content: <RemoteControlRulesContent language={language} />
-          }}
-        />
-
-        <h3>{content[language].outputModuleConfig.title}</h3>
-        <ConfigTable
-          keyword="OUTPUT MODULE"
-          leftColumn={{
-            title: content[language].outputModuleConfig.declaration,
-            content: <OutputModuleDeclarationContent language={language} />
-          }}
-          rightColumn={{
-            title: content[language].outputModuleConfig.configRules,
-            content: <OutputModuleRulesContent language={language} />
           }}
         />
 

@@ -1,7 +1,7 @@
 export const content = {
     en: {
       title: 'Configuration Guidelines',
-      // Device Configuration
+      // 1. Device Configuration
       deviceConfig: 'Device Configuration',
       modelDeclaration: 'Device Model Declaration',
       namingRules: 'Device Naming Rules',
@@ -15,7 +15,137 @@ export const content = {
       uniqueName: 'Each device name must be unique and cannot conflict with Device models',
       closeButton: 'Close',
   
-      // Group Configuration
+      // 2. Output Module Configuration
+      outputModuleConfig: {
+        title: 'Output Module Configuration',
+        declaration: 'Device Declaration',
+        configRules: 'Channel Configuration Rules',
+        mustStartWith: 'Must start with NAME:',
+        deviceNamesCanContain: 'Device names can contain:',
+        letters: 'Letters (a-z, A-Z)',
+        numbers: 'Numbers (0-9)',
+        underscore: 'Underscore (_)',
+        spaces: 'Spaces',
+        deviceTypes: {
+          title: 'Must be defined in DEVICE section as:',
+          types: [
+            '4 Output Module'
+          ]
+        },
+        channelFormat: {
+          title: 'Channel Format:',
+          basic: '[channel_number]: [channel_name]',
+          withAction: '[channel_number]: [channel_name] - [action]',
+          notes: [
+            'Channel numbers must be between 1 and 4',
+            'Channel names cannot contain spaces',
+            'Each channel can only be used once per output module'
+          ]
+        },
+        actions: {
+          title: 'Supported Actions:',
+          types: [
+            'NORMAL (default if not specified)',
+            '1SEC (1 second pulse)',
+            '6SEC (6 seconds pulse)',
+            '9SEC (9 seconds pulse)',
+            'REVERS (reverse operation)'
+          ]
+        },
+        rules: [
+          'Device must be of type "4 Output Module"',
+          'Each output module must have a unique name',
+          'Channel numbers must be between 1-4',
+          'Channel names cannot contain spaces',
+          'Each channel can only be used once per module',
+          'Actions are optional (NORMAL is default)',
+          'Only supported actions are allowed',
+          'Command format must be exact'
+        ]
+      },
+      // 3. Input Module Configuration
+      inputModuleConfig: {
+        title: 'Input Module Configuration',
+        declaration: 'Device Declaration',
+        configRules: 'Channel Configuration Rules',
+        mustStartWith: 'Must start with NAME:',
+        deviceNamesCanContain: 'Device names can contain:',
+        letters: 'Letters (a-z, A-Z)',
+        numbers: 'Numbers (0-9)',
+        underscore: 'Underscore (_)',
+        spaces: 'Spaces',
+        deviceTypes: {
+          title: 'Must be defined in DEVICE section as:',
+          types: [
+            '5 Input Module'
+          ]
+        },
+        channelFormat: {
+          title: 'Channel Format:',
+          format: '[channel_number]: [action]',
+          notes: [
+            'Channel numbers must be between 1 and 5',
+            'Each channel can only be used once per input module'
+          ]
+        },
+        actions: {
+          title: 'Supported Actions:',
+          types: [
+            'TOGGLE',
+            'MOMENTARY'
+          ]
+        },
+        rules: [
+          'Device must be of type "5 Input Module"',
+          'Each input module must have a unique name',
+          'Channel numbers must be between 1-5',
+          'Each channel can only be used once per module',
+          'Only supported actions are allowed',
+          'Command format must be exact'
+        ]
+      },
+      // 4. Dry Contact Module Configuration
+      dryContactConfig: {
+        title: 'Dry Contact Module Configuration',
+        declaration: 'Device Declaration',
+        configRules: 'Configuration Rules',
+        mustStartWith: 'Must start with NAME:',
+        deviceNamesCanContain: 'Device names can contain:',
+        letters: 'Letters (a-z, A-Z)',
+        numbers: 'Numbers (0-9)',
+        underscore: 'Underscore (_)',
+        spaces: 'Spaces',
+        deviceTypes: {
+          title: 'Must be defined in DEVICE section as:',
+          types: [
+            'Dry Contact'
+          ]
+        },
+        actionFormat: {
+          title: 'Action Format:',
+          format: '[action]',
+          note: 'Action must be specified immediately after device name'
+        },
+        actions: {
+          title: 'Supported Actions:',
+          types: [
+            'NORMAL (default operation)',
+            '1SEC (1 second pulse)',
+            '6SEC (6 seconds pulse)',
+            '9SEC (9 seconds pulse)',
+            'REVERS (reverse operation)'
+          ]
+        },
+        rules: [
+          'Device must be of type "Dry Contact"',
+          'Each dry contact module must have a unique name',
+          'Action must be specified after device name',
+          'Only one action per module is allowed',
+          'Only supported actions are allowed',
+          'Command format must be exact'
+        ]
+      },
+      // 5. Group Configuration
       groupConfig: 'Group Configuration',
       groupModelDeclaration: 'Group Model Declaration',
       deviceListRules: 'Device List Rules',
@@ -33,7 +163,7 @@ export const content = {
       uniqueInGroup: 'Be unique within the group',
       devicesSeparated: 'Multiple devices separated by commas',
   
-      // Scene Configuration
+      // 6. Scene Configuration
       sceneConfig: {
         title: 'Scene Configuration',
         sceneDeclaration: 'Scene Declaration',
@@ -107,199 +237,69 @@ export const content = {
           'Each instruction must contain at least one device and one valid operation'
         ]
       },
-      // Remote Control Configuration
+      // 7. Remote Control Configuration
       remoteControlConfig: {
         title: 'Remote Control Configuration',
-        declaration: 'Device Declaration',
-        configRules: 'Button/Input Configuration Rules',
-        mustStartWith: 'Must start with NAME:',
-        deviceNamesCanContain: 'Device names can contain:',
-        letters: 'Letters (a-z, A-Z)',
-        numbers: 'Numbers (0-9)',
-        underscore: 'Underscore (_)',
-        spaces: 'Spaces',
+        declaration: 'Remote Control Declaration',
+        configRules: 'Configuration Rules',
         deviceTypes: {
-          title: 'Must be defined in DEVICE section as:',
+          title: 'Supported Device Types',
           types: [
-            'Remote Control type (1-6 Push Panel)',
-            '5/6 Input Module',
+            'Remote Control (1-6 Push Panel)',
+            '5 Input Module',
             '4 Output Module'
           ]
         },
         commandFormat: {
-          title: 'Basic Format:',
-          format: '[Number]: [Command Type] [Target] [Options]',
-          notes: [
-            'Number: Based on device type (1-6)',
-            'Command Types: DEVICE, GROUP, or SCENE'
-          ]
+          title: 'Command Format',
+          format: '<button_number>: <command>',
+          example: '1: DEVICE LightA'
         },
         commandTypes: {
+          title: 'Supported Commands',
           device: {
-            title: 'DEVICE Commands:',
-            standard: {
-              title: 'Standard Devices:',
-              format: 'Basic: [Number]: DEVICE [device_name]'
+            title: 'Device Commands',
+            basic: {
+              title: 'Basic Device Control',
+              format: 'DEVICE [device_name]'
             },
-            fan: {
-              title: 'Fan Type:',
-              formats: [
-                'DEVICE [device_name]    (Default operation: FAN)',
-                'DEVICE [device_name] - FAN',
-                'DEVICE [device_name] - LAMP',
-                'DEVICE [device_name] - WHOLE'
-              ]
-            },
-            curtain: {
-              title: 'Curtain Type:',
-              formats: [
-                'DEVICE [device_name]    (Default operation: OPEN)',
-                'DEVICE [device_name] - OPEN',
-                'DEVICE [device_name] - CLOSE',
-                'DEVICE [device_name] - WHOLE'
-              ]
-            },
-            powerPoint: {
-              title: 'PowerPoint Type (Two-Way):',
-              formats: [
-                'DEVICE [device_name]    (Default operation: WHOLE)',
-                'DEVICE [device_name] - LEFT',
-                'DEVICE [device_name] - RIGHT',
-                'DEVICE [device_name] - WHOLE'
-              ]
-            },
-            outputModule: {
-              title: '4 Output Module:',
-              formats: [
-                'DEVICE [device_name]    (Default operation: WHOLE)',
-                'DEVICE [device_name] - FIRST',
-                'DEVICE [device_name] - SECOND',
-                'DEVICE [device_name] - THIRD',
-                'DEVICE [device_name] - FOURTH',
-                'DEVICE [device_name] - WHOLE'
-              ]
-            },
-            inputModule: {
-              title: 'Input Module (5/6 Input):',
-              basic: {
-                title: 'Basic Device Binding:',
-                format: 'DEVICE [device_name]    (Default: MOMENTARY)'
-              },
-              deviceOperation: {
-                title: 'Device with Operation:',
-                curtain: {
-                  title: 'Curtain Examples:',
-                  formats: [
-                    'DEVICE [device_name] - OPEN    (Default: MOMENTARY)',
-                    'DEVICE [device_name] - CLOSE    (Default: MOMENTARY)'
-                  ]
-                },
-                fan: {
-                  title: 'Fan Examples:',
-                  formats: [
-                    'DEVICE [device_name] - FAN    (Default: MOMENTARY)',
-                    'DEVICE [device_name] - LAMP    (Default: MOMENTARY)'
-                  ]
-                }
-              },
-              inputAction: {
-                title: 'Device with Input Action:',
+            deviceOperation: {
+              title: 'Device Operations',
+              curtain: {
+                title: 'Curtain Control',
                 formats: [
-                  'DEVICE [device_name] + TOGGLE',
-                  'DEVICE [device_name] + MOMENTARY    (Default)'
+                  'DEVICE [device_name] - OPEN',
+                  'DEVICE [device_name] - CLOSE'
                 ]
               },
-              combinedOperation: {
-                title: 'Combined Operation and Input Action:',
-                curtain: {
-                  title: 'Curtain Examples:',
-                  formats: [
-                    'DEVICE [device_name] - OPEN + TOGGLE',
-                    'DEVICE [device_name] - CLOSE + MOMENTARY'
-                  ]
-                },
-                fan: {
-                  title: 'Fan Examples:',
-                  formats: [
-                    'DEVICE [device_name] - FAN + TOGGLE',
-                    'DEVICE [device_name] - LAMP + MOMENTARY'
-                  ]
-                }
+              fan: {
+                title: 'Fan Control',
+                formats: [
+                  'DEVICE [device_name] - FAN',
+                  'DEVICE [device_name] - LAMP'
+                ]
               }
             }
           },
           group: {
-            title: 'GROUP Commands:',
-            formats: [
-              'GROUP [group_name]'
-            ]
+            title: 'Group Control',
+            format: 'GROUP [group_name]'
           },
           scene: {
-            title: 'SCENE Commands:',
-            formats: [
-              'SCENE [scene_name]'
-            ]
+            title: 'Scene Control',
+            format: 'SCENE [scene_name]'
           }
         },
         rules: [
-          'Button/Input numbers must not exceed device capacity:',
-          '• 1-6 Push Panel: 1-6 buttons',
-          '• 5 Input Module: 1-5 inputs',
-          '• 6 Input Module: 1-6 inputs',
+          'Button/Input numbers cannot exceed device capacity:',
+          '1-6 Push Panel: 1-6 buttons',
+          '5 Input Module: 1-5 inputs',
           'All referenced devices/groups/scenes must exist',
           'Each button/input can only have one command',
-          'Only Input Modules support TOGGLE/MOMENTARY actions',
-          'Commands must match device type capabilities',
-          'Input Module actions (TOGGLE/MOMENTARY) are added with \'+\' symbol'
+          'Commands must match device type functionality'
         ]
       },
-      outputModuleConfig: {
-        title: 'Output Module Configuration',
-        declaration: 'Device Declaration',
-        configRules: 'Channel Configuration Rules',
-        mustStartWith: 'Must start with NAME:',
-        deviceNamesCanContain: 'Device names can contain:',
-        letters: 'Letters (a-z, A-Z)',
-        numbers: 'Numbers (0-9)',
-        underscore: 'Underscore (_)',
-        spaces: 'Spaces',
-        deviceTypes: {
-          title: 'Must be defined in DEVICE section as:',
-          types: [
-            '4 Output Module'
-          ]
-        },
-        channelFormat: {
-          title: 'Channel Format:',
-          basic: '[channel_number]: [channel_name]',
-          withAction: '[channel_number]: [channel_name] - [action]',
-          notes: [
-            'Channel numbers must be between 1 and 4',
-            'Channel names cannot contain spaces',
-            'Each channel can only be used once per output module'
-          ]
-        },
-        actions: {
-          title: 'Supported Actions:',
-          types: [
-            'NORMAL (default if not specified)',
-            '1SEC (1 second pulse)',
-            '6SEC (6 seconds pulse)',
-            '9SEC (9 seconds pulse)',
-            'REVERS (reverse operation)'
-          ]
-        },
-        rules: [
-          'Device must be of type "4 Output Module"',
-          'Each output module must have a unique name',
-          'Channel numbers must be between 1-4',
-          'Channel names cannot contain spaces',
-          'Each channel can only be used once per module',
-          'Actions are optional (NORMAL is default)',
-          'Only supported actions are allowed',
-          'Command format must be exact'
-        ]
-      },
+      // 8. Remote Parameters Configuration
       remoteParametersConfig: {
         title: 'Remote Parameters Configuration',
         declaration: 'Parameter Declaration',
@@ -370,7 +370,7 @@ export const content = {
     },
     zh: {
       title: '配置指南',
-      // Device Configuration
+      // 1. Device Configuration
       deviceConfig: '设备配置',
       modelDeclaration: '设备型号声明',
       namingRules: '设备命名规则',
@@ -384,7 +384,137 @@ export const content = {
       uniqueName: '每个设备名称必须唯一，且不能与设备型号冲突',
       closeButton: 'CLOSE',
   
-      // Group Configuration
+      // 2. Output Module Configuration
+      outputModuleConfig: {
+        title: '输出模块配置',
+        declaration: '设备声明',
+        configRules: '通道配置规则',
+        mustStartWith: '必须以 NAME: 开头',
+        deviceNamesCanContain: '设备名称可以包含：',
+        letters: '字母 (a-z, A-Z)',
+        numbers: '数字 (0-9)',
+        underscore: '下划线 (_)',
+        spaces: '空格',
+        deviceTypes: {
+          title: '必须在 DEVICE 部分定义为：',
+          types: [
+            '4路输出模块'
+          ]
+        },
+        channelFormat: {
+          title: '通道格式：',
+          basic: '[通道号]: [通道名称]',
+          withAction: '[通道号]: [通道名称] - [动作]',
+          notes: [
+            '通道号必须在1到4之间',
+            '通道名称不能包含空格',
+            '每个通道在每个输出模块中只能使用一次'
+          ]
+        },
+        actions: {
+          title: '支持的动作：',
+          types: [
+            'NORMAL (默认，如未指定)',
+            '1SEC (1秒脉冲)',
+            '6SEC (6秒脉冲)',
+            '9SEC (9秒脉冲)',
+            'REVERS (反向操作)'
+          ]
+        },
+        rules: [
+          '设备类型必须是"4输出模块"',
+          '每个4输出模块必须有唯一的名称',
+          '通道号必须在1-4之间',
+          '通道名称不能包含空格',
+          '每个通道在每个模块中只能使用一次',
+          '动作是可选的(默认为NORMAL)',
+          '只允许使用支持的动作',
+          '命令格式必须准确'
+        ]
+      },
+      // 3. Input Module Configuration
+      inputModuleConfig: {
+        title: '输入模块配置',
+        declaration: '设备声明',
+        configRules: '通道配置规则',
+        mustStartWith: '必须以 NAME: 开头',
+        deviceNamesCanContain: '设备名称可以包含：',
+        letters: '字母 (a-z, A-Z)',
+        numbers: '数字 (0-9)',
+        underscore: '下划线 (_)',
+        spaces: '空格',
+        deviceTypes: {
+          title: '必须在 DEVICE 部分定义为：',
+          types: [
+            '5路输入模块'
+          ]
+        },
+        channelFormat: {
+          title: '通道格式：',
+          format: '[通道号]: [动作]',
+          notes: [
+            '通道号必须在1到5之间',
+            '每个通道在每个输入模块中只能使用一次'
+          ]
+        },
+        actions: {
+          title: '支持的动作：',
+          types: [
+            'TOGGLE (开关切换)',
+            'MOMENTARY (点动)'
+          ]
+        },
+        rules: [
+          '设备类型必须是"5路输入模块"',
+          '每个输入模块必须有唯一的名称',
+          '通道号必须在1-5之间',
+          '每个通道在每个模块中只能使用一次',
+          '只允许使用支持的动作',
+          '命令格式必须准确'
+        ]
+      },
+      // 4. Dry Contact Module Configuration
+      dryContactConfig: {
+        title: '干接点模块配置',
+        declaration: '设备声明',
+        configRules: '配置规则',
+        mustStartWith: '必须以 NAME: 开头',
+        deviceNamesCanContain: '设备名称可以包含：',
+        letters: '字母 (a-z, A-Z)',
+        numbers: '数字 (0-9)',
+        underscore: '下划线 (_)',
+        spaces: '空格',
+        deviceTypes: {
+          title: '必须在 DEVICE 部分定义为：',
+          types: [
+            '干接点'
+          ]
+        },
+        actionFormat: {
+          title: '动作格式：',
+          format: '[动作]',
+          note: '动作必须紧跟在设备名称后面'
+        },
+        actions: {
+          title: '支持的动作：',
+          types: [
+            'NORMAL (默认操作)',
+            '1SEC (1秒脉冲)',
+            '6SEC (6秒脉冲)',
+            '9SEC (9秒脉冲)',
+            'REVERS (反向操作)'
+          ]
+        },
+        rules: [
+          '设备类型必须是"干接点"',
+          '每个干接点模块必须有唯一的名称',
+          '动作必须在设备名称后指定',
+          '每个模块只允许一个动作',
+          '只允许使用支持的动作',
+          '命令格式必须准确'
+        ]
+      },
+      // 5. Group Configuration
       groupConfig: '组配置',
       groupModelDeclaration: '组模型声明',
       deviceListRules: '设备列表规则',
@@ -402,7 +532,7 @@ export const content = {
       uniqueInGroup: '在组内唯一',
       devicesSeparated: '多个设备用逗号分隔',
   
-      // Scene Configuration
+      // 6. Scene Configuration
       sceneConfig: {
         title: '场景配置',
         sceneDeclaration: '场景声明',
@@ -471,204 +601,74 @@ export const content = {
           '不能在组操作中混合不同类型的设备（继电器和调光器除外）',
           '百分比值必须在 0-100 之间',
           '设备名称必须在任何操作命令之前定义',
-          '操作必须严格遵循每种设备类型指定的格式',
+          '作必须严格遵循每种设备类型指定的格式',
           '命令不区分大小写，但必须匹配指定格式',
           '每条指令必须包含至少一个设备和一个有效操作'
         ]
       },
-      // Remote Control Configuration 中文版
+      // 7. Remote Control Configuration 中文版
       remoteControlConfig: {
         title: '遥控器配置',
-        declaration: '设备声明',
-        configRules: '按钮/输入配置规则',
-        mustStartWith: '必须以 NAME: 开头',
-        deviceNamesCanContain: '设备名称可以包含：',
-        letters: '字母 (a-z, A-Z)',
-        numbers: '数字 (0-9)',
-        underscore: '下划线 (_)',
-        spaces: '空格',
+        declaration: '遥控器声明',
+        configRules: '配置规则',
         deviceTypes: {
-          title: '必须在 DEVICE 部分定义为：',
+          title: '支持的设备类型',
           types: [
-            '遥控器类型 (1-6键面板)',
-            '5/6路输入模块',
+            '遥控器 (1-6键面板)',
+            '5路输入模块',
             '4路输出模块'
           ]
         },
         commandFormat: {
-          title: '基本格式：',
-          format: '[编号]: [命令类型] [目标] [选项]',
-          notes: [
-            '编号：基于设备类型 (1-6)',
-            '命令类型: DEVICE, GROUP, 或 SCENE'
-          ]
+          title: '命令格式',
+          format: '<按键编号>: <命令>',
+          example: '1: DEVICE LightA'
         },
         commandTypes: {
+          title: '支持的命令',
           device: {
-            title: 'DEVICE 命令：',
-            standard: {
-              title: '标准设备：',
-              format: '基本格式：[编号]: DEVICE [设备名称]'
+            title: '设备命令',
+            basic: {
+              title: '基础设备控制',
+              format: 'DEVICE [设备名称]'
             },
-            fan: {
-              title: '风扇类型：',
-              formats: [
-                'DEVICE [设备名称]    (默认操作: FAN)',
-                'DEVICE [设备名称] - FAN',
-                'DEVICE [设备名称] - LAMP',
-                'DEVICE [设备名称] - WHOLE'
-              ]
-            },
-            curtain: {
-              title: '窗帘类型：',
-              formats: [
-                'DEVICE [设备名称]    (默认操作: OPEN)',
-                'DEVICE [设备名称] - OPEN',
-                'DEVICE [设备名称] - CLOSE',
-                'DEVICE [设备名称] - WHOLE'
-              ]
-            },
-            powerPoint: {
-              title: '电源点类型(双路）：',
-              formats: [
-                'DEVICE [设备名称]    (默认操作: WHOLE)',
-                'DEVICE [设备名称] - LEFT',
-                'DEVICE [设备名称] - RIGHT',
-                'DEVICE [设备名称] - WHOLE'
-              ]
-            },
-            outputModule: {
-              title: '4路输出模块:',
-              formats: [
-                'DEVICE [设备名称]    (默认操作: WHOLE)',
-                'DEVICE [设备名称] - FIRST',
-                'DEVICE [设备名称] - SECOND',
-                'DEVICE [设备名称] - THIRD',
-                'DEVICE [设备名称] - FOURTH',
-                'DEVICE [设备名称] - WHOLE'
-              ]
-            },
-            inputModule: {
-              title: '输入模块(5/6路输入):',
-              basic: {
-                title: '基础设备绑定：',
-                format: 'DEVICE [设备名称]    (默认: MOMENTARY)'
-              },
-              deviceOperation: {
-                title: '设备操作：',
-                curtain: {
-                  title: '窗帘示例：',
-                  formats: [
-                    'DEVICE [设备名称] - OPEN    (默认: MOMENTARY)',
-                    'DEVICE [设备名称] - CLOSE    (默认: MOMENTARY)'
-                  ]
-                },
-                fan: {
-                  title: '风扇示例：',
-                  formats: [
-                    'DEVICE [设备名称] - FAN    (默认: MOMENTARY)',
-                    'DEVICE [设备名称] - LAMP    (默认: MOMENTARY)'
-                  ]
-                }
-              },
-              inputAction: {
-                title: '输入动作：',
+            deviceOperation: {
+              title: '设备操作',
+              curtain: {
+                title: '窗帘控制',
                 formats: [
-                  'DEVICE [设备名称] + TOGGLE',
-                  'DEVICE [设备名称] + MOMENTARY    (默认)'
+                  'DEVICE [设备名称] - OPEN',
+                  'DEVICE [设备名称] - CLOSE'
                 ]
               },
-              combinedOperation: {
-                title: '组合操作和输入动作：',
-                curtain: {
-                  title: '窗帘示例：',
-                  formats: [
-                    'DEVICE [设备名称] - OPEN + TOGGLE',
-                    'DEVICE [设备名称] - CLOSE + MOMENTARY'
-                  ]
-                },
-                fan: {
-                  title: '风扇示例：',
-                  formats: [
-                    'DEVICE [设备名称] - FAN + TOGGLE',
-                    'DEVICE [设备名称] - LAMP + MOMENTARY'
-                  ]
-                }
+              fan: {
+                title: '风扇控制',
+                formats: [
+                  'DEVICE [设备名称] - FAN',
+                  'DEVICE [设备名称] - LAMP'
+                ]
               }
             }
           },
           group: {
-            title: 'GROUP 命令：',
-            formats: [
-              'GROUP [组名称]'
-            ]
+            title: '群组控制',
+            format: 'GROUP [群组名称]'
           },
           scene: {
-            title: 'SCENE 命令：',
-            formats: [
-              'SCENE [场景名称]'
-            ]
+            title: '场景控制',
+            format: 'SCENE [场景名称]'
           }
         },
         rules: [
           '按钮/输入编号不能超过设备容量：',
-          '• 1-6键面板: 1-6个按钮',
-          '• 5输入模块: 1-5个输入',
-          '• 6输入模块: 1-6个输入',
-          '所有引用的设备/组/场景必须存在',
+          '1-6键面板: 1-6个按钮',
+          '5路输入模块: 1-5个输入',
+          '所有引用的设备/群组/场景必须存在',
           '每个按钮/输入只能有一个命令',
-          '只有输入模块支持 TOGGLE/MOMENTARY 动作',
-          '命令必须匹配设备类型功能',
-          '输入模块动作 (TOGGLE/MOMENTARY) 使用 \'+\' 符号添加'
+          '命令必须匹配设备类型功能'
         ]
       },
-      outputModuleConfig: {
-        title: '输出模块配置',
-        declaration: '设备声明',
-        configRules: '通道配置规则',
-        mustStartWith: '必须以 NAME: 开头',
-        deviceNamesCanContain: '设备名称可以包含：',
-        letters: '字母 (a-z, A-Z)',
-        numbers: '数字 (0-9)',
-        underscore: '下划线 (_)',
-        spaces: '空格',
-        deviceTypes: {
-          title: '必须在 DEVICE 部分定义为：',
-          types: [
-            '4路输出模块'
-          ]
-        },
-        channelFormat: {
-          title: '通道格式：',
-          basic: '[通道号]: [通道名称]',
-          withAction: '[通道号]: [通道名称] - [动作]',
-          notes: [
-            '通道号必须在1到4之间',
-            '通道名称不能包含空格',
-            '每个通道在每个输出模块中只能使用一次'
-          ]
-        },
-        actions: {
-          title: '支持的动作：',
-          types: [
-            'NORMAL (默认，如未指定)',
-            '1SEC (1秒脉冲)',
-            '6SEC (6秒脉冲)',
-            '9SEC (9秒脉冲)',
-            'REVERS (反向操作)'
-          ]
-        },
-        rules: [
-          '设备类型必须是"4输出模块"',
-          '每个4输出模块必须有唯一的名称',
-          '通道号必须在1-4之间',
-          '通道名称不能包含空格',
-          '每个通道在每个模块中只能使用一次',
-          '动作是可选的(默认为NORMAL)',
-          '只允许使用支持的动作',
-          '命令格式必须准确'
-        ]
-      },
+      // 8. Remote Parameters Configuration
       remoteParametersConfig: {
         title: '遥控器参数配置',
         declaration: '参数声明',
