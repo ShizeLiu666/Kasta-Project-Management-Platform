@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Button } from 'reactstrap';
-import BootstrapTable from 'react-bootstrap-table-next';
-import paginationFactory, { PaginationProvider, PaginationListStandalone, SizePerPageDropdownStandalone } from 'react-bootstrap-table2-paginator';
-import ToolkitProvider from 'react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit';
 import ComponentCard from '../CustomComponents/ComponentCard';
 import { getToken } from '../auth';
 import axiosInstance from '../../config';
@@ -16,20 +13,21 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';  // 导入 Conten
 import CustomAlert from '../CustomComponents/CustomAlert';  // 导入 CustomAlert
 import CustomButton from '../CustomComponents/CustomButton';
 import CustomSearchBar from '../CustomComponents/CustomSearchBar';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TablePagination from '@mui/material/TablePagination';
+import Paper from '@mui/material/Paper';
+import Chip from '@mui/material/Chip';
 // import { backdropClasses } from '@mui/material';
 
 // const { SearchBar } = Search;
 
-const sortIndicator = (order) => {
-  if (!order) return <span className="sort-indicator">&nbsp;↕</span>;
-  return order === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />;
-};
-
 const AuthCodeManagement = () => {
   const [authCodes, setAuthCodes] = useState([]);
-  const [totalElements, setTotalElements] = useState(0);
-  const [page, setPage] = useState(1);
-  const [sizePerPage, setSizePerPage] = useState(10);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedAuthCode, setSelectedAuthCode] = useState(null);
@@ -43,34 +41,25 @@ const AuthCodeManagement = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredAuthCodes, setFilteredAuthCodes] = useState([]);
+  const [muiPage, setMuiPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [orderBy, setOrderBy] = useState('createDate'); // 默认按创建日期排序
+  const [order, setOrder] = useState('desc'); // 默认降序
 
   const fetchAuthCodes = useCallback(async () => {
     setLoading(true);
     try {
       const token = getToken();
-      // 首先获取总数
-      const countResponse = await axiosInstance.get('/authorization-codes', {
+      // 删除获取总数的请求，直接获取所有数据
+      const allDataResponse = await axiosInstance.get('/authorization-codes', {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page: 0, size: 1 },
+        params: { page: 0, size: 1000 }, // 使用一个足够大的数字
       });
 
-      if (countResponse.data.success) {
-        const totalCount = countResponse.data.data.totalElements;
-        setTotalElements(totalCount);
-
-        // 然后取所有数据
-        const allDataResponse = await axiosInstance.get('/authorization-codes', {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { page: 0, size: totalCount },
-        });
-
-        if (allDataResponse.data.success) {
-          setAuthCodes(allDataResponse.data.data.content);
-        } else {
-          console.error('Failed to fetch auth codes:', allDataResponse.data.errorMsg);
-        }
+      if (allDataResponse.data.success) {
+        setAuthCodes(allDataResponse.data.data.content);
       } else {
-        console.error('Failed to fetch total count:', countResponse.data.errorMsg);
+        console.error('Failed to fetch auth codes:', allDataResponse.data.errorMsg);
       }
     } catch (error) {
       console.error('Error fetching auth codes:', error);
@@ -83,141 +72,13 @@ const AuthCodeManagement = () => {
     fetchAuthCodes();
   }, [fetchAuthCodes, refreshTrigger]);
 
-  const handleSelectRow = (row, isSelect) => {
-    if (isSelect) {
-      setSelectedAuthCode(row);
-    } else {
-      setSelectedAuthCode(null);
-    }
-  };
-
   const toggleEditModal = () => {
     setEditModalOpen(!editModalOpen);
   };
 
-  const selectRow = {
-    mode: 'radio',
-    clickToSelect: true,
-    onSelect: handleSelectRow,
-    selected: selectedAuthCode ? [selectedAuthCode.code] : [],
-    hideSelectColumn: true,
-    selectionHeaderRenderer: () => null,
-    style: { backgroundColor: '#e8e8e8' },
-    classes: 'custom-selection-row',
-  };
-
-  const columns = [
-    {
-      dataField: 'code',
-      text: 'Code',
-      formatter: (cell, row) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <ContentCopyIcon 
-            style={{ marginRight: '10px', cursor: 'pointer' }}
-            onClick={() => copyToClipboard(cell)}
-            fontSize="small"
-          />
-          {cell}
-        </div>
-      ),
-    },
-    {
-      dataField: 'creator',
-      text: 'Creator',
-      sort: true,
-      searchable: false,
-      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {column.text} {sortElement}
-        </div>
-      ),
-      sortCaret: sortIndicator,
-    },
-    {
-      dataField: 'createDate',
-      text: 'Create Date',
-      sort: true,
-      formatter: (cell) => new Date(cell).toLocaleString(),
-      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {column.text} {sortElement}
-        </div>
-      ),
-      sortCaret: sortIndicator,
-    },
-    {
-      dataField: 'usedBy',
-      text: 'Used By',
-      sort: true,
-      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {column.text} {sortElement}
-        </div>
-      ),
-      sortCaret: sortIndicator,
-    },
-    {
-      dataField: 'usageCount',
-      text: 'Usage Count',
-      sort: true,
-      headerFormatter: (column, colIndex, { sortElement, filterElement }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {column.text} {sortElement}
-        </div>
-      ),
-      sortCaret: sortIndicator,
-      headerStyle: { width: '150px' },
-      style: { width: '150px' }, 
-    },
-    {
-      dataField: 'valid',
-      text: 'Valid',
-      formatter: (cell) => cell ? 'Yes' : 'No',
-      // 移除了 sort 性和相关的排序配置
-    },
-    {
-      dataField: 'actions',
-      text: 'Actions',
-      formatter: (cell, row) => (
-        <Button
-          color="primary"
-          size="sm"
-          onClick={() => handleEditClick(row)}
-          style={{
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: '#007bff',
-            padding: '0',
-          }}
-        >
-          <EditIcon fontSize="medium" style={{marginRight:"4px"}}/>
-          Edit
-        </Button>
-      ),
-      headerStyle: { width: '100px' }
-    }
-  ];
-
   const handleEditClick = (row) => {
     setSelectedAuthCode(row);
     toggleEditModal();
-  };
-
-  const paginationOptions = {
-    custom: true,
-    totalSize: totalElements,
-    page,
-    sizePerPage,
-    sizePerPageList: [
-      { text: '10', value: 10 },
-      { text: '15', value: 15 },
-      { text: '20', value: 20 },
-    ],
-    onPageChange: (page) => setPage(page),
-    onSizePerPageChange: (sizePerPage, page) => {
-      setSizePerPage(sizePerPage);
-      setPage(page);
-    },
   };
 
   const toggleCreateModal = () => {
@@ -312,9 +173,7 @@ const AuthCodeManagement = () => {
   // 过滤授权码的函数
   const filterAuthCodes = useCallback((searchValue) => {
     return authCodes.filter((authCode) =>
-      authCode.code.toLowerCase().includes(searchValue.toLowerCase()) ||
-      (authCode.creator && authCode.creator.toLowerCase().includes(searchValue.toLowerCase())) ||
-      (authCode.usedBy && authCode.usedBy.toLowerCase().includes(searchValue.toLowerCase()))
+      authCode.code.toLowerCase().includes(searchValue.toLowerCase())
     );
   }, [authCodes]);
 
@@ -322,6 +181,45 @@ const AuthCodeManagement = () => {
   useEffect(() => {
     setFilteredAuthCodes(filterAuthCodes(searchTerm));
   }, [authCodes, searchTerm, filterAuthCodes]);
+
+  const handleChangePage = (event, newPage) => {
+    setMuiPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setMuiPage(0);
+  };
+
+  // 添加排序处理函数
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  // 排序函数
+  const sortData = (data) => {
+    return [...data].sort((a, b) => {
+      if (orderBy === 'createDate') {
+        const dateA = new Date(a.createDate);
+        const dateB = new Date(b.createDate);
+        return order === 'asc' ? dateA - dateB : dateB - dateA;
+      }
+      if (orderBy === 'usageCount') {
+        return order === 'asc' 
+          ? a.usageCount - b.usageCount 
+          : b.usageCount - a.usageCount;
+      }
+      if (orderBy === 'valid') {
+        // 将布尔值转换为数字进行排序
+        const validA = a.valid ? 1 : 0;
+        const validB = b.valid ? 1 : 0;
+        return order === 'asc' ? validA - validB : validB - validA;
+      }
+      return 0;
+    });
+  };
 
   return (
     <div>
@@ -337,57 +235,159 @@ const AuthCodeManagement = () => {
         <Row>
           <Col md="12">
             <ComponentCard title="Authorization Code Management">
-              <ToolkitProvider
-                keyField="code"
-                data={filteredAuthCodes} // 使用过滤后的数据
-                columns={columns}
+              <div className="d-flex justify-content-between mb-3">
+                <CustomSearchBar
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  placeholder="Search Auth Code..."
+                  width="300px"
+                  showBorder={true}
+                  onFilter={(value) => {
+                    const filtered = filterAuthCodes(value);
+                    setFilteredAuthCodes(filtered);
+                  }}
+                />
+                <CustomButton
+                  type="create"
+                  onClick={toggleCreateModal}
+                  style={{ marginLeft: 'auto' }}
+                >
+                  Create Auth Codes
+                </CustomButton>
+              </div>
+
+              <TableContainer 
+                component={Paper}
+                sx={{
+                  boxShadow: 'none',
+                  border: '1px solid #dee2e6'
+                }}
               >
-                {(props) => (
-                  <div>
-                    <div className="d-flex justify-content-between mb-3">
-                      <CustomSearchBar
-                        searchTerm={searchTerm}
-                        setSearchTerm={setSearchTerm}
-                        placeholder="Search Auth Code..."
-                        width="300px"
-                        showBorder={true}
-                        onFilter={(value) => {
-                          const filtered = filterAuthCodes(value);
-                          setFilteredAuthCodes(filtered);
-                        }}
-                      />
-                      <CustomButton
-                        type="create"
-                        onClick={toggleCreateModal}
-                        style={{ marginLeft: 'auto' }}
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Code</TableCell>
+                      <TableCell>Creator</TableCell>
+                      <TableCell 
+                        onClick={() => handleRequestSort('createDate')}
+                        style={{ cursor: 'pointer' }}
                       >
-                        Create Auth Codes
-                      </CustomButton>
-                    </div>
-                    <PaginationProvider pagination={paginationFactory(paginationOptions)}>
-                      {({ paginationProps, paginationTableProps }) => (
-                        <div>
-                          <BootstrapTable
-                            {...props.baseProps}
-                            {...paginationTableProps}
-                            bootstrap4
-                            striped
-                            hover
-                            condensed
-                            noDataIndication="No data available"
-                            selectRow={selectRow}
-                            classes="allow-selection"
-                          />
-                          <div className="d-flex justify-content-between align-items-center mt-3">
-                            <SizePerPageDropdownStandalone {...paginationProps} className="custom-size-per-page"/>
-                            <PaginationListStandalone {...paginationProps} />
-                          </div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          Create Date
+                          {orderBy === 'createDate' && (
+                            order === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
+                          )}
                         </div>
-                      )}
-                    </PaginationProvider>
-                  </div>
-                )}
-              </ToolkitProvider>
+                      </TableCell>
+                      <TableCell>Used By</TableCell>
+                      <TableCell 
+                        onClick={() => handleRequestSort('usageCount')}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          Usage Count
+                          {orderBy === 'usageCount' && (
+                            order === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell 
+                        onClick={() => handleRequestSort('valid')}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          Valid
+                          {orderBy === 'valid' && (
+                            order === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {sortData(filteredAuthCodes)
+                      .slice(muiPage * rowsPerPage, muiPage * rowsPerPage + rowsPerPage)
+                      .map((authCode) => (
+                        <TableRow
+                          key={authCode.code}
+                          sx={{
+                            '&:hover': {
+                              backgroundColor: '#f5f5f5',
+                              cursor: 'pointer',
+                            },
+                          }}
+                        >
+                          <TableCell>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <ContentCopyIcon 
+                                style={{ marginRight: '10px', cursor: 'pointer' }}
+                                onClick={() => copyToClipboard(authCode.code)}
+                                fontSize="small"
+                              />
+                              {authCode.code}
+                            </div>
+                          </TableCell>
+                          <TableCell>{authCode.creator}</TableCell>
+                          <TableCell>{new Date(authCode.createDate).toLocaleString()}</TableCell>
+                          <TableCell>{authCode.usedBy}</TableCell>
+                          <TableCell>{authCode.usageCount}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={authCode.valid ? 'Yes' : 'No'}
+                              color={authCode.valid ? 'success' : 'error'}
+                              size="small"
+                              sx={{
+                                minWidth: '60px',
+                                '& .MuiChip-label': {
+                                  px: 2,
+                                },
+                                backgroundColor: authCode.valid ? '#e6f4ea' : '#fde7e7',
+                                color: authCode.valid ? '#1e4620' : '#c62828',
+                                borderRadius: '4px',
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              color="primary"
+                              size="sm"
+                              onClick={() => handleEditClick(authCode)}
+                              style={{
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                color: '#007bff',
+                                padding: '0',
+                              }}
+                            >
+                              <EditIcon fontSize="medium" style={{marginRight:"4px"}}/>
+                              Edit
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  component="div"
+                  count={filteredAuthCodes.length}
+                  page={muiPage}
+                  onPageChange={handleChangePage}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  rowsPerPageOptions={[10, 15, 20]}
+                  labelRowsPerPage="Rows per page"
+                  labelDisplayedRows={({ from, to, count }) => 
+                    `${from}-${to} of ${count}`
+                  }
+                  sx={{
+                    borderTop: '1px solid #dee2e6',
+                    '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                      margin: 0,
+                    }
+                  }}
+                />
+              </TableContainer>
             </ComponentCard>
           </Col>
         </Row>
