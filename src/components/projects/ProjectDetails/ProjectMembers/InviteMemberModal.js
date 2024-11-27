@@ -29,6 +29,7 @@ const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited, current
 
     if (!account.trim()) {
       setError('Please enter an account');
+      onMemberInvited({ success: false, errorMsg: 'Please enter an account' });
       return;
     }
 
@@ -36,6 +37,7 @@ const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited, current
     if (currentUser && currentUser.username && 
         account.trim().toLowerCase() === currentUser.username.toLowerCase()) {
       setError('You cannot invite yourself to the project');
+      onMemberInvited({ success: false, errorMsg: 'You cannot invite yourself to the project' });
       return;
     }
 
@@ -47,11 +49,15 @@ const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited, current
 
       if (existingMember) {
         if (existingMember.memberStatus === 'WAITING') {
-          setError('This user has already been invited and is pending response');
+          const errorMsg = 'This user has already been invited and is pending response';
+          setError(errorMsg);
+          onMemberInvited({ success: false, errorMsg });
           return;
         }
         if (existingMember.memberStatus === 'ACCEPT') {
-          setError('This user is already a member of the project');
+          const errorMsg = 'This user is already a member of the project';
+          setError(errorMsg);
+          onMemberInvited({ success: false, errorMsg });
           return;
         }
       }
@@ -83,9 +89,10 @@ const InviteMemberModal = ({ isOpen, toggle, projectId, onMemberInvited, current
         onMemberInvited(response.data);
       }
     } catch (err) {
-      setError('An error occurred while inviting the member');
+      const errorMsg = 'An error occurred while inviting the member';
+      setError(errorMsg);
       console.error('Error inviting member:', err);
-      onMemberInvited({ success: false, errorMsg: err.message });
+      onMemberInvited({ success: false, errorMsg });
     } finally {
       setIsSubmitting(false);
     }

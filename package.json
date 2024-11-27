@@ -5,6 +5,7 @@
   "homepage": "http://kastacloud.com",
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
+    "@emailjs/browser": "^4.4.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
