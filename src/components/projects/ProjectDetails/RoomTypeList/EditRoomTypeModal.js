@@ -29,12 +29,24 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
   };
 
   const isFormValid = () => {
-    return formData.name.trim() !== '' && formData.typeCode.trim() !== '';
+    if (!roomType) return false;
+    
+    // 检查每个字段是否有实际变更，同时处理可能的undefined值
+    const hasNameChange = formData.name.trim() !== (roomType.name || '').trim();
+    const hasTypeCodeChange = formData.typeCode.trim() !== (roomType.typeCode || '').trim();
+    const hasDesChange = formData.des.trim() !== (roomType.des || '').trim();
+    
+    return hasNameChange || hasTypeCodeChange || hasDesChange;
   };
 
   const handleSubmit = async () => {
+    if (!roomType) {
+      setError("Room type information is missing. Please try again.");
+      return;
+    }
+
     if (!isFormValid()) {
-      setError("Please fill in all required fields.");
+      setError("No changes detected. Please modify at least one field.");
       return;
     }
 
@@ -45,9 +57,24 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
     }
 
     const attributes = {};
-    if (formData.name !== roomType.name) attributes.name = formData.name.trim();
-    if (formData.typeCode !== roomType.typeCode) attributes.typeCode = formData.typeCode.trim();
-    if (formData.des !== roomType.des) attributes.des = formData.des.trim();
+    // 安全地处理可能为undefined的值
+    const currentName = (roomType.name || '').trim();
+    const currentTypeCode = (roomType.typeCode || '').trim();
+    const currentDes = (roomType.des || '').trim();
+
+    const newName = formData.name.trim();
+    const newTypeCode = formData.typeCode.trim();
+    const newDes = formData.des.trim();
+
+    if (newName !== currentName) {
+      attributes.name = newName;
+    }
+    if (newTypeCode !== currentTypeCode) {
+      attributes.typeCode = newTypeCode;
+    }
+    if (newDes !== currentDes) {
+      attributes.des = newDes;
+    }
 
     if (Object.keys(attributes).length === 0) {
       setError("No changes detected. Please modify at least one field.");

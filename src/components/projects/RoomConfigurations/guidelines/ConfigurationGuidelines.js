@@ -114,14 +114,12 @@ const SceneRulesContent = ({ language }) => (
 // Remote Control Configuration 内容组件
 const RemoteControlDeclarationContent = ({ language }) => (
   <ul style={{ margin: 0, paddingLeft: '20px' }}>
-    <li>{content[language].remoteControlConfig.mustStartWith}</li>
     <li>
-      {content[language].remoteControlConfig.deviceNamesCanContain}
+      {content[language].remoteControlConfig.deviceNamesCanContain.title}
       <ul>
-        <li>{content[language].remoteControlConfig.letters}</li>
-        <li>{content[language].remoteControlConfig.numbers}</li>
-        <li>{content[language].remoteControlConfig.underscore}</li>
-        <li>{content[language].remoteControlConfig.spaces}</li>
+        {content[language].remoteControlConfig.deviceNamesCanContain.rules.map((rule, index) => (
+          <li key={index}>{rule}</li>
+        ))}
       </ul>
     </li>
     <li>
@@ -138,18 +136,13 @@ const RemoteControlDeclarationContent = ({ language }) => (
 const RemoteControlRulesContent = ({ language }) => (
   <ul style={{ margin: 0, paddingLeft: '20px' }}>
     <li>
-      {content[language].remoteControlConfig.deviceTypes.title}
-      <ul>
-        {content[language].remoteControlConfig.deviceTypes.types.map((type, index) => (
-          <li key={index}>{type}</li>
-        ))}
-      </ul>
-    </li>
-    <li>
       {content[language].remoteControlConfig.commandFormat.title}
       <ul>
         <li>{content[language].remoteControlConfig.commandFormat.format}</li>
         <li>{content[language].remoteControlConfig.commandFormat.example}</li>
+        {content[language].remoteControlConfig.commandFormat.notes.map((note, index) => (
+          <li key={index}>{note}</li>
+        ))}
       </ul>
     </li>
     <li>
@@ -158,21 +151,31 @@ const RemoteControlRulesContent = ({ language }) => (
         <li>
           {content[language].remoteControlConfig.commandTypes.device.title}
           <ul>
-            <li>{content[language].remoteControlConfig.commandTypes.device.basic.format}</li>
             <li>
-              {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.title}
+              {content[language].remoteControlConfig.commandTypes.device.basic.title}
               <ul>
-                {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.formats.map((format, index) => (
-                  <li key={index}>{format}</li>
-                ))}
+                <li>{content[language].remoteControlConfig.commandTypes.device.basic.format}</li>
               </ul>
             </li>
             <li>
-              {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.title}
+              {content[language].remoteControlConfig.commandTypes.device.deviceOperation.title}
               <ul>
-                {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.formats.map((format, index) => (
-                  <li key={index}>{format}</li>
-                ))}
+                <li>
+                  {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.title}
+                  <ul>
+                    {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.formats.map((format, index) => (
+                      <li key={index}>{format}</li>
+                    ))}
+                  </ul>
+                </li>
+                <li>
+                  {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.title}
+                  <ul>
+                    {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.formats.map((format, index) => (
+                      <li key={index}>{format}</li>
+                    ))}
+                  </ul>
+                </li>
               </ul>
             </li>
           </ul>
@@ -191,11 +194,9 @@ const RemoteControlRulesContent = ({ language }) => (
         </li>
       </ul>
     </li>
-    <li>
-      {content[language].remoteControlConfig.rules.map((rule, index) => (
-        <li key={index}>{rule}</li>
-      ))}
-    </li>
+    {content[language].remoteControlConfig.rules.map((rule, index) => (
+      <li key={`rule-${index}`}>{rule}</li>
+    ))}
   </ul>
 );
 
@@ -252,46 +253,35 @@ const OutputModuleRulesContent = ({ language }) => (
 // Remote Parameters Configuration 内容组件
 const RemoteParametersDeclarationContent = ({ language }) => (
   <ul style={{ margin: 0, paddingLeft: '20px' }}>
-    <li style={{ marginBottom: '10px', color: '#666' }}>
-      {content[language].remoteParametersConfig.globalNote}
-    </li>
-    <li style={{ marginBottom: '10px', color: '#666' }}>
-      {content[language].remoteParametersConfig.optionalNote}
-    </li>
-    {Object.entries(content[language].remoteParametersConfig.parameters).map(([key, param]) => (
-      <li key={key}>
-        {param.title}
-        <ul>
-          {param.values.map((value, index) => (
-            <li key={index}>
-              {value}
-              {value.includes(param.defaultValue) && (
-                <span style={{ color: '#666', marginLeft: '8px' }}>
-                  {language === 'zh' ? '(默认值)' : '(Default)'}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </li>
-    ))}
-  </ul>
-);
-
-const RemoteParametersRulesContent = ({ language }) => (
-  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+    <li>{content[language].remoteParametersConfig.globalNote}</li>
+    <li>{content[language].remoteParametersConfig.optionalNote}</li>
     <li>
       {content[language].remoteParametersConfig.defaultValues}
       <ul>
         {Object.entries(content[language].remoteParametersConfig.parameters).map(([key, param]) => (
           <li key={key}>
-            {`${key}: ${param.defaultValue}`}
+            {param.title}: {param.defaultValue}
           </li>
         ))}
       </ul>
     </li>
+  </ul>
+);
+
+const RemoteParametersRulesContent = ({ language }) => (
+  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+    {Object.entries(content[language].remoteParametersConfig.parameters).map(([key, param]) => (
+      <li key={key}>
+        {param.title}
+        <ul>
+          {param.values.map((value, index) => (
+            <li key={index}>{value}</li>
+          ))}
+        </ul>
+      </li>
+    ))}
     {content[language].remoteParametersConfig.rules.map((rule, index) => (
-      <li key={index}>{rule}</li>
+      <li key={`rule-${index}`}>{rule}</li>
     ))}
   </ul>
 );

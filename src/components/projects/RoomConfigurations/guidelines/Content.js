@@ -250,10 +250,25 @@ export const content = {
             '4 Output Module'
           ]
         },
+        deviceNamesCanContain: {
+          title: 'Device names can contain:',
+          rules: [
+            'Letters (a-z, A-Z)',
+            'Numbers (0-9)',
+            'Underscore (_)',
+            'Spaces'
+          ]
+        },
         commandFormat: {
           title: 'Command Format',
           format: '<button_number>: <command>',
-          example: '1: DEVICE LightA'
+          example: '1: DEVICE LightA',
+          notes: [
+            'Button numbers must be within device capacity:',
+            '1-6 Push Panel: 1-6 buttons',
+            '5 Input Module: 1-5 inputs',
+            '4 Output Module: 1-4 outputs'
+          ]
         },
         commandTypes: {
           title: 'Supported Commands',
@@ -291,12 +306,13 @@ export const content = {
           }
         },
         rules: [
-          'Button/Input numbers cannot exceed device capacity:',
-          '1-6 Push Panel: 1-6 buttons',
-          '5 Input Module: 1-5 inputs',
+          'Device must be of supported type',
+          'Each remote control must have a unique name',
+          'Button/Input numbers cannot exceed device capacity',
           'All referenced devices/groups/scenes must exist',
           'Each button/input can only have one command',
-          'Commands must match device type functionality'
+          'Commands must match device type functionality',
+          'Command format must be exact'
         ]
       },
       // 8. Remote Parameters Configuration
@@ -606,7 +622,7 @@ export const content = {
           '每条指令必须包含至少一个设备和一个有效操作'
         ]
       },
-      // 7. Remote Control Configuration 中文版
+      // 7. Remote Control Configuration
       remoteControlConfig: {
         title: '遥控器配置',
         declaration: '遥控器声明',
@@ -619,10 +635,25 @@ export const content = {
             '4路输出模块'
           ]
         },
+        deviceNamesCanContain: {
+          title: '设备名称可以包含：',
+          rules: [
+            '字母 (a-z, A-Z)',
+            '数字 (0-9)',
+            '下划线 (_)',
+            '空格'
+          ]
+        },
         commandFormat: {
           title: '命令格式',
           format: '<按键编号>: <命令>',
-          example: '1: DEVICE LightA'
+          example: '1: DEVICE LightA',
+          notes: [
+            '按键编号必须在设备容量范围内：',
+            '• 1-6键面板: 1-6个按键',
+            '• 5路输入模块: 1-5个输入',
+            '• 4路输出模块: 1-4个输出'
+          ]
         },
         commandTypes: {
           title: '支持的命令',
@@ -660,12 +691,13 @@ export const content = {
           }
         },
         rules: [
-          '按钮/输入编号不能超过设备容量：',
-          '1-6键面板: 1-6个按钮',
-          '5路输入模块: 1-5个输入',
+          '设备必须是支持的类型',
+          '每个遥控器必须有唯一的名称',
+          '按键/输入编号不能超过设备容量',
           '所有引用的设备/群组/场景必须存在',
-          '每个按钮/输入只能有一个命令',
-          '命令必须匹配设备类型功能'
+          '每个按键/输入只能有一个命令',
+          '命令必须匹配设备类型功能',
+          '命令格式必须准确'
         ]
       },
       // 8. Remote Parameters Configuration
