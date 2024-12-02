@@ -64,13 +64,13 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
     const registeredModuleNames = new Set();
     let currentModuleName = null;
     let expectingAction = false;
+    const specialActionDevices = new Map();
 
     dryContactsDataArray.forEach((line) => {
         line = line.trim();
 
         if (line.startsWith("NAME")) {
             if (!checkNamePrefix(line, errors)) return;
-            
             currentModuleName = line.substring(5).trim();
             
             if (!validateDryContactName(
@@ -85,6 +85,10 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
             }
             expectingAction = true;
         } else if (currentModuleName && expectingAction) {
+            // 检查并记录非NORMAL动作的设备
+            if (line !== 'NORMAL' && VALID_ACTIONS.includes(line)) {
+                specialActionDevices.set(currentModuleName, line);
+            }
             validateAction(line, errors, currentModuleName);
             expectingAction = false;
             currentModuleName = null;
@@ -102,5 +106,8 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
         );
     }
 
-    return errors;
+    console.log("DryContactModules - Special Action Devices:", 
+        Object.fromEntries(specialActionDevices));
+
+    return { errors, specialActionDevices };
 }

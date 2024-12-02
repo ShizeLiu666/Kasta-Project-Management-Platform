@@ -11,6 +11,17 @@ const ModuleConfigurations = forwardRef(({
   onValidate
 }, ref) => {
 
+  const handleDryContactValidation = (isValid, data) => {
+    if (isValid) {
+      onValidate(true, {
+        dryContactData: data.dryContactData,
+        specialActionDevices: data.specialActionDevices
+      });
+    } else {
+      onValidate(false, null);
+    }
+  };
+
   return (
     <div className="step step4 mt-5">
       <div className="row justify-content-md-center">
@@ -39,7 +50,7 @@ const ModuleConfigurations = forwardRef(({
               splitData={splitData}
               deviceNameToType={deviceNameToType}
               registeredDeviceNames={registeredDeviceNames}
-              onValidate={onValidate}
+              onValidate={handleDryContactValidation}
             />
           </div>
         </div>

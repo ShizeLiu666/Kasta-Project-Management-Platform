@@ -281,32 +281,61 @@ function validatePowerPointTypeOperations(
 }
 
 //! Validate Dry Contact Type operations using regex
-function validateDryContactTypeOperations(names, operation, errors, sceneName) {
-  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
-  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
-  const groupOnPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* ON$/i;
-  const groupOffPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* OFF$/i;
+function validateDryContactTypeOperations(names, operation, errors, sceneName, dryContactSpecialActions) {
+    console.log("Scenes - Validating Dry Contact Operation:", {
+        names,
+        operation,
+        sceneName,
+        specialActions: Object.fromEntries(dryContactSpecialActions)
+    });
 
-  const operationString = names.join(", ") + " " + operation;
+    const operationString = names.join(", ") + " " + operation;
 
-  if (
-    !singleOnPattern.test(operationString) &&
-    !singleOffPattern.test(operationString) &&
-    !groupOnPattern.test(operationString) &&
-    !groupOffPattern.test(operationString)
-  ) {
-    errors.push([
-      `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
-      "- DEVICE_NAME ON (Single ON)",
-      "- DEVICE_NAME OFF (Single OFF)",
-      "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
-      "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)"
-    ]);
-  }
+    names.forEach(deviceName => {
+        // 检查设备是否有特殊动作配置
+        if (dryContactSpecialActions.has(deviceName)) {
+            console.log(`Found special action for ${deviceName}:`, 
+                dryContactSpecialActions.get(deviceName));
+            // 如果有特殊动作，只允许ON操作
+            if (operation.toUpperCase() !== 'ON') {
+                errors.push(
+                    `KASTA SCENE [${sceneName}]: The device '${deviceName}' has a special action (${dryContactSpecialActions.get(deviceName)}) configured, and can only be turned ON in scenes.`
+                );
+            }
+            return;
+        }
+    });
+
+    // 对于普通干接点设备，保持原有的验证逻辑
+    const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
+    const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
+    const groupOnPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* ON$/i;
+    const groupOffPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* OFF$/i;
+
+    if (
+        !singleOnPattern.test(operationString) &&
+        !singleOffPattern.test(operationString) &&
+        !groupOnPattern.test(operationString) &&
+        !groupOffPattern.test(operationString)
+    ) {
+        errors.push([
+            `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
+            "- DEVICE_NAME ON (Single ON)",
+            "- DEVICE_NAME OFF (Single OFF)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)"
+        ]);
+    }
 }
 
 //! Validate the consistency of device types within a line in a scene
-function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) {
+function validateSceneDevicesInLine(
+  parts,
+  errors,
+  deviceNameToType,
+  sceneName,
+  dryContactSpecialActions
+) {
   let deviceTypesInLine = new Set();
   let deviceNames = [];
   let operation = null;
@@ -516,7 +545,8 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
       deviceNames.flat(),
       operation,
       errors,
-      sceneName
+      sceneName,
+      dryContactSpecialActions
     );
   }
   if (
@@ -534,7 +564,11 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
 }
 
 //! Validate all scenes in the provided data
-export function validateScenes(sceneDataArray, deviceNameToType) {
+export function validateScenes(
+  sceneDataArray, 
+  deviceNameToType, 
+  dryContactSpecialActions = new Map()
+) {
   const errors = [];
   const registeredSceneNames = new Set();
   let currentSceneName = null;
@@ -557,13 +591,11 @@ export function validateScenes(sceneDataArray, deviceNameToType) {
         parts,
         errors,
         deviceNameToType,
-        currentSceneName
+        currentSceneName,
+        dryContactSpecialActions
       );
     }
   });
-
-  // console.log(deviceNameToType);
-  // console.log("Errors found:", errors);
 
   return { errors, registeredSceneNames };
 }

@@ -24,7 +24,12 @@ const formatErrors = (errors) => {
 };
 
 // Scenes function component
-const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
+const Scenes = forwardRef(({ 
+  splitData, 
+  deviceNameToType, 
+  dryContactSpecialActions, 
+  onValidate 
+}, ref) => {
   const [sceneErrors, setSceneErrors] = useState(null);
   const [success, setSuccess] = useState(false);
   const [sceneData, setSceneData] = useState({});
@@ -37,7 +42,11 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
       return;
     }
 
-    const { errors } = validateScenes(splitData.scenes, deviceNameToType);
+    const { errors } = validateScenes(
+      splitData.scenes, 
+      deviceNameToType,
+      dryContactSpecialActions 
+    );
 
     if (errors.length > 0) {
       setSceneErrors(formatErrors(errors));
@@ -61,7 +70,7 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
     }
 
     hasValidated.current = true;
-  }, [splitData, deviceNameToType, onValidate]);
+  }, [splitData, deviceNameToType, dryContactSpecialActions, onValidate]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

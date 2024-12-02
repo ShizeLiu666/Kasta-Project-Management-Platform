@@ -27,6 +27,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
   const [registeredGroupNames, setRegisteredGroupNames] = useState(new Set());
   const [registeredSceneNames, setRegisteredSceneNames] = useState(new Set());
   const [outputModuleData, setOutputModuleData] = useState(null);
+  const [dryContactSpecialActions, setDryContactSpecialActions] = useState(new Map());
 
   const handleStep1Validation = (isValid, data) => {
     if (isValid) {
@@ -44,6 +45,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
   const handleStep3Validation = (isValid, data) => {
     if (isValid) {
       setOutputModuleData(data.outputModuleData);  // 处理虚拟干接点数据
+      setDryContactSpecialActions(data.specialActionDevices);
     }
   };
 
@@ -153,6 +155,9 @@ const Steps = ({ projectRoomId, submitJson }) => {
         ref={scenesRef} 
         splitData={splitData} 
         deviceNameToType={deviceData} 
+        registeredDeviceNames={registeredDeviceNames}
+        registeredGroupNames={registeredGroupNames}
+        dryContactSpecialActions={dryContactSpecialActions}
         onValidate={handleStep5Validation} 
       /> 
     },

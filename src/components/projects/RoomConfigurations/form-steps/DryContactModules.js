@@ -43,7 +43,11 @@ const DryContactModules = forwardRef(({
       return;
     }
 
-    const errors = validateDryContactModules(splitData.dryContacts, deviceNameToType, registeredDeviceNames);
+    const { errors, specialActionDevices } = validateDryContactModules(
+      splitData.dryContacts, 
+      deviceNameToType, 
+      registeredDeviceNames
+    );
 
     if (errors.length > 0) {
       setDryContactErrors(formatErrors(errors));
@@ -64,7 +68,10 @@ const DryContactModules = forwardRef(({
 
       setDryContactData(dryContactData);
       setSuccess(true);
-      onValidate(true, { dryContactData });
+      onValidate(true, { 
+        dryContactData,
+        specialActionDevices
+      });
     }
 
     hasValidated.current = true;
