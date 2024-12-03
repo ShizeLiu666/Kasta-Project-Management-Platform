@@ -43,6 +43,14 @@ function processExcelToJson(fileContent) {
   return Object.keys(allTextData).length ? allTextData : null;
 }
 
+// 新增函数：检查必需的 DEVICE 关键词
+function hasRequiredDeviceKeyword(sheetData) {
+  return sheetData.some(line => {
+    const trimmedLine = line.trim();
+    return splitKeywords.devices.some(keyword => trimmedLine === keyword);
+  });
+}
+
 const splitKeywords = {
   devices: ["KASTA DEVICE", "DEVICE"],
   groups: ["KASTA GROUP", "GROUP"],
@@ -112,6 +120,40 @@ function splitJsonFile(content) {
   return splitData;
 }
 
+// 新增函数：检查关键词重复
+function checkDuplicateKeywords(sheetData) {
+  const keywordCounts = {};
+  const duplicates = [];
+
+  // 初始化计数器
+  Object.values(splitKeywords).forEach(keywordArray => {
+    keywordArray.forEach(keyword => {
+      keywordCounts[keyword] = 0;
+    });
+  });
+
+  // 计算每个关键词出现的次数
+  sheetData.forEach(line => {
+    const trimmedLine = line.trim();
+    Object.values(splitKeywords).forEach(keywordArray => {
+      keywordArray.forEach(keyword => {
+        if (trimmedLine === keyword) {
+          keywordCounts[keyword]++;
+        }
+      });
+    });
+  });
+
+  // 检查重复
+  Object.entries(keywordCounts).forEach(([keyword, count]) => {
+    if (count > 1) {
+      duplicates.push(keyword);
+    }
+  });
+
+  return duplicates;
+}
+
 // Use forwardRef to expose isValidated method
 const Step1 = forwardRef(({ onValidate }, ref) => {
   const [file, setFile] = useState(null);
@@ -153,7 +195,30 @@ const Step1 = forwardRef(({ onValidate }, ref) => {
         if (programmingDetailsSheet) {
           const sheet = workbook.Sheets[programmingDetailsSheet];
           const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-          const sheetText = sheetData.flat().join(" ").toLowerCase();
+          const flattenedData = sheetData.flat().map(item => item?.toString()?.trim() || '');
+          
+          // 检查必需的 DEVICE 关键词
+          if (!hasRequiredDeviceKeyword(flattenedData)) {
+            setFile(selectedFile);
+            setIsValidFile(true);
+            setHasProgrammingDetails(false);
+            setErrorMessage(`Excel file is missing the required keyword: DEVICE or KASTA DEVICE (must be on a separate line)`);
+            setFileContent(null);
+            return;
+          }
+
+          // 检查关键词重复
+          const duplicateKeywords = checkDuplicateKeywords(flattenedData);
+          if (duplicateKeywords.length > 0) {
+            setFile(selectedFile);
+            setIsValidFile(true);
+            setHasProgrammingDetails(false);
+            setErrorMessage(`Found duplicate keywords: ${duplicateKeywords.join(", ")}. Each keyword should only appear once.`);
+            setFileContent(null);
+            return;
+          }
+
+          const sheetText = flattenedData.join(" ").toLowerCase();
           
           // Check for REMOTE CONTROL PARAMETER without REMOTE CONTROL LINK
           const hasRemoteControl = sheetText.includes("remote control link");

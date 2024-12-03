@@ -7,7 +7,7 @@
 .sidebar-collapse-button {
   position: absolute;
   right: -20px;
-  top: 20px;
+  top: 23px;
   background-color: #fff;
   border-radius: 50%;
   width: 40px;
@@ -27,7 +27,7 @@
 } */
 
 .sidebarArea {
-  width: 260px;
+  width: 230px;
   transition: all 0.3s ease;
   background: white;
 }
