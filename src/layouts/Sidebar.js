@@ -2,7 +2,10 @@ import React from "react";
 import { Nav, NavItem } from "reactstrap";
 import { Link, useLocation } from "react-router-dom";
 import '../assets/scss/loader/Sidebar.css'
-import CloseIcon from '@mui/icons-material/Close'; // 确保已安装 @mui/icons-material
+import CloseIcon from '@mui/icons-material/Close';
+import MenuOpenIcon from '@mui/icons-material/KeyboardArrowRightTwoTone';
+// import KeyboardArrowLeftTwoToneIcon from '@mui/icons-material/KeyboardArrowLeftTwoTone';
+import MenuIcon from '@mui/icons-material/KeyboardArrowLeftTwoTone';
 
 const navigation = [
   {
@@ -28,13 +31,16 @@ const navigation = [
   // },
 ];
 
-const Sidebar = ({ userType, toggleSidebar }) => {
+const Sidebar = ({ userType, toggleSidebar, isCollapsed }) => {
   let location = useLocation();
 
   return (
     <div className="sidebar-container">
       <div className="sidebar-close-button d-lg-none" onClick={toggleSidebar}>
         <CloseIcon />
+      </div>
+      <div className="sidebar-collapse-button d-none d-lg-flex" onClick={toggleSidebar}>
+        {isCollapsed ? <MenuOpenIcon /> : <MenuIcon />}
       </div>
       <div className="p-2 mt-2">
         <Nav vertical className="sidebarNav">
@@ -55,7 +61,9 @@ const Sidebar = ({ userType, toggleSidebar }) => {
                   }}
                 >
                   <i className={`bi ${navi.icon} me-2`}></i>
-                  <span>{navi.title}</span>
+                  <span className={isCollapsed ? 'd-none' : ''}>
+                    {navi.title}
+                  </span>
                 </Link>
               </NavItem>
             )

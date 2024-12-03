@@ -8,9 +8,14 @@ import './FullLayout.css';
 const FullLayout = () => {
   const [userType, setUserType] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    if (window.innerWidth >= 992) {
+      setIsCollapsed(!isCollapsed);
+    } else {
+      setSidebarOpen(!sidebarOpen);
+    }
   };
 
   useEffect(() => {
@@ -24,8 +29,15 @@ const FullLayout = () => {
     <main>
       <Header toggleSidebar={toggleSidebar} />
       <div className="pageWrapper d-lg-flex content-container">
-        <aside className={`sidebarArea shadow ${sidebarOpen ? 'showSidebar' : ''}`} id="sidebarArea">
-          <Sidebar userType={userType} toggleSidebar={toggleSidebar} />
+        <aside 
+          className={`sidebarArea shadow ${sidebarOpen ? 'showSidebar' : ''} ${isCollapsed ? 'collapsed' : ''}`} 
+          id="sidebarArea"
+        >
+          <Sidebar 
+            userType={userType} 
+            toggleSidebar={toggleSidebar}
+            isCollapsed={isCollapsed}
+          />
         </aside>
         <div className="contentArea">
           <Container className="p-4" fluid>
