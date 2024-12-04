@@ -72,35 +72,66 @@ function validateDeviceNameInGroup(deviceName, errors, deviceNameToType, deviceN
 
 export function validateGroups(groupDataArray, deviceNameToType) {
     const errors = [];
-    const deviceNameToGroup = {}; // Store device names within each group
-    const registeredGroupNames = new Set(); // track registered group names
+    const deviceNameToGroup = {};
+    const registeredGroupNames = new Set();
     let currentGroupName = null;
 
-    groupDataArray.forEach((line) => {
+    groupDataArray.forEach((line, index) => {
         line = line.trim();
+
+        // 新增：检查第一行是否直接输入设备
+        if (index === 0 && line && !line.startsWith('NAME:') && !line.startsWith("CONTROL CONTENT")) {
+            errors.push(`KASTA GROUP: Please define a group name using 'NAME:' before adding devices.`);
+            return;
+        }
+
         if (line.startsWith("CONTROL CONTENT")) {
             return;
-          }
+        }
 
         if (line.startsWith('NAME')) {
+            // 修改：检查前一个组是否为空（添加安全检查）
+            if (currentGroupName && deviceNameToGroup[currentGroupName] && 
+                deviceNameToGroup[currentGroupName].size === 0) {
+                errors.push(`KASTA GROUP: The group '${currentGroupName}' has no devices. Please add at least one device.`);
+            }
+
             if (!checkNamePrefix(line, errors)) return;
-            currentGroupName = line.substring(5).trim(); // Extract the part after 'NAME:'
+            currentGroupName = line.substring(5).trim();
             if (!validateGroupName(currentGroupName, errors, deviceNameToGroup, registeredGroupNames)) return;
-        } else if (currentGroupName) {
+        } else if (currentGroupName && line) {
+            // 确保当前组的 Set 已初始化
+            if (!deviceNameToGroup[currentGroupName]) {
+                deviceNameToGroup[currentGroupName] = new Set();
+            }
+
             // 移除所有关键词
             line = line.replace(/CONTROL CONTENT:|DEVICE CONTENT:|DEVICE CONTROL:/g, '').trim();
-            // 分割设备名称并验证每个设备
+            
+            // 新增：检查空行
+            if (!line) {
+                errors.push(`KASTA GROUP: Empty line detected in group '${currentGroupName}'.`);
+                return;
+            }
+
             const deviceNames = line.split(',')
-                                    .map(name => name.trim())
-                                    .filter(name => name);
+                .map(name => name.trim())
+                .filter(name => name);
+
             deviceNames.forEach(deviceName => {
-                if (!validateDeviceNameInGroup(deviceName, errors, deviceNameToType, deviceNameToGroup, currentGroupName)) return;
+                validateDeviceNameInGroup(deviceName, errors, deviceNameToType, deviceNameToGroup, currentGroupName);
             });
+        } else if (line && !line.startsWith('NAME:')) {
+            // 新增：处理没有组名时的设备输入
+            errors.push(`KASTA GROUP: Cannot add device '${line}' without first defining a group name using 'NAME:'.`);
         }
     });
 
-    // console.log('Errors found:', errors);  // Debugging line
-    // console.log(deviceNameToGroup); // Debugging the group-device mapping
+    // 修改：检查最后一个组是否为空（添加安全检查）
+    if (currentGroupName && deviceNameToGroup[currentGroupName] && 
+        deviceNameToGroup[currentGroupName].size === 0) {
+        errors.push(`KASTA GROUP: The group '${currentGroupName}' has no devices. Please add at least one device.`);
+    }
 
-    return { errors, registeredGroupNames };
+    return { errors, registeredGroupNames, deviceNameToGroup };
 }

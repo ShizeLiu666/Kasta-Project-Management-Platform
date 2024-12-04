@@ -43,9 +43,10 @@ const InputModules = forwardRef(({
     const errors = validateInputModules(splitData.inputs, deviceNameToType, registeredDeviceNames);
 
     if (errors.length > 0) {
-      setInputModuleErrors(formatErrors(errors));
+      const formattedErrors = formatErrors(errors);
+      setInputModuleErrors(formattedErrors);
       setSuccess(false);
-      onValidate(false, null);
+      onValidate(false, formattedErrors);
     } else {
       const inputModuleData = {};
       let currentModule = null;

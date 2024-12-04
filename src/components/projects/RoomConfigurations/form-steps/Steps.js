@@ -120,6 +120,28 @@ const Steps = ({ projectRoomId, submitJson }) => {
     }
   };
 
+  const handleReturnToInitialStep = () => {
+    setSplitData(null);
+    setDeviceData(null);
+    setGroupData(null);
+    setSceneData(null);
+    setRemoteControlData(null);
+    setRemoteParameterData(null);
+    setRegisteredDeviceNames(new Set());
+    setRegisteredGroupNames(new Set());
+    setRegisteredSceneNames(new Set());
+    setOutputModuleData(null);
+    setDryContactSpecialActions(new Map());
+
+    initialStepRef.current?.resetValidation();
+    devicesRef.current?.resetValidation();
+    outputModulesRef.current?.resetValidation();
+    groupsRef.current?.resetValidation();
+    scenesRef.current?.resetValidation();
+    remoteControlsRef.current?.resetValidation();
+    finalStepRef.current?.resetValidation();
+  };
+
   const steps = [
     { name: "Upload", component: <InitialStep ref={initialStepRef} onValidate={handleStep1Validation} /> },
     { 
@@ -128,6 +150,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
         ref={devicesRef}
         splitData={splitData}
         onValidate={handleStep2Validation}
+        onReturnToInitialStep={handleReturnToInitialStep}
       /> 
     },
     { 
@@ -138,6 +161,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
         deviceNameToType={deviceData}
         registeredDeviceNames={registeredDeviceNames}
         onValidate={handleStep3Validation}
+        onReturnToInitialStep={handleReturnToInitialStep}
       /> 
     },
     { 
@@ -146,7 +170,8 @@ const Steps = ({ projectRoomId, submitJson }) => {
         ref={groupsRef} 
         splitData={splitData} 
         deviceNameToType={deviceData} 
-        onValidate={handleStep4Validation} 
+        onValidate={handleStep4Validation}
+        onReturnToInitialStep={handleReturnToInitialStep}
       /> 
     },
     { 

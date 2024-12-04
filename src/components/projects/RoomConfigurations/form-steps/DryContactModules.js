@@ -50,9 +50,10 @@ const DryContactModules = forwardRef(({
     );
 
     if (errors.length > 0) {
-      setDryContactErrors(formatErrors(errors));
+      const formattedErrors = formatErrors(errors);
+      setDryContactErrors(formattedErrors);
       setSuccess(false);
-      onValidate(false, null);
+      onValidate(false, formattedErrors);
     } else {
       const dryContactData = {};
       let currentModule = null;

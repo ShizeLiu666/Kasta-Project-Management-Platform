@@ -66,8 +66,16 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
     let expectingAction = false;
     const specialActionDevices = new Map();
 
-    dryContactsDataArray.forEach((line) => {
+    dryContactsDataArray.forEach((line, index) => {
         line = line.trim();
+
+        // 新增：检查第一行是否直接配置动作
+        if (index === 0 && VALID_ACTIONS.includes(line)) {
+            errors.push(
+                `DRY CONTACT MODULE: Please define the module name using 'NAME:' before configuring its action.`
+            );
+            return;
+        }
 
         if (line.startsWith("NAME")) {
             if (!checkNamePrefix(line, errors)) return;
@@ -84,6 +92,18 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
                 return;
             }
             expectingAction = true;
+        } else if (!currentModuleName && line.trim()) {
+            // 新增：如果没有当前模块名但尝试配置动作
+            if (VALID_ACTIONS.includes(line)) {
+                errors.push(
+                    `DRY CONTACT MODULE: Cannot configure action '${line}' without first defining a module name using 'NAME:'.`
+                );
+                return;
+            }
+            errors.push(
+                `DRY CONTACT MODULE: Unexpected line '${line}'. Each dry contact module should start with 'NAME:'.`
+            );
+            return;
         } else if (currentModuleName && expectingAction) {
             // 检查并记录非NORMAL动作的设备
             if (line !== 'NORMAL' && VALID_ACTIONS.includes(line)) {
@@ -105,9 +125,6 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
             `DRY CONTACT MODULE: Missing action for module '${currentModuleName}'.`
         );
     }
-
-    console.log("DryContactModules - Special Action Devices:", 
-        Object.fromEntries(specialActionDevices));
 
     return { errors, specialActionDevices };
 }
