@@ -196,6 +196,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
         registeredGroupNames={registeredGroupNames}
         registeredSceneNames={registeredSceneNames}
         onValidate={handleStep6Validation}
+        onReturnToInitialStep={handleReturnToInitialStep}
       /> 
     },
     { 

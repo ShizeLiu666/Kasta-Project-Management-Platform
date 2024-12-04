@@ -171,6 +171,25 @@ function validateFanTypeOperations(parts, errors, sceneName) {
 
 //! Validate Curtain Type operations using regex
 function validateCurtainTypeOperations(names, operation, errors, sceneName) {
+  // 检查分隔符
+  const originalString = names.join(", ") + " " + operation;
+  if (originalString.includes(";")) {
+    errors.push(
+      `KASTA SCENE [${sceneName}]: Invalid separator ';' in "${originalString}". Please use comma ',' for multiple devices.`
+    );
+    return;
+  }
+
+  // 检查重复的设备名称
+  const uniqueNames = new Set(names);
+  if (uniqueNames.size !== names.length) {
+    const duplicates = names.filter((name, index) => names.indexOf(name) !== index);
+    errors.push(
+      `KASTA SCENE [${sceneName}]: Duplicate device names found: ${duplicates.join(", ")} in "${originalString}"`
+    );
+    return;
+  }
+
   const singleCurtainPattern = /^[a-zA-Z0-9_]+ (OPEN|CLOSE)$/i;
   const groupCurtainPattern =
     /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+(OPEN|CLOSE)$/i;
@@ -211,6 +230,14 @@ function validatePowerPointTypeOperations(
     }
   }
 
+  // 首先检查是否是群控
+  if (deviceNames.length > 1) {
+    errors.push(
+      `KASTA SCENE [${sceneName}]: PowerPoint Type devices do not support group control. Found multiple devices: ${deviceNames.join(", ")}`
+    );
+    return;
+  }
+
   // 获取操作部分
   const operationParts = parts.slice(operationIndex);
 
@@ -240,9 +267,9 @@ function validatePowerPointTypeOperations(
   const deviceType = deviceTypes.values().next().value;
   const operationString = deviceNames.join(", ") + " " + operationParts.join(" ");
 
-  // 新的正则表达式模式
-  const singleWayPattern = /^PPT\d+\s+(ON|OFF)$/i;
-  const twoWayPattern = /^PPT_\d+\s+((ON|OFF|UNSELECT)\s+(ON|OFF|UNSELECT))$/i;
+  // 修改正则表达式，移除对设备名称格式的限制
+  const singleWayPattern = /^[a-zA-Z0-9_]+\s+(ON|OFF)$/i;
+  const twoWayPattern = /^[a-zA-Z0-9_]+\s+((ON|OFF|UNSELECT)\s+(ON|OFF|UNSELECT))$/i;
 
   let isValid = false;
 
@@ -251,8 +278,9 @@ function validatePowerPointTypeOperations(
     if (!isValid) {
       errors.push([
         `KASTA SCENE [${sceneName}]: Invalid Single-Way PowerPoint operation. The operation string "${operationString}" is not valid. Supported formats are:`,
-        "- DEVICE_NAME ON",
-        "- DEVICE_NAME OFF"
+        "- DEVICE_NAME ON (Single ON)",
+        "- DEVICE_NAME OFF (Single OFF)",
+        "Note: Single-Way PowerPoint only supports one operation (ON or OFF)"
       ]);
     }
   } else if (deviceType === "PowerPoint Type (Two-Way)") {
@@ -267,14 +295,14 @@ function validatePowerPointTypeOperations(
     if (!isValid) {
       errors.push([
         `KASTA SCENE [${sceneName}]: Invalid Two-Way PowerPoint operation. The operation string "${operationString}" is not valid. Supported formats are:`,
-        "- DEVICE_NAME ON OFF",
-        "- DEVICE_NAME OFF ON",
-        "- DEVICE_NAME ON UNSELECT",
-        "- DEVICE_NAME UNSELECT ON",
-        "- DEVICE_NAME OFF UNSELECT",
-        "- DEVICE_NAME UNSELECT OFF",
-        "- DEVICE_NAME ON ON",
-        "- DEVICE_NAME OFF OFF"
+        "- DEVICE_NAME ON OFF (Left ON, Right OFF)",
+        "- DEVICE_NAME OFF ON (Left OFF, Right ON)",
+        "- DEVICE_NAME ON UNSELECT (Left ON, Right unchanged)",
+        "- DEVICE_NAME UNSELECT ON (Left unchanged, Right ON)",
+        "- DEVICE_NAME OFF UNSELECT (Left OFF, Right unchanged)",
+        "- DEVICE_NAME UNSELECT OFF (Left unchanged, Right OFF)",
+        "- DEVICE_NAME ON ON (Both ON)",
+        "- DEVICE_NAME OFF OFF (Both OFF)"
       ]);
     }
   }
@@ -572,19 +600,31 @@ export function validateScenes(
   const errors = [];
   const registeredSceneNames = new Set();
   let currentSceneName = null;
+  let hasControlContent = false;  // 新增：跟踪当前场景是否有控制内容
 
-  sceneDataArray.forEach((line) => {
+  sceneDataArray.forEach((line, index) => {
     line = line.trim();
 
     if (line.startsWith("CONTROL CONTENT")) {
+      hasControlContent = true;
       return;
     }
 
     if (line.startsWith("NAME")) {
+      // 检查前一个场景是否为空
+      if (currentSceneName && !hasControlContent) {
+        errors.push(
+          `KASTA SCENE: The scene '${currentSceneName}' is empty. Each scene must have at least one control instruction.`
+        );
+      }
+
       if (!checkNamePrefix(line, errors)) return;
       currentSceneName = line.substring(5).trim();
       if (!validateSceneName(currentSceneName, errors, registeredSceneNames))
         return;
+      
+      // 重置控制内容标志
+      hasControlContent = false;
     } else if (currentSceneName && line) {
       const parts = line.split(/\s+/);
       validateSceneDevicesInLine(
@@ -594,8 +634,16 @@ export function validateScenes(
         currentSceneName,
         dryContactSpecialActions
       );
+      hasControlContent = true;
     }
   });
+
+  // 检查最后一个场景是否为空
+  if (currentSceneName && !hasControlContent) {
+    errors.push(
+      `KASTA SCENE: The scene '${currentSceneName}' is empty. Each scene must have at least one control instruction.`
+    );
+  }
 
   return { errors, registeredSceneNames };
 }
