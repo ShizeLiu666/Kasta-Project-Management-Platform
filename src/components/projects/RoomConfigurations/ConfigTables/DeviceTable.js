@@ -50,7 +50,7 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
             width: '30%',
           }}
         >
-          {deviceType} ({devices.length})
+          {deviceType}
         </TableCell>
         <TableCell sx={{ width: '30%' }}>
           {devices[0].appearanceShortname}
@@ -121,11 +121,15 @@ const DeviceTable = ({ devices }) => {
 
   const groupedDevices = useMemo(() => {
     return devices.reduce((acc, device) => {
-      const type = device.deviceType;
-      if (!acc[type]) {
-        acc[type] = [];
+      const key = `${device.deviceType}_${device.appearanceShortname}`;
+      if (!acc[key]) {
+        acc[key] = {
+          deviceType: device.deviceType,
+          appearanceShortname: device.appearanceShortname,
+          devices: []
+        };
       }
-      acc[type].push(device);
+      acc[key].devices.push(device);
       return acc;
     }, {});
   }, [devices]);
@@ -216,13 +220,13 @@ const DeviceTable = ({ devices }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {Object.entries(groupedDevices).map(([deviceType, deviceList]) => (
+              {Object.values(groupedDevices).map((group) => (
                 <DeviceTypeRow
-                  key={deviceType}
-                  deviceType={deviceType}
-                  devices={deviceList}
-                  isExpanded={expandedTypes.has(deviceType)}
-                  onToggle={() => handleToggle(deviceType)}
+                  key={`${group.deviceType}_${group.appearanceShortname}`}
+                  deviceType={`${group.deviceType} (${group.devices.length})`}
+                  devices={group.devices}
+                  isExpanded={expandedTypes.has(`${group.deviceType}_${group.appearanceShortname}`)}
+                  onToggle={() => handleToggle(`${group.deviceType}_${group.appearanceShortname}`)}
                 />
               ))}
             </TableBody>
