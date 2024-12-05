@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Input, InputGroup } from 'reactstrap';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -14,31 +14,30 @@ const CustomSearchBar = ({
     fontSize = "14px",
     iconColor = "#6c757d",
     filterKey = "name",
-    onFilter, // 自定义过滤函数
+    onFilter,
     debounceTime = 100,
     autoFocus = false,
     disabled = false,
-    showBorder = false,  // 新增边框显示选项
+    showBorder = false,
 }) => {
-  // 防抖处理
-  const debounce = (func, wait) => {
+  const debouncedFilter = useCallback((value) => {
     let timeout;
-    return (...args) => {
+    if (timeout) {
       clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  };
+    }
+    timeout = setTimeout(() => {
+      if (onFilter) {
+        onFilter(value);
+      }
+    }, debounceTime);
+  }, [onFilter, debounceTime]);
 
-  // 处理搜索输入
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    if (onFilter) {
-      debounce(onFilter, debounceTime)(value);
-    }
+    debouncedFilter(value);
   };
 
-  // 清除搜索内容
   const handleClear = () => {
     setSearchTerm('');
     if (onFilter) {
@@ -55,7 +54,7 @@ const CustomSearchBar = ({
     backgroundColor: backgroundColor,
     borderRadius: borderRadius,
     height: height,
-    border: showBorder ? '1px solid #ced4da' : 'none',  // 根据 showBorder 决定是否显示边框
+    border: showBorder ? '1px solid #ced4da' : 'none',
     transition: 'all 0.3s ease',
   };
 
@@ -68,17 +67,6 @@ const CustomSearchBar = ({
     zIndex: 2,
   };
 
-  const clearIconStyle = {
-    position: 'absolute',
-    right: '10px',
-    top: '53%',
-    transform: 'translateY(-50%)',
-    color: iconColor,
-    cursor: 'pointer',
-    zIndex: 2,
-    display: searchTerm ? 'block' : 'none',
-  };
-
   const inputStyle = {
     paddingLeft: '41px',
     paddingRight: '35px',
@@ -86,6 +74,8 @@ const CustomSearchBar = ({
     border: 'none',
     backgroundColor: 'transparent',
     height: '100%',
+    position: 'relative',
+    zIndex: 1,
     '&:focus': {
       boxShadow: 'none',
       borderColor: '#80bdff',
@@ -105,10 +95,34 @@ const CustomSearchBar = ({
           autoFocus={autoFocus}
           disabled={disabled}
         />
-        <ClearIcon 
-          style={clearIconStyle}
-          onClick={handleClear}
-        />
+        {searchTerm && (
+          <div 
+            onClick={handleClear}
+            style={{
+              position: 'absolute',
+              right: '0',
+              top: '0',
+              height: '100%',
+              width: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              zIndex: 10,
+            }}
+          >
+            <ClearIcon 
+              style={{
+                color: iconColor,
+                fontSize: '20px',
+                transition: 'color 0.2s ease',
+                '&:hover': {
+                  color: '#333',
+                },
+              }}
+            />
+          </div>
+        )}
       </InputGroup>
     </div>
   );

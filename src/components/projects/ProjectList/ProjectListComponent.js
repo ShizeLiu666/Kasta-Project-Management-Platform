@@ -419,8 +419,19 @@ const ProjectListComponent = () => {
         onMemberInvited={(response) => {
           if (response.success) {
             fetchProjectList();
+            setAlert({
+              isOpen: true,
+              message: 'Member invited successfully',
+              severity: 'success',
+              duration: 1000
+            });
           } else {
-            console.error('Error inviting member:', response.errorMsg);
+            setAlert({
+              isOpen: true,
+              message: response.errorMsg || 'Failed to invite member',
+              severity: 'error',
+              duration: 2000
+            });
           }
         }}
         currentMembers={selectedProjectForInvite?.members || []}

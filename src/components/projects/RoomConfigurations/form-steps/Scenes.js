@@ -12,6 +12,7 @@ import { validateScenes } from "../ExcelProcessor/validation/Scenes";
 import "./steps.scss"
 
 import ScenesTreeView from "./TreeView/ScenesTreeView";
+import ReturnToUploadButton from "../../../CustomComponents/ReturnToUploadButton";
 
 // Format error messages function
 const formatErrors = (errors) => {
@@ -24,7 +25,14 @@ const formatErrors = (errors) => {
 };
 
 // Scenes function component
-const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
+const Scenes = forwardRef(({ 
+  splitData, 
+  deviceNameToType, 
+  dryContactSpecialActions, 
+  onValidate,
+  onReturnToInitialStep,
+  jumpToStep
+}, ref) => {
   const [sceneErrors, setSceneErrors] = useState(null);
   const [success, setSuccess] = useState(false);
   const [sceneData, setSceneData] = useState({});
@@ -37,7 +45,11 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
       return;
     }
 
-    const { errors } = validateScenes(splitData.scenes, deviceNameToType);
+    const { errors } = validateScenes(
+      splitData.scenes, 
+      deviceNameToType,
+      dryContactSpecialActions 
+    );
 
     if (errors.length > 0) {
       setSceneErrors(formatErrors(errors));
@@ -61,7 +73,7 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
     }
 
     hasValidated.current = true;
-  }, [splitData, deviceNameToType, onValidate]);
+  }, [splitData, deviceNameToType, dryContactSpecialActions, onValidate]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -86,28 +98,35 @@ const Scenes = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
           {sceneErrors && (
-            <Alert severity="error" style={{ marginTop: "10px" }}>
-              <AlertTitle>Error</AlertTitle>
-              <ul>
-                {sceneErrors.map((error, index) => (
-                  <li key={index}>
-                    {Array.isArray(error) ? (
-                      error.map((line, lineIndex) => (
-                        <React.Fragment key={lineIndex}>
-                          {line}
-                          {lineIndex < error.length - 1 && <br />}
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      error
-                    )}
-                  </li>
-                ))}
-              </ul>
-              <div style={{ marginTop: "10px" }}>
-                Please refer to the <strong>Supported Scene Control Formats</strong> below for the correct format.
-              </div>
-            </Alert>
+            <>
+              <Alert severity="error" style={{ marginTop: "10px" }}>
+                <AlertTitle>Error</AlertTitle>
+                <ul>
+                  {sceneErrors.map((error, index) => (
+                    <li key={index}>
+                      {Array.isArray(error) ? (
+                        error.map((line, lineIndex) => (
+                          <React.Fragment key={lineIndex}>
+                            {line}
+                            {lineIndex < error.length - 1 && <br />}
+                          </React.Fragment>
+                        ))
+                      ) : (
+                        error
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <div style={{ marginTop: "10px" }}>
+                  Please refer to the <strong>Supported Scene Control Formats</strong> below for the correct format.
+                </div>
+              </Alert>
+
+              <ReturnToUploadButton 
+                onReturnToInitialStep={onReturnToInitialStep}
+                jumpToStep={jumpToStep}
+              />
+            </>
           )}
 
           {success && (

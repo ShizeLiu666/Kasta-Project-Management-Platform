@@ -129,8 +129,16 @@ export function validateOutputModules(outputsDataArray, deviceNameToType, regist
     let currentModuleName = null;
     const usedChannels = new Map();
 
-    outputsDataArray.forEach((line) => {
+    outputsDataArray.forEach((line, index) => {
         line = line.trim();
+
+        // 新增：检查第一行是否以数字开头（直接配置通道）
+        if (index === 0 && /^\d+:/.test(line)) {
+            errors.push(
+                `OUTPUT MODULE: Please define the output module name using 'NAME:' before configuring channels.`
+            );
+            return;
+        }
 
         if (line.startsWith("NAME")) {
             if (!checkNamePrefix(line, errors)) return;
@@ -148,6 +156,14 @@ export function validateOutputModules(outputsDataArray, deviceNameToType, regist
                 currentModuleName = null;
                 return;
             }
+        } else if (!currentModuleName && line.trim()) {
+            // 新增：如果没有当前模块名但尝试配置通道
+            if (/^\d+:/.test(line)) {
+                errors.push(
+                    `OUTPUT MODULE: Cannot configure channel '${line}' without first defining a module name using 'NAME:'.`
+                );
+            }
+            return;
         } else if (currentModuleName) {
             const match = checkCommandFormat(line, errors, currentModuleName);
             if (!match) return;

@@ -15,6 +15,7 @@ import "./steps.scss"
 import RemoteControlTreeView from './TreeView/RemoteControlsTreeView';
 import RemoteParameters from './RemoteParameters';
 import RemoteParametersTreeView from './TreeView/RemoteParametersTreeView';
+import ReturnToUploadButton from "../../../CustomComponents/ReturnToUploadButton";
 
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
@@ -26,7 +27,16 @@ const formatErrors = (errors) => {
   return errors.sort();
 };
 
-const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDeviceNames, registeredGroupNames, registeredSceneNames, onValidate }, ref) => {
+const RemoteControls = forwardRef(({ 
+  splitData, 
+  deviceNameToType, 
+  registeredDeviceNames, 
+  registeredGroupNames, 
+  registeredSceneNames, 
+  onValidate,
+  onReturnToInitialStep, 
+  jumpToStep
+}, ref) => {
   const [remoteControlErrors, setRemoteControlErrors] = useState(null);
   const [parameterErrors, setParameterErrors] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -109,18 +119,37 @@ const RemoteControls = forwardRef(({ splitData, deviceNameToType, registeredDevi
     <div className="step step5 mt-5">
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
-          {remoteControlErrors && (
-            <Alert severity="error" style={{ marginTop: "10px" }}>
-              <AlertTitle>Error</AlertTitle>
-              <div>
-                <strong>Remote Control Errors:</strong>
-                <ul>
-                  {remoteControlErrors.map((error, index) => (
-                    <li key={`rc-${index}`}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            </Alert>
+          {(remoteControlErrors || parameterErrors) && (
+            <>
+              <Alert severity="error" style={{ marginTop: "10px" }}>
+                <AlertTitle>Error</AlertTitle>
+                {remoteControlErrors && (
+                  <div>
+                    <strong>Remote Control Errors:</strong>
+                    <ul>
+                      {remoteControlErrors.map((error, index) => (
+                        <li key={`rc-${index}`}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {parameterErrors && (
+                  <div>
+                    <strong>Parameter Errors:</strong>
+                    <ul>
+                      {parameterErrors.map((error, index) => (
+                        <li key={`p-${index}`}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </Alert>
+
+              <ReturnToUploadButton 
+                onReturnToInitialStep={onReturnToInitialStep}
+                jumpToStep={jumpToStep}
+              />
+            </>
           )}
 
           {remoteControlSuccess && (

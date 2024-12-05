@@ -36,11 +36,13 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
 
   const isFormValid = () => {
     if (!project) return false;
-    const { name, address, des } = formData;
-    const isChanged = name !== project.name || 
-                      address !== project.address || 
-                      des !== project.des;
-    return isChanged;
+    
+    // 检查每个字段是否有实际变更，同时处理可能的undefined值
+    const hasNameChange = formData.name.trim() !== (project.name || '').trim();
+    const hasAddressChange = formData.address.trim() !== (project.address || '').trim();
+    const hasDesChange = formData.des.trim() !== (project.des || '').trim();
+    
+    return hasNameChange || hasAddressChange || hasDesChange;
   };
 
   const handleSubmit = async () => {
@@ -50,16 +52,9 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     }
 
     if (!isFormValid()) {
-      setError("Please make at least one change.");
+      setError("No changes detected. Please modify at least one field.");
       return;
     }
-
-    // 移除密码验证
-    // if (formData.currentPassword !== project.password) {
-    //   setError("Current password is incorrect. Please try again.");
-    //   setTimeout(() => setError(""), 3000);
-    //   return;
-    // }
 
     const token = getToken();
     if (!token) {
@@ -68,15 +63,27 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
     }
 
     const attributes = {};
-    if (formData.name !== project.name) attributes.name = formData.name;
-    if (formData.address !== project.address) attributes.address = formData.address;
-    if (formData.des !== project.des) attributes.des = formData.des;
-    // 移除新密码设置
-    // if (formData.newPassword !== "") attributes.password = formData.newPassword;
+    // 安全地处理可能为undefined的值
+    const currentName = (project.name || '').trim();
+    const currentAddress = (project.address || '').trim();
+    const currentDes = (project.des || '').trim();
+
+    const newName = formData.name.trim();
+    const newAddress = formData.address.trim();
+    const newDes = formData.des.trim();
+
+    if (newName !== currentName) {
+      attributes.name = newName;
+    }
+    if (newAddress !== currentAddress) {
+      attributes.address = newAddress;
+    }
+    if (newDes !== currentDes) {
+      attributes.des = newDes;
+    }
 
     if (Object.keys(attributes).length === 0) {
       setError("No changes detected. Please modify at least one field.");
-      setTimeout(() => setError(""), 3000);
       return;
     }
 

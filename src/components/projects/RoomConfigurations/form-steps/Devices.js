@@ -12,6 +12,7 @@ import TablePagination from "@mui/material/TablePagination";
 import { validateDevices } from "../ExcelProcessor/validation/Devices";
 import "./steps.scss"
 import DevicesTreeView from './TreeView/DevicesTreeView';
+import ReturnToUploadButton from "../../../CustomComponents/ReturnToUploadButton";
 
 // 导入设备类型格式图片
 // import deviceTypesFormatImage from '../../../../assets/excel/device_format/device_types.png';
@@ -27,7 +28,12 @@ const formatErrors = (errors) => {
 };
 
 // Step2 function component
-const Devices = forwardRef(({ splitData, onValidate }, ref) => {
+const Devices = forwardRef(({ 
+  splitData, 
+  onValidate,
+  onReturnToInitialStep,
+  jumpToStep
+}, ref) => {
   const [deviceErrors, setDeviceErrors] = useState(null);
   const [success, setSuccess] = useState(false);
   const [deviceNameToType, setDeviceNameToType] = useState({});
@@ -81,17 +87,24 @@ const Devices = forwardRef(({ splitData, onValidate }, ref) => {
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
           {deviceErrors && (
-            <Alert severity="error" style={{ marginTop: "10px" }}>
-              <AlertTitle>Error</AlertTitle>
-              <ul>
-                {deviceErrors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
-              <div style={{ marginTop: "10px" }}>
-                Please refer to the <strong>Supported Devices</strong> below for the correct format.
-              </div>
-            </Alert>
+            <>
+              <Alert severity="error" style={{ marginTop: "10px" }}>
+                <AlertTitle>Error</AlertTitle>
+                <ul>
+                  {deviceErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+                <div style={{ marginTop: "10px" }}>
+                  Please refer to the <strong>Supported Devices</strong> below for the correct format.
+                </div>
+              </Alert>
+
+              <ReturnToUploadButton 
+                onReturnToInitialStep={onReturnToInitialStep}
+                jumpToStep={jumpToStep}
+              />
+            </>
           )}
 
           {success && (

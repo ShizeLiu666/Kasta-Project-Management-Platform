@@ -4,14 +4,34 @@ $sidebarWidth: 230px; // Adjust this value to your desired width
   flex-shrink: 0;
   width: $sidebarWidth;
   background-color: $sidebarColor;
-  .sidenav-bg:hover {
-    background-color: $gray-100;
-    border-radius: $border-radius;
-  }
-  .sidenav-bg .active {
-    background-color: $info;
-    border-radius: $border-radius;
-    color: white;
+  
+  .sidenav-bg {
+    &:hover {
+      background-color: $gray-100;
+      border-radius: $border-radius;
+    }
+    
+    a {
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      outline: none !important;
+      
+      &:active,
+      &:focus,
+      &:hover,
+      &.active {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+    }
+    
+    .active {
+      background: linear-gradient(118deg, #26c6da, #33d6e4);
+      box-shadow: 0 0 10px 1px rgba(38, 198, 218, 0.3);
+      border-radius: $border-radius;
+      color: white;
+    }    
   }
 }
 
@@ -21,13 +41,14 @@ $sidebarWidth: 230px; // Adjust this value to your desired width
     height: 100%;
     overflow: auto;
     top: 0;
-    left: 0; /* 确保从左边开始 */
-    z-index: 1050; /* 增加z-index确保在其他元素之上 */
-    width: 250px; /* 设置固定宽度 */
-    transform: translateX(-100%); /* 初始状态隐藏 */
+    left: 0;
+    z-index: 1050;
+    width: 200px;
+    transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
+    
     &.showSidebar {
-      transform: translateX(0); /* 显示时移动到可见区域 */
+      transform: translateX(0);
     }
   }
 }

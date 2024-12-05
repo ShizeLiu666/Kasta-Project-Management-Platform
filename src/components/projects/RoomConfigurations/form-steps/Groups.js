@@ -11,6 +11,7 @@ import TablePagination from "@mui/material/TablePagination";
 import { validateGroups } from "../ExcelProcessor/validation/Groups";
 import "./steps.scss"
 import GroupsTreeView from './TreeView/GroupsTreeView';
+import ReturnToUploadButton from "../../../CustomComponents/ReturnToUploadButton";
 
 // Function to format error messages
 const formatErrors = (errors) => {
@@ -23,7 +24,13 @@ const formatErrors = (errors) => {
 };
 
 // Step3 function component
-const Groups = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => {
+const Groups = forwardRef(({ 
+  splitData, 
+  deviceNameToType, 
+  onValidate, 
+  onReturnToInitialStep,
+  jumpToStep  // 新增：接收 jumpToStep prop
+}, ref) => {
   const [groupErrors, setGroupErrors] = useState(null);
   const [success, setSuccess] = useState(false);
   const [groupData, setGroupData] = useState({});
@@ -87,17 +94,24 @@ const Groups = forwardRef(({ splitData, deviceNameToType, onValidate }, ref) => 
       <div className="row justify-content-md-center">
         <div className="col-lg-8" style={{ marginBottom: "20px" }}>
           {groupErrors && (
-            <Alert severity="error" style={{ marginTop: "10px" }}>
-              <AlertTitle>Error</AlertTitle>
-              <ul>
-                {groupErrors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
-              <div style={{ marginTop: "10px" }}>
-                Please refer to the <strong>Supported Group Control Formats</strong> below for the correct format.
-              </div>
-            </Alert>
+            <>
+              <Alert severity="error" style={{ marginTop: "10px", marginBottom: "10px" }}>
+                <AlertTitle>Error</AlertTitle>
+                <ul>
+                  {groupErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+                <div style={{ marginTop: "10px" }}>
+                  Please refer to the <strong>Supported Group Control Formats</strong> below for the correct format.
+                </div>
+              </Alert>
+              
+              <ReturnToUploadButton 
+                onReturnToInitialStep={onReturnToInitialStep}
+                jumpToStep={jumpToStep}
+              />
+            </>
           )}
 
           {success && (

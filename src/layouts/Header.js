@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Navbar,
-  Collapse,
-  Nav,
   NavbarBrand,
   DropdownToggle,
   DropdownMenu,
@@ -16,13 +14,15 @@ import '../assets/scss/loader/Header.css';
 import { getUserDetails } from '../components/auth';
 import defaultAvatar from '../assets/images/users/normal_user.jpg';
 import CustomModal from '../components/CustomComponents/CustomModal';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+import FeedbackModal from './FeedbackModal';
 
 const Header = ({ toggleSidebar }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(defaultAvatar);
   const navigate = useNavigate();
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   const updateAvatar = (userDetails) => {
     setAvatarSrc(userDetails?.headPic || defaultAvatar);
@@ -56,11 +56,13 @@ const Header = ({ toggleSidebar }) => {
   }, []);
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
-  const Handletoggle = () => setIsOpen(!isOpen);
   const showMobilemenu = () => {
     toggleSidebar();
   };
   const toggleLogoutModal = () => setLogoutModalOpen(!logoutModalOpen);
+  const toggleFeedbackModal = () => {
+    setFeedbackModalOpen(!feedbackModalOpen);
+  };
 
   const handleLogout = () => {
     console.log("Logout button clicked");
@@ -89,6 +91,11 @@ const Header = ({ toggleSidebar }) => {
     navigate('/admin/profile');
   };
 
+  const handleFeedbackSubmit = (feedbackData) => {
+    console.log('Feedback submitted:', feedbackData);
+    // TODO: 处理反馈提交逻辑
+  };
+
   return (
     <Navbar dark expand="md" className="fix-header header-background">
       <div className="d-flex align-items-center">
@@ -98,29 +105,32 @@ const Header = ({ toggleSidebar }) => {
         <Button
           color="primary"
           className="d-lg-none"
-          onClick={() => showMobilemenu()}
+          onClick={showMobilemenu}
         >
           <i className="bi bi-list"></i>
         </Button>
       </div>
-      <div className="hstack gap-2">
+      <div className="ms-auto d-flex align-items-center">
         <Button
-          color="primary"
-          size="sm"
-          className="d-sm-block d-md-none"
-          onClick={Handletoggle}
+          color="link"
+          className="me-3"
+          onClick={toggleFeedbackModal}
+          style={{
+            color: '#ff4d4f',
+            padding: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            border: 'none',
+            transition: 'color 0.3s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.color = '#ff7875'}
+          onMouseOut={(e) => e.currentTarget.style.color = '#ff4d4f'}
         >
-          {isOpen ? (
-            <i className="bi bi-x"></i>
-          ) : (
-            <i className="bi bi-three-dots-vertical"></i>
-          )}
+          <FeedbackIcon style={{ 
+            fontSize: '24px',
+            transform: 'scaleX(-1)'  // 水平翻转图标
+          }} />
         </Button>
-      </div>
-      <Collapse navbar isOpen={isOpen}>
-        <Nav className="me-auto" navbar>
-          {/* Add more navigation items if needed */}
-        </Nav>
         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
           <DropdownToggle color="transparent" className="d-flex align-items-center">
             <img
@@ -138,9 +148,8 @@ const Header = ({ toggleSidebar }) => {
             <DropdownItem onClick={toggleLogoutModal}>Logout</DropdownItem>
           </DropdownMenu>
         </Dropdown>
-      </Collapse>
+      </div>
 
-      {/* Logout Confirmation Modal */}
       <CustomModal
         isOpen={logoutModalOpen}
         toggle={toggleLogoutModal}
@@ -153,6 +162,12 @@ const Header = ({ toggleSidebar }) => {
       >
         Are you sure you want to log out?
       </CustomModal>
+
+      <FeedbackModal
+        isOpen={feedbackModalOpen}
+        toggle={toggleFeedbackModal}
+        onSubmit={handleFeedbackSubmit}
+      />
     </Navbar>
   );
 };

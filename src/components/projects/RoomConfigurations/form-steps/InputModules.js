@@ -10,6 +10,7 @@ import Paper from "@mui/material/Paper";
 import TablePagination from "@mui/material/TablePagination";
 import { validateInputModules } from "../ExcelProcessor/validation/InputModules";
 import "./steps.scss";
+import InputModulesTreeView from './TreeView/InputModulesTreeView';
 
 const formatErrors = (errors) => {
   if (typeof errors === 'string') {
@@ -42,9 +43,10 @@ const InputModules = forwardRef(({
     const errors = validateInputModules(splitData.inputs, deviceNameToType, registeredDeviceNames);
 
     if (errors.length > 0) {
-      setInputModuleErrors(formatErrors(errors));
+      const formattedErrors = formatErrors(errors);
+      setInputModuleErrors(formattedErrors);
       setSuccess(false);
-      onValidate(false, null);
+      onValidate(false, formattedErrors);
     } else {
       const inputModuleData = {};
       let currentModule = null;
@@ -79,18 +81,25 @@ const InputModules = forwardRef(({
     <>
       {inputModuleErrors && (
         <Alert severity="error" style={{ marginTop: "10px" }}>
-          <AlertTitle>The following errors were found:</AlertTitle>
+          <AlertTitle>Error</AlertTitle>
           <ul>
             {inputModuleErrors.map((error, index) => (
               <li key={index}>{error}</li>
             ))}
           </ul>
+          <div style={{ marginTop: "10px" }}>
+            Please refer to the <strong>Supported Input Module Formats</strong> below for the correct format.
+          </div>
         </Alert>
       )}
 
       {success && (
         <>
-          <TableContainer component={Paper}>
+          <Alert severity="success" style={{ marginTop: "10px" }}>
+            <AlertTitle>The following input modules have been identified:</AlertTitle>
+          </Alert>
+
+          <TableContainer component={Paper} style={{ marginTop: "20px" }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -130,10 +139,19 @@ const InputModules = forwardRef(({
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[5, 10]}
+              style={{
+                alignItems: "center",
+                display: "flex",
+                margin: "10px 0",
+              }}
             />
           </TableContainer>
         </>
       )}
+
+      <div style={{ marginTop: "20px" }}>
+        <InputModulesTreeView />
+      </div>
     </>
   );
 });

@@ -54,7 +54,45 @@ function checkMissingNamePrefix(line, errors) {
   return true;
 }
 
+// 新增：获取所有设备型号的函数
+function getAllModelNames() {
+  const allModels = [];
+  
+  for (const value of Object.values(AllDeviceTypes)) {
+    if (Array.isArray(value)) {
+      allModels.push(...value);
+    } else if (typeof value === 'object') {
+      // 处理嵌套对象（如 PowerPoint Type 和 Remote Control）
+      Object.values(value).forEach(subModels => {
+        if (Array.isArray(subModels)) {
+          allModels.push(...subModels);
+        }
+      });
+    }
+  }
+
+  console.log("All Models:", allModels);
+  
+  return allModels;
+}
+
+// 缓存所有设备型号
+const ALL_MODEL_NAMES = getAllModelNames();
+
 function validateDeviceName(line, errors, registeredDeviceNames) {
+  console.log("Line:", line);
+  // 首先检查是否与任何设备型号冲突
+  if (ALL_MODEL_NAMES.includes(line)) {
+    errors.push(createError(`The device name '${line}' cannot be the same as any device model name.`));
+    return false;
+  }
+
+  // 长度检查
+  if (line.length < 1 || line.length > 20) {
+    errors.push(createError(`The device name '${line}' must be between 1 and 20 characters long.`));
+    return false;
+  }
+
   if (registeredDeviceNames.has(line)) {
     errors.push(createError(`The device name '${line}' is duplicated. Each device name must be unique.`));
     return false;
@@ -89,66 +127,84 @@ function findDeviceType(currentDeviceModel) {
   return { type: null, exists: false };
 }
 
-function checkConflict(modelList, deviceName) {
-  return Array.isArray(modelList) && modelList.includes(deviceName);
-}
-
 export function validateDevices(deviceDataArray) {
   const errors = [];
   let deviceNameToType = {};
   const registeredDeviceNames = new Set();
   let currentDeviceType = null;
   let currentDeviceModel = null;
+  let hasCurrentModel = false;  // 标记是否有当前有效的设备型号
+  let hasDeviceInstance = false;  // 新增：标记当前型号是否有设备实例
 
-  deviceDataArray.forEach((line) => {
+  deviceDataArray.forEach((line, index) => {
     line = line.trim();
 
     if (line.startsWith(QTY_PREFIX) || line.includes("(")) return;
 
     if (line.startsWith(NAME_PREFIX)) {
+      // 检查前一个设备型号是否有设备实例
+      if (hasCurrentModel && !hasDeviceInstance) {
+        errors.push(createError(`No device instance was defined for model '${currentDeviceModel}'. Please add at least one device name.`));
+      }
+
+      // 重置设备实例标记
+      hasDeviceInstance = false;
+      
       // 情况1和2：NAME开头的行
       if (!checkNamePrefix(line, errors)) return;
       currentDeviceModel = line.substring(NAME_PREFIX.length).trim();
-      if (!validateDeviceModel(currentDeviceModel, errors)) return;
+      if (!validateDeviceModel(currentDeviceModel, errors)) {
+        hasCurrentModel = false;
+        return;
+      }
 
       const { type, exists } = findDeviceType(currentDeviceModel);
       currentDeviceType = type;
 
       if (!exists) {
         errors.push(createError(`The device model '${currentDeviceModel}' is not recognized in any known device type.`));
+        hasCurrentModel = false;
         return;
       }
       
+      hasCurrentModel = true;
       deviceNameToType[currentDeviceModel] = currentDeviceType;
     } else {
-      // 情况3：可能缺少NAME前缀的行
+      // 情况3：设备名称行
       if (!checkMissingNamePrefix(line, errors)) return;
+      
+      // 检查是否有当前有效的设备型号
+      if (!hasCurrentModel) {
+        errors.push(createError(`The device name '${line}' is not associated with any device model. Please define a device model using 'NAME:' first.`));
+        return;
+      }
+      
+      // 检查设备名称是否与任何设备型号相同
+      if (ALL_MODEL_NAMES.includes(line)) {
+        errors.push(createError(`The device name '${line}' cannot be the same as any device model name.`));
+        return;
+      }
+
       if (!validateDeviceName(line, errors, registeredDeviceNames)) return;
 
       if (currentDeviceType) {
         deviceNameToType[line] = currentDeviceType;
+        hasDeviceInstance = true;  // 标记已有设备实例
       }
     }
   });
+
+  // 检查最后一个设备型号是否有设备实例
+  if (hasCurrentModel && !hasDeviceInstance) {
+    errors.push(createError(`No device instance was defined for model '${currentDeviceModel}'. Please add at least one device name.`));
+  }
 
   // 删除与 AllDeviceTypes 中已存在的设备名冲突的条目
   Object.keys(deviceNameToType).forEach((deviceName) => {
-    for (const models of Object.values(AllDeviceTypes)) {
-      if (checkConflict(models, deviceName)) {
-        delete deviceNameToType[deviceName];
-        break;
-      }
-      if (typeof models === "object") {
-        if (Object.values(models).some(subModels => checkConflict(subModels, deviceName))) {
-          delete deviceNameToType[deviceName];
-          break;
-        }
-      }
+    if (ALL_MODEL_NAMES.includes(deviceName)) {
+      delete deviceNameToType[deviceName];
     }
   });
-
-  // console.log("Errors found:", errors);
-  // console.log("Device Types:", deviceNameToType);
 
   return { errors, deviceNameToType, registeredDeviceNames };
 }

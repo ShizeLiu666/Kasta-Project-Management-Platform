@@ -1,31 +1,13 @@
-.nav-link.active {
-  /* background-color: #525455 !important;  */
-  /* color: white !important;  */
-  color: white !important; 
-  font-weight: bold; /* 激活状态下的文本加粗 */
-}
-
-.nav-link {
-  color: #6c757d; /* 非激活状态下的文本颜色 */
-  transition: background-color 0.3s ease; /* 添加背景颜色过渡效果 */
-}
-
-.sidenav-bg {
-  margin-bottom: 5px; /* 每个导航项之间增加一些间距 */
-  /* border-radius: 2px; 导航项的圆角 */
-}
-
 .sidebar-container {
   position: relative;
-  /* height: 100%; */
+  transition: all 0.3s ease;
+  width: 100%;
 }
 
-.sidebar-close-button {
-  /* position: absolute;
-  top: 10px;
-  right: -20px; */
-  margin-left: 10px;
-  margin-top: 10px;
+.sidebar-collapse-button {
+  position: absolute;
+  right: -20px;
+  top: 23px;
   background-color: #fff;
   border-radius: 50%;
   width: 40px;
@@ -34,16 +16,59 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0.1,0.1,0.1,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  transition: all 0.3s ease;
 }
 
-.sidebar-close-button:hover {
-  background-color: #f0f0f0;
+/* .sidebar-collapse-button:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.05);
+} */
+
+.sidebarArea {
+  width: 230px;
+  transition: all 0.3s ease;
+  background: white;
 }
 
-@media (min-width: 992px) {
-  .sidebar-close-button {
-    display: none;
-  }
+.sidebarArea.collapsed {
+  width: 70px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin: 4px 0;
+}
+
+.nav-link:hover {
+  background-color: #f8f9fa;
+  transform: translateX(5px);
+}
+
+.nav-link.active {
+  background: linear-gradient(118deg, #fbcd0b, #ffd700);
+  box-shadow: 0 0 10px 1px rgba(251, 205, 11, 0.3);
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.nav-link i {
+  font-size: 1.2rem;
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}
+
+/* 动画效果 */
+.nav-link span {
+  transition: opacity 0.3s ease;
+}
+
+.sidebarArea.collapsed .nav-link span {
+  opacity: 0;
 }

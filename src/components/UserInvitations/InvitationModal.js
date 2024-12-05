@@ -72,7 +72,7 @@ const InvitationModal = ({ isOpen, toggle, invitations, onActionComplete }) => {
                   Accept All
                 </CustomButton>
                 <CustomButton
-                  color="#F44336"
+                  color="#f62d51"
                   onClick={() => handleBulkAction('reject')}
                   disabled={isProcessing}
                   icon={<DangerousIcon sx={{ fontSize: '16px' }} />}

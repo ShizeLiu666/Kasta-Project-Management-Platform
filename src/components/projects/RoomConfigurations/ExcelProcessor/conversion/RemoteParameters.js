@@ -36,7 +36,7 @@ const PARAMETER_VALUES = {
     NIGHT_LIGHT: {
         'LOW': 10,
         'MEDIUM': 15,
-        'HIGH': 20,
+        'HIGH': 30,
         'DISABLED': 0
     }
 };

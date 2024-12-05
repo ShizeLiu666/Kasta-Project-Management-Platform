@@ -171,6 +171,25 @@ function validateFanTypeOperations(parts, errors, sceneName) {
 
 //! Validate Curtain Type operations using regex
 function validateCurtainTypeOperations(names, operation, errors, sceneName) {
+  // 检查分隔符
+  const originalString = names.join(", ") + " " + operation;
+  if (originalString.includes(";")) {
+    errors.push(
+      `KASTA SCENE [${sceneName}]: Invalid separator ';' in "${originalString}". Please use comma ',' for multiple devices.`
+    );
+    return;
+  }
+
+  // 检查重复的设备名称
+  const uniqueNames = new Set(names);
+  if (uniqueNames.size !== names.length) {
+    const duplicates = names.filter((name, index) => names.indexOf(name) !== index);
+    errors.push(
+      `KASTA SCENE [${sceneName}]: Duplicate device names found: ${duplicates.join(", ")} in "${originalString}"`
+    );
+    return;
+  }
+
   const singleCurtainPattern = /^[a-zA-Z0-9_]+ (OPEN|CLOSE)$/i;
   const groupCurtainPattern =
     /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+(OPEN|CLOSE)$/i;
@@ -211,6 +230,14 @@ function validatePowerPointTypeOperations(
     }
   }
 
+  // 首先检查是否是群控
+  if (deviceNames.length > 1) {
+    errors.push(
+      `KASTA SCENE [${sceneName}]: PowerPoint Type devices do not support group control. Found multiple devices: ${deviceNames.join(", ")}`
+    );
+    return;
+  }
+
   // 获取操作部分
   const operationParts = parts.slice(operationIndex);
 
@@ -240,9 +267,9 @@ function validatePowerPointTypeOperations(
   const deviceType = deviceTypes.values().next().value;
   const operationString = deviceNames.join(", ") + " " + operationParts.join(" ");
 
-  // 新的正则表达式模式
-  const singleWayPattern = /^PPT\d+\s+(ON|OFF)$/i;
-  const twoWayPattern = /^PPT_\d+\s+((ON|OFF|UNSELECT)\s+(ON|OFF|UNSELECT))$/i;
+  // 修改正则表达式，移除对设备名称格式的限制
+  const singleWayPattern = /^[a-zA-Z0-9_]+\s+(ON|OFF)$/i;
+  const twoWayPattern = /^[a-zA-Z0-9_]+\s+((ON|OFF|UNSELECT)\s+(ON|OFF|UNSELECT))$/i;
 
   let isValid = false;
 
@@ -251,8 +278,9 @@ function validatePowerPointTypeOperations(
     if (!isValid) {
       errors.push([
         `KASTA SCENE [${sceneName}]: Invalid Single-Way PowerPoint operation. The operation string "${operationString}" is not valid. Supported formats are:`,
-        "- DEVICE_NAME ON",
-        "- DEVICE_NAME OFF"
+        "- DEVICE_NAME ON (Single ON)",
+        "- DEVICE_NAME OFF (Single OFF)",
+        "Note: Single-Way PowerPoint only supports one operation (ON or OFF)"
       ]);
     }
   } else if (deviceType === "PowerPoint Type (Two-Way)") {
@@ -267,46 +295,106 @@ function validatePowerPointTypeOperations(
     if (!isValid) {
       errors.push([
         `KASTA SCENE [${sceneName}]: Invalid Two-Way PowerPoint operation. The operation string "${operationString}" is not valid. Supported formats are:`,
-        "- DEVICE_NAME ON OFF",
-        "- DEVICE_NAME OFF ON",
-        "- DEVICE_NAME ON UNSELECT",
-        "- DEVICE_NAME UNSELECT ON",
-        "- DEVICE_NAME OFF UNSELECT",
-        "- DEVICE_NAME UNSELECT OFF",
-        "- DEVICE_NAME ON ON",
-        "- DEVICE_NAME OFF OFF"
+        "- DEVICE_NAME ON OFF (Left ON, Right OFF)",
+        "- DEVICE_NAME OFF ON (Left OFF, Right ON)",
+        "- DEVICE_NAME ON UNSELECT (Left ON, Right unchanged)",
+        "- DEVICE_NAME UNSELECT ON (Left unchanged, Right ON)",
+        "- DEVICE_NAME OFF UNSELECT (Left OFF, Right unchanged)",
+        "- DEVICE_NAME UNSELECT OFF (Left unchanged, Right OFF)",
+        "- DEVICE_NAME ON ON (Both ON)",
+        "- DEVICE_NAME OFF OFF (Both OFF)"
       ]);
     }
   }
 }
 
 //! Validate Dry Contact Type operations using regex
-function validateDryContactTypeOperations(names, operation, errors, sceneName) {
-  const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
-  const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
-  const groupOnPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* ON$/i;
-  const groupOffPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* OFF$/i;
+function validateDryContactTypeOperations(names, operation, errors, sceneName, dryContactSpecialActions) {
+    console.log("Scenes - Validating Dry Contact Operation:", {
+        names,
+        operation,
+        sceneName,
+        specialActions: Object.fromEntries(dryContactSpecialActions)
+    });
 
-  const operationString = names.join(", ") + " " + operation;
+    const operationString = names.join(", ") + " " + operation;
+    const upperOperation = operation.toUpperCase();
 
-  if (
-    !singleOnPattern.test(operationString) &&
-    !singleOffPattern.test(operationString) &&
-    !groupOnPattern.test(operationString) &&
-    !groupOffPattern.test(operationString)
-  ) {
-    errors.push([
-      `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
-      "- DEVICE_NAME ON (Single ON)",
-      "- DEVICE_NAME OFF (Single OFF)",
-      "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
-      "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)"
-    ]);
-  }
+    // 将设备按动作类型分类
+    const devicesByAction = new Map();
+    names.forEach(name => {
+        const action = dryContactSpecialActions.has(name) 
+            ? dryContactSpecialActions.get(name) 
+            : 'NORMAL';
+        if (!devicesByAction.has(action)) {
+            devicesByAction.set(action, []);
+        }
+        devicesByAction.get(action).push(name);
+    });
+
+    // 检查操作合法性
+    if (upperOperation === 'ON') {
+        // ON 操作：所有类型的设备都可以一起 ON
+        return;
+    } else if (upperOperation === 'OFF') {
+        // OFF 操作：检查是否只有 NORMAL 设备
+        const nonNormalDevices = [];
+        devicesByAction.forEach((devices, action) => {
+            if (action !== 'NORMAL') {
+                nonNormalDevices.push(...devices.map(name => `${name}(${action})`));
+            }
+        });
+
+        if (nonNormalDevices.length > 0) {
+            errors.push(
+                `KASTA SCENE [${sceneName}]: Cannot turn OFF special action devices in group control. Problematic devices: ${nonNormalDevices.join(", ")}`
+            );
+            return;
+        }
+    } else {
+        // 非法操作
+        errors.push([
+            `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
+            "- DEVICE_NAME ON (Single ON)",
+            "- DEVICE_NAME OFF (Single OFF, only for NORMAL devices)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF, only for NORMAL devices)",
+            "Note: Special action devices (1SEC, 6SEC, 9SEC, REVERS) can only be turned ON"
+        ]);
+        return;
+    }
+
+    // 验证格式
+    const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
+    const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
+    const groupOnPattern = /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+ON$/i;
+    const groupOffPattern = /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+OFF$/i;
+
+    if (
+        !singleOnPattern.test(operationString) &&
+        !singleOffPattern.test(operationString) &&
+        !groupOnPattern.test(operationString) &&
+        !groupOffPattern.test(operationString)
+    ) {
+        errors.push([
+            `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
+            "- DEVICE_NAME ON (Single ON)",
+            "- DEVICE_NAME OFF (Single OFF, only for NORMAL devices)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF, only for NORMAL devices)",
+            "Note: Special action devices (1SEC, 6SEC, 9SEC, REVERS) can only be turned ON"
+        ]);
+    }
 }
 
 //! Validate the consistency of device types within a line in a scene
-function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) {
+function validateSceneDevicesInLine(
+  parts,
+  errors,
+  deviceNameToType,
+  sceneName,
+  dryContactSpecialActions
+) {
   let deviceTypesInLine = new Set();
   let deviceNames = [];
   let operation = null;
@@ -516,7 +604,8 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
       deviceNames.flat(),
       operation,
       errors,
-      sceneName
+      sceneName,
+      dryContactSpecialActions
     );
   }
   if (
@@ -534,36 +623,58 @@ function validateSceneDevicesInLine(parts, errors, deviceNameToType, sceneName) 
 }
 
 //! Validate all scenes in the provided data
-export function validateScenes(sceneDataArray, deviceNameToType) {
+export function validateScenes(
+  sceneDataArray, 
+  deviceNameToType, 
+  dryContactSpecialActions = new Map()
+) {
   const errors = [];
   const registeredSceneNames = new Set();
   let currentSceneName = null;
+  let hasControlContent = false;  // 新增：跟踪当前场景是否有控制内容
 
-  sceneDataArray.forEach((line) => {
+  sceneDataArray.forEach((line, index) => {
     line = line.trim();
 
     if (line.startsWith("CONTROL CONTENT")) {
+      hasControlContent = true;
       return;
     }
 
     if (line.startsWith("NAME")) {
+      // 检查前一个场景是否为空
+      if (currentSceneName && !hasControlContent) {
+        errors.push(
+          `KASTA SCENE: The scene '${currentSceneName}' is empty. Each scene must have at least one control instruction.`
+        );
+      }
+
       if (!checkNamePrefix(line, errors)) return;
       currentSceneName = line.substring(5).trim();
       if (!validateSceneName(currentSceneName, errors, registeredSceneNames))
         return;
+      
+      // 重置控制内容标志
+      hasControlContent = false;
     } else if (currentSceneName && line) {
       const parts = line.split(/\s+/);
       validateSceneDevicesInLine(
         parts,
         errors,
         deviceNameToType,
-        currentSceneName
+        currentSceneName,
+        dryContactSpecialActions
       );
+      hasControlContent = true;
     }
   });
 
-  // console.log(deviceNameToType);
-  // console.log("Errors found:", errors);
+  // 检查最后一个场景是否为空
+  if (currentSceneName && !hasControlContent) {
+    errors.push(
+      `KASTA SCENE: The scene '${currentSceneName}' is empty. Each scene must have at least one control instruction.`
+    );
+  }
 
   return { errors, registeredSceneNames };
 }
