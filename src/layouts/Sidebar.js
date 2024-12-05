@@ -7,22 +7,37 @@ import MenuOpenIcon from '@mui/icons-material/KeyboardArrowRightTwoTone';
 // import KeyboardArrowLeftTwoToneIcon from '@mui/icons-material/KeyboardArrowLeftTwoTone';
 import MenuIcon from '@mui/icons-material/KeyboardArrowLeftTwoTone';
 
+
 const navigation = [
   {
-    title: "Projects",
-    href: "/admin/projects",
-    icon: 'bi-folder2-open',
+    title: "Dashboard",
+    href: "/admin/dashboard",
+    icon: 'bi-bar-chart-line',
+    allowedUserTypes: [99999, 1, 0],
   },
   {
-    title: "Profile",
-    href: "/admin/profile",
-    icon: 'bi-person-circle',
+    title: "Project",
+    href: "/admin/project",
+    icon: 'bi-folder2-open',
+    allowedUserTypes: [99999, 1],
+  },
+  {
+    title: "Network",
+    href: "/admin/network",
+    icon: 'bi-house-door',
+    allowedUserTypes: [99999, 1, 0],
   },
   {
     title: "AuthCode",
     href: "/admin/auth-code-management",
     icon: 'bi-key',
-    superUserOnly: true,
+    allowedUserTypes: [99999],
+  },
+  {
+    title: "Profile",
+    href: "/admin/profile",
+    icon: 'bi-person-circle',
+    allowedUserTypes: [99999, 1, 0],
   },
   // {
   //   title: "Testing",
@@ -34,6 +49,10 @@ const navigation = [
 const Sidebar = ({ userType, toggleSidebar, isCollapsed }) => {
   let location = useLocation();
 
+  const filteredNavigation = navigation.filter(item => 
+    item.allowedUserTypes.includes(userType)
+  );
+
   return (
     <div className="sidebar-container">
       <div className="sidebar-close-button d-lg-none" onClick={toggleSidebar}>
@@ -44,29 +63,27 @@ const Sidebar = ({ userType, toggleSidebar, isCollapsed }) => {
       </div>
       <div className="p-2 mt-2">
         <Nav vertical className="sidebarNav">
-          {navigation.map((navi, index) => (
-            (!navi.superUserOnly || userType === 99999) && (
-              <NavItem key={index} className="sidenav-bg">
-                <Link
-                  to={navi.href}
-                  className={
-                    location.pathname === navi.href
-                      ? "active nav-link py-3"
-                      : "nav-link text-secondary py-3"
+          {filteredNavigation.map((navi, index) => (
+            <NavItem key={index} className="sidenav-bg">
+              <Link
+                to={navi.href}
+                className={
+                  location.pathname === navi.href
+                    ? "active nav-link py-3"
+                    : "nav-link text-secondary py-3"
+                }
+                onClick={() => {
+                  if (window.innerWidth < 992) {
+                    toggleSidebar();
                   }
-                  onClick={() => {
-                    if (window.innerWidth < 992) {
-                      toggleSidebar();
-                    }
-                  }}
-                >
-                  <i className={`bi ${navi.icon} me-2`}></i>
-                  <span className={isCollapsed ? 'd-none' : ''}>
-                    {navi.title}
-                  </span>
-                </Link>
-              </NavItem>
-            )
+                }}
+              >
+                <i className={`bi ${navi.icon} me-2`}></i>
+                <span className={isCollapsed ? 'd-none' : ''}>
+                  {navi.title}
+                </span>
+              </Link>
+            </NavItem>
           ))}
         </Nav>
       </div>

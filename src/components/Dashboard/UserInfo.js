@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import FolderIcon from '@mui/icons-material/Folder';
 import HomeIcon from '@mui/icons-material/Home';
-import backgroundImage from '../../assets/images/CarouseItems/UserInfo_background.png';
 import defaultAvatar from '../../assets/images/users/normal_user.jpg';
 import { countryOptions } from '../Login/CountryCodeSelect';
 import axiosInstance from '../../config';
@@ -75,9 +74,6 @@ const UserInfo = ({ userDetails }) => {
       className="user-info-card" 
       style={{ 
         height: '500px',
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
         position: 'relative'
       }}
     >
