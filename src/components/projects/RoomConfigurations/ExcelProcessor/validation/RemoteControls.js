@@ -143,7 +143,7 @@ function validateDeviceCommand(command, errors, currentRemoteControlName, regist
     return true;
 }
 
-function validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames, deviceNameToType) {
+function validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames) {
     const groupMatch = command.match(/^GROUP\s+(.+?)$/);
     if (!groupMatch) {
         errors.push(
@@ -152,9 +152,9 @@ function validateGroupCommand(command, errors, currentRemoteControlName, registe
         return false;
     }
 
-    const [, groupName] = groupMatch;
+    const groupName = groupMatch[1].trim();
 
-    if (!registeredGroupNames.has(groupName.trim())) {
+    if (!registeredGroupNames.has(groupName)) {
         errors.push(
             `KASTA REMOTE CONTROL: The GROUP name '${groupName}' in '${currentRemoteControlName}' does not exist.`
         );
@@ -165,36 +165,21 @@ function validateGroupCommand(command, errors, currentRemoteControlName, registe
 }
 
 function validateSceneCommand(command, errors, currentRemoteControlName, registeredSceneNames) {
-    const sceneMatch = command.match(/^SCENE\s+(.+?)(?:\s+-\s+(.+))?$/);
+    const sceneMatch = command.match(/^SCENE\s+(.+?)$/);
     if (!sceneMatch) {
         errors.push(
-            `KASTA REMOTE CONTROL: The SCENE command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'SCENE <scene_name>' or 'SCENE <scene_name> - <action>'.`
+            `KASTA REMOTE CONTROL: The SCENE command '${command}' in '${currentRemoteControlName}' is not valid. Expected format: 'SCENE <scene_name>'`
         );
         return false;
     }
 
-    const fullSceneName = sceneMatch[1].trim();
-    const operation = sceneMatch[2];
+    const sceneName = sceneMatch[1].trim();
 
-    let sceneNameToCheck;
-    if (operation) {
-        // If there's an operation, we check the scene name before the '-'
-        sceneNameToCheck = fullSceneName;
-    } else {
-        // If there's no operation, we check the entire string after 'SCENE'
-        sceneNameToCheck = fullSceneName;
-    }
-
-    if (!registeredSceneNames.has(sceneNameToCheck)) {
+    if (!registeredSceneNames.has(sceneName)) {
         errors.push(
-            `KASTA REMOTE CONTROL: The SCENE name '${sceneNameToCheck}' in '${currentRemoteControlName}' does not exist.`
+            `KASTA REMOTE CONTROL: The SCENE name '${sceneName}' in '${currentRemoteControlName}' does not exist.`
         );
         return false;
-    }
-
-    if (operation) {
-        // TODO: 在这里添加对场景操作的验证（如果将来需要的话）
-        // console.log(`Scene operation: ${operation} for scene ${sceneNameToCheck}`);
     }
 
     return true;
@@ -275,7 +260,7 @@ export function validateRemoteControls(remoteControlDataArray, deviceNameToType,
             if (command.startsWith("DEVICE")) {
                 validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType);
             } else if (command.startsWith("GROUP")) {
-                validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames, deviceNameToType);
+                validateGroupCommand(command, errors, currentRemoteControlName, registeredGroupNames);
             } else if (command.startsWith("SCENE")) {
                 validateSceneCommand(command, errors, currentRemoteControlName, registeredSceneNames);
             }

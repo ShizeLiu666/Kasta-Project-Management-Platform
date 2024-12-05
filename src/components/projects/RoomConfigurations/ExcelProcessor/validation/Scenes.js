@@ -318,27 +318,57 @@ function validateDryContactTypeOperations(names, operation, errors, sceneName, d
     });
 
     const operationString = names.join(", ") + " " + operation;
+    const upperOperation = operation.toUpperCase();
 
-    names.forEach(deviceName => {
-        // 检查设备是否有特殊动作配置
-        if (dryContactSpecialActions.has(deviceName)) {
-            console.log(`Found special action for ${deviceName}:`, 
-                dryContactSpecialActions.get(deviceName));
-            // 如果有特殊动作，只允许ON操作
-            if (operation.toUpperCase() !== 'ON') {
-                errors.push(
-                    `KASTA SCENE [${sceneName}]: The device '${deviceName}' has a special action (${dryContactSpecialActions.get(deviceName)}) configured, and can only be turned ON in scenes.`
-                );
-            }
-            return;
+    // 将设备按动作类型分类
+    const devicesByAction = new Map();
+    names.forEach(name => {
+        const action = dryContactSpecialActions.has(name) 
+            ? dryContactSpecialActions.get(name) 
+            : 'NORMAL';
+        if (!devicesByAction.has(action)) {
+            devicesByAction.set(action, []);
         }
+        devicesByAction.get(action).push(name);
     });
 
-    // 对于普通干接点设备，保持原有的验证逻辑
+    // 检查操作合法性
+    if (upperOperation === 'ON') {
+        // ON 操作：所有类型的设备都可以一起 ON
+        return;
+    } else if (upperOperation === 'OFF') {
+        // OFF 操作：检查是否只有 NORMAL 设备
+        const nonNormalDevices = [];
+        devicesByAction.forEach((devices, action) => {
+            if (action !== 'NORMAL') {
+                nonNormalDevices.push(...devices.map(name => `${name}(${action})`));
+            }
+        });
+
+        if (nonNormalDevices.length > 0) {
+            errors.push(
+                `KASTA SCENE [${sceneName}]: Cannot turn OFF special action devices in group control. Problematic devices: ${nonNormalDevices.join(", ")}`
+            );
+            return;
+        }
+    } else {
+        // 非法操作
+        errors.push([
+            `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
+            "- DEVICE_NAME ON (Single ON)",
+            "- DEVICE_NAME OFF (Single OFF, only for NORMAL devices)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
+            "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF, only for NORMAL devices)",
+            "Note: Special action devices (1SEC, 6SEC, 9SEC, REVERS) can only be turned ON"
+        ]);
+        return;
+    }
+
+    // 验证格式
     const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
     const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
-    const groupOnPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* ON$/i;
-    const groupOffPattern = /^[a-zA-Z0-9_]+(, [a-zA-Z0-9_]+)* OFF$/i;
+    const groupOnPattern = /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+ON$/i;
+    const groupOffPattern = /^[a-zA-Z0-9_]+(,\s*[a-zA-Z0-9_]+)*\s+OFF$/i;
 
     if (
         !singleOnPattern.test(operationString) &&
@@ -349,9 +379,10 @@ function validateDryContactTypeOperations(names, operation, errors, sceneName, d
         errors.push([
             `KASTA SCENE [${sceneName}]: Invalid operation format for Dry Contact Type. The operation string "${operationString}" is not valid. Accepted formats are:`,
             "- DEVICE_NAME ON (Single ON)",
-            "- DEVICE_NAME OFF (Single OFF)",
+            "- DEVICE_NAME OFF (Single OFF, only for NORMAL devices)",
             "- DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)",
-            "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF)"
+            "- DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF, only for NORMAL devices)",
+            "Note: Special action devices (1SEC, 6SEC, 9SEC, REVERS) can only be turned ON"
         ]);
     }
 }
