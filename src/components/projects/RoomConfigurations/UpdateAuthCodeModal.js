@@ -39,7 +39,9 @@ const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
         const validCodes = response.data.data.content
           .filter(code => 
             code.usageCount < 10 && 
-            (!code.usedBy || code.usedBy === currentUsername)
+            (!code.usedBy || code.usedBy === currentUsername) &&
+            code.valid === true &&
+            !code.deleted
           )
           .map(code => ({
             code: code.code,
@@ -56,33 +58,40 @@ const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
   }, [currentUsername]);
 
   const fetchProjectRoomCodes = useCallback(async (token) => {
-    const initialResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { page: 0, size: 1 },
-    });
-
-    if (initialResponse.data.success) {
-      const totalElements = initialResponse.data.data.totalElements;
-
-      const fullResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
+    try {
+      const initialResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page: 0, size: totalElements },
+        params: { page: 0, size: 1 },
       });
 
-      if (fullResponse.data.success) {
-        const validCodes = fullResponse.data.data.content
-          .filter(code => code.usageCount < 10 && (!code.used_by || code.used_by === currentUsername))
-          .map(code => ({
-            code: code.code,
-            label: `${code.code} (${10 - code.usageCount} uses left)`,
-            usageCount: code.usageCount
-          }));
-        setValidAuthCodes(validCodes);
-      } else {
-        console.error('Failed to fetch project room codes:', fullResponse.data.errorMsg);
+      if (initialResponse.data.success) {
+        const totalElements = initialResponse.data.data.totalElements;
+
+        const fullResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { page: 0, size: totalElements },
+        });
+
+        if (fullResponse.data.success) {
+          const validCodes = fullResponse.data.data.content
+            .filter(code => 
+              code.usageCount < 10 && 
+              (!code.usedBy || code.usedBy === currentUsername) &&
+              code.valid === true &&
+              !code.deleted &&
+              code.status === 'ACTIVE'
+            )
+            .map(code => ({
+              code: code.code,
+              label: `${code.code} (${10 - code.usageCount} uses left)`,
+              usageCount: code.usageCount
+            }));
+          setValidAuthCodes(validCodes);
+        }
       }
-    } else {
-      console.error('Failed to fetch initial project room codes:', initialResponse.data.errorMsg);
+    } catch (error) {
+      console.error('Error fetching project room codes:', error);
+      setError('Failed to fetch authorization codes');
     }
   }, [currentUsername]);
 
@@ -99,11 +108,21 @@ const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
     }
   }, [isSuperUser, fetchValidAuthCodes, fetchProjectRoomCodes]);
 
+  const resetState = () => {
+    setFormData({ authorizationCode: "" });
+    setError('');
+    setSuccessAlert('');
+    setIsSubmitting(false);
+  };
+
+  const isFormValid = () => {
+    const code = formData.authorizationCode.trim();
+    return code && code.length > 0;
+  };
+
   useEffect(() => {
     if (isOpen) {
-      setFormData({ authorizationCode: "" });
-      setError('');
-      setSuccessAlert('');
+      resetState();
       fetchAuthCodes();
     }
   }, [isOpen, fetchAuthCodes]);
@@ -125,6 +144,11 @@ const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
   };
 
   const handleSubmit = async () => {
+    if (!isFormValid()) {
+      setError("Please enter a valid authorization code.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
     setSuccessAlert('');
@@ -138,7 +162,7 @@ const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
 
       const response = await axiosInstance.put('/project-rooms/update-code', {
         projectRoomId,
-        code: formData.authorizationCode
+        code: formData.authorizationCode.trim()
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -150,6 +174,7 @@ const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
         setSuccessAlert("Authorization code updated successfully.");
         onSuccess();
         setTimeout(() => {
+          resetState();
           toggle();
         }, 2000);
       } else {
@@ -172,7 +197,7 @@ const UpdateAuthCodeModal = ({ isOpen, toggle, projectRoomId, onSuccess }) => {
       isSubmitting={isSubmitting}
       error={error}
       successAlert={successAlert}
-      disabled={!formData.authorizationCode}
+      disabled={!isFormValid()}
     >
       <Form>
         <FormGroup>

@@ -96,23 +96,26 @@ function handleDryContactType(parts) {
 
 function handlePowerPointType(parts, deviceType) {
     const contents = [];
-    
-    const operationIndex = parts.findIndex(part => 
+
+    // 操作指令的位置（ON/OFF/UNSELECT）
+    const operationIndex = parts.findIndex(part =>
         ["ON", "OFF", "UNSELECT"].includes(part.toUpperCase())
     );
-    
-    if (operationIndex === -1) return contents;
-    
-    const deviceNames = parts.slice(0, operationIndex);
-    const operations = parts.slice(operationIndex);
 
+    if (operationIndex === -1) return contents;
+
+    // 分离设备名称和操作指令
+    const deviceNames = parts.slice(0, operationIndex);   // 设备名称部分
+    const operations = parts.slice(operationIndex);      // 操作指令部分
+
+    // 处理单路和双路的情况
     if (deviceType.includes("Single-Way")) {
         deviceNames.forEach(deviceName => {
             contents.push({
                 name: deviceName.trim().replace(",", ""),
                 deviceType: "PowerPoint Type (Single-Way)",
                 statusConditions: {
-                    status: operations[0].toUpperCase() === "ON"
+                    status: operations[0].toUpperCase() === "ON" ? 2 : 1
                 }
             });
         });
@@ -120,18 +123,28 @@ function handlePowerPointType(parts, deviceType) {
         deviceNames.forEach(deviceName => {
             const leftStatus = operations[0].toUpperCase();
             const rightStatus = operations[1] ? operations[1].toUpperCase() : "OFF";
-            
+
             if (leftStatus === "UNSELECT" && rightStatus === "UNSELECT") {
                 console.warn("Invalid combination: UNSELECT UNSELECT is not allowed");
                 return;
             }
 
+            // 状态映射函数
+            const mapStatus = (status) => {
+                switch (status) {
+                    case "ON": return 2;
+                    case "OFF": return 1;
+                    case "UNSELECT": return 0;
+                    default: return 1; // 默认为 OFF 状态
+                }
+            };
+
             contents.push({
                 name: deviceName.trim().replace(",", ""),
                 deviceType: "PowerPoint Type (Two-Way)",
                 statusConditions: {
-                    leftStatus: leftStatus,
-                    rightStatus: rightStatus
+                    leftStatus: mapStatus(leftStatus),
+                    rightStatus: mapStatus(rightStatus)
                 }
             });
         });
@@ -205,7 +218,7 @@ export function parseSceneContent(sceneName, contentLines) {
 
 export function processScenes(scenesContent) {
     if (!scenesContent) return { scenes: [] };
-    
+
     const scenesData = {};
     let currentScene = null;
 

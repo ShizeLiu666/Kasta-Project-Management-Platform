@@ -4,7 +4,7 @@ import { AllDeviceTypes } from "../ExcelProcessor";
 const NAME_PREFIX = "NAME:";
 const QTY_PREFIX = "QTY:";
 const KASTA_DEVICE_ERROR = "KASTA DEVICE:";
-const VALID_NAME_REGEX = /^[a-zA-Z0-9_]+$/;
+const VALID_NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 // 辅助函数
 const createError = (message) => `${KASTA_DEVICE_ERROR} ${message}`;

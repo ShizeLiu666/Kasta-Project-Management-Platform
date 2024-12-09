@@ -18,9 +18,19 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 const formatDeviceSettings = (content) => {
   if (content.deviceType && content.deviceType.includes("PowerPoint Type")) {
     if (content.deviceType.includes("Single-Way")) {
-      return `Status: ${content.statusConditions.status ? 'ON' : 'OFF'}`;
+      const statusText = content.statusConditions.status === 2 ? 'ON' : 'OFF';
+      return `Status: ${statusText}`;
     } else {
-      return `Left: ${content.statusConditions.leftStatus}, Right: ${content.statusConditions.rightStatus}`;
+      const mapStatusToText = (status) => {
+        switch (status) {
+          case 2: return 'ON';
+          case 1: return 'OFF';
+          case 0: return 'UNSELECT';
+          default: return 'OFF';
+        }
+      };
+      
+      return `Left: ${mapStatusToText(content.statusConditions.leftStatus)}, Right: ${mapStatusToText(content.statusConditions.rightStatus)}`;
     }
   }
 

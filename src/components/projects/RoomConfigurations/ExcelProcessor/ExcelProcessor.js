@@ -10,9 +10,9 @@ import { validateRemoteParameters } from './validation/RemoteParameters';
 
 const AllDeviceTypes = {
     "Dimmer Type": ["KBSKTDIM", "D300IB", "D300IB2", "DH10VIB", "DM300BH", "D0-10IB", "DDAL"],
-    "Relay Type": ["KBSKTREL", "S2400IB2", "S2400IBH", "RM1440BH", "KBSKTR2400","SSR1200"],
+    "Relay Type": ["KBSKTREL", "S2400IB2", "S2400IB-H", "RM1440BH", "KBSKTR2400","SSR1200"],
     "Curtain Type": ["C300IBH"],
-    "Fan Type": ["FC150A2"],
+    "Fan Type": ["FC150A2", "FC150A"],
     "PowerPoint Type": {
         "Single-Way": ["H1PPWVBX"],
         "Two-Way": ["K2PPHB", "H2PPHB", "H2PPWHB", 'H2PPHB']
