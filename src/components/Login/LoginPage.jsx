@@ -8,7 +8,7 @@ import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { setToken, saveUsername, saveUserDetails } from '../auth';
-import axiosInstance from '../../config';  // 路径可能需要调整
+import axiosInstance from '../../config'; 
 import CustomAlert from '../CustomComponents/CustomAlert';
 
 const DEFAULT_ALERT_DURATION = 3000;
@@ -110,10 +110,10 @@ const LoginPage = () => {
         return { success: true };
       } else {
         // 登录失败处理
-        if (isSecondAttempt) {
-          showAlert(response.data.errorMsg || "Login failed", "error");
-        }
-        return { success: false, error: response.data.errorMsg || "Login failed" };
+        return { 
+          success: false, 
+          error: response.data.errorMsg // 直接使用后端返回的错误信息
+        };
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -146,18 +146,10 @@ const LoginPage = () => {
 
     setIsLoading(true);
     try {
-      let loginResult = await attemptLogin(username, false);
-
+      const loginResult = await attemptLogin(username, true);
+      
       if (!loginResult.success) {
-        const alteredUsername = username.charAt(0) === username.charAt(0).toLowerCase()
-          ? username.charAt(0).toUpperCase() + username.slice(1)
-          : username.charAt(0).toLowerCase() + username.slice(1);
-
-        loginResult = await attemptLogin(alteredUsername, true);
-      }
-
-      if (!loginResult.success && !loginResult.isServerError) {
-        showAlert("Incorrect username or password. Please check your credentials.", "error");
+        showAlert(loginResult.error || "Login failed", "error");
       }
     } finally {
       setIsLoading(false);
