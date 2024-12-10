@@ -28,6 +28,7 @@ const formatErrors = (errors) => {
 const Scenes = forwardRef(({ 
   splitData, 
   deviceNameToType, 
+  registeredGroupNames, 
   dryContactSpecialActions, 
   onValidate,
   onReturnToInitialStep,
@@ -48,7 +49,8 @@ const Scenes = forwardRef(({
     const { errors } = validateScenes(
       splitData.scenes, 
       deviceNameToType,
-      dryContactSpecialActions 
+      dryContactSpecialActions,
+      registeredGroupNames 
     );
 
     if (errors.length > 0) {
@@ -73,7 +75,7 @@ const Scenes = forwardRef(({
     }
 
     hasValidated.current = true;
-  }, [splitData, deviceNameToType, dryContactSpecialActions, onValidate]);
+  }, [splitData, deviceNameToType, dryContactSpecialActions, registeredGroupNames, onValidate]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

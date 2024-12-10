@@ -71,7 +71,7 @@ function getAllModelNames() {
     }
   }
 
-  console.log("All Models:", allModels);
+  // console.log("All Models:", allModels);
   
   return allModels;
 }
@@ -80,7 +80,7 @@ function getAllModelNames() {
 const ALL_MODEL_NAMES = getAllModelNames();
 
 function validateDeviceName(line, errors, registeredDeviceNames) {
-  console.log("Line:", line);
+  // console.log("Line:", line);
   // 首先检查是否与任何设备型号冲突
   if (ALL_MODEL_NAMES.includes(line)) {
     errors.push(createError(`The device name '${line}' cannot be the same as any device model name.`));

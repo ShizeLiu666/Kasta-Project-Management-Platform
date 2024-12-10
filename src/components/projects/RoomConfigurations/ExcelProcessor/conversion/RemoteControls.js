@@ -3,8 +3,8 @@ import { processRemoteParameters } from './RemoteParameters';
 
 // 创建默认链接对象的函数
 const createDefaultLink = (index) => ({
-    action: "",          // 改为空字符串
-    linkName: "",        // 改为空字符串
+    action: "",
+    linkName: "",
     linkType: 0,
     rc_index: 0,
     linkIndex: index
@@ -23,64 +23,104 @@ const getRemoteButtonCount = (deviceType) => {
     return 0;
 };
 
-// 添加 getRcIndex 函数
+// 添加 rc_index 映射
+const ACTION_RC_INDEX_MAP = {
+    'CURTAIN': {
+        'OPEN': 0,
+        'CLOSE': 1,
+        'WHOLE': 2
+    },
+    'FAN': {
+        'FAN': 0,
+        'LAMP': 1,
+        'WHOLE': 2
+    },
+    'POWERPOINT': {
+        'LEFT': 0,
+        'RIGHT': 1,
+        'WHOLE': 2
+    },
+    '4_OUTPUT': {
+        'FIRST': 0,
+        'SECOND': 1,
+        'THIRD': 2,
+        'FOURTH': 3,
+        'WHOLE': 4
+    },
+};
+
+// 获取 rc_index 的函数
 const getRcIndex = (deviceType, operation) => {
     if (!operation) return 0;
     
     const upperOperation = operation.toUpperCase();
-
-    if (deviceType === "Curtain Type") {
-        switch (upperOperation) {
-            case "OPEN": return 0;
-            case "CLOSE": return 1;
-            case "WHOLE": return 2;
-            default: return 2;  // 默认为 WHOLE
-        }
-    }
     
-    if (deviceType === "Fan Type") {
-        switch (upperOperation) {
-            case "FAN": return 0;
-            case "LAMP": return 1;
-            case "WHOLE": return 2;
-            default: return 0;  // 默认为 FAN
-        }
+    if (deviceType.includes("Curtain Type")) {
+        return ACTION_RC_INDEX_MAP.CURTAIN[upperOperation] ?? 2;
     }
-    
-    if (deviceType && deviceType.includes("PowerPoint Type")) {
-        if (deviceType.includes("Two-Way")) {
-            switch (upperOperation) {
-                case "LEFT": return 0;
-                case "RIGHT": return 1;
-                case "WHOLE": return 2;
-                default: return 2;  // 默认为 WHOLE
-            }
-        }
+    if (deviceType.includes("Fan Type")) {
+        return ACTION_RC_INDEX_MAP.FAN[upperOperation] ?? 0;
     }
-    
+    if (deviceType === "PowerPoint Type (Two-Way)") {
+        return ACTION_RC_INDEX_MAP.POWERPOINT[upperOperation] ?? 2;
+    }
     if (deviceType === "4 Output Module") {
-        switch (upperOperation) {
-            case "FIRST": return 0;
-            case "SECOND": return 1;
-            case "THIRD": return 2;
-            case "FOURTH": return 3;
-            case "WHOLE": return 4;
-            default: return 4;  // 默认为 WHOLE
-        }
+        return ACTION_RC_INDEX_MAP['4_OUTPUT'][upperOperation] ?? 4;
     }
+    // if (deviceType === "5 Input Module") {
+    //     return ACTION_RC_INDEX_MAP['5_INPUT'][upperOperation] ?? 5;
+    // }
     
-    return 0;  // 其他设备类型的默认值
+    return 0;
 };
 
-export function processRemoteControls(remoteControlsContent, remoteParametersContent) {
+export function processRemoteControls(
+    remoteControlsContent, 
+    remoteParametersContent,
+    registeredGroupNames,
+    registeredSceneNames
+) {
     if (!remoteControlsContent) return { remoteControls: [] };
     
-    const { parameters } = processRemoteParameters(remoteParametersContent);
     const deviceNameToType = getDeviceNameToType();
-    
     const remoteControlsData = [];
     let currentRemote = null;
     let currentLinks = [];
+
+    // 处理参数
+    const { parameters } = processRemoteParameters(remoteParametersContent);
+
+    const determineTargetType = (targetName) => {
+        // 移除可能存在的关键词前缀
+        const cleanTargetName = targetName
+            .replace(/^(DEVICE|GROUP|SCENE)\s+/, '')
+            .trim();
+
+        // 首先检查是否是设备
+        if (deviceNameToType[cleanTargetName]) {
+            return {
+                type: 1, // DEVICE
+                name: cleanTargetName,
+                deviceType: deviceNameToType[cleanTargetName]
+            };
+        }
+        
+        if (registeredGroupNames?.has(cleanTargetName)) {
+            return {
+                type: 2, // GROUP
+                name: cleanTargetName
+            };
+        }
+        
+        if (registeredSceneNames?.has(cleanTargetName)) {
+            return {
+                type: 4, // SCENE
+                name: cleanTargetName
+            };
+        }
+        
+        return null;
+    };
 
     remoteControlsContent.forEach(line => {
         line = line.trim();
@@ -88,110 +128,87 @@ export function processRemoteControls(remoteControlsContent, remoteParametersCon
         if (line.startsWith("TOTAL")) return;
 
         if (line.startsWith("NAME:")) {
+            // 处理前一个遥控器的数据
             if (currentRemote) {
                 const deviceType = deviceNameToType[currentRemote];
-                const isRemoteControl = deviceType && (
-                    deviceType.includes("Push Panel") || 
-                    deviceType.includes("Input Module")
-                );
+                const buttonCount = getRemoteButtonCount(deviceType);
                 
-                if (isRemoteControl) {
-                    const buttonCount = getRemoteButtonCount(deviceType);
-                    
-                    // 创建完整的按键数组，包含所有按键的默认值
-                    const fullLinks = Array(buttonCount).fill(null).map((_, index) => {
-                        const existingLink = currentLinks.find(link => link.linkIndex === index);
-                        return existingLink || createDefaultLink(index);
-                    });
+                // 创建完整的按键数组
+                const fullLinks = Array(buttonCount).fill(null).map((_, index) => {
+                    const existingLink = currentLinks.find(link => link.linkIndex === index);
+                    return existingLink || createDefaultLink(index);
+                });
 
-                    const remoteData = {
-                        remoteName: currentRemote,
-                        links: fullLinks,
-                    };
-                    
-                    // 添加参数
-                    const parameterValues = {};
+                // 检查是否是 Input Module
+                const isInputModule = deviceType?.includes("Input Module");
+                
+                const remoteData = {
+                    remoteName: currentRemote,
+                    links: fullLinks,
+                    // 只有非 Input Module 设备才需要 parameters
+                    parameters: isInputModule ? undefined : {}
+                };
+
+                // 只有非 Input Module 设备才处理参数
+                if (!isInputModule && parameters) {
                     parameters.forEach((param, key) => {
-                        parameterValues[key.toLowerCase()] = param.value;
+                        remoteData.parameters[key.toLowerCase()] = param.value;
                     });
-                    remoteData.parameters = parameterValues;
-                    
-                    remoteControlsData.push(remoteData);
                 }
+                
+                remoteControlsData.push(remoteData);
             }
+
             currentRemote = line.replace("NAME:", "").trim();
             currentLinks = [];
-        } else if (line.startsWith("LINK:")) {
-            return;
-        } else {
-            const parts = line.split(":");
-            if (parts.length < 2) return;
+        } else if (line.includes(":")) {
+            const [indexStr, targetInfo] = line.split(":");
+            if (!indexStr || !targetInfo) return;
 
-            const linkIndex = parseInt(parts[0].trim(), 10) - 1;
-            let linkDescription = parts[1].trim();
-            let baseAction = "";
-
-            if (linkDescription.includes(" - ")) {
-                [linkDescription, baseAction] = linkDescription.split(" - ");
-                baseAction = baseAction.trim();
+            const linkIndex = parseInt(indexStr.trim(), 10) - 1;
+            const [targetName, operation] = targetInfo.trim().split(" - ").map(part => part?.trim());
+            
+            const targetTypeInfo = determineTargetType(targetName);
+            if (targetTypeInfo) {
+                const rc_index = targetTypeInfo.type === 2 ? 32 : 
+                               getRcIndex(targetTypeInfo.deviceType, operation);
+                
+                currentLinks.push({
+                    linkIndex,
+                    linkType: targetTypeInfo.type,
+                    linkName: targetTypeInfo.name,
+                    action: operation || "",
+                    rc_index
+                });
             }
-
-            let linkType = 0;
-            let linkName = "";
-            let rc_index = 0;
-
-            if (linkDescription.startsWith("SCENE")) {
-                linkType = 4;
-                linkName = linkDescription.replace("SCENE", "").trim();
-            } else if (linkDescription.startsWith("GROUP")) {
-                linkType = 2;
-                linkName = linkDescription.replace("GROUP", "").trim();
-                rc_index = 32;
-            } else if (linkDescription.startsWith("DEVICE")) {
-                linkType = 1;
-                linkName = linkDescription.replace("DEVICE", "").trim();
-                const deviceType = deviceNameToType[linkName];
-                rc_index = getRcIndex(deviceType, baseAction);
-            }
-
-            currentLinks.push({
-                linkIndex,
-                linkType,
-                linkName,
-                action: baseAction || "",  // 确保空值为空字符串而不是null
-                rc_index
-            });
         }
     });
 
     // 处理最后一个遥控器
     if (currentRemote) {
         const deviceType = deviceNameToType[currentRemote];
-        const isRemoteControl = deviceType && (
-            deviceType.includes("Push Panel") || 
-            deviceType.includes("Input Module")
-        );
+        const buttonCount = getRemoteButtonCount(deviceType);
+        const isInputModule = deviceType?.includes("Input Module");
         
-        if (isRemoteControl) {
-            const buttonCount = getRemoteButtonCount(deviceType);
-            const fullLinks = Array(buttonCount).fill(null).map((_, index) => {
-                const existingLink = currentLinks.find(link => link.linkIndex === index);
-                return existingLink || createDefaultLink(index);
-            });
+        const fullLinks = Array(buttonCount).fill(null).map((_, index) => {
+            const existingLink = currentLinks.find(link => link.linkIndex === index);
+            return existingLink || createDefaultLink(index);
+        });
 
-            const remoteData = {
-                remoteName: currentRemote,
-                links: fullLinks,
-            };
-            
-            const parameterValues = {};
+        const remoteData = {
+            remoteName: currentRemote,
+            links: fullLinks,
+            parameters: isInputModule ? undefined : {}
+        };
+
+        // 只有非 Input Module 设备才处理参数
+        if (!isInputModule && parameters) {
             parameters.forEach((param, key) => {
-                parameterValues[key.toLowerCase()] = param.value;
+                remoteData.parameters[key.toLowerCase()] = param.value;
             });
-            remoteData.parameters = parameterValues;
-            
-            remoteControlsData.push(remoteData);
         }
+
+        remoteControlsData.push(remoteData);
     }
 
     return { remoteControls: remoteControlsData };

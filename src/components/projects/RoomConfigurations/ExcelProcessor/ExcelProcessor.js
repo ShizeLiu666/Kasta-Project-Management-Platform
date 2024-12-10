@@ -99,12 +99,27 @@ function handleRemoteParameters(remoteParametersContent) {
     return processRemoteParameters(remoteParametersContent, parameters);
 }
 
+function handleRemoteControls(
+    remoteControlsContent, 
+    remoteParametersContent,
+    registeredGroupNames,
+    registeredSceneNames
+) {
+    // 传递给实际的处理函数
+    return processRemoteControls(
+        remoteControlsContent, 
+        remoteParametersContent,
+        registeredGroupNames,
+        registeredSceneNames
+    );
+}
+
 export {
     resetDeviceNameToType,
     processDevices,
     processGroups,
     processScenes,
-    processRemoteControls,
+    handleRemoteControls as processRemoteControls,
     processOutputModules,
     processInputModules,
     processDryContactModules,

@@ -115,6 +115,30 @@ const RemoteControls = forwardRef(({
     resetValidation
   }));
 
+  // 修改 determineTargetType 函数
+  const determineTargetType = (content, registeredDeviceNames, registeredGroupNames, registeredSceneNames) => {
+    // 先获取目标名称并移除前缀
+    const targetName = content
+      .split(' - ')[0]
+      .trim()
+      .replace(/^(DEVICE|GROUP|SCENE)\s+/, '')  // 移除前缀
+      .trim();
+
+    // 然后检查目标类型
+    if (registeredDeviceNames.has(targetName)) return 'DEVICE';
+    if (registeredGroupNames.has(targetName)) return 'GROUP';
+    if (registeredSceneNames.has(targetName)) return 'SCENE';
+    return 'UNKNOWN';
+  };
+
+  // 添加颜色常量
+  const TYPE_COLORS = {
+    DEVICE: '#fbcd0b',   // 设备 - 黄色
+    GROUP: '#009688',    // 组 - 绿色
+    SCENE: '#9C27B0',    // 场景 - 紫色
+    UNKNOWN: '#95A5A6'   // 未知 - 灰色
+  };
+
   return (
     <div className="step step5 mt-5">
       <div className="row justify-content-md-center">
@@ -164,6 +188,7 @@ const RemoteControls = forwardRef(({
                     <TableRow>
                       <TableCell><strong>Remote Control Name</strong></TableCell>
                       <TableCell><strong>Button</strong></TableCell>
+                      <TableCell><strong>Type</strong></TableCell>
                       <TableCell><strong>Control Content</strong></TableCell>
                     </TableRow>
                   </TableHead>
@@ -171,17 +196,39 @@ const RemoteControls = forwardRef(({
                     {Object.entries(remoteControlData)
                       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                       .map(([remoteControlName, controls]) => (
-                        controls.map((control, index) => (
-                          <TableRow key={`${remoteControlName}-${index}`}>
-                            {index === 0 && (
-                              <TableCell rowSpan={controls.length}>
-                                {remoteControlName}
+                        controls.map((control, index) => {
+                          const [button, content] = control.split(':').map(part => part.trim());
+                          const targetType = determineTargetType(
+                            content, 
+                            registeredDeviceNames, 
+                            registeredGroupNames, 
+                            registeredSceneNames
+                          );
+                          
+                          return (
+                            <TableRow key={`${remoteControlName}-${index}`}>
+                              {index === 0 && (
+                                <TableCell rowSpan={controls.length}>
+                                  {remoteControlName}
+                                </TableCell>
+                              )}
+                              <TableCell>{button}</TableCell>
+                              <TableCell>
+                                <span style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  backgroundColor: TYPE_COLORS[targetType] || '#95A5A6',
+                                  color: 'white',
+                                  fontWeight: 'bold',
+                                  fontSize: '0.8rem'
+                                }}>
+                                  {targetType}
+                                </span>
                               </TableCell>
-                            )}
-                            <TableCell>{control.split(':')[0]}</TableCell>
-                            <TableCell>{control.split(':')[1].trim()}</TableCell>
-                          </TableRow>
-                        ))
+                              <TableCell>{content}</TableCell>
+                            </TableRow>
+                          );
+                        })
                       ))}
                   </TableBody>
                 </Table>
