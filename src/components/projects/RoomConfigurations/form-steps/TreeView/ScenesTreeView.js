@@ -97,6 +97,11 @@ const ScenesTreeView = () => {
           </CustomTreeItem>
           <CustomTreeItem itemId="scenes-fan-speed" label="Speed Control">
             <CustomTreeItem
+              itemId="scenes-fan-speed-0"
+              label="<device_name> ON RELAY ON SPEED 0"
+              copyText="<device_name> ON RELAY ON SPEED 0"
+            />
+            <CustomTreeItem
               itemId="scenes-fan-speed-1"
               label="<device_name> ON RELAY ON SPEED 1"
               copyText="<device_name> ON RELAY ON SPEED 1"
@@ -105,11 +110,6 @@ const ScenesTreeView = () => {
               itemId="scenes-fan-speed-2"
               label="<device_name> ON RELAY ON SPEED 2"
               copyText="<device_name> ON RELAY ON SPEED 2"
-            />
-            <CustomTreeItem
-              itemId="scenes-fan-speed-3"
-              label="<device_name> ON RELAY ON SPEED 3"
-              copyText="<device_name> ON RELAY ON SPEED 3"
             />
           </CustomTreeItem>
         </CustomTreeItem>

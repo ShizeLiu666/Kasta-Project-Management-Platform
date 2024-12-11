@@ -141,7 +141,7 @@ function validateFanTypeOperations(parts, errors, sceneName) {
   const operation = parts.slice(1).join(" ");
 
   // 修改风扇操作的正则表达式以支持所有有效组合
-  const singleFanPattern = /^[a-zA-Z0-9_]+ (ON|OFF) RELAY (ON|OFF)(?: SPEED [1-3])?$/i;
+  const singleFanPattern = /^[a-zA-Z0-9_]+ (ON|OFF) RELAY (ON|OFF)(?: SPEED [0-2])?$/i;
 
   // 构建操作字符串
   const operationString = deviceName + " " + operation;
@@ -151,9 +151,9 @@ function validateFanTypeOperations(parts, errors, sceneName) {
     const speedMatch = operation.match(/SPEED (\d+)/i);
     if (speedMatch) {
       const speedValue = parseInt(speedMatch[1]);
-      if (speedValue < 1 || speedValue > 3) {
+      if (speedValue < 0 || speedValue > 2) {
         errors.push(
-          `KASTA SCENE [${sceneName}]: Fan speed value must be between 1 and 3. Found: ${speedValue}`
+          `KASTA SCENE [${sceneName}]: Fan speed value must be between 0 and 2. Found: ${speedValue}`
         );
         return;
       }
@@ -164,8 +164,8 @@ function validateFanTypeOperations(parts, errors, sceneName) {
   if (!singleFanPattern.test(operationString)) {
     errors.push([
       `KASTA SCENE [${sceneName}]: Fan Type operation '${operationString}' does not match any of the allowed formats. Accepted formats are:`,
-      "- FAN_NAME ON RELAY ON [SPEED X] (Fan and Light ON)",
-      "- FAN_NAME ON RELAY OFF [SPEED X] (Only Fan ON)",
+      "- FAN_NAME ON RELAY ON [SPEED 0, 1, 2] (Fan and Light ON)",
+      "- FAN_NAME ON RELAY OFF [SPEED 0, 1, 2] (Only Fan ON)",
       "- FAN_NAME OFF RELAY ON (Only Light ON)",
       "- FAN_NAME OFF RELAY OFF (All OFF)"
     ]);
