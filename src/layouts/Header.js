@@ -14,7 +14,8 @@ import '../assets/scss/loader/Header.css';
 import { getUserDetails } from '../components/auth';
 import defaultAvatar from '../assets/images/users/normal_user.jpg';
 import CustomModal from '../components/CustomComponents/CustomModal';
-import FeedbackIcon from '@mui/icons-material/Feedback';
+// import FeedbackIcon from '@mui/icons-material/SupportAgent';
+import FeedbackIcon from '@mui/icons-material/ContactSupport';
 import FeedbackModal from './FeedbackModal';
 
 const Header = ({ toggleSidebar }) => {
@@ -127,8 +128,8 @@ const Header = ({ toggleSidebar }) => {
           onMouseOut={(e) => e.currentTarget.style.color = '#ff4d4f'}
         >
           <FeedbackIcon style={{ 
-            fontSize: '24px',
-            transform: 'scaleX(-1)'  // 水平翻转图标
+            fontSize: '34px',
+            // transform: 'scaleX(-1)'  // 水平翻转图标
           }} />
         </Button>
         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
