@@ -11,6 +11,7 @@ export const content = {
       letters: 'Letters (a-z, A-Z)',
       numbers: 'Numbers (0-9)',
       underscore: 'Underscore (_)',
+      hyphen: 'Hyphen (-)',
       noSpaces: 'Spaces are not allowed',
       uniqueName: 'Each device name must be unique and cannot conflict with Device models',
       closeButton: 'Close',
@@ -25,6 +26,7 @@ export const content = {
         letters: 'Letters (a-z, A-Z)',
         numbers: 'Numbers (0-9)',
         underscore: 'Underscore (_)',
+        hyphen: 'Hyphen (-)',
         spaces: 'Spaces',
         deviceTypes: {
           title: 'Must be defined in DEVICE section as:',
@@ -73,6 +75,7 @@ export const content = {
         letters: 'Letters (a-z, A-Z)',
         numbers: 'Numbers (0-9)',
         underscore: 'Underscore (_)',
+        hyphen: 'Hyphen (-)',
         spaces: 'Spaces',
         deviceTypes: {
           title: 'Must be defined in DEVICE section as:',
@@ -114,6 +117,7 @@ export const content = {
         letters: 'Letters (a-z, A-Z)',
         numbers: 'Numbers (0-9)',
         underscore: 'Underscore (_)',
+        hyphen: 'Hyphen (-)',
         spaces: 'Spaces',
         deviceTypes: {
           title: 'Must be defined in DEVICE section as:',
@@ -168,73 +172,101 @@ export const content = {
         title: 'Scene Configuration',
         sceneDeclaration: 'Scene Declaration',
         deviceOperationRules: 'Device Operation Rules',
-        scene: 'Scene',
         mustStartWith: 'Must start with NAME:',
         sceneNamesCanContain: 'Scene names can contain:',
         letters: 'Letters (a-z, A-Z)',
         numbers: 'Numbers (0-9)',
         underscore: 'Underscore (_)',
+        hyphen: 'Hyphen (-)',
         spaces: 'Spaces',
         uniqueSceneName: 'Each scene name must be unique',
+        namingRules: [
+          'Scene names cannot duplicate group names',
+          'Each scene name must be unique',
+          'Only letters, numbers, underscores, and spaces are allowed'
+        ],
         deviceTypes: {
           relay: {
-            title: 'Relay/Dry Contact Type:',
+            title: 'Relay Type:',
             rules: [
-              'DEVICE_NAME ON/OFF',
-              'DEVICE_NAME_1, DEVICE_NAME_2 ON/OFF'
+              'DEVICE_NAME ON',
+              'DEVICE_NAME OFF',
+              'DEVICE_NAME_1, DEVICE_NAME_2 ON',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OFF'
             ]
           },
           dimmer: {
             title: 'Dimmer Type:',
             rules: [
-              'DEVICE_NAME ON/OFF',
-              'DEVICE_NAME ON +XX% (0-100%)',
+              'DEVICE_NAME ON',
+              'DEVICE_NAME OFF',
+              'DEVICE_NAME ON +XX% (0-100)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 ON',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OFF',
               'DEVICE_NAME_1, DEVICE_NAME_2 ON +XX%'
             ]
           },
           fan: {
             title: 'Fan Type:',
             rules: [
-              'FAN_NAME ON RELAY ON [SPEED X]  (X = 1-3)',
-              'FAN_NAME ON RELAY ON',
-              'FAN_NAME OFF RELAY OFF'
+              'FAN_NAME ON RELAY ON [SPEED X] (Fan and light ON)',
+              'FAN_NAME ON RELAY OFF [SPEED X] (Only fan ON)',
+              'FAN_NAME OFF RELAY ON (Only light ON)',
+              'FAN_NAME OFF RELAY OFF (All OFF)',
+              'Note: X in SPEED X must be between 1-3'
             ]
           },
           curtain: {
             title: 'Curtain Type:',
             rules: [
-              'DEVICE_NAME OPEN/CLOSE',
-              'DEVICE_NAME_1, DEVICE_NAME_2 OPEN/CLOSE'
+              'DEVICE_NAME OPEN',
+              'DEVICE_NAME CLOSE',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OPEN',
+              'DEVICE_NAME_1, DEVICE_NAME_2 CLOSE'
             ]
           },
           powerPoint: {
             title: 'PowerPoint Type:',
             rules: {
               singleWay: {
-                title: 'Single-Way:',
+                title: 'Single Way:',
                 rules: ['DEVICE_NAME ON/OFF']
               },
               twoWay: {
-                title: 'Two-Way:',
+                title: 'Two Way:',
                 rules: [
                   'DEVICE_NAME ON ON',
                   'DEVICE_NAME ON OFF',
                   'DEVICE_NAME OFF ON',
+                  'DEVICE_NAME OFF OFF',
                   'DEVICE_NAME UNSELECT'
                 ]
               }
             }
+          },
+          dryContact: {
+            title: 'Dry Contact Type:',
+            rules: [
+              'DEVICE_NAME ON (Single ON)',
+              'DEVICE_NAME OFF (Single OFF, NORMAL devices only)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 ON (Group ON)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OFF (Group OFF, NORMAL devices only)',
+              'Note: Special action devices (1SEC, 6SEC, 9SEC, REVERS) can only execute ON operation'
+            ]
           }
         },
         generalRules: [
-          'All devices must be previously defined in DEVICE section',
+          'All devices must be defined in DEVICE section',
           'Multiple devices of the same type can be controlled together',
-          'Cannot mix different device types in group operations (except Relay and Dimmer)',
+          'Cannot mix different device types in group operations (except relay and dimmer)',
           'Percentage values must be between 0-100',
-          'Device names must be defined before any operation commands',
-          'Operations must follow the exact format specified for each device type',
-          'Commands are case-insensitive but must match the specified format',
-          'Each instruction must contain at least one device and one valid operation'
+          'Device names must be defined before any operation command',
+          'Operations must strictly follow the format specified for each device type',
+          'Commands are case-insensitive but must match specified format',
+          'Each instruction must contain at least one device and one valid operation',
+          'Each scene must contain at least one control instruction',
+          'Empty scenes are not allowed',
+          'Device names must be defined in DEVICE section or be valid group names'
         ]
       },
       // 7. Remote Control Configuration
@@ -256,13 +288,14 @@ export const content = {
             'Letters (a-z, A-Z)',
             'Numbers (0-9)',
             'Underscore (_)',
+            'Hyphen (-)',
             'Spaces'
           ]
         },
         commandFormat: {
           title: 'Command Format',
-          format: '<button_number>: <command>',
-          example: '1: DEVICE LightA',
+          format: '<button_number>: <target_name> [- <operation>]',
+          example: '1: LightA    or    1: LightA - FAN',
           notes: [
             'Button numbers must be within device capacity:',
             '1-6 Push Panel: 1-6 buttons',
@@ -273,36 +306,34 @@ export const content = {
         commandTypes: {
           title: 'Supported Commands',
           device: {
-            title: 'Device Commands',
-            basic: {
-              title: 'Basic Device Control',
-              format: 'DEVICE [device_name]'
-            },
-            deviceOperation: {
-              title: 'Device Operations',
-              curtain: {
-                title: 'Curtain Control',
-                formats: [
-                  'DEVICE [device_name] - OPEN',
-                  'DEVICE [device_name] - CLOSE'
-                ]
-              },
+            title: 'Device Control',
+            format: '<device_name> [- operation]',
+            operations: {
               fan: {
-                title: 'Fan Control',
-                formats: [
-                  'DEVICE [device_name] - FAN',
-                  'DEVICE [device_name] - LAMP'
-                ]
+                title: 'Fan Operations',
+                values: ['FAN', 'LAMP', 'WHOLE']
+              },
+              curtain: {
+                title: 'Curtain Operations',
+                values: ['OPEN', 'CLOSE', 'WHOLE']
+              },
+              powerpoint: {
+                title: 'PowerPoint Operations',
+                values: ['LEFT', 'RIGHT', 'WHOLE']
+              },
+              outputModule: {
+                title: '4 Output Module Operations',
+                values: ['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'WHOLE']
               }
             }
           },
           group: {
             title: 'Group Control',
-            format: 'GROUP [group_name]'
+            format: '<group_name>'
           },
           scene: {
             title: 'Scene Control',
-            format: 'SCENE [scene_name]'
+            format: '<scene_name>'
           }
         },
         rules: [
@@ -389,13 +420,14 @@ export const content = {
       // 1. Device Configuration
       deviceConfig: '设备配置',
       modelDeclaration: '设备型号声明',
-      namingRules: '设备命名规则',
+      namingRules: '设命名规则',
       mustStartWith: '必须以 NAME: 开头',
       deviceModels: '设备型号必须来自"支持的设备"列表',
       allowedChars: '允许的字符：',
       letters: '字母 (a-z, A-Z)',
       numbers: '数字 (0-9)',
       underscore: '下划线 (_)',
+      hyphen: '破折号 (-)',
       noSpaces: '不允许使用空格',
       uniqueName: '每个设备名称必须唯一，且不能与设备型号冲突',
       closeButton: 'CLOSE',
@@ -410,6 +442,7 @@ export const content = {
         letters: '字母 (a-z, A-Z)',
         numbers: '数字 (0-9)',
         underscore: '下划线 (_)',
+        hyphen: '破折号 (-)',
         spaces: '空格',
         deviceTypes: {
           title: '必须在 DEVICE 部分定义为：',
@@ -458,6 +491,7 @@ export const content = {
         letters: '字母 (a-z, A-Z)',
         numbers: '数字 (0-9)',
         underscore: '下划线 (_)',
+        hyphen: '破折号 (-)',
         spaces: '空格',
         deviceTypes: {
           title: '必须在 DEVICE 部分定义为：',
@@ -499,6 +533,7 @@ export const content = {
         letters: '字母 (a-z, A-Z)',
         numbers: '数字 (0-9)',
         underscore: '下划线 (_)',
+        hyphen: '破折号 (-)',
         spaces: '空格',
         deviceTypes: {
           title: '必须在 DEVICE 部分定义为：',
@@ -553,43 +588,57 @@ export const content = {
         title: '场景配置',
         sceneDeclaration: '场景声明',
         deviceOperationRules: '设备操作规则',
-        scene: '场景',
         mustStartWith: '必须以 NAME: 开头',
         sceneNamesCanContain: '场景名称可以包含：',
         letters: '字母 (a-z, A-Z)',
         numbers: '数字 (0-9)',
         underscore: '下划线 (_)',
+        hyphen: '破折号 (-)',
         spaces: '空格',
         uniqueSceneName: '每个场景名称必须唯一',
+        namingRules: [
+          '场景名称不能与组名重复',
+          '每个场景名称必须唯一',
+          '只允许使用字母、数字、下划线和空格'
+        ],
         deviceTypes: {
           relay: {
-            title: '继电器/干接点类型：',
+            title: '继电器类型：',
             rules: [
-              'DEVICE_NAME ON/OFF',
-              'DEVICE_NAME_1, DEVICE_NAME_2 ON/OFF'
+              'DEVICE_NAME ON (单个开启)',
+              'DEVICE_NAME OFF (单个关闭)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 ON (群组开启)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OFF (群组关闭)'
             ]
           },
           dimmer: {
             title: '调光器类型：',
             rules: [
-              'DEVICE_NAME ON/OFF',
-              'DEVICE_NAME ON +XX% (0-100%)',
-              'DEVICE_NAME_1, DEVICE_NAME_2 ON +XX%'
+              'DEVICE_NAME ON (开启)',
+              'DEVICE_NAME OFF (关闭)',
+              'DEVICE_NAME ON +XX% (亮度0-100)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 ON (群组开启)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OFF (群组关闭)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 ON +XX% (群组调光)'
             ]
           },
           fan: {
             title: '风扇类型：',
             rules: [
-              'FAN_NAME ON RELAY ON [SPEED X]  (X = 1-3)',
-              'FAN_NAME ON RELAY ON',
-              'FAN_NAME OFF RELAY OFF'
+              'FAN_NAME ON RELAY ON [SPEED X] (风扇和灯开启)',
+              'FAN_NAME ON RELAY OFF [SPEED X] (仅风扇开启)',
+              'FAN_NAME OFF RELAY ON (仅灯开启)',
+              'FAN_NAME OFF RELAY OFF (全部关闭)',
+              '注意：SPEED X中的X必须在1-3之间'
             ]
           },
           curtain: {
             title: '窗帘类型：',
             rules: [
-              'DEVICE_NAME OPEN/CLOSE',
-              'DEVICE_NAME_1, DEVICE_NAME_2 OPEN/CLOSE'
+              'DEVICE_NAME OPEN (单个打开)',
+              'DEVICE_NAME CLOSE (单个关闭)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OPEN (群组打开)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 CLOSE (群组关闭)'
             ]
           },
           powerPoint: {
@@ -605,10 +654,21 @@ export const content = {
                   'DEVICE_NAME ON ON',
                   'DEVICE_NAME ON OFF',
                   'DEVICE_NAME OFF ON',
+                  'DEVICE_NAME OFF OFF',
                   'DEVICE_NAME UNSELECT'
                 ]
               }
             }
+          },
+          dryContact: {
+            title: '干接点类型：',
+            rules: [
+              'DEVICE_NAME ON (单个开启)',
+              'DEVICE_NAME OFF (单个关闭，仅适用于NORMAL设备)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 ON (群组开启)',
+              'DEVICE_NAME_1, DEVICE_NAME_2 OFF (群组关闭，仅适用于NORMAL设备)',
+              '注意：特殊动作设备(1SEC, 6SEC, 9SEC, REVERS)只能执行ON操作'
+            ]
           }
         },
         generalRules: [
@@ -617,9 +677,12 @@ export const content = {
           '不能在组操作中混合不同类型的设备（继电器和调光器除外）',
           '百分比值必须在 0-100 之间',
           '设备名称必须在任何操作命令之前定义',
-          '作必须严格遵循每种设备类型指定的格式',
+          '操作必须严格遵循每种设备类型指定的格式',
           '命令不区分大小写，但必须匹配指定格式',
-          '每条指令必须包含至少一个设备和一个有效操作'
+          '每条指令必须包含至少一个设备和一个有效操作',
+          '每个场景必须至少包含一条控制指令',
+          '不允许空场景',
+          '设备名称必须在DEVICE部分定义或是有效的组名'
         ]
       },
       // 7. Remote Control Configuration
@@ -641,53 +704,52 @@ export const content = {
             '字母 (a-z, A-Z)',
             '数字 (0-9)',
             '下划线 (_)',
+            '破折号 (-)',
             '空格'
           ]
         },
         commandFormat: {
           title: '命令格式',
-          format: '<按键编号>: <命令>',
-          example: '1: DEVICE LightA',
+          format: '<按键编号>: <目标名称> [- <操作>]',
+          example: '1: 灯A    或    1: 风扇A - FAN',
           notes: [
             '按键编号必须在设备容量范围内：',
-            '• 1-6键面板: 1-6个按键',
-            '• 5路输入模块: 1-5个输入',
-            '• 4路输出模块: 1-4个输出'
+            '1-6键面板: 1-6个按键',
+            '5路输入模块: 1-5个输入',
+            '4路输出模块: 1-4个输出'
           ]
         },
         commandTypes: {
           title: '支持的命令',
           device: {
-            title: '设备命令',
-            basic: {
-              title: '基础设备控制',
-              format: 'DEVICE [设备名称]'
-            },
-            deviceOperation: {
-              title: '设备操作',
-              curtain: {
-                title: '窗帘控制',
-                formats: [
-                  'DEVICE [设备名称] - OPEN',
-                  'DEVICE [设备名称] - CLOSE'
-                ]
-              },
+            title: '设备控制',
+            format: '<设备名称> [- 操作]',
+            operations: {
               fan: {
-                title: '风扇控制',
-                formats: [
-                  'DEVICE [设备名称] - FAN',
-                  'DEVICE [设备名称] - LAMP'
-                ]
+                title: '风扇操作',
+                values: ['FAN (风扇)', 'LAMP (灯)', 'WHOLE (全部)']
+              },
+              curtain: {
+                title: '窗帘操作',
+                values: ['OPEN (打开)', 'CLOSE (关闭)', 'WHOLE (全部)']
+              },
+              powerpoint: {
+                title: '电源插座操作',
+                values: ['LEFT (左)', 'RIGHT (右)', 'WHOLE (全部)']
+              },
+              outputModule: {
+                title: '4路输出模块操作',
+                values: ['FIRST (第一路)', 'SECOND (第二路)', 'THIRD (第三路)', 'FOURTH (第四路)', 'WHOLE (全部)']
               }
             }
           },
           group: {
             title: '群组控制',
-            format: 'GROUP [群组名称]'
+            format: '<群组名称>'
           },
           scene: {
             title: '场景控制',
-            format: 'SCENE [场景名称]'
+            format: '<场景名称>'
           }
         },
         rules: [
