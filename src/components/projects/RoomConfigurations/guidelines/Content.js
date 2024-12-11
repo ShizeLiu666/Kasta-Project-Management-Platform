@@ -210,7 +210,7 @@ export const content = {
               'FAN_NAME ON RELAY OFF [SPEED 0, 1, 2] (Only Fan ON)',
               'FAN_NAME OFF RELAY ON (Only Light ON)',
               'FAN_NAME OFF RELAY OFF (All OFF)',
-              'Note: SPEED value must be 0, 1, or 2'
+              'Note: SPEED value must be 0 (LOW), 1 (MEDIUM), or 2 (HIGH)'
             ]
           },
           curtain: {
@@ -624,7 +624,7 @@ export const content = {
               'FAN_NAME ON RELAY OFF [SPEED 0, 1, 2] (仅风扇开启)',
               'FAN_NAME OFF RELAY ON (仅灯开启)',
               'FAN_NAME OFF RELAY OFF (全部关闭)',
-              '注意: SPEED 值必须是 0、1 或 2'
+              '注意: SPEED 值必须是 0 (低)、1 (中) 或 2 (高)'
             ]
           },
           curtain: {
