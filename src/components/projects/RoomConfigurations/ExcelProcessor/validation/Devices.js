@@ -4,7 +4,7 @@ import { AllDeviceTypes } from "../ExcelProcessor";
 const NAME_PREFIX = "NAME:";
 const QTY_PREFIX = "QTY:";
 const KASTA_DEVICE_ERROR = "KASTA DEVICE:";
-const VALID_NAME_REGEX = /^[a-zA-Z0-9_]+$/;
+const VALID_NAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 // 辅助函数
 const createError = (message) => `${KASTA_DEVICE_ERROR} ${message}`;
@@ -71,7 +71,7 @@ function getAllModelNames() {
     }
   }
 
-  console.log("All Models:", allModels);
+  // console.log("All Models:", allModels);
   
   return allModels;
 }
@@ -80,7 +80,7 @@ function getAllModelNames() {
 const ALL_MODEL_NAMES = getAllModelNames();
 
 function validateDeviceName(line, errors, registeredDeviceNames) {
-  console.log("Line:", line);
+  // console.log("Line:", line);
   // 首先检查是否与任何设备型号冲突
   if (ALL_MODEL_NAMES.includes(line)) {
     errors.push(createError(`The device name '${line}' cannot be the same as any device model name.`));

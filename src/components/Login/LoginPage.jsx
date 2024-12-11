@@ -8,7 +8,7 @@ import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { setToken, saveUsername, saveUserDetails } from '../auth';
-import axiosInstance from '../../config';  // 路径可能需要调整
+import axiosInstance from '../../config'; 
 import CustomAlert from '../CustomComponents/CustomAlert';
 
 const DEFAULT_ALERT_DURATION = 3000;
@@ -60,6 +60,7 @@ const LoginPage = () => {
       if (response.data && response.data.success) {
         const { token, username: loggedInUsername } = response.data.data;
 
+        // 获取用户详情
         try {
           const userDetailResponse = await axiosInstance.get('/users/detail', {
             headers: { Authorization: `Bearer ${token}` }
@@ -68,38 +69,51 @@ const LoginPage = () => {
           if (userDetailResponse.data && userDetailResponse.data.success) {
             const userDetails = userDetailResponse.data.data;
             
-            setToken(token, rememberMe);
-            saveUsername(loggedInUsername, rememberMe);
-            saveUserDetails(userDetails);
-            
-            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            // 检查用户类型
+            if (userDetails.userType !== 0) {
+              // Project user - 允许登录
+              setToken(token, rememberMe);
+              saveUsername(loggedInUsername, rememberMe);
+              saveUserDetails(userDetails);
+              
+              // 设置 axios 默认 headers
+              axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-            if (rememberMe) {
-              localStorage.setItem('rememberedUsername', username);
-              localStorage.setItem('rememberedPassword', password);
+              if (rememberMe) {
+                localStorage.setItem('rememberedUsername', username);
+                localStorage.setItem('rememberedPassword', password);
+              } else {
+                localStorage.removeItem('rememberedUsername');
+                localStorage.removeItem('rememberedPassword');
+              }
+
+              showAlert("Login successful! Redirecting...", "success");
+              setTimeout(() => {
+                navigate("/admin/projects");
+              }, 1000);
             } else {
-              localStorage.removeItem('rememberedUsername');
-              localStorage.removeItem('rememberedPassword');
+              // Normal user - 不允许登录
+              showAlert(
+                "This platform is currently only open to Project users. Normal user access is coming soon.\n\n" +
+                "If you previously registered as a project user on our website, please send your account details to jackliu@haneco.com.au for permission update.\n\n" +
+                "Thank you for your cooperation.",
+                "warning",
+                15000
+              );
             }
-
-            showAlert("Login successful! Redirecting...", "success");
-            setTimeout(() => {
-              // const redirectPath = userDetails.userType !== 0 ? "/admin/project" : "/admin/network";
-              const redirectPath = "/admin/dashboard";
-              navigate(redirectPath);
-            }, 1000);
-            
-            return { success: true };
           }
         } catch (detailError) {
           console.error("Error fetching user details:", detailError);
           showAlert("An error occurred while fetching user details. Please try again.", "error");
         }
+
+        return { success: true };
       } else {
-        if (isSecondAttempt) {
-          showAlert(response.data.errorMsg || "Login failed", "error");
-        }
-        return { success: false, error: response.data.errorMsg || "Login failed" };
+        // 登录失败处理
+        return { 
+          success: false, 
+          error: response.data.errorMsg // 直接使用后端返回的错误信息
+        };
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -132,18 +146,10 @@ const LoginPage = () => {
 
     setIsLoading(true);
     try {
-      let loginResult = await attemptLogin(username, false);
-
+      const loginResult = await attemptLogin(username, true);
+      
       if (!loginResult.success) {
-        const alteredUsername = username.charAt(0) === username.charAt(0).toLowerCase()
-          ? username.charAt(0).toUpperCase() + username.slice(1)
-          : username.charAt(0).toLowerCase() + username.slice(1);
-
-        loginResult = await attemptLogin(alteredUsername, true);
-      }
-
-      if (!loginResult.success && !loginResult.isServerError) {
-        showAlert("Incorrect username or password. Please check your credentials.", "error");
+        showAlert(loginResult.error || "Login failed", "error");
       }
     } finally {
       setIsLoading(false);

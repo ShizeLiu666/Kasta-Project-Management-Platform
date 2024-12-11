@@ -21,6 +21,9 @@ const Step6 = forwardRef(({
   groupData,
   sceneData,
   remoteControlData,
+  remoteParameterData,
+  registeredGroupNames,
+  registeredSceneNames,
   submitJson,
   projectRoomId
 }, ref) => {
@@ -37,7 +40,9 @@ const Step6 = forwardRef(({
       const scenesResult = processScenes(splitData.scenes);
       const remoteControlsResult = processRemoteControls(
         splitData.remoteControls, 
-        splitData.remoteParameters
+        splitData.remoteParameters,
+        registeredGroupNames,
+        registeredSceneNames
       );
       const outputModulesResult = processOutputModules(splitData.outputs);
       const inputModulesResult = processInputModules(splitData.inputs);
@@ -56,7 +61,7 @@ const Step6 = forwardRef(({
       setError(err.message);
       return null;
     }
-  }, [splitData]);
+  }, [splitData, registeredGroupNames, registeredSceneNames]);
 
   const jsonResult = useMemo(() => {
     return processedData ? JSON.stringify(processedData, null, 2) : "";

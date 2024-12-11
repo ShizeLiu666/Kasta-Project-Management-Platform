@@ -28,6 +28,7 @@ const DeviceNamingContent = ({ language }) => (
         <li>{content[language].letters}</li>
         <li>{content[language].numbers}</li>
         <li>{content[language].underscore}</li>
+        <li>{content[language].hyphen}</li>
       </ul>
     </li>
     <li>{content[language].noSpaces}</li>
@@ -115,14 +116,6 @@ const SceneRulesContent = ({ language }) => (
 const RemoteControlDeclarationContent = ({ language }) => (
   <ul style={{ margin: 0, paddingLeft: '20px' }}>
     <li>
-      {content[language].remoteControlConfig.deviceNamesCanContain.title}
-      <ul>
-        {content[language].remoteControlConfig.deviceNamesCanContain.rules.map((rule, index) => (
-          <li key={index}>{rule}</li>
-        ))}
-      </ul>
-    </li>
-    <li>
       {content[language].remoteControlConfig.deviceTypes.title}
       <ul>
         {content[language].remoteControlConfig.deviceTypes.types.map((type, index) => (
@@ -130,11 +123,14 @@ const RemoteControlDeclarationContent = ({ language }) => (
         ))}
       </ul>
     </li>
-  </ul>
-);
-
-const RemoteControlRulesContent = ({ language }) => (
-  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+    <li>
+      {content[language].remoteControlConfig.deviceNamesCanContain.title}
+      <ul>
+        {content[language].remoteControlConfig.deviceNamesCanContain.rules.map((rule, index) => (
+          <li key={index}>{rule}</li>
+        ))}
+      </ul>
+    </li>
     <li>
       {content[language].remoteControlConfig.commandFormat.title}
       <ul>
@@ -145,47 +141,65 @@ const RemoteControlRulesContent = ({ language }) => (
         ))}
       </ul>
     </li>
+  </ul>
+);
+
+const RemoteControlRulesContent = ({ language }) => (
+  <ul style={{ margin: 0, paddingLeft: '20px' }}>
     <li>
       {content[language].remoteControlConfig.commandTypes.title}
       <ul>
+        {/* Device Control */}
         <li>
           {content[language].remoteControlConfig.commandTypes.device.title}
           <ul>
+            <li>{content[language].remoteControlConfig.commandTypes.device.format}</li>
+            {/* Fan Operations */}
             <li>
-              {content[language].remoteControlConfig.commandTypes.device.basic.title}
+              {content[language].remoteControlConfig.commandTypes.device.operations.fan.title}
               <ul>
-                <li>{content[language].remoteControlConfig.commandTypes.device.basic.format}</li>
+                {content[language].remoteControlConfig.commandTypes.device.operations.fan.values.map((value, index) => (
+                  <li key={index}>{value}</li>
+                ))}
               </ul>
             </li>
+            {/* Curtain Operations */}
             <li>
-              {content[language].remoteControlConfig.commandTypes.device.deviceOperation.title}
+              {content[language].remoteControlConfig.commandTypes.device.operations.curtain.title}
               <ul>
-                <li>
-                  {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.title}
-                  <ul>
-                    {content[language].remoteControlConfig.commandTypes.device.deviceOperation.curtain.formats.map((format, index) => (
-                      <li key={index}>{format}</li>
-                    ))}
-                  </ul>
-                </li>
-                <li>
-                  {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.title}
-                  <ul>
-                    {content[language].remoteControlConfig.commandTypes.device.deviceOperation.fan.formats.map((format, index) => (
-                      <li key={index}>{format}</li>
-                    ))}
-                  </ul>
-                </li>
+                {content[language].remoteControlConfig.commandTypes.device.operations.curtain.values.map((value, index) => (
+                  <li key={index}>{value}</li>
+                ))}
+              </ul>
+            </li>
+            {/* PowerPoint Operations */}
+            <li>
+              {content[language].remoteControlConfig.commandTypes.device.operations.powerpoint.title}
+              <ul>
+                {content[language].remoteControlConfig.commandTypes.device.operations.powerpoint.values.map((value, index) => (
+                  <li key={index}>{value}</li>
+                ))}
+              </ul>
+            </li>
+            {/* Output Module Operations */}
+            <li>
+              {content[language].remoteControlConfig.commandTypes.device.operations.outputModule.title}
+              <ul>
+                {content[language].remoteControlConfig.commandTypes.device.operations.outputModule.values.map((value, index) => (
+                  <li key={index}>{value}</li>
+                ))}
               </ul>
             </li>
           </ul>
         </li>
+        {/* Group Control */}
         <li>
           {content[language].remoteControlConfig.commandTypes.group.title}
           <ul>
             <li>{content[language].remoteControlConfig.commandTypes.group.format}</li>
           </ul>
         </li>
+        {/* Scene Control */}
         <li>
           {content[language].remoteControlConfig.commandTypes.scene.title}
           <ul>
@@ -194,9 +208,6 @@ const RemoteControlRulesContent = ({ language }) => (
         </li>
       </ul>
     </li>
-    {content[language].remoteControlConfig.rules.map((rule, index) => (
-      <li key={`rule-${index}`}>{rule}</li>
-    ))}
   </ul>
 );
 

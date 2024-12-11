@@ -43,7 +43,7 @@ const Groups = forwardRef(({
       return;
     }
 
-    const { errors } = validateGroups(splitData.groups, deviceNameToType);
+    const { errors, registeredGroupNames, deviceNameToGroup } = validateGroups(splitData.groups, deviceNameToType);
 
     if (errors.length > 0) {
       setGroupErrors(formatErrors(errors));
@@ -65,7 +65,10 @@ const Groups = forwardRef(({
       });
       setGroupData(groupDevices);
       setSuccess(true);
-      onValidate(true, { groupData: groupDevices });
+      onValidate(true, { 
+        groupData: deviceNameToGroup,  // 使用 validateGroups 返回的 deviceNameToGroup
+        registeredGroupNames: registeredGroupNames  // 添加这行
+      });
     }
 
     hasValidated.current = true;

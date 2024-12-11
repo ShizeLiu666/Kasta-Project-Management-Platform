@@ -16,7 +16,7 @@ function checkNamePrefix(line, errors) {
 }
 
 //! Validate the scene name
-function validateSceneName(sceneName, errors, registeredSceneNames) {
+function validateSceneName(sceneName, errors, registeredSceneNames, registeredGroupNames) {
   //! Check if the scene name is empty
   if (!sceneName) {
     errors.push(
@@ -36,6 +36,12 @@ function validateSceneName(sceneName, errors, registeredSceneNames) {
   // 检查重复的 Scene Name
   if (registeredSceneNames.has(sceneName)) {
     errors.push(`KASTA SCENE: The scene name '${sceneName}' is duplicated. Each scene name must be unique.`);
+    return false;
+  }
+
+  // 新增：检查场景名是否与组名冲突
+  if (registeredGroupNames.has(sceneName)) {
+    errors.push(`KASTA SCENE: The scene name '${sceneName}' conflicts with an existing group name. Scene names must be different from group names.`);
     return false;
   }
 
@@ -134,9 +140,8 @@ function validateFanTypeOperations(parts, errors, sceneName) {
   // 获取操作部分
   const operation = parts.slice(1).join(" ");
 
-  // 定义单风扇操作的合法模式（修改正则表达式以限制速度范围）
-  const singleFanPattern = /^[a-zA-Z0-9_]+ ON RELAY (ON|OFF)(?: SPEED [1-3])?$/i;
-  const singleFanOffPattern = /^[a-zA-Z0-9_]+ OFF RELAY OFF$/i;
+  // 修改风扇操作的正则表达式以支持所有有效组合
+  const singleFanPattern = /^[a-zA-Z0-9_]+ (ON|OFF) RELAY (ON|OFF)(?: SPEED [1-3])?$/i;
 
   // 构建操作字符串
   const operationString = deviceName + " " + operation;
@@ -156,15 +161,13 @@ function validateFanTypeOperations(parts, errors, sceneName) {
   }
 
   // 检查操作字符串是否匹配合法模式
-  if (
-    !singleFanPattern.test(operationString) &&
-    !singleFanOffPattern.test(operationString)
-  ) {
+  if (!singleFanPattern.test(operationString)) {
     errors.push([
       `KASTA SCENE [${sceneName}]: Fan Type operation '${operationString}' does not match any of the allowed formats. Accepted formats are:`,
-      "- FAN_NAME ON RELAY ON (Single ON)",
-      "- FAN_NAME OFF RELAY OFF (Single OFF)",
-      "- FAN_NAME ON RELAY ON SPEED X (X must be 1-3)"
+      "- FAN_NAME ON RELAY ON [SPEED X] (Fan and Light ON)",
+      "- FAN_NAME ON RELAY OFF [SPEED X] (Only Fan ON)",
+      "- FAN_NAME OFF RELAY ON (Only Light ON)",
+      "- FAN_NAME OFF RELAY OFF (All OFF)"
     ]);
   }
 }
@@ -217,7 +220,7 @@ function validatePowerPointTypeOperations(
   sceneName,
   deviceNameToType
 ) {
-  // 找到第一个操作符（ON, OFF, UNSELECT）之前的部分作为设备名
+  // 找到第一个操作符（ON, OFF, UNSELECT之前的部分作为设备名
   const deviceNames = [];
   let operationIndex = -1;
 
@@ -393,7 +396,8 @@ function validateSceneDevicesInLine(
   errors,
   deviceNameToType,
   sceneName,
-  dryContactSpecialActions
+  dryContactSpecialActions,
+  registeredGroupNames
 ) {
   let deviceTypesInLine = new Set();
   let deviceNames = [];
@@ -449,6 +453,13 @@ function validateSceneDevicesInLine(
       currentDeviceType = deviceNameToType[deviceNames[0][0]];
     }
     
+    // 检查是否是风扇操作的数字部分
+    if (isFanOperation && /^\d+$/.test(part)) {
+      operationParts.push(part);
+      i++;
+      continue;
+    }
+    
     // 检查是否是 "TURN ON" 或 "TURN OFF"
     if (part.toUpperCase() === "TURN" && nextPart && ["ON", "OFF"].includes(nextPart.toUpperCase())) {
         if (!operation) {
@@ -473,7 +484,19 @@ function validateSceneDevicesInLine(
         if (deviceNames.length === 0) {
             deviceNames.push([]);
         }
-        deviceNames[0].push(part.replace(",", ""));
+        const name = part.replace(",", "");
+        // 检查是否是设备名或组名
+        if (!deviceNameToType[name] && !registeredGroupNames.has(name)) {
+            // 如果是风扇操作的一部分，跳过设备名检查
+            if (isFanOperation && /^\d+$/.test(name)) {
+                continue;
+            }
+            errors.push(
+                `KASTA SCENE [${sceneName}]: '${name}' is neither a valid device name nor a valid group name.`
+            );
+            return;
+        }
+        deviceNames[0].push(name);
         deviceNameProvided = true;
     }
     i++;
@@ -626,14 +649,15 @@ function validateSceneDevicesInLine(
 export function validateScenes(
   sceneDataArray, 
   deviceNameToType, 
-  dryContactSpecialActions = new Map()
+  dryContactSpecialActions = new Map(),
+  registeredGroupNames = new Set()
 ) {
   const errors = [];
   const registeredSceneNames = new Set();
   let currentSceneName = null;
-  let hasControlContent = false;  // 新增：跟踪当前场景是否有控制内容
+  let hasControlContent = false;
 
-  sceneDataArray.forEach((line, index) => {
+  sceneDataArray.forEach((line) => {
     line = line.trim();
 
     if (line.startsWith("CONTROL CONTENT")) {
@@ -651,10 +675,10 @@ export function validateScenes(
 
       if (!checkNamePrefix(line, errors)) return;
       currentSceneName = line.substring(5).trim();
-      if (!validateSceneName(currentSceneName, errors, registeredSceneNames))
+      if (!validateSceneName(currentSceneName, errors, registeredSceneNames, registeredGroupNames))
         return;
       
-      // 重置控制内容标志
+      // 重置控制容标志
       hasControlContent = false;
     } else if (currentSceneName && line) {
       const parts = line.split(/\s+/);
@@ -663,7 +687,8 @@ export function validateScenes(
         errors,
         deviceNameToType,
         currentSceneName,
-        dryContactSpecialActions
+        dryContactSpecialActions,
+        registeredGroupNames
       );
       hasControlContent = true;
     }

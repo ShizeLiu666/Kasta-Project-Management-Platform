@@ -46,6 +46,11 @@ const ScenesTreeView = () => {
               label="<device_name> OFF"
               copyText="<device_name> OFF"
             />
+            <CustomTreeItem
+              itemId="scenes-dimmer-single-dim"
+              label="<device_name> ON +XX%    (XX: 0-100)"
+              copyText="<device_name> ON +XX%"
+            />
           </CustomTreeItem>
           <CustomTreeItem itemId="scenes-dimmer-group" label="Group Device Control">
             <CustomTreeItem
@@ -58,18 +63,9 @@ const ScenesTreeView = () => {
               label="<device_name>, <device_name> OFF"
               copyText="<device_name>, <device_name> OFF"
             />
-          </CustomTreeItem>
-          <CustomTreeItem itemId="scenes-dimmer-single-dim" label="Single Device Dimming">
             <CustomTreeItem
-              itemId="scenes-dimmer-single-dim-value"
-              label="<device_name> ON +XX%"
-              copyText="<device_name> ON +XX%"
-            />
-          </CustomTreeItem>
-          <CustomTreeItem itemId="scenes-dimmer-group-dim" label="Group Device Dimming">
-            <CustomTreeItem
-              itemId="scenes-dimmer-group-dim-value"
-              label="<device_name>, <device_name> ON +XX%"
+              itemId="scenes-dimmer-group-dim"
+              label="<device_name>, <device_name> ON +XX%    (XX: 0-100)"
               copyText="<device_name>, <device_name> ON +XX%"
             />
           </CustomTreeItem>
@@ -87,6 +83,16 @@ const ScenesTreeView = () => {
               itemId="scenes-fan-off"
               label="<device_name> OFF RELAY OFF"
               copyText="<device_name> OFF RELAY OFF"
+            />
+            <CustomTreeItem
+              itemId="scenes-fan-light-only"
+              label="<device_name> OFF RELAY ON"
+              copyText="<device_name> OFF RELAY ON"
+            />
+            <CustomTreeItem
+              itemId="scenes-fan-fan-only"
+              label="<device_name> ON RELAY OFF"
+              copyText="<device_name> ON RELAY OFF"
             />
           </CustomTreeItem>
           <CustomTreeItem itemId="scenes-fan-speed" label="Speed Control">
@@ -140,44 +146,50 @@ const ScenesTreeView = () => {
         <CustomTreeItem itemId="scenes-powerpoint" label="PowerPoint Type">
           {/* Single-Way PowerPoint */}
           <CustomTreeItem itemId="scenes-powerpoint-single" label="Single-Way PowerPoint">
-
             <CustomTreeItem
-              itemId="scenes-powerpoint-single-device-on"
+              itemId="scenes-powerpoint-single-on"
               label="<device_name> ON"
               copyText="<device_name> ON"
             />
             <CustomTreeItem
-              itemId="scenes-powerpoint-single-device-off"
+              itemId="scenes-powerpoint-single-off"
               label="<device_name> OFF"
               copyText="<device_name> OFF"
             />
-
           </CustomTreeItem>
 
           {/* Two-Way PowerPoint */}
           <CustomTreeItem itemId="scenes-powerpoint-two" label="Two-Way PowerPoint">
-
             <CustomTreeItem
-              itemId="scenes-powerpoint-two-device-on-on"
+              itemId="scenes-powerpoint-two-both-on"
               label="<device_name> ON ON"
               copyText="<device_name> ON ON"
             />
             <CustomTreeItem
-              itemId="scenes-powerpoint-two-device-on-off"
+              itemId="scenes-powerpoint-two-both-off"
+              label="<device_name> OFF OFF"
+              copyText="<device_name> OFF OFF"
+            />
+            <CustomTreeItem
+              itemId="scenes-powerpoint-two-left-on"
               label="<device_name> ON OFF"
               copyText="<device_name> ON OFF"
             />
             <CustomTreeItem
-              itemId="scenes-powerpoint-two-device-off-on"
+              itemId="scenes-powerpoint-two-right-on"
               label="<device_name> OFF ON"
               copyText="<device_name> OFF ON"
             />
             <CustomTreeItem
-              itemId="scenes-powerpoint-two-device-unselect"
-              label="<device_name> UNSELECT"
-              copyText="<device_name> UNSELECT"
+              itemId="scenes-powerpoint-two-left-unselect"
+              label="<device_name> UNSELECT ON"
+              copyText="<device_name> UNSELECT ON"
             />
-
+            <CustomTreeItem
+              itemId="scenes-powerpoint-two-right-unselect"
+              label="<device_name> ON UNSELECT"
+              copyText="<device_name> ON UNSELECT"
+            />
           </CustomTreeItem>
         </CustomTreeItem>
 
@@ -191,7 +203,7 @@ const ScenesTreeView = () => {
             />
             <CustomTreeItem
               itemId="scenes-drycontact-single-off"
-              label="<device_name> OFF"
+              label="<device_name> OFF    (Only for NORMAL devices)"
               copyText="<device_name> OFF"
             />
           </CustomTreeItem>
@@ -203,7 +215,7 @@ const ScenesTreeView = () => {
             />
             <CustomTreeItem
               itemId="scenes-drycontact-group-off"
-              label="<device_name>, <device_name> OFF"
+              label="<device_name>, <device_name> OFF    (Only for NORMAL devices)"
               copyText="<device_name>, <device_name> OFF"
             />
           </CustomTreeItem>

@@ -18,22 +18,23 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 const getLinkTypeString = (type) => {
     switch (type) {
-        case 1: return 'Device';
-        case 2: return 'Group';
-        case 3: return 'Room';
-        case 4: return 'Scene';
-        default: return 'Unknown';
+        case 1: return 'DEVICE';
+        case 2: return 'GROUP';
+        case 4: return 'SCENE';
+        default: return 'UNKNOWN';
     }
 };
 
+const TYPE_COLORS = {
+    DEVICE: '#fbcd0b',   // 设备 - 黄色
+    GROUP: '#009688',    // 组 - 绿色
+    SCENE: '#9C27B0',    // 场景 - 紫色
+    UNKNOWN: '#95A5A6'   // 未知 - 灰色
+};
+
 const getLinkTypeColor = (type) => {
-    switch (type) {
-        case 1: return '#fbcd0b';   
-        case 2: return '#009688';    // Group - 绿色
-        // case 3: return '#F5A623';    // Room - 橙色
-        case 4: return '#9C27B0';    // Scene - 紫色
-        default: return '#95A5A6';   // 默认 - 灰色
-    }
+    const typeString = getLinkTypeString(type);
+    return TYPE_COLORS[typeString] || TYPE_COLORS.UNKNOWN;
 };
 
 const RemoteControlTable = ({ remoteControls }) => {

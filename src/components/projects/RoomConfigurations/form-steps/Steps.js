@@ -51,8 +51,9 @@ const Steps = ({ projectRoomId, submitJson }) => {
 
   const handleStep4Validation = (isValid, data) => {
     if (isValid) {
-      setGroupData(data.groupData);
-      setRegisteredGroupNames(new Set(Object.keys(data.groupData)));
+      setGroupData(data.deviceNameToGroup);  // 保存组数据
+      setRegisteredGroupNames(data.registeredGroupNames);  // 保存注册的组名
+      // console.log("Registered group names:", data.registeredGroupNames); // 添加调试日志
     }
   };
 
@@ -179,8 +180,7 @@ const Steps = ({ projectRoomId, submitJson }) => {
       component: <Scenes 
         ref={scenesRef} 
         splitData={splitData} 
-        deviceNameToType={deviceData} 
-        registeredDeviceNames={registeredDeviceNames}
+        deviceNameToType={deviceData}
         registeredGroupNames={registeredGroupNames}
         dryContactSpecialActions={dryContactSpecialActions}
         onValidate={handleStep5Validation} 
@@ -210,6 +210,8 @@ const Steps = ({ projectRoomId, submitJson }) => {
         remoteControlData={remoteControlData}
         remoteParameterData={remoteParameterData}
         outputModuleData={outputModuleData}
+        registeredGroupNames={registeredGroupNames}
+        registeredSceneNames={registeredSceneNames}
         submitJson={submitJson}
         projectRoomId={projectRoomId}
       /> 
