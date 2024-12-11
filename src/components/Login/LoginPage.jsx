@@ -69,38 +69,26 @@ const LoginPage = () => {
           if (userDetailResponse.data && userDetailResponse.data.success) {
             const userDetails = userDetailResponse.data.data;
             
-            // 检查用户类型
-            if (userDetails.userType !== 0) {
-              // Project user - 允许登录
-              setToken(token, rememberMe);
-              saveUsername(loggedInUsername, rememberMe);
-              saveUserDetails(userDetails);
-              
-              // 设置 axios 默认 headers
-              axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            // 直接允许所有用户登录，移除用户类型检查
+            setToken(token, rememberMe);
+            saveUsername(loggedInUsername, rememberMe);
+            saveUserDetails(userDetails);
+            
+            // 设置 axios 默认 headers
+            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-              if (rememberMe) {
-                localStorage.setItem('rememberedUsername', username);
-                localStorage.setItem('rememberedPassword', password);
-              } else {
-                localStorage.removeItem('rememberedUsername');
-                localStorage.removeItem('rememberedPassword');
-              }
-
-              showAlert("Login successful! Redirecting...", "success");
-              setTimeout(() => {
-                navigate("/admin/projects");
-              }, 1000);
+            if (rememberMe) {
+              localStorage.setItem('rememberedUsername', username);
+              localStorage.setItem('rememberedPassword', password);
             } else {
-              // Normal user - 不允许登录
-              showAlert(
-                "This platform is currently only open to Project users. Normal user access is coming soon.\n\n" +
-                "If you previously registered as a project user on our website, please send your account details to jackliu@haneco.com.au for permission update.\n\n" +
-                "Thank you for your cooperation.",
-                "warning",
-                15000
-              );
+              localStorage.removeItem('rememberedUsername');
+              localStorage.removeItem('rememberedPassword');
             }
+
+            showAlert("Login successful! Redirecting...", "success");
+            setTimeout(() => {
+              navigate("/admin/dashboard");
+            }, 1000);
           }
         } catch (detailError) {
           console.error("Error fetching user details:", detailError);

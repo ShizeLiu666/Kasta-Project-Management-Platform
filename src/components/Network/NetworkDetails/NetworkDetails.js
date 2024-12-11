@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import NetworkMember from './NetworkMember';
+import DeviceList from './Devices/DeviceList';
 
 const NetworkDetails = ({ network }) => {
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -10,14 +11,6 @@ const NetworkDetails = ({ network }) => {
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
   };
-
-  // 临时的占位组件
-  const PlaceholderComponent = ({ title }) => (
-    <div>
-      <h3>{title}</h3>
-      <p>Coming soon...</p>
-    </div>
-  );
 
   return (
     <>
@@ -29,20 +22,20 @@ const NetworkDetails = ({ network }) => {
           scrollButtons="auto"
           TabIndicatorProps={{
             style: {
-              backgroundColor: '#fbcd0b'  // 修改底部指示器颜色
+              backgroundColor: '#fbcd0b'
             }
           }}
           sx={{
-            '& .MuiTab-root': {  // 修改所有 Tab 的样式
-              textTransform: 'none',  // 防止大写
+            '& .MuiTab-root': {
+              textTransform: 'none',
               '&:hover': {
-                backgroundColor: 'transparent'  // 移除悬停效果
+                backgroundColor: 'transparent'
               },
               '&.Mui-selected': {
-                color: '#fbcd0b'  // 选中时的文字颜色
+                color: '#fbcd0b'
               }
             },
-            '& .MuiTouchRipple-root': {  // 移除点击涟漪效果
+            '& .MuiTouchRipple-root': {
               display: 'none'
             }
           }}
@@ -59,12 +52,12 @@ const NetworkDetails = ({ network }) => {
 
       <Box sx={{ p: 2 }}>
         {selectedTab === 0 && <NetworkMember networkId={network.networkId} />}
-        {selectedTab === 1 && <PlaceholderComponent title="Devices" />}
-        {selectedTab === 2 && <PlaceholderComponent title="Groups" />}
-        {selectedTab === 3 && <PlaceholderComponent title="Room" />}
-        {selectedTab === 4 && <PlaceholderComponent title="Scene" />}
-        {selectedTab === 5 && <PlaceholderComponent title="Timer" />}
-        {selectedTab === 6 && <PlaceholderComponent title="Schedule" />}
+        {selectedTab === 1 && <DeviceList networkId={network.networkId} />}
+        {selectedTab === 2 && <div>Groups Coming Soon...</div>}
+        {selectedTab === 3 && <div>Rooms Coming Soon...</div>}
+        {selectedTab === 4 && <div>Scenes Coming Soon...</div>}
+        {selectedTab === 5 && <div>Timers Coming Soon...</div>}
+        {selectedTab === 6 && <div>Schedules Coming Soon...</div>}
       </Box>
     </>
   );
