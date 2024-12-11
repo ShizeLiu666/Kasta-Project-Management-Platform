@@ -96,11 +96,7 @@ const UserInfo = ({ userDetails }) => {
               />
             )}
           </div>
-          <h3 className="user-name" style={{
-            color: '#ffffff',
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-            fontWeight: 600
-          }}>
+          <h3 className="user-name">
             {userDetails.username}
           </h3>
           <p className="user-role">
