@@ -75,7 +75,6 @@ export const content = {
         letters: 'Letters (a-z, A-Z)',
         numbers: 'Numbers (0-9)',
         underscore: 'Underscore (_)',
-        hyphen: 'Hyphen (-)',
         spaces: 'Spaces',
         deviceTypes: {
           title: 'Must be defined in DEVICE section as:',
@@ -117,7 +116,6 @@ export const content = {
         letters: 'Letters (a-z, A-Z)',
         numbers: 'Numbers (0-9)',
         underscore: 'Underscore (_)',
-        hyphen: 'Hyphen (-)',
         spaces: 'Spaces',
         deviceTypes: {
           title: 'Must be defined in DEVICE section as:',
@@ -177,7 +175,6 @@ export const content = {
         letters: 'Letters (a-z, A-Z)',
         numbers: 'Numbers (0-9)',
         underscore: 'Underscore (_)',
-        hyphen: 'Hyphen (-)',
         spaces: 'Spaces',
         uniqueSceneName: 'Each scene name must be unique',
         namingRules: [
@@ -209,11 +206,11 @@ export const content = {
           fan: {
             title: 'Fan Type:',
             rules: [
-              'FAN_NAME ON RELAY ON [SPEED X] (Fan and light ON)',
-              'FAN_NAME ON RELAY OFF [SPEED X] (Only fan ON)',
-              'FAN_NAME OFF RELAY ON (Only light ON)',
+              'FAN_NAME ON RELAY ON [SPEED 0, 1, 2] (Fan and Light ON)',
+              'FAN_NAME ON RELAY OFF [SPEED 0, 1, 2] (Only Fan ON)',
+              'FAN_NAME OFF RELAY ON (Only Light ON)',
               'FAN_NAME OFF RELAY OFF (All OFF)',
-              'Note: X in SPEED X must be between 1-3'
+              'Note: SPEED value must be 0, 1, or 2'
             ]
           },
           curtain: {
@@ -491,7 +488,6 @@ export const content = {
         letters: '字母 (a-z, A-Z)',
         numbers: '数字 (0-9)',
         underscore: '下划线 (_)',
-        hyphen: '破折号 (-)',
         spaces: '空格',
         deviceTypes: {
           title: '必须在 DEVICE 部分定义为：',
@@ -533,7 +529,6 @@ export const content = {
         letters: '字母 (a-z, A-Z)',
         numbers: '数字 (0-9)',
         underscore: '下划线 (_)',
-        hyphen: '破折号 (-)',
         spaces: '空格',
         deviceTypes: {
           title: '必须在 DEVICE 部分定义为：',
@@ -625,11 +620,11 @@ export const content = {
           fan: {
             title: '风扇类型：',
             rules: [
-              'FAN_NAME ON RELAY ON [SPEED X] (风扇和灯开启)',
-              'FAN_NAME ON RELAY OFF [SPEED X] (仅风扇开启)',
+              'FAN_NAME ON RELAY ON [SPEED 0, 1, 2] (风扇和灯开启)',
+              'FAN_NAME ON RELAY OFF [SPEED 0, 1, 2] (仅风扇开启)',
               'FAN_NAME OFF RELAY ON (仅灯开启)',
               'FAN_NAME OFF RELAY OFF (全部关闭)',
-              '注意：SPEED X中的X必须在1-3之间'
+              '注意: SPEED 值必须是 0、1 或 2'
             ]
           },
           curtain: {

@@ -4,10 +4,12 @@ function handleFanType(parts) {
     const deviceName = parts[0];
     const status = parts[1] === "ON"; // 风扇开关状态：ON 为 true，OFF 为 false
     const relayStatus = parts[3] === "ON"; // 继电器开关状态：ON 为 true，OFF 为 false
-    let speed = status ? 1 : 0; // 默认速度：ON 为 1，OFF 为 0
+    let speed = 0; // 默认速度为 0
 
     if (parts.length > 5 && parts[4] === "SPEED") {
-        speed = parseInt(parts[5], 10); // 如果提供了速度，使用提供的速度值
+        const parsedSpeed = parseInt(parts[5], 10);
+        // 确保速度只能是 0、1、2
+        speed = [0, 1, 2].includes(parsedSpeed) ? parsedSpeed : 0;
     }
 
     return [sceneOutputTemplates["Fan Type"](deviceName, status, relayStatus, speed)];

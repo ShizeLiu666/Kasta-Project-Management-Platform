@@ -39,7 +39,13 @@ const formatDeviceSettings = (content) => {
       return `Level: ${content.statusConditions.level}`;
     }
     if (content.statusConditions.speed !== undefined) {
-      return `Speed: ${content.statusConditions.speed}, Relay: ${content.statusConditions.relay ? 'ON' : 'OFF'}`;
+      const speedMapping = {
+        0: 'LOW',
+        1: 'MEDIUM',
+        2: 'HIGH'
+      };
+      const speedText = speedMapping[content.statusConditions.speed] || 'LOW';
+      return `Speed: ${speedText}, Relay: ${content.statusConditions.relay ? 'ON' : 'OFF'}`;
     }
     if (content.statusConditions.position !== undefined) {
       return `Position: ${content.statusConditions.position}`;
