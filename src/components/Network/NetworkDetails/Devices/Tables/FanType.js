@@ -10,7 +10,7 @@ import {
   Box,
   Typography
 } from '@mui/material';
-import FanIcon from '@mui/icons-material/Air';
+import fanIcon from '../../../../../assets/icons/DeviceType/FAN.png';
 
 const FanType = ({ devices }) => {
   // Define columns for fan type devices
@@ -70,28 +70,33 @@ const FanType = ({ devices }) => {
           alignItems: 'center', 
           gap: 1,
           mb: 2,
-          pl: 2
+          pl: 0
         }}
       >
-        <FanIcon 
-          sx={{ 
-            color: 'primary.main',
-            fontSize: 24
-          }} 
+        <img 
+          src={fanIcon} 
+          alt="Fan"
+          style={{ 
+            width: 30,
+            height: 30,
+            objectFit: 'contain'
+          }}
         />
         <Typography 
           variant="h6" 
           sx={{ 
             fontWeight: 500,
-            color: '#fbcd0b'
+            color: '#fbcd0b',
+            mb: 0.5,
+            ml: 0.5
           }}
         >
-          Fan Type
+          Fan
         </Typography>
         <Typography 
           variant="body2" 
           sx={{ 
-            ml: 2,
+            ml: 0.5,
             color: 'text.secondary'
           }}
         >
