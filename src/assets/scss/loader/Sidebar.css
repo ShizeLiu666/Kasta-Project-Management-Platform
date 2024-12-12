@@ -1,13 +1,18 @@
 .sidebar-container {
-  position: relative;
-  transition: all 0.3s ease;
-  width: 100%;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  height: calc(100vh - 64px);
+  background: white;
+  z-index: 999;
+  width: inherit;
+  transition: top 0.2s ease-out;
 }
 
 .sidebar-collapse-button {
   position: absolute;
   right: -20px;
-  top: 23px;
+  top: 30px;
   background-color: #fff;
   border-radius: 50%;
   width: 40px;
