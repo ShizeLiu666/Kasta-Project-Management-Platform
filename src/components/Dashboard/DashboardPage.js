@@ -8,6 +8,7 @@ import kastaSolutionImage from '../../assets/images/CarouseItems/kasta_solution.
 import { getUserDetails } from '../auth';
 import UserInfo from './UserInfo';
 import './DashboardUserInfo.css';
+import ProductOverview from './ProductOverview';
 
 const DashboardPage = () => {
     const userDetails = getUserDetails();
@@ -125,15 +126,26 @@ const DashboardPage = () => {
                         </Row>
                         <Row className="mb-4">
                             <Col md="6">
-                                <div className="p-4 border rounded">
-                                    <h5>Networks Status</h5>
-                                    {/* <p className="text-muted">Your Network Statistics</p> */}
+                                <div style={{ 
+                                    height: '500px', 
+                                    overflow: 'auto',
+                                    backgroundColor: '#fff',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
+                                }}>
+                                    <ProductOverview />
                                 </div>
                             </Col>
                             <Col md="6">
-                                <div className="p-4 border rounded">
+                                <div style={{ 
+                                    height: '500px',
+                                    backgroundColor: '#fff',
+                                    borderRadius: '12px',
+                                    padding: '20px',
+                                    boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
+                                }}>
                                     <h5>Projects Overview</h5>
-                                    {/* <p className="text-muted">Your Project Statistics</p> */}
+                                    {/* 项目概览内容 */}
                                 </div>
                             </Col>
                         </Row>
