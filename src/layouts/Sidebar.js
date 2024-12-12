@@ -9,20 +9,34 @@ import MenuIcon from '@mui/icons-material/KeyboardArrowLeftTwoTone';
 
 const navigation = [
   {
-    title: "Projects",
-    href: "/admin/projects",
-    icon: 'bi-folder2-open',
+    title: "Dashboard",
+    href: "/admin/dashboard",
+    icon: 'bi-bar-chart-line',
+    allowedUserTypes: [99999, 1, 0],
   },
   {
-    title: "Profile",
-    href: "/admin/profile",
-    icon: 'bi-person-circle',
+    title: "Project",
+    href: "/admin/project",
+    icon: 'bi-folder2-open',
+    allowedUserTypes: [99999, 1],
+  },
+  {
+    title: "Network",
+    href: "/admin/network",
+    icon: 'bi-house-door',
+    allowedUserTypes: [99999, 1, 0],
   },
   {
     title: "AuthCode",
     href: "/admin/auth-code-management",
     icon: 'bi-key',
-    superUserOnly: true,
+    allowedUserTypes: [99999],
+  },
+  {
+    title: "Profile",
+    href: "/admin/profile",
+    icon: 'bi-person-circle',
+    allowedUserTypes: [99999, 1, 0],
   },
   // {
   //   title: "Testing",

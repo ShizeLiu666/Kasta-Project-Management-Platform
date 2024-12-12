@@ -10,7 +10,7 @@ import {
   Box,
   Typography
 } from '@mui/material';
-import fanIcon from '../../../../../assets/icons/DeviceType/FAN.png';
+import fanIcon from '../../../../../../assets/icons/DeviceType/FAN.png';
 
 const FanType = ({ devices }) => {
   // Define columns for fan type devices
