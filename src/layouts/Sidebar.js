@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Nav, NavItem } from "reactstrap";
 import { Link, useLocation } from "react-router-dom";
 import '../assets/scss/loader/Sidebar.css'
@@ -33,33 +33,6 @@ const navigation = [
 
 const Sidebar = ({ userType, toggleSidebar, isCollapsed }) => {
   let location = useLocation();
-
-  useEffect(() => {
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const sidebarContainer = document.querySelector('.sidebar-container');
-          if (sidebarContainer) {
-            if (window.scrollY >= 10) {
-              sidebarContainer.style.top = '0';
-            } else {
-              sidebarContainer.style.top = '64px';
-            }
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   return (
     <div className="sidebar-container">
