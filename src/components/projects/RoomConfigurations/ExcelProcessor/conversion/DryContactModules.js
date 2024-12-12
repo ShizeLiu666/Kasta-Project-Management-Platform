@@ -8,7 +8,7 @@ const PULSE_MAPPING = {
     '1SEC': 1,
     '6SEC': 2,
     '9SEC': 3,
-    'REVERS': 4
+    'REVERSE': 4
 };
 
 export function processDryContactModules(dryContactsContent) {

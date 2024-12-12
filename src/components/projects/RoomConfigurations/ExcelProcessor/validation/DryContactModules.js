@@ -1,5 +1,5 @@
 // 定义常量
-const VALID_ACTIONS = ['NORMAL', '1SEC', '6SEC', '9SEC', 'REVERS'];
+const VALID_ACTIONS = ['NORMAL', '1SEC', '6SEC', '9SEC', 'REVERSE'];
 
 // 检查名称前缀
 function checkNamePrefix(line, errors) {

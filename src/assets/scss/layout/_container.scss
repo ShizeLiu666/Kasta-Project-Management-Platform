@@ -4,10 +4,12 @@
 .contentArea {
   flex-grow: 1;
   max-width: 1700px;
-  // min-width: 1200px;
   margin: 0 auto;
-  // width: 100%;
-  // overflow-x: hidden;
+  padding-top: 64px;
+  // margin-left: 230px;
+}
+.contentArea.collapsed {
+  margin-left: 70px;
 }
 .card {
   box-shadow: $card-box-shadow;

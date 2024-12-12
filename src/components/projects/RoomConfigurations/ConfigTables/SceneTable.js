@@ -18,7 +18,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 const formatDeviceSettings = (content) => {
   if (content.deviceType && content.deviceType.includes("PowerPoint Type")) {
     if (content.deviceType.includes("Single-Way")) {
-      const statusText = content.statusConditions.status === 2 ? 'ON' : 'OFF';
+      const statusText = content.status ? 'ON' : 'OFF';
       return `Status: ${statusText}`;
     } else {
       const mapStatusToText = (status) => {
@@ -30,7 +30,7 @@ const formatDeviceSettings = (content) => {
         }
       };
       
-      return `Left: ${mapStatusToText(content.statusConditions.leftStatus)}, Right: ${mapStatusToText(content.statusConditions.rightStatus)}`;
+      return `Status: ${content.status ? 'ON' : 'OFF'}, Left: ${mapStatusToText(content.statusConditions.leftStatus)}, Right: ${mapStatusToText(content.statusConditions.rightStatus)}`;
     }
   }
 
@@ -45,7 +45,7 @@ const formatDeviceSettings = (content) => {
         2: 'HIGH'
       };
       const speedText = speedMapping[content.statusConditions.speed] || 'LOW';
-      return `Speed: ${speedText}, Relay: ${content.statusConditions.relay ? 'ON' : 'OFF'}`;
+      return `Fan: ${content.status ? 'ON' : 'OFF'}, Speed: ${speedText}, Relay: ${content.statusConditions.relay ? 'ON' : 'OFF'}`;
     }
     if (content.statusConditions.position !== undefined) {
       return `Position: ${content.statusConditions.position}`;

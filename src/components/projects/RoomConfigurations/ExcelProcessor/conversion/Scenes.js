@@ -110,11 +110,22 @@ function handlePowerPointType(parts, deviceType) {
     const deviceNames = parts.slice(0, operationIndex);   // 设备名称部分
     const operations = parts.slice(operationIndex);      // 操作指令部分
 
+    // 状态映射函数
+    const mapStatus = (status) => {
+        switch (status) {
+            case "ON": return 2;
+            case "OFF": return 1;
+            case "UNSELECT": return 0;
+            default: return 1; // 默认为 OFF 状态
+        }
+    };
+
     // 处理单路和双路的情况
     if (deviceType.includes("Single-Way")) {
         deviceNames.forEach(deviceName => {
             contents.push({
                 name: deviceName.trim().replace(",", ""),
+                status: operations[0].toUpperCase() === "ON",  // 布尔值
                 deviceType: "PowerPoint Type (Single-Way)",
                 statusConditions: {
                     status: operations[0].toUpperCase() === "ON" ? 2 : 1
@@ -131,18 +142,12 @@ function handlePowerPointType(parts, deviceType) {
                 return;
             }
 
-            // 状态映射函数
-            const mapStatus = (status) => {
-                switch (status) {
-                    case "ON": return 2;
-                    case "OFF": return 1;
-                    case "UNSELECT": return 0;
-                    default: return 1; // 默认为 OFF 状态
-                }
-            };
+            // 计算整体状态：只要有一路为 ON，整体 status 就为 true
+            const overallStatus = leftStatus === "ON" || rightStatus === "ON";
 
             contents.push({
                 name: deviceName.trim().replace(",", ""),
+                status: overallStatus,  // 布尔值，与 name 平级
                 deviceType: "PowerPoint Type (Two-Way)",
                 statusConditions: {
                     leftStatus: mapStatus(leftStatus),

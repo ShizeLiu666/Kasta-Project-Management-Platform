@@ -1,5 +1,5 @@
 // 定义常量
-const VALID_ACTIONS = ['NORMAL', '1SEC', '6SEC', '9SEC', 'REVERS'];
+const VALID_ACTIONS = ['NORMAL', '1SEC', '6SEC', '9SEC', 'REVERSE'];
 const MAX_CHANNELS = 4;
 
 // 检查名称前缀
