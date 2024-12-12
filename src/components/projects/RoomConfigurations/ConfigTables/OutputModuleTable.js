@@ -20,7 +20,7 @@ const PULSE_MAPPING = {
   1: '1SEC',
   2: '6SEC',
   3: '9SEC',
-  4: 'REVERS'
+  4: 'REVERSE'
 };
 
 const OutputModuleTable = ({ outputs }) => {
