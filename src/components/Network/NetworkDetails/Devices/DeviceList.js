@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { axiosInstance, getToken } from '../../../auth';
+import { Box } from '@mui/material';
 
 // 产品类型映射表
 const PRODUCT_TYPE_MAP = {
@@ -74,7 +75,11 @@ const DeviceList = ({ networkId }) => {
   const renderDeviceTable = (productType, devices) => {
     try {
       const DeviceComponent = require(`./Tables/${productType}/${devices[0].deviceType}`).default;
-      return <DeviceComponent key={productType} devices={devices} />;
+      return (
+        <Box sx={{ mb: 3 }}>
+          <DeviceComponent key={productType} devices={devices} />
+        </Box>
+      );
     } catch (error) {
       console.error(`Failed to load component for ${productType}/${devices[0].deviceType}`, error);
       return null;
