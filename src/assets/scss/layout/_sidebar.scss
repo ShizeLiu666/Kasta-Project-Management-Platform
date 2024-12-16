@@ -1,4 +1,4 @@
-$sidebarWidth: 230px; // Adjust this value to your desired width
+$sidebarWidth: 180px; // Adjust this value to your desired width
 
 .sidebarArea {
   flex-shrink: 0;
@@ -43,7 +43,7 @@ $sidebarWidth: 230px; // Adjust this value to your desired width
     top: 0;
     left: 0;
     z-index: 1050;
-    width: 200px;
+    width: 180px;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
     
