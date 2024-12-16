@@ -4,10 +4,11 @@ import { Box } from '@mui/material';
 
 // 产品类型映射表
 const PRODUCT_TYPE_MAP = {
-  'tb7prezu': 'FAN',           // FAN
-  'clniiasn': 'RGB_CW',        // RGB_CW
-  'myfiewpc': 'CCT_DOWNLIGHT', // CCT_DOWNLIGHT
-  '5atdh35u': 'DIMMER'         // DIMMER
+  'tb7prezu': 'FAN',           
+  'clniiasn': 'RGB_CW',        
+  'myfiewpc': 'CCT_DOWNLIGHT', 
+  '5atdh35u': 'DIMMER',        
+  'k8tngzhj': 'SOCKET_RELAY'
 };
 
 const DeviceList = ({ networkId }) => {

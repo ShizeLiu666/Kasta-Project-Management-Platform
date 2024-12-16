@@ -1,3 +1,4 @@
+// src/components/Network/NetworkDetails/Devices/Tables/BasicTable.js
 import React from 'react';
 import {
     Table,
@@ -10,69 +11,68 @@ import {
     Box,
     Typography
 } from '@mui/material';
-import cctDownlightIcon from '../../../../../../assets/icons/DeviceType/CCT_DOWNLIGHT.png';
 
-const CCT_DOWNLIGHTType = ({ devices }) => {
-    const columns = [
+const BasicTable = ({
+    // 基础配置
+    title,                    // 表格标题
+    icon,                     // 表格图标
+    devices,                  // 设备数据
+    columns,                  // 列配置
+
+    // 样式配置(可选)
+    nameColumnWidth = '30%',  // 名称列宽度
+    headerBgColor = '#f8f9fa',
+    borderColor = '#dee2e6',
+    titleColor = '#fbcd0b'
+}) => {
+    // 1. 计算其他列的默认宽度
+    const remainingWidth = (100 - parseInt(nameColumnWidth)) / (columns.length - 1);
+
+    // 2. 处理列配置
+    const processedColumns = [
         {
             id: 'name',
             label: 'Device',
-            width: '40%'
+            width: nameColumnWidth
         },
-        {
-            id: 'level',
-            label: 'Level',
-            width: '30%',
-            format: (value) => {
-                if (value === undefined || value === null) return '-';
-                return `${value}%`;
-            }
-        },
-        {
-            id: 'colorTemperature',
-            label: 'Color Temp',
-            width: '30%',
-            format: (value) => {
-                if (value === undefined || value === null) return '-';
-                return `${value}K`;
-            }
-        }
+        ...columns.map(col => ({
+            ...col,
+            width: col.width || `${remainingWidth}%`
+        }))
     ];
 
     return (
         <Box>
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    mb: 2,
-                    pl: 0
-                }}
-            >
-                {/* 图标 */}
-                <img
-                    src={cctDownlightIcon}
-                    alt="CCT Downlight"
-                    style={{
-                        width: 30,
-                        height: 30,
-                        objectFit: 'contain'
-                    }}
-                />
-                {/* 主标题 */}
+            {/* 3. 标题区域 */}
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                mb: 2,
+                pl: 0
+            }}>
+                {icon && (
+                    <img
+                        src={icon}
+                        alt={title}
+                        style={{
+                            width: 30,
+                            height: 30,
+                            objectFit: 'contain'
+                        }}
+                    />
+                )}
                 <Typography
                     variant="h6"
                     sx={{
                         fontWeight: 500,
-                        color: '#fbcd0b',
+                        color: titleColor,
                         mb: 0.5,
                         ml: 0.5
                     }}
                 >
-                    CCT Downlight
+                    {title}
                 </Typography>
-                {/* 设备数 */}
                 <Typography
                     variant="body2"
                     sx={{
@@ -83,12 +83,13 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
                     ({devices.length} {devices.length === 1 ? 'device' : 'devices'})
                 </Typography>
             </Box>
-            {/* 最外层容器 */}
+
+            {/* 4. 表格区域 */}
             <TableContainer
                 component={Paper}
                 sx={{
                     boxShadow: 'none',
-                    border: '1px solid #dee2e6',
+                    border: `1px solid ${borderColor}`,
                     borderRadius: '8px',
                     width: '100%',
                     '& .MuiTable-root': {
@@ -98,18 +99,17 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
                 }}
             >
                 <Table>
-                    {/* 表头部分 */}
+                    {/* 5. 表头 */}
                     <TableHead>
                         <TableRow>
-                            {columns.map(column => (
+                            {processedColumns.map(column => (
                                 <TableCell
                                     key={column.id}
-                                    align="left"
                                     sx={{
                                         width: column.width,
                                         fontWeight: 'bold',
                                         whiteSpace: 'nowrap',
-                                        backgroundColor: '#f8f9fa'
+                                        backgroundColor: headerBgColor
                                     }}
                                 >
                                     {column.label}
@@ -117,17 +117,18 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
                             ))}
                         </TableRow>
                     </TableHead>
-                    {/* 表格主体 */}
+
+                    {/* 6. 表格主体 */}
                     <TableBody>
                         {devices.map((device) => (
                             <TableRow
                                 key={device.deviceId}
                                 sx={{
                                     '&:last-child td, &:last-child th': { border: 0 },
-                                    '&:hover': { backgroundColor: '#f8f9fa' }
+                                    '&:hover': { backgroundColor: headerBgColor }
                                 }}
                             >
-                                {columns.map(column => {
+                                {processedColumns.map(column => {
                                     if (column.id === 'name') {
                                         return (
                                             <TableCell key={column.id} sx={{ width: column.width }}>
@@ -147,7 +148,7 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
                                                                 whiteSpace: 'nowrap'
                                                             }}
                                                         >
-                                                            {device.name} {/* 设备名 */}
+                                                            {device.name}
                                                         </Typography>
                                                         <Typography
                                                             variant="body2"
@@ -158,7 +159,7 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
                                                                 whiteSpace: 'nowrap'
                                                             }}
                                                         >
-                                                            {device.appearanceShortname} {/* 设备别名 */}
+                                                            {device.appearanceShortname}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -185,4 +186,4 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
     );
 };
 
-export default CCT_DOWNLIGHTType;
+export default BasicTable;
