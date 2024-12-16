@@ -125,7 +125,7 @@ function handlePowerPointType(parts, deviceType) {
         deviceNames.forEach(deviceName => {
             contents.push({
                 name: deviceName.trim().replace(",", ""),
-                status: operations[0].toUpperCase() === "ON",  // 布尔值
+                status: true, // operations[0].toUpperCase() === "ON",  // 布尔值
                 deviceType: "PowerPoint Type (Single-Way)",
                 statusConditions: {
                     status: operations[0].toUpperCase() === "ON" ? 2 : 1
