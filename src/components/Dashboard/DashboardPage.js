@@ -144,7 +144,7 @@ const DashboardPage = () => {
                                     padding: '20px',
                                     boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
                                 }}>
-                                    <h5>Projects Overview</h5>
+                                    <h5>Network Overview</h5>
                                     {/* 项目概览内容 */}
                                 </div>
                             </Col>

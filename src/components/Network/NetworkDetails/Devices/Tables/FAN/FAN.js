@@ -15,14 +15,14 @@ import fanIcon from '../../../../../../assets/icons/DeviceType/FAN.png';
 const FanType = ({ devices }) => {
   // Define columns for fan type devices
   const columns = [
-    { 
-      id: 'name', 
-      label: 'Device', 
-      width: '30%' 
+    {
+      id: 'name',
+      label: 'Device',
+      width: '30%'
     },
-    { 
-      id: 'isHaveFanLight', 
-      label: 'Has Light', 
+    {
+      id: 'isHaveFanLight',
+      label: 'Has Light',
       width: '17.5%',
       format: (value) => {
         if (value === 1) return 'Yes';
@@ -30,9 +30,9 @@ const FanType = ({ devices }) => {
         return '-';
       }
     },
-    { 
-      id: 'fanLightState', 
-      label: 'Light Status', 
+    {
+      id: 'fanLightState',
+      label: 'Light Status',
       width: '17.5%',
       format: (value) => {
         if (value === 1) return 'On';
@@ -40,9 +40,9 @@ const FanType = ({ devices }) => {
         return '-';
       }
     },
-    { 
-      id: 'fanState', 
-      label: 'Fan Status', 
+    {
+      id: 'fanState',
+      label: 'Fan Status',
       width: '17.5%',
       format: (value) => {
         if (value === 1) return 'On';
@@ -50,9 +50,9 @@ const FanType = ({ devices }) => {
         return '-';
       }
     },
-    { 
-      id: 'isConfigFanLight', 
-      label: 'Light Configured', 
+    {
+      id: 'isConfigFanLight',
+      label: 'Light Configured',
       width: '17.5%',
       format: (value) => {
         if (value === 1) return 'Yes';
@@ -64,27 +64,27 @@ const FanType = ({ devices }) => {
 
   return (
     <Box>
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
           gap: 1,
           mb: 2,
           pl: 0
         }}
       >
-        <img 
-          src={fanIcon} 
+        <img
+          src={fanIcon}
           alt="Fan"
-          style={{ 
+          style={{
             width: 30,
             height: 30,
             objectFit: 'contain'
           }}
         />
-        <Typography 
-          variant="h6" 
-          sx={{ 
+        <Typography
+          variant="h6"
+          sx={{
             fontWeight: 500,
             color: '#fbcd0b',
             mb: 0.5,
@@ -93,9 +93,9 @@ const FanType = ({ devices }) => {
         >
           Fan
         </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
+        <Typography
+          variant="body2"
+          sx={{
             ml: 0.5,
             color: 'text.secondary'
           }}
@@ -104,9 +104,9 @@ const FanType = ({ devices }) => {
         </Typography>
       </Box>
 
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
+      <TableContainer
+        component={Paper}
+        sx={{
           boxShadow: 'none',
           border: '1px solid #dee2e6',
           borderRadius: '8px',
@@ -121,9 +121,10 @@ const FanType = ({ devices }) => {
           <TableHead>
             <TableRow>
               {columns.map(column => (
-                <TableCell 
+                <TableCell
+                  align="left"
                   key={column.id}
-                  sx={{ 
+                  sx={{
                     width: column.width,
                     fontWeight: 'bold',
                     whiteSpace: 'nowrap',
@@ -148,16 +149,16 @@ const FanType = ({ devices }) => {
                   if (column.id === 'name') {
                     return (
                       <TableCell key={column.id} sx={{ width: column.width }}>
-                        <Box sx={{ 
-                          display: 'flex', 
+                        <Box sx={{
+                          display: 'flex',
                           alignItems: 'center',
                           overflow: 'hidden',
                           maxWidth: '100%'
                         }}>
                           <Box sx={{ minWidth: 0, flex: 1 }}>
-                            <Typography 
-                              variant="subtitle2" 
-                              sx={{ 
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
                                 fontWeight: 600,
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
@@ -166,8 +167,8 @@ const FanType = ({ devices }) => {
                             >
                               {device.name}
                             </Typography>
-                            <Typography 
-                              variant="body2" 
+                            <Typography
+                              variant="body2"
                               color="text.secondary"
                               sx={{
                                 overflow: 'hidden',
@@ -182,12 +183,12 @@ const FanType = ({ devices }) => {
                       </TableCell>
                     );
                   }
-                  
+
                   return (
-                    <TableCell key={column.id} align="center">
+                    <TableCell key={column.id} align="left">
                       <Typography variant="body2">
-                        {column.format ? 
-                          column.format(device.specificAttributes[column.id]) : 
+                        {column.format ?
+                          column.format(device.specificAttributes[column.id]) :
                           device.specificAttributes[column.id]}
                       </Typography>
                     </TableCell>

@@ -86,9 +86,12 @@ const DeviceList = ({ networkId }) => {
     }
   };
 
+  const sortedProductTypes = Object.entries(devicesByProductType)
+    .sort(([typeA], [typeB]) => typeA.localeCompare(typeB));
+
   return (
     <>
-      {Object.entries(devicesByProductType).map(([productType, devices]) => (
+      {sortedProductTypes.map(([productType, devices]) => (
         renderDeviceTable(productType, devices)
       ))}
     </>

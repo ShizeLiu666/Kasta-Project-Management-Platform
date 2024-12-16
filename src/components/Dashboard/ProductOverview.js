@@ -98,15 +98,19 @@ const ProductOverview = () => {
               </Typography>
               <Grid container spacing={1}>
                 {devices.map((device) => (
-                  <Grid item xs={12} key={device.id}>
+                  <Grid item xs={11.8} key={device.id}>
                     <Card 
                       sx={{ 
-                        borderRadius: '8px',
+                        // borderRadius: '8px',
+                        boxShadow: 'none',
                         transition: 'transform 0.2s, box-shadow 0.2s',
                         '&:hover': {
                           transform: 'translateY(-2px)',
                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                        }
+                        },
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        borderColor: '#dee2e6',
                       }}
                     >
                       <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
@@ -115,7 +119,7 @@ const ProductOverview = () => {
                             label={device.typeCode}
                             size="small"
                             sx={{ 
-                              backgroundColor: 'rgba(251, 205, 11, 0.1)',
+                              backgroundColor: '95a5a6',
                               color: '#2c3e50',
                               fontWeight: 500,
                               fontSize: '0.75rem'
