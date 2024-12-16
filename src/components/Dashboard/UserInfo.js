@@ -71,14 +71,16 @@ const UserInfo = ({ userDetails }) => {
 
   return (
     <div 
-      className="user-info-card" 
       style={{ 
         height: '500px',
-        position: 'relative'
+        position: 'relative',
+        overflow: 'auto',
+        backgroundColor: '#f5f5f5',
+        borderRadius: '12px',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+        padding: '20px'
       }}
     >
-      <div className="overlay"></div>
-      
       <div className="user-info-content">
         <div className="user-info-header">
           <div className="avatar-wrapper-dashboard">

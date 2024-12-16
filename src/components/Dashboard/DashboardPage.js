@@ -48,7 +48,12 @@ const DashboardPage = () => {
                     <ComponentCard title="" showTitle={false}>
                         <Row className="mb-4">
                             <Col md="9">
-                                <div>
+                                <div style={{ 
+                                    height: '500px',
+                                    overflow: 'auto',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
+                                }}>
                                     <Carousel
                                         animation="fade"
                                         interval={20000}
