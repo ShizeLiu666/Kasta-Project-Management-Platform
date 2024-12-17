@@ -4,6 +4,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import NetworkMember from './NetworkMember';
 import DeviceList from './Devices/DeviceList';
+import GroupList from './Groups/GroupList';
 
 const NetworkDetails = ({ network }) => {
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -53,7 +54,7 @@ const NetworkDetails = ({ network }) => {
       <Box sx={{ p: 2 }}>
         {selectedTab === 0 && <NetworkMember networkId={network.networkId} />}
         {selectedTab === 1 && <DeviceList networkId={network.networkId} />}
-        {selectedTab === 2 && <div>Groups Coming Soon...</div>}
+        {selectedTab === 2 && <GroupList networkId={network.networkId} />}
         {selectedTab === 3 && <div>Rooms Coming Soon...</div>}
         {selectedTab === 4 && <div>Scenes Coming Soon...</div>}
         {selectedTab === 5 && <div>Timers Coming Soon...</div>}

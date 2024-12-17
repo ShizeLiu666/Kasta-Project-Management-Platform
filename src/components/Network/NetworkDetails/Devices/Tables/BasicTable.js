@@ -149,6 +149,17 @@ const BasicTable = ({
                                                             }}
                                                         >
                                                             {device.name}
+                                                            <Typography
+                                                                component="span"
+                                                                variant="body2"
+                                                                sx={{
+                                                                    color: '#95a5a6',
+                                                                    ml: 0.5,
+                                                                    fontWeight: 400
+                                                                }}
+                                                            >
+                                                                - {device.deviceId}
+                                                            </Typography>
                                                         </Typography>
                                                         <Typography
                                                             variant="body2"

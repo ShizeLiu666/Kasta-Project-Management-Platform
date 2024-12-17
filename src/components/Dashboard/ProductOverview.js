@@ -243,16 +243,14 @@ const ProductOverview = () => {
           >
             <ToggleButton
               value="all"
-              sx={{
+              disableRipple
+              sx={{ 
                 textTransform: 'none',
-                transition: 'none', // 禁用所有过渡动画
                 '&.Mui-selected': {
                   backgroundColor: '#fbcd0b',
                   color: '#2c3e50',
-                  transition: 'none', // 禁用选中状态的过渡动���
                   '&:hover': {
                     backgroundColor: '#fbcd0b',
-                    transition: 'none' // 禁用悬停状态的过渡动画
                   }
                 }
               }}
@@ -261,21 +259,19 @@ const ProductOverview = () => {
             </ToggleButton>
             <ToggleButton
               value="supported"
-              sx={{
+              disableRipple
+              sx={{ 
                 textTransform: 'none',
-                transition: 'none', // 禁用所有过渡动画
                 '&.Mui-selected': {
                   backgroundColor: '#fbcd0b',
                   color: '#2c3e50',
-                  transition: 'none', // 禁用选中状态的过渡动画
                   '&:hover': {
                     backgroundColor: '#fbcd0b',
-                    transition: 'none' // 禁用悬停状态的过渡动画
                   }
                 }
               }}
             >
-              Supported Types
+              Project Supported Types
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>

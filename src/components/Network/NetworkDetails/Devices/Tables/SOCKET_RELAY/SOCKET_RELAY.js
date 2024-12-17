@@ -26,7 +26,7 @@ const SOCKET_RELAYType = ({ devices }) => {
       id: 'socketErrors',
       label: 'Errors',
       format: (value) => {
-        if (!value) return 'None';
+        if (!value) return '-';
         return value;
       }
     }
