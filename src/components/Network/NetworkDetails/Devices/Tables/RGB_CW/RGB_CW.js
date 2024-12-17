@@ -5,12 +5,21 @@ import BasicTable from '../BasicTable';
 
 const RGB_CWType = ({ devices }) => {
   const columns = [
+    {
+      id: 'power',
+      label: 'Power',
+      format: (value) => {
+        if (value === 1) return 'On';
+        if (value === 0) return 'Off';
+        return '-';
+      }
+    },
     { 
       id: 'level', 
       label: 'Brightness',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}%`;
+        return `${Math.round((value / 255) * 100)}%`;
       }
     },
     { 
@@ -49,8 +58,13 @@ const RGB_CWType = ({ devices }) => {
       id: 'blinkSpeed', 
       label: 'Blink Speed',
       format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return value;
+        switch (value) {
+          case -1: return 'None';
+          case 0: return 'Slow';
+          case 1: return 'Medium';
+          case 2: return 'Fast';
+          default: return '-';
+        }
       }
     }
   ];

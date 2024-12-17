@@ -6,11 +6,20 @@ import dimmerIcon from '../../../../../../assets/icons/DeviceType/DIMMER.png';
 const DimmerType = ({ devices }) => {
   const columns = [
     {
+      id: 'power',
+      label: 'Power',
+      format: (value) => {
+        if (value === 1) return 'On';
+        if (value === 0) return 'Off';
+        return '-';
+      }
+    },
+    {
       id: 'level',
       label: 'Dimming Level',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}%`;
+        return `${Math.round((value / 255) * 100)}%`;
       }
     }
   ];
@@ -21,7 +30,7 @@ const DimmerType = ({ devices }) => {
       icon={dimmerIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="50%"  // 只有一列额外数据，所以name列可以占50%
+      nameColumnWidth="40%"
     />
   );
 };

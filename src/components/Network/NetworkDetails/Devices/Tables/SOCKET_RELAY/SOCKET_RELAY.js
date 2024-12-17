@@ -19,14 +19,36 @@ const SOCKET_RELAYType = ({ devices }) => {
       label: 'Delay',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}s`;
+        return `${value}min`;
       }
     },
     {
-      id: 'socketErrors',
-      label: 'Errors',
+      id: 'errorType',
+      label: 'Error Type',
       format: (value) => {
-        if (!value) return '-';
+        switch (value) {
+          case 0: return 'Low Energy';
+          case 1: return 'Threshold Warning';
+          case 0x50: return 'Config Error';
+          case 0x51: return 'Alert Enabled';
+          case 0x52: return 'Alert Disabled';
+          default: return '-';
+        }
+      }
+    },
+    {
+      id: 'value',
+      label: 'Error Value',
+      format: (value) => {
+        if (value === undefined || value === null) return '-';
+        return value;
+      }
+    },
+    {
+      id: 'channel',
+      label: 'Channel',
+      format: (value) => {
+        if (value === undefined || value === null) return '-';
         return value;
       }
     }

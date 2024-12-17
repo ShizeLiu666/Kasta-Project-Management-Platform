@@ -6,11 +6,20 @@ import cctDownlightIcon from '../../../../../../assets/icons/DeviceType/CCT_DOWN
 const CCT_DOWNLIGHTType = ({ devices }) => {
   const columns = [
     {
+      id: 'power',
+      label: 'Power',
+      format: (value) => {
+        if (value === 1) return 'On';
+        if (value === 0) return 'Off';
+        return '-';
+      }
+    },
+    {
       id: 'level',
-      label: 'Level',
+      label: 'Brightness',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}%`;
+        return `${Math.round((value / 255) * 100)}%`;
       }
     },
     {

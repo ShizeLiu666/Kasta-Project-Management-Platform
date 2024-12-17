@@ -18,13 +18,13 @@ const THERMOSTATType = ({ devices }) => {
       id: 'mode',
       label: 'Mode',
       format: (value) => {
-        const modes = {
-          0: 'Auto',
-          1: 'Cool',
-          2: 'Heat',
-          3: 'Fan'
-        };
-        return modes[value] || '-';
+        switch (value) {
+          case 0: return 'Auto';
+          case 1: return 'Cool';
+          case 2: return 'Heat';
+          case 3: return 'Fan';
+          default: return '-';
+        }
       }
     },
     {
@@ -47,13 +47,13 @@ const THERMOSTATType = ({ devices }) => {
       id: 'fanSpeed',
       label: 'Fan Speed',
       format: (value) => {
-        const speeds = {
-          0: 'Auto',
-          1: 'Low',
-          2: 'Medium',
-          3: 'High'
-        };
-        return speeds[value] || '-';
+        switch (value) {
+          case 0: return 'Auto';
+          case 1: return 'Slow';
+          case 2: return 'Medium';
+          case 3: return 'Fast';
+          default: return '-';
+        }
       }
     }
   ];

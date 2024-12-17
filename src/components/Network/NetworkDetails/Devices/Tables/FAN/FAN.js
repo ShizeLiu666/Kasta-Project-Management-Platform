@@ -27,9 +27,13 @@ const FanType = ({ devices }) => {
       id: 'fanState',
       label: 'Fan Status',
       format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
+        switch (value) {
+          case 0: return 'Off';
+          case 1: return 'Slow';
+          case 2: return 'Medium';
+          case 3: return 'Fast';
+          default: return '-';
+        }
       }
     },
     {

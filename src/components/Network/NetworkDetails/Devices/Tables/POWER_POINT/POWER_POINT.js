@@ -15,6 +15,11 @@ const POWER_POINTType = ({ devices }) => {
       }
     },
     {
+      id: 'leftName',
+      label: 'Left Name',
+      format: (value) => value || '-'
+    },
+    {
       id: 'leftPower',
       label: 'Left Power',
       format: (value) => {
@@ -22,6 +27,11 @@ const POWER_POINTType = ({ devices }) => {
         if (value === 0) return 'Off';
         return '-';
       }
+    },
+    {
+      id: 'rightName',
+      label: 'Right Name',
+      format: (value) => value || '-'
     },
     {
       id: 'rightPower',
@@ -55,7 +65,7 @@ const POWER_POINTType = ({ devices }) => {
       label: 'Left Delay',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}s`;
+        return `${value}min`;
       }
     },
     {
@@ -63,7 +73,7 @@ const POWER_POINTType = ({ devices }) => {
       label: 'Right Delay',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}s`;
+        return `${value}min`;
       }
     },
     {
