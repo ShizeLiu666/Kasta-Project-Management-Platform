@@ -123,12 +123,13 @@ function handlePowerPointType(parts, deviceType) {
     // 处理单路和双路的情况
     if (deviceType.includes("Single-Way")) {
         deviceNames.forEach(deviceName => {
+            const statusValue = operations[0].toUpperCase() === "ON" ? 2 : 1;
             contents.push({
                 name: deviceName.trim().replace(",", ""),
-                status: true, // operations[0].toUpperCase() === "ON",  // 布尔值
+                status: statusValue === 2,
                 deviceType: "PowerPoint Type (Single-Way)",
                 statusConditions: {
-                    status: operations[0].toUpperCase() === "ON" ? 2 : 1
+                    status: statusValue
                 }
             });
         });
@@ -147,7 +148,7 @@ function handlePowerPointType(parts, deviceType) {
 
             contents.push({
                 name: deviceName.trim().replace(",", ""),
-                status: overallStatus,  // 布尔值，与 name 平级
+                status: overallStatus,
                 deviceType: "PowerPoint Type (Two-Way)",
                 statusConditions: {
                     leftStatus: mapStatus(leftStatus),
