@@ -9,6 +9,7 @@ import { getUserDetails } from '../auth';
 import UserInfo from './UserInfo';
 import './DashboardUserInfo.css';
 import ProductOverview from './ProductOverview';
+import NetworkOverview from './NetworkOverview';
 
 const DashboardPage = () => {
     const userDetails = getUserDetails();
@@ -48,7 +49,7 @@ const DashboardPage = () => {
                     <ComponentCard title="" showTitle={false}>
                         <Row className="mb-4">
                             <Col md="9">
-                                <div style={{ 
+                                <div style={{
                                     height: '500px',
                                     overflow: 'auto',
                                     borderRadius: '12px',
@@ -131,26 +132,24 @@ const DashboardPage = () => {
                         </Row>
                         <Row className="mb-4">
                             <Col md="6">
-                                <div style={{ 
-                                    height: '500px', 
+                                <div style={{
+                                    height: '500px',
+                                    backgroundColor: '#fff',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
+                                }}>
+                                    <NetworkOverview />
+                                </div>
+                            </Col>
+                            <Col md="6">
+                                <div style={{
+                                    height: '500px',
                                     overflow: 'auto',
                                     backgroundColor: '#fff',
                                     borderRadius: '12px',
                                     boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
                                 }}>
                                     <ProductOverview />
-                                </div>
-                            </Col>
-                            <Col md="6">
-                                <div style={{ 
-                                    height: '500px',
-                                    backgroundColor: '#fff',
-                                    borderRadius: '12px',
-                                    padding: '20px',
-                                    boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
-                                }}>
-                                    <h5>Network Overview</h5>
-                                    {/* 项目概览内容 */}
                                 </div>
                             </Col>
                         </Row>
