@@ -1,7 +1,7 @@
 // src/components/Network/NetworkDetails/Devices/Tables/RGB_CW/RGB_CW.js
 import React from 'react';
 import BasicTable from '../BasicTable';
-// import rgbcwIcon from '../../../../../../assets/icons/DeviceType/RGB_CW.png';
+import rgbcwIcon from '../../../../../../assets/icons/DeviceType/RGB_CW.png';
 
 const RGB_CWType = ({ devices }) => {
   const columns = [
@@ -72,7 +72,7 @@ const RGB_CWType = ({ devices }) => {
   return (
     <BasicTable
       title="RGB CW"
-    //   icon={rgbcwIcon}
+      icon={rgbcwIcon}
       devices={devices}
       columns={columns}
       nameColumnWidth="25%"  // 其他6列平均分配75%

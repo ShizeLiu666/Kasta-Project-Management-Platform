@@ -5,6 +5,10 @@ import Tab from '@mui/material/Tab';
 import NetworkMember from './NetworkMember';
 import DeviceList from './Devices/DeviceList';
 import GroupList from './Groups/GroupList';
+import SceneList from './Scenes/SceneList';
+import RoomList from './Rooms/RoomList';
+import TimerList from './Timers/TimerList';
+import ScheduleList from './Schedules/ScheduleList';
 
 const NetworkDetails = ({ network }) => {
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -44,8 +48,8 @@ const NetworkDetails = ({ network }) => {
           <Tab label="Network Member" />
           <Tab label="Device" />
           <Tab label="Group" />
-          <Tab label="Room" />
           <Tab label="Scene" />
+          <Tab label="Room" />
           <Tab label="Timer" />
           <Tab label="Schedule" />
         </Tabs>
@@ -55,10 +59,10 @@ const NetworkDetails = ({ network }) => {
         {selectedTab === 0 && <NetworkMember networkId={network.networkId} />}
         {selectedTab === 1 && <DeviceList networkId={network.networkId} />}
         {selectedTab === 2 && <GroupList networkId={network.networkId} />}
-        {selectedTab === 3 && <div>Rooms Coming Soon...</div>}
-        {selectedTab === 4 && <div>Scenes Coming Soon...</div>}
-        {selectedTab === 5 && <div>Timers Coming Soon...</div>}
-        {selectedTab === 6 && <div>Schedules Coming Soon...</div>}
+        {selectedTab === 3 && <SceneList networkId={network.networkId} />}
+        {selectedTab === 4 && <RoomList networkId={network.networkId} />}
+        {selectedTab === 5 && <TimerList networkId={network.networkId} />}
+        {selectedTab === 6 && <ScheduleList networkId={network.networkId} />}
       </Box>
     </>
   );

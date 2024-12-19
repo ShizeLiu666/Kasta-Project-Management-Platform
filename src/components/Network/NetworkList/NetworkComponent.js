@@ -29,15 +29,16 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 // import RefreshIcon from '@mui/icons-material/Refresh';
 import RefreshButton from '../../CustomComponents/RefreshButton';
 import TablePagination from '@mui/material/TablePagination';
+import { Typography } from '@mui/material';
 
 // 修改日期格式化函数
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  
+
   // 检查日期是否有效
   if (isNaN(date.getTime())) return '';
-  
+
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: '2-digit',
@@ -215,14 +216,14 @@ const NetworkComponent = () => {
   const handleSort = () => {
     const isAsc = orderDirection === 'asc';
     setOrderDirection(isAsc ? 'desc' : 'asc');
-    
+
     const sortedNetworks = [...filteredNetworks].sort((a, b) => {
       if (!a.createData) return 1;
       if (!b.createData) return -1;
       const comparison = new Date(a.createData) - new Date(b.createData);
       return isAsc ? -comparison : comparison;
     });
-    
+
     setFilteredNetworks(sortedNetworks);
   };
 
@@ -282,7 +283,17 @@ const NetworkComponent = () => {
                   </BreadcrumbItem>
                   {showNetworkDetails && (
                     <BreadcrumbItem active>
-                      {activeNetwork?.meshName}
+                      {activeNetwork?.meshName}<Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          color: '#95a5a6',
+                          ml: 0.5,
+                          fontWeight: 400
+                        }}
+                      >
+                        - {activeNetwork.networkId}
+                      </Typography>
                     </BreadcrumbItem>
                   )}
                 </Breadcrumb>
@@ -305,7 +316,7 @@ const NetworkComponent = () => {
                         setFilteredNetworks(filtered);
                       }}
                     />
-                    <RefreshButton 
+                    <RefreshButton
                       onClick={handleRefresh}
                       isLoading={isLoading}
                     />
@@ -329,7 +340,7 @@ const NetworkComponent = () => {
                         <TableCell>Network Name</TableCell>
                         <TableCell>Network ID</TableCell>
                         <TableCell>Passphrase</TableCell>
-                        <TableCell 
+                        <TableCell
                           onClick={handleSort}
                           style={{ cursor: 'pointer' }}
                           sx={{
@@ -338,7 +349,7 @@ const NetworkComponent = () => {
                         >
                           <div style={{ display: 'flex', alignItems: 'center' }}>
                             Create Time
-                            {orderDirection === 'asc' 
+                            {orderDirection === 'asc'
                               ? <ArrowDropUpIcon sx={{ fontSize: 20 }} />
                               : <ArrowDropDownIcon sx={{ fontSize: 20 }} />
                             }
@@ -390,7 +401,7 @@ const NetworkComponent = () => {
                         ))}
                     </TableBody>
                   </Table>
-                  
+
                   <TablePagination
                     component="div"
                     count={filteredNetworks.length}
@@ -400,7 +411,7 @@ const NetworkComponent = () => {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     rowsPerPageOptions={[1, 5, 10, 25]}
                     labelRowsPerPage="Rows per page"
-                    labelDisplayedRows={({ from, to, count }) => 
+                    labelDisplayedRows={({ from, to, count }) =>
                       `${from}-${to} of ${count}`
                     }
                     sx={{

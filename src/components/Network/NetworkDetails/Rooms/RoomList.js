@@ -11,12 +11,13 @@ import {
     Paper
 } from '@mui/material';
 
-const GroupList = ({ networkId }) => {
-    const [groups, setGroups] = useState([]);
+const RoomList = ({ networkId }) => {
+    const [rooms, setRooms] = useState([]);
     const [isEmpty, setIsEmpty] = useState(false);
-    const [groupDevices, setGroupDevices] = useState({});
+    const [roomDevices, setRoomDevices] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
 
-    const fetchDevicesInGroup = useCallback(async (groupId) => {
+    const fetchDevicesInRoom = useCallback(async (roomId) => {
         try {
             const token = getToken();
             if (!token) {
@@ -24,8 +25,8 @@ const GroupList = ({ networkId }) => {
                 return;
             }
 
-            const response = await axiosInstance.post('/groups/devices', {
-                groupId: groupId,
+            const response = await axiosInstance.post('/rooms/list', {
+                roomId: roomId,
                 networkId: networkId
             }, {
                 headers: {
@@ -33,27 +34,39 @@ const GroupList = ({ networkId }) => {
                 }
             });
 
+            // 添加日志来检查响应数据
+            console.log(`Room ${roomId} devices response:`, response.data);
+
             if (response.data.success) {
-                setGroupDevices(prev => ({
+                // 确保设置的是数组数据
+                const devices = Array.isArray(response.data.data) ? response.data.data : [];
+                setRoomDevices(prev => ({
                     ...prev,
-                    [groupId]: response.data.data
+                    [roomId]: devices
                 }));
             }
         } catch (error) {
-            console.error(`Failed to fetch devices for group ${groupId}:`, error);
+            console.error(`Failed to fetch devices for room ${roomId}:`, error);
+            // 确保在错误时设置空数组
+            setRoomDevices(prev => ({
+                ...prev,
+                [roomId]: []
+            }));
         }
     }, [networkId]);
 
     useEffect(() => {
-        const fetchGroups = async () => {
+        const fetchRooms = async () => {
             try {
+                setIsLoading(true);
                 const token = getToken();
                 if (!token) {
                     console.error("No token found");
+                    setIsEmpty(true);
                     return;
                 }
 
-                const url = '/groups/list';
+                const url = '/rooms/list';
                 const initialResponse = await axiosInstance.post(url, {
                     page: 1,
                     size: 1,
@@ -69,6 +82,7 @@ const GroupList = ({ networkId }) => {
 
                 if (totalSize === 0) {
                     setIsEmpty(true);
+                    setIsLoading(false);
                     return;
                 }
 
@@ -83,21 +97,29 @@ const GroupList = ({ networkId }) => {
                 });
 
                 const fullData = fullResponse.data;
-                const groups = fullData.data.content;
-                setGroups(groups);
+                const rooms = fullData.data.content;
+                setRooms(rooms);
 
-                groups.forEach(group => {
-                    fetchDevicesInGroup(group.groupId);
+                // 为每个房间获取设备
+                rooms.forEach(room => {
+                    fetchDevicesInRoom(room.roomId);
                 });
             } catch (error) {
-                console.error('Failed to fetch groups:', error);
+                console.error('Failed to fetch rooms:', error);
+                setIsEmpty(true);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         if (networkId) {
-            fetchGroups();
+            fetchRooms();
         }
-    }, [networkId, fetchDevicesInGroup]);
+    }, [networkId, fetchDevicesInRoom]);
+
+    if (isLoading) {
+        return null;
+    }
 
     if (isEmpty) {
         return (
@@ -115,7 +137,7 @@ const GroupList = ({ networkId }) => {
                 }}
             >
                 <Typography variant="body1" color="text.secondary">
-                    No groups found in this network
+                    No rooms found in this network
                 </Typography>
             </Box>
         );
@@ -123,8 +145,8 @@ const GroupList = ({ networkId }) => {
 
     return (
         <Box>
-            {groups.map((group) => (
-                <Box key={group.groupId} sx={{ mb: 4 }}>
+            {rooms.map((room) => (
+                <Box key={room.roomId} sx={{ mb: 4 }}>
                     <Box sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -141,7 +163,7 @@ const GroupList = ({ networkId }) => {
                                 ml: 0.5
                             }}
                         >
-                            {group.name}
+                            {room.name}
                             <Typography
                                 component="span"
                                 variant="body2"
@@ -151,7 +173,7 @@ const GroupList = ({ networkId }) => {
                                     fontWeight: 400
                                 }}
                             >
-                                - {group.groupId}
+                                - {room.roomId}
                             </Typography>
                         </Typography>
                         <Typography
@@ -161,7 +183,7 @@ const GroupList = ({ networkId }) => {
                                 color: 'text.secondary'
                             }}
                         >
-                            ({groupDevices[group.groupId]?.length || 0} {(groupDevices[group.groupId]?.length || 0) === 1 ? 'device' : 'devices'})
+                            ({roomDevices[room.roomId]?.length || 0} {(roomDevices[room.roomId]?.length || 0) === 1 ? 'device' : 'devices'})
                         </Typography>
                     </Box>
 
@@ -171,29 +193,20 @@ const GroupList = ({ networkId }) => {
                             boxShadow: 'none',
                             border: '1px solid #dee2e6',
                             borderRadius: '8px',
-                            width: '100%',
-                            '& .MuiTable-root': {
-                                tableLayout: 'fixed',
-                                width: '100%'
-                            }
+                            width: '100%'
                         }}
                     >
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell
-                                        sx={{
-                                            width: '100%',
-                                            fontWeight: 'bold',
-                                            backgroundColor: '#f8f9fa'
-                                        }}
-                                    >
+                                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
                                         Device Name
                                     </TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {groupDevices[group.groupId]?.map((device) => (
+                                {/* 添加检查确保 roomDevices[room.roomId] 是数组 */}
+                                {Array.isArray(roomDevices[room.roomId]) && roomDevices[room.roomId].map((device) => (
                                     <TableRow
                                         key={device.deviceId}
                                         sx={{
@@ -256,4 +269,4 @@ const GroupList = ({ networkId }) => {
     );
 };
 
-export default GroupList;
+export default RoomList;
