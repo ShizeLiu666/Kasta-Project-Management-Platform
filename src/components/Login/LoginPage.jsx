@@ -10,6 +10,7 @@ import ForgotPasswordModal from "./ForgotPasswordModal";
 import { setToken, saveUsername, saveUserDetails } from '../auth';
 import axiosInstance from '../../config'; 
 import CustomAlert from '../CustomComponents/CustomAlert';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const DEFAULT_ALERT_DURATION = 3000;
 
@@ -29,6 +30,7 @@ const LoginPage = () => {
   const usernameInputRef = useRef(null);
   const passwordInputRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const navigate = useNavigate();
 
@@ -69,7 +71,7 @@ const LoginPage = () => {
           if (userDetailResponse.data && userDetailResponse.data.success) {
             const userDetails = userDetailResponse.data.data;
             
-            // 直接允许所有用户登录，移除用户类型检查
+            // 直接允许所有用户登录，移除用户���型检查
             setToken(token, rememberMe);
             saveUsername(loggedInUsername, rememberMe);
             saveUserDetails(userDetails);
@@ -136,7 +138,9 @@ const LoginPage = () => {
     try {
       const loginResult = await attemptLogin(username, true);
       
-      if (!loginResult.success) {
+      if (loginResult.success) {
+        setLoginSuccess(true); // 触发成功动画
+      } else {
         showAlert(loginResult.error || "Login failed", "error");
       }
     } finally {
@@ -187,188 +191,262 @@ const LoginPage = () => {
   };
 
   return (
-    <>
-      <section className="h-100 gradient-form">
-        <div className="container py-5 h-100">
-          <div className="row d-flex justify-content-center align-items-center h-100">
-            <div className="col-xl-10">
-              <div className="card rounded-3 text-black">
-                <div className="row g-0">
-                  {/* Left Panel */}
-                  <div className="col-lg-6">
-                    <div className="card-body p-md-5 mx-md-4">
-                      <div className="text-center">
-                        <img
-                          src={kastaLogo}
-                          className="logo-margin-bottom"
-                          style={{ width: "150px" }}
-                          alt="logo"
-                        />
-                        <h4 className="mt-1 mb-4 pb-1 custom-title">
-                          Project Management Platform
-                        </h4>
-                      </div>
-
-                      {alert.isOpen && (
-                        <CustomAlert
-                          isOpen={alert.isOpen}
-                          onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
-                          message={alert.message}
-                          severity={alert.severity}
-                          autoHideDuration={alert.duration}
-                        />
-                      )}
-
-                      {/* Conditionally Render: Login, Create Account, or Forgot Password */}
-                      {isCreatingAccount ? (
-                        <CreateAccountModal
-                          handleBackToLogin={handleBackToLogin}
-                        />
-                      ) : isForgotPassword ? (
-                        <ForgotPasswordModal
-                          handleBackToLogin={handleBackToLogin}
-                        />
-                      ) : (
-                        <div className="form-container">
-                          <Form onSubmit={handleSubmit}>
-                            <FormGroup className="mb-4">
-                              <Input
-                                type="text"
-                                id="username"
-                                name="username"
-                                placeholder="Email / Username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                onKeyDown={handleUsernameKeyDown}
-                                autoComplete="off"
-                                // required
-                                ref={usernameInputRef}
-                              />
-                            </FormGroup>
-
-                            <FormGroup
-                              className="mb-4"
-                              style={{ position: "relative" }}
-                            >
-                              <Input
-                                type={showPassword ? "text" : "password"}
-                                id="password"
-                                name="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                onKeyDown={handlePasswordKeyDown}
-                                autoComplete="new-password"
-                                ref={passwordInputRef}
-                                // required
-                              />
-                              <span
-                                onClick={togglePasswordVisibility}
-                                style={{
-                                  position: "absolute",
-                                  right: "10px",
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <FontAwesomeIcon
-                                  icon={showPassword ? faEyeSlash : faEye}
-                                  style={{ color: "#68696a" }}
-                                />
-                              </span>
-                            </FormGroup>
-
-                            <FormGroup className="d-flex justify-content-between align-items-center mb-4">
-                              <Label check className="text-dark">
-                                <Input
-                                  type="checkbox"
-                                  checked={rememberMe}
-                                  onChange={() => setRememberMe(!rememberMe)}
-                                  style={{
-                                    backgroundColor: rememberMe
-                                      ? "#fbcd0b"
-                                      : "white",
-                                    border: "none",
-                                  }}
-                                />{" "}
-                                Remember Me
-                              </Label>
-                              <button
-                                className="text-primary btn btn-link p-0"
-                                style={{
-                                  display: "inline-block",
-                                  textDecoration: "none",
-                                  fontSize: "0.9rem",
-                                  border: "none",
-                                  background: "transparent",
-                                }}
-                                onClick={handleForgotPasswordClick} // Switch to Forgot Password modal
-                              >
-                                Forgot Password?
-                              </button>
-                            </FormGroup>
-
-                            <div className="text-center pt-1 mb-1 pb-0 move-down">
-                              <Button
-                                className="btn-block fa-lg mb-2 login-button"
-                                style={{
-                                  backgroundColor: "#fbcd0b",
-                                  borderColor: "#fbcd0b",
-                                  fontWeight: "bold",
-                                  opacity: isLoading ? 0.7 : 1,
-                                }}
-                                type="submit"
-                                onClick={handleLogin}
-                                disabled={isLoading}
-                              >
-                                {isLoading ? "Logging in..." : "Log in"}
-                              </Button>
-                            </div>
-
-                            <div className="d-flex justify-content-center align-items-center mb-1">
-                              <p className="mb-0">New Member?</p>
-                              <button
-                                type="button" // 添加 type="button" 以防止表单提交
-                                className="text-primary btn btn-link p-0"
-                                style={{
-                                  display: "inline-block",
-                                  textDecoration: "none",
-                                  fontSize: "1rem",
-                                  border: "none",
-                                  background: "transparent",
-                                  marginLeft: "10px",
-                                }}
-                                onClick={handleCreateAccountClick} // Switch to Create Account modal
-                              >
-                                Create an account
-                              </button>
-                            </div>
-                          </Form>
+    <AnimatePresence>
+      {loginSuccess ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="success-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: '#fbcd0b',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+          >
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 1,
+                ease: "easeInOut",
+              }}
+            >
+              <svg
+                width="100"
+                height="100"
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <motion.path
+                  d="M20 50L40 70L80 30"
+                  stroke="white"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                />
+              </svg>
+            </motion.div>
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            style={{ color: 'white', marginTop: 20 }}
+          >
+            Login Successful!
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            style={{ color: 'white', marginTop: 10 }}
+          >
+            Redirecting to dashboard...
+          </motion.p>
+        </motion.div>
+      ) : (
+        <section className="h-100 gradient-form">
+          <div className="container py-5 h-100">
+            <div className="row d-flex justify-content-center align-items-center h-100">
+              <div className="col-xl-10">
+                <div className="card rounded-3 text-black">
+                  <div className="row g-0">
+                    {/* Left Panel */}
+                    <div className="col-lg-6">
+                      <div className="card-body p-md-5 mx-md-4">
+                        <div className="text-center">
+                          <img
+                            src={kastaLogo}
+                            className="logo-margin-bottom"
+                            style={{ width: "150px" }}
+                            alt="logo"
+                          />
+                          <h4 className="mt-1 mb-4 pb-1 custom-title">
+                            Project Management Platform
+                          </h4>
                         </div>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Right Panel */}
-                  <div className="col-lg-6 d-flex align-items-center gradient-custom-2">
-                    <div className="text-gradient">
-                      <h4 className="mb-4">Living Enhanced</h4>
-                      <p className="small mb-0">
-                        KASTA offers smart control solutions with products
-                        designed in Australia. Our seamless integration and
-                        modular form ensure connectivity and scalability,
-                        enhancing lifestyles with tailored applications.
-                      </p>
+                        {alert.isOpen && (
+                          <CustomAlert
+                            isOpen={alert.isOpen}
+                            onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+                            message={alert.message}
+                            severity={alert.severity}
+                            autoHideDuration={alert.duration}
+                          />
+                        )}
+
+                        {/* Conditionally Render: Login, Create Account, or Forgot Password */}
+                        {isCreatingAccount ? (
+                          <CreateAccountModal
+                            handleBackToLogin={handleBackToLogin}
+                          />
+                        ) : isForgotPassword ? (
+                          <ForgotPasswordModal
+                            handleBackToLogin={handleBackToLogin}
+                          />
+                        ) : (
+                          <div className="form-container">
+                            <Form onSubmit={handleSubmit}>
+                              <FormGroup className="mb-4">
+                                <Input
+                                  type="text"
+                                  id="username"
+                                  name="username"
+                                  placeholder="Email / Username"
+                                  value={username}
+                                  onChange={(e) => setUsername(e.target.value)}
+                                  onKeyDown={handleUsernameKeyDown}
+                                  autoComplete="off"
+                                  // required
+                                  ref={usernameInputRef}
+                                />
+                              </FormGroup>
+
+                              <FormGroup
+                                className="mb-4"
+                                style={{ position: "relative" }}
+                              >
+                                <Input
+                                  type={showPassword ? "text" : "password"}
+                                  id="password"
+                                  name="password"
+                                  placeholder="Password"
+                                  value={password}
+                                  onChange={(e) => setPassword(e.target.value)}
+                                  onKeyDown={handlePasswordKeyDown}
+                                  autoComplete="new-password"
+                                  ref={passwordInputRef}
+                                  // required
+                                />
+                                <span
+                                  onClick={togglePasswordVisibility}
+                                  style={{
+                                    position: "absolute",
+                                    right: "10px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <FontAwesomeIcon
+                                    icon={showPassword ? faEyeSlash : faEye}
+                                    style={{ color: "#68696a" }}
+                                  />
+                                </span>
+                              </FormGroup>
+
+                              <FormGroup className="d-flex justify-content-between align-items-center mb-4">
+                                <Label check className="text-dark">
+                                  <Input
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={() => setRememberMe(!rememberMe)}
+                                    style={{
+                                      backgroundColor: rememberMe
+                                        ? "#fbcd0b"
+                                        : "white",
+                                      border: "none",
+                                    }}
+                                  />{" "}
+                                  Remember Me
+                                </Label>
+                                <button
+                                  className="text-primary btn btn-link p-0"
+                                  style={{
+                                    display: "inline-block",
+                                    textDecoration: "none",
+                                    fontSize: "0.9rem",
+                                    border: "none",
+                                    background: "transparent",
+                                  }}
+                                  onClick={handleForgotPasswordClick} // Switch to Forgot Password modal
+                                >
+                                  Forgot Password?
+                                </button>
+                              </FormGroup>
+
+                              <div className="text-center pt-1 mb-1 pb-0 move-down">
+                                <Button
+                                  className="btn-block fa-lg mb-2 login-button"
+                                  style={{
+                                    backgroundColor: "#fbcd0b",
+                                    borderColor: "#fbcd0b",
+                                    fontWeight: "bold",
+                                    opacity: isLoading ? 0.7 : 1,
+                                  }}
+                                  type="submit"
+                                  onClick={handleLogin}
+                                  disabled={isLoading}
+                                >
+                                  {isLoading ? "Logging in..." : "Log in"}
+                                </Button>
+                              </div>
+
+                              <div className="d-flex justify-content-center align-items-center mb-1">
+                                <p className="mb-0">New Member?</p>
+                                <button
+                                  type="button" // 添加 type="button" 以防止表单提交
+                                  className="text-primary btn btn-link p-0"
+                                  style={{
+                                    display: "inline-block",
+                                    textDecoration: "none",
+                                    fontSize: "1rem",
+                                    border: "none",
+                                    background: "transparent",
+                                    marginLeft: "10px",
+                                  }}
+                                  onClick={handleCreateAccountClick} // Switch to Create Account modal
+                                >
+                                  Create an account
+                                </button>
+                              </div>
+                            </Form>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Panel */}
+                    <div className="col-lg-6 d-flex align-items-center gradient-custom-2">
+                      <div className="text-gradient">
+                        <h4 className="mb-4">Living Enhanced</h4>
+                        <p className="small mb-0">
+                          KASTA offers smart control solutions with products
+                          designed in Australia. Our seamless integration and
+                          modular form ensure connectivity and scalability,
+                          enhancing lifestyles with tailored applications.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    </>
+        </section>
+      )}
+    </AnimatePresence>
   );
 };
 
