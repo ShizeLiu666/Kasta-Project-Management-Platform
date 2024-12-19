@@ -68,6 +68,9 @@ const Sidebar = ({ userType, toggleSidebar, isCollapsed }) => {
                       ? "active nav-link py-3"
                       : "nav-link text-secondary py-3"
                   }
+                  style={{
+                    borderRadius: '5px',
+                  }}
                   onClick={() => {
                     if (window.innerWidth < 992) {
                       toggleSidebar();

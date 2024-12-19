@@ -17,6 +17,7 @@ import CustomModal from '../components/CustomComponents/CustomModal';
 // import FeedbackIcon from '@mui/icons-material/SupportAgent';
 import FeedbackIcon from '@mui/icons-material/ContactSupport';
 import FeedbackModal from './FeedbackModal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = ({ toggleSidebar }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -24,6 +25,7 @@ const Header = ({ toggleSidebar }) => {
   const [avatarSrc, setAvatarSrc] = useState(defaultAvatar);
   const navigate = useNavigate();
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [logoutSuccess, setLogoutSuccess] = useState(false);
 
   const updateAvatar = (userDetails) => {
     setAvatarSrc(userDetails?.headPic || defaultAvatar);
@@ -66,26 +68,28 @@ const Header = ({ toggleSidebar }) => {
   };
 
   const handleLogout = () => {
-    console.log("Logout button clicked");
+    setLogoutSuccess(true);
     
-    // 保存 Remember Me 凭据
-    const rememberedUsername = localStorage.getItem('rememberedUsername');
-    const rememberedPassword = localStorage.getItem('rememberedPassword');
-    
-    // 清除 localStorage 和 sessionStorage
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // 如果存在 Remember Me 凭据，则重新保存
-    if (rememberedUsername) {
-      localStorage.setItem('rememberedUsername', rememberedUsername);
-    }
-    if (rememberedPassword) {
-      localStorage.setItem('rememberedPassword', rememberedPassword);
-    }
-    
-    toggleLogoutModal();
-    navigate("/login"); // 重定向到登录页面
+    setTimeout(() => {
+      // 保存 Remember Me 凭据
+      const rememberedUsername = localStorage.getItem('rememberedUsername');
+      const rememberedPassword = localStorage.getItem('rememberedPassword');
+      
+      // 清除 localStorage 和 sessionStorage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // 如果存在 Remember Me 凭据，则重新保存
+      if (rememberedUsername) {
+        localStorage.setItem('rememberedUsername', rememberedUsername);
+      }
+      if (rememberedPassword) {
+        localStorage.setItem('rememberedPassword', rememberedPassword);
+      }
+      
+      toggleLogoutModal();
+      navigate("/login");
+    }, 2000);
   };
 
   const handleEditProfile = () => {
@@ -98,58 +102,124 @@ const Header = ({ toggleSidebar }) => {
   };
 
   return (
-    <Navbar dark expand="md" className="fix-header header-background">
-      <div className="d-flex align-items-center">
-        <NavbarBrand href="/admin/dashboard">
-          <img src={kasta_logo} alt="logo" className="logo" />
-        </NavbarBrand>
-        <Button
-          color="primary"
-          className="d-lg-none"
-          onClick={showMobilemenu}
-        >
-          <i className="bi bi-list"></i>
-        </Button>
-      </div>
-      <div className="ms-auto d-flex align-items-center">
-        <Button
-          color="link"
-          className="me-3"
-          onClick={toggleFeedbackModal}
-          style={{
-            color: '#ff4d4f',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            border: 'none',
-            transition: 'color 0.3s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.color = '#ff7875'}
-          onMouseOut={(e) => e.currentTarget.style.color = '#ff4d4f'}
-        >
-          <FeedbackIcon style={{ 
-            fontSize: '34px',
-            // transform: 'scaleX(-1)'  // 水平翻转图标
-          }} />
-        </Button>
-        <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-          <DropdownToggle color="transparent" className="d-flex align-items-center">
-            <img
-              src={avatarSrc}
-              alt="profile"
-              className="rounded-circle"
-              width="45"
-              height="45"
-            />
-          </DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem header>Info</DropdownItem>
-            <DropdownItem onClick={handleEditProfile}>Edit Profile</DropdownItem>
-            <DropdownItem divider />
-            <DropdownItem onClick={toggleLogoutModal}>Logout</DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </div>
+    <>
+      <AnimatePresence>
+        {logoutSuccess ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: '#fbcd0b',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+            >
+              <motion.div
+                animate={{
+                  rotate: [-10, 10, -10, 10, -10, 0], // 创建摆动效果
+                }}
+                transition={{
+                  duration: 1.5,
+                  ease: "easeInOut",
+                  times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                  repeat: 0, // 重复一次
+                }}
+                style={{
+                  fontSize: '80px',
+                  display: 'inline-block'
+                }}
+              >
+                👋
+              </motion.div>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              style={{ color: 'white', marginTop: 20 }}
+            >
+              Logout Successful!
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              style={{ color: 'white', marginTop: 10 }}
+            >
+              See you next time...
+            </motion.p>
+          </motion.div>
+        ) : (
+          <Navbar dark expand="md" className="fix-header header-background">
+            <div className="d-flex align-items-center">
+              <NavbarBrand href="/admin/dashboard">
+                <img src={kasta_logo} alt="logo" className="logo" />
+              </NavbarBrand>
+              <Button
+                color="primary"
+                className="d-lg-none"
+                onClick={showMobilemenu}
+              >
+                <i className="bi bi-list"></i>
+              </Button>
+            </div>
+            <div className="ms-auto d-flex align-items-center">
+              <Button
+                color="link"
+                className="me-3"
+                onClick={toggleFeedbackModal}
+                style={{
+                  color: '#ff4d4f',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: 'none',
+                  transition: 'color 0.3s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = '#ff7875'}
+                onMouseOut={(e) => e.currentTarget.style.color = '#ff4d4f'}
+              >
+                <FeedbackIcon style={{ 
+                  fontSize: '34px',
+                  // transform: 'scaleX(-1)'  // 水平翻转图标
+                }} />
+              </Button>
+              <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+                <DropdownToggle color="transparent" className="d-flex align-items-center">
+                  <img
+                    src={avatarSrc}
+                    alt="profile"
+                    className="rounded-circle"
+                    width="45"
+                    height="45"
+                  />
+                </DropdownToggle>
+                <DropdownMenu>
+                  <DropdownItem header>Info</DropdownItem>
+                  <DropdownItem onClick={handleEditProfile}>Edit Profile</DropdownItem>
+                  <DropdownItem divider />
+                  <DropdownItem onClick={toggleLogoutModal}>Logout</DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          </Navbar>
+        )}
+      </AnimatePresence>
 
       <CustomModal
         isOpen={logoutModalOpen}
@@ -169,7 +239,7 @@ const Header = ({ toggleSidebar }) => {
         toggle={toggleFeedbackModal}
         onSubmit={handleFeedbackSubmit}
       />
-    </Navbar>
+    </>
   );
 };
 

@@ -90,7 +90,7 @@ const LoginPage = () => {
             showAlert("Login successful! Redirecting...", "success");
             setTimeout(() => {
               navigate("/admin/dashboard");
-            }, 1000);
+            }, 1800);
           }
         } catch (detailError) {
           console.error("Error fetching user details:", detailError);
