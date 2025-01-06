@@ -7,6 +7,8 @@ import NetworkIcon from '../../assets/icons/NetworkOverview/Network.png';
 import DeviceIcon from '../../assets/icons/NetworkOverview/Device.png';
 import GroupIcon from '../../assets/icons/NetworkOverview/Group.png';
 import SceneIcon from '../../assets/icons/NetworkOverview/Scene.png';
+import RoomIcon from '../../assets/icons/NetworkOverview/Room.png';
+import ScheduleIcon from '../../assets/icons/NetworkOverview/Schedule.png';
 
 const NetworkOverview = () => {
   const [networkStats, setNetworkStats] = useState({
@@ -150,7 +152,7 @@ const NetworkOverview = () => {
         <Grid item xs={12} md={4}>
           <StatCard
             icon={<GroupIconMUI fontSize="large" />}
-            title="Network Members"
+            title="Members"
             value={networkStats.totalMembers}
             color="#ff9800"
           />
@@ -168,7 +170,7 @@ const NetworkOverview = () => {
                 }} 
               />
             }
-            title="Connected Devices"
+            title="Devices"
             value={networkStats.totalDevices}
             color="#fbcd0b"
           />
@@ -212,13 +214,13 @@ const NetworkOverview = () => {
         <Grid item xs={12} md={4}>
           <StatCard
             icon={
-              <Box 
-                sx={{ 
+              <img
+                src={RoomIcon} 
+                alt="Room" 
+                style={{ 
                   width: '32px', 
                   height: '32px',
-                  display: 'block',
-                  backgroundColor: '#1976D2',
-                  borderRadius: '4px'
+                  display: 'block'
                 }} 
               />
             }
@@ -230,37 +232,19 @@ const NetworkOverview = () => {
         <Grid item xs={12} md={4}>
           <StatCard
             icon={
-              <Box 
-                sx={{ 
+              <img
+                src={ScheduleIcon} 
+                alt="Room" 
+                style={{ 
                   width: '32px', 
                   height: '32px',
-                  display: 'block',
-                  backgroundColor: '#FF5722',
-                  borderRadius: '4px'
-                }} 
-              />
-            }
-            title="Timers"
-            value={networkStats.totalTimers}
-            color="#FF5722"
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <Box 
-                sx={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block',
-                  backgroundColor: '#607D8B',
-                  borderRadius: '4px'
+                  display: 'block'
                 }} 
               />
             }
             title="Schedules"
             value={networkStats.totalSchedules}
-            color="#607D8B"
+            color="#FAEBD7"
           />
         </Grid>
       </Grid>

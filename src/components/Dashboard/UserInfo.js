@@ -5,7 +5,7 @@ import defaultAvatar from '../../assets/images/users/normal_user.jpg';
 import { countryOptions } from '../Login/CountryCodeSelect';
 import axiosInstance from '../../config';
 import { getToken } from '../auth';
-import './DashboardUserInfo.css';
+import './UserInfo.css';
 
 const UserInfo = ({ userDetails }) => {
   const showProjects = userDetails.userType === 1 || userDetails.userType === 99999;
@@ -72,13 +72,14 @@ const UserInfo = ({ userDetails }) => {
   return (
     <div 
       style={{ 
-        height: '500px',
+        height: '100%',  // 改为100%
+        minHeight: '500px', // 添加最小高度
         position: 'relative',
         overflow: 'auto',
         backgroundColor: '#f5f5f5',
         borderRadius: '12px',
         boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
-        padding: '20px'
+        // padding: '20px'
       }}
     >
       <div className="user-info-content">

@@ -7,7 +7,7 @@ import kastaImage from '../../assets/images/CarouseItems/kasta.jpg';
 import kastaSolutionImage from '../../assets/images/CarouseItems/kasta_solution.jpg';
 import { getUserDetails } from '../auth';
 import UserInfo from './UserInfo';
-import './DashboardUserInfo.css';
+import './UserInfo.css';
 import ProductOverview from './ProductOverview';
 import NetworkOverview from './NetworkOverview';
 
