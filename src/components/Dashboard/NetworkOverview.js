@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
-import { axiosInstance, getToken } from '../auth';
 import GroupIconMUI from '@mui/icons-material/Group';
 import { motion } from 'framer-motion';
 import NetworkIcon from '../../assets/icons/NetworkOverview/Network.png';
@@ -11,68 +10,19 @@ import RoomIcon from '../../assets/icons/NetworkOverview/Room.png';
 import ScheduleIcon from '../../assets/icons/NetworkOverview/Schedule.png';
 
 const NetworkOverview = () => {
-  const [networkStats, setNetworkStats] = useState({
-    totalNetworks: 0,
-    totalDevices: 0,
-    totalMembers: 0,
-    totalGroups: 0,
-    totalScenes: 0,
-    totalRooms: 0,
-    totalTimers: 0,
-    totalSchedules: 0
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchNetworkStats = async () => {
-      try {
-        const token = getToken();
-        const [networksResponse, currentNetworkResponse] = await Promise.all([
-          axiosInstance.get('/networks/list', {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axiosInstance.get('/networks/current', {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-        ]);
-
-        if (currentNetworkResponse.data.success && currentNetworkResponse.data.data) {
-          const currentNetwork = currentNetworkResponse.data.data;
-          
-          // 获取当前网络的设备、分组和场景数量
-          const [devicesResponse, groupsResponse, scenesResponse] = await Promise.all([
-            axiosInstance.post('/devices/list', {
-              networkId: currentNetwork.networkId,
-              page: 1,
-              size: 1
-            }, {
-              headers: { Authorization: `Bearer ${token}` }
-            }),
-            axiosInstance.get(`/networks/${currentNetwork.networkId}/groups`, {
-              headers: { Authorization: `Bearer ${token}` }
-            }),
-            axiosInstance.get(`/networks/${currentNetwork.networkId}/scenes`, {
-              headers: { Authorization: `Bearer ${token}` }
-            })
-          ]);
-
-          setNetworkStats({
-            totalNetworks: networksResponse.data.data.length,
-            totalDevices: devicesResponse.data.data.totalElements || 0,
-            totalGroups: groupsResponse.data.data.length || 0,
-            totalScenes: scenesResponse.data.data.length || 0,
-            currentNetwork: currentNetwork
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching network stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNetworkStats();
-  }, []);
+  // 使用模拟数据
+  const mockNetworkStats = {
+    totalNetworks: 5,
+    totalDevices: 25,
+    totalMembers: 8,
+    totalGroups: 6,
+    totalScenes: 4,
+    totalRooms: 3,
+    totalSchedules: 2,
+    currentNetwork: {
+      meshName: "Home Network"
+    }
+  };
 
   const StatCard = ({ icon, title, value, color }) => (
     <motion.div
@@ -114,19 +64,15 @@ const NetworkOverview = () => {
     </motion.div>
   );
 
-  if (loading) {
-    return <Box p={3}>Loading...</Box>;
-  }
-
   return (
     <Box p={2}>
       <Typography variant="h5" gutterBottom>
         Network Overview
       </Typography>
       
-      {networkStats.currentNetwork && (
+      {mockNetworkStats.currentNetwork && (
         <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-          Current Network: {networkStats.currentNetwork.meshName}
+          Current Network: {mockNetworkStats.currentNetwork.meshName}
         </Typography>
       )}
 
@@ -145,7 +91,7 @@ const NetworkOverview = () => {
               />
             }
             title="Total Networks"
-            value={networkStats.totalNetworks}
+            value={mockNetworkStats.totalNetworks}
             color="#3f51b5"
           />
         </Grid>
@@ -153,7 +99,7 @@ const NetworkOverview = () => {
           <StatCard
             icon={<GroupIconMUI fontSize="large" />}
             title="Members"
-            value={networkStats.totalMembers}
+            value={mockNetworkStats.totalMembers}
             color="#ff9800"
           />
         </Grid>
@@ -171,7 +117,7 @@ const NetworkOverview = () => {
               />
             }
             title="Devices"
-            value={networkStats.totalDevices}
+            value={mockNetworkStats.totalDevices}
             color="#fbcd0b"
           />
         </Grid>
@@ -189,7 +135,7 @@ const NetworkOverview = () => {
               />
             }
             title="Groups"
-            value={networkStats.totalGroups}
+            value={mockNetworkStats.totalGroups}
             color="#009688"
           />
         </Grid>
@@ -207,7 +153,7 @@ const NetworkOverview = () => {
               />
             }
             title="Scenes"
-            value={networkStats.totalScenes}
+            value={mockNetworkStats.totalScenes}
             color="#9C27B0"
           />
         </Grid>
@@ -225,7 +171,7 @@ const NetworkOverview = () => {
               />
             }
             title="Rooms"
-            value={networkStats.totalRooms}
+            value={mockNetworkStats.totalRooms}
             color="#1976D2"
           />
         </Grid>
@@ -234,7 +180,7 @@ const NetworkOverview = () => {
             icon={
               <img
                 src={ScheduleIcon} 
-                alt="Room" 
+                alt="Schedule" 
                 style={{ 
                   width: '32px', 
                   height: '32px',
@@ -243,7 +189,7 @@ const NetworkOverview = () => {
               />
             }
             title="Schedules"
-            value={networkStats.totalSchedules}
+            value={mockNetworkStats.totalSchedules}
             color="#FAEBD7"
           />
         </Grid>

@@ -1,16 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Spinner } from 'reactstrap';
 import Box from '@mui/material/Box';
-import axiosInstance from '../../../config';
-import { getToken } from '../../auth';
 import CustomAlert from '../../CustomComponents/CustomAlert';
 import CustomButton from '../../CustomComponents/CustomButton';
 import InviteMemberModal from './InviteMemberModal';
 import MemberTable from '../../CustomComponents/MemberTable';
+import { useNetworkMembers } from './useNetworkQueries';
 
 const NetworkMember = ({ networkId }) => {
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState({
     isOpen: false,
     message: "",
@@ -18,67 +15,17 @@ const NetworkMember = ({ networkId }) => {
     duration: 2000
   });
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
-  const [currentUserRole, setCurrentUserRole] = useState(null);
 
-  const fetchMembers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const token = getToken();
-      if (!token) {
-        setAlert({
-          isOpen: true,
-          message: "No token found, please log in again.",
-          severity: "error",
-          duration: 2000
-        });
-        return;
-      }
+  // 使用 React Query hook
+  const { 
+    data: members = [], 
+    isLoading,
+    error,
+    refetch: fetchMembers 
+  } = useNetworkMembers(networkId);
 
-      const response = await axiosInstance.get(`/networks/${networkId}/members`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data.success) {
-        const sortedMembers = response.data.data.sort((a, b) => {
-          if (a.role === 'OWNER') return -1;
-          if (b.role === 'OWNER') return 1;
-          return 0;
-        });
-        setMembers(sortedMembers);
-        
-        // 找到当前用户的角色
-        const currentUser = sortedMembers.find(member => member.isCurrentUser);
-        if (currentUser) {
-          setCurrentUserRole(currentUser.role);
-        }
-      } else {
-        setAlert({
-          isOpen: true,
-          message: response.data.errorMsg || 'Failed to fetch members',
-          severity: "error",
-          duration: 2000
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching members:', error);
-      setAlert({
-        isOpen: true,
-        message: error.response?.data?.errorMsg || 'Error fetching members',
-        severity: "error",
-        duration: 2000
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [networkId]);
-
-  useEffect(() => {
-    if (networkId) {
-      fetchMembers();
-    }
-  }, [networkId, fetchMembers]);
+  // 获取当前用户角色
+  const currentUserRole = members.find(member => member.isCurrentUser)?.role;
 
   const handleInviteMember = (response) => {
     if (response.success) {
@@ -88,7 +35,7 @@ const NetworkMember = ({ networkId }) => {
         severity: 'success',
         duration: 2000
       });
-      fetchMembers(); // 刷新成员列表
+      fetchMembers(); // 使用 refetch 刷新数据
     } else {
       setAlert({
         isOpen: true,
@@ -98,6 +45,18 @@ const NetworkMember = ({ networkId }) => {
       });
     }
   };
+
+  // 处理错误状态
+  if (error) {
+    return (
+      <CustomAlert
+        isOpen={true}
+        message={error.message || "Failed to load members"}
+        severity="error"
+        duration={2000}
+      />
+    );
+  }
 
   return (
     <div>
@@ -122,7 +81,7 @@ const NetworkMember = ({ networkId }) => {
         </div>
       )}
 
-      {loading ? (
+      {isLoading ? (
         <Box display="flex" justifyContent="center" p={3}>
           <Spinner color="primary" />
         </Box>

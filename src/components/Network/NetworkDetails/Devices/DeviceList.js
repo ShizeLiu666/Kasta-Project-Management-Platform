@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { axiosInstance, getToken } from '../../../auth';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { useNetworkDevices } from '../useNetworkQueries';
 
 // 产品类型映射表
 const PRODUCT_TYPE_MAP = {
@@ -14,60 +14,48 @@ const PRODUCT_TYPE_MAP = {
 };
 
 const DeviceList = ({ networkId }) => {
-  const [devices, setDevices] = useState([]);
-  const [isEmpty, setIsEmpty] = useState(false);
+  // 使用 React Query hook
+  const { 
+    data: devices = [], 
+    isLoading, 
+    error 
+  } = useNetworkDevices(networkId);
 
-  useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const token = getToken();
-        if (!token) {
-          console.error("No token found");
-          return;
-        }
+  // 处理加载状态
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px'
+        }}
+      >
+        <Typography>Loading devices...</Typography>
+      </Box>
+    );
+  }
 
-        const url = '/devices/list';
-        const initialResponse = await axiosInstance.post(url, {
-          page: 1,
-          size: 1,
-          networkId: networkId
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+  // 处理错误状态
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px',
+          color: 'error.main'
+        }}
+      >
+        <Typography>{error.message || 'Failed to load devices'}</Typography>
+      </Box>
+    );
+  }
 
-        const initialData = initialResponse.data;
-        const totalSize = initialData.data.totalElements;
-
-        if (totalSize === 0) {
-          setIsEmpty(true);
-          return;
-        }
-
-        const fullResponse = await axiosInstance.post(url, {
-          page: 1,
-          size: totalSize,
-          networkId: networkId
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        const fullData = fullResponse.data;
-        setDevices(fullData.data.content);
-      } catch (error) {
-        console.error('Failed to fetch devices:', error);
-      }
-    };
-
-    if (networkId) {
-      fetchDevices();
-    }
-  }, [networkId]);
-
-  if (isEmpty) {
+  // 处理空状态
+  if (!devices.length) {
     return (
       <Box
         sx={{
@@ -92,7 +80,7 @@ const DeviceList = ({ networkId }) => {
   // 按 ProductType 分组设备
   const devicesByProductType = devices.reduce((acc, device) => {
     const productType = PRODUCT_TYPE_MAP[device.productType];
-    if (productType) {  // 只处理已映射的产品类型
+    if (productType) {
       if (!acc[productType]) {
         acc[productType] = [];
       }

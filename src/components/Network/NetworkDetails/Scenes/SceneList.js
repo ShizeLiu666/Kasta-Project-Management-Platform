@@ -1,90 +1,62 @@
-import { axiosInstance, getToken } from '../../../auth';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { useNetworkScenes } from '../useNetworkQueries';
 
 const SceneList = ({ networkId }) => {
-    // const [scenes, setScenes] = useState([]);
-    const [isEmpty, setIsEmpty] = useState(false);
+  const { 
+    data: scenes = [], 
+    isLoading, 
+    error 
+  } = useNetworkScenes(networkId);
 
-    useEffect(() => {
-        const fetchScenes = async () => {
-            try {
-                const token = getToken();
-                if (!token) {
-                    console.error("No token found");
-                    return;
-                }
-
-                const url = '/scene/list';
-                const initialResponse = await axiosInstance.post(url, {
-                    page: 1,
-                    size: 1,
-                    networkId: networkId
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const initialData = initialResponse.data;
-                const totalSize = initialData.data.totalElements;
-
-                if (totalSize === 0) {
-                    setIsEmpty(true);
-                    return;
-                }
-
-                const fullResponse = await axiosInstance.post(url, {
-                    page: 1,
-                    size: totalSize,
-                    networkId: networkId
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const fullData = fullResponse.data;
-                console.log(fullData);
-                // setScenes(fullData.data.content);
-            } catch (error) {
-                console.error('Failed to fetch scenes:', error);
-                setIsEmpty(true);
-            }
-        };
-
-        if (networkId) {
-            fetchScenes();
-        }
-    }, [networkId]);
-
-    if (isEmpty) {
-        return (
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '200px',
-                    color: '#666',
-                    backgroundColor: '#fafbfc',
-                    borderRadius: '12px',
-                    border: '1px dashed #dee2e6'
-                }}
-            >
-                <Typography variant="body1" color="text.secondary">
-                    No scenes found in this network
-                </Typography>
-            </Box>
-        );
-    }
-
+  if (isLoading) {
     return (
-        <Box>
-            {/* Scene list will be implemented here */}
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <Typography>Loading scenes...</Typography>
+      </Box>
     );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ color: 'error.main', p: 3 }}>
+        <Typography>{error.message || 'Failed to load scenes'}</Typography>
+      </Box>
+    );
+  }
+
+  if (!scenes.length) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '200px',
+          color: '#666',
+          backgroundColor: '#fafbfc',
+          borderRadius: '12px',
+          border: '1px dashed #dee2e6'
+        }}
+      >
+        <Typography variant="body1" color="text.secondary">
+          No scenes found in this network
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
+      {/* Scene list implementation will go here */}
+      {scenes.map(scene => (
+        <Box key={scene.sceneId}>
+          <Typography>{scene.name}</Typography>
+        </Box>
+      ))}
+    </Box>
+  );
 };
 
 export default SceneList;
