@@ -2,6 +2,19 @@ import React from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { useNetworkSchedules } from '../useNetworkQueries';
 
+// 添加一个辅助函数来格式化日期和时间
+const formatDateTime = (date) => {
+  if (!date) return '-';
+  return new Date(date).toLocaleString();
+};
+
+// 添加一个辅助函数来格式化星期
+const formatWeekdays = (weekdays) => {
+  if (!weekdays) return '-';
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return weekdays.split(',').map(day => days[parseInt(day)]).join(', ');
+};
+
 // 抽取成单独的组件以优化性能
 const ScheduleItem = ({ schedule }) => (
   <TableRow
@@ -20,20 +33,30 @@ const ScheduleItem = ({ schedule }) => (
         {schedule.scheduleId}
       </Typography>
     </TableCell>
-    <TableCell>{schedule.sortOrder}</TableCell>
     <TableCell>
-      {schedule.iconUrl && (
-        <Box
-          component="img"
-          src={schedule.iconUrl}
-          alt={schedule.name}
-          sx={{
-            width: 24,
-            height: 24,
-            objectFit: 'contain'
-          }}
-        />
-      )}
+      <Typography variant="body2">
+        {schedule.scheduleType === 0 ? 'Device' : 'Group'}
+      </Typography>
+    </TableCell>
+    <TableCell>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Typography variant="body2" sx={{ color: '#666' }}>
+          Start: {formatDateTime(schedule.startDate)}
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#666' }}>
+          End: {formatDateTime(schedule.endDate)}
+        </Typography>
+      </Box>
+    </TableCell>
+    <TableCell>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Typography variant="body2" sx={{ color: '#666' }}>
+          Time: {schedule.executionTime || '-'}
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#666' }}>
+          Days: {formatWeekdays(schedule.weekdays)}
+        </Typography>
+      </Box>
     </TableCell>
   </TableRow>
 );
@@ -97,10 +120,11 @@ const ScheduleList = ({ networkId }) => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Schedule Name</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Schedule ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Sort Order</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Icon</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>ID</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Type</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Date Range</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Execution</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
