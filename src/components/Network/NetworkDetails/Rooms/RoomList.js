@@ -3,189 +3,182 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useNetworkRooms, useRoomDevices } from '../useNetworkQueries';
 
 const RoomList = ({ networkId }) => {
-  const { 
-    data: rooms = [], 
-    isLoading, 
-    error 
-  } = useNetworkRooms(networkId);
+    const {
+        data: rooms = [],
+        isLoading,
+        error
+    } = useNetworkRooms(networkId);
 
-  if (isLoading) {
+    if (isLoading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                <Typography>Loading rooms...</Typography>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box sx={{ color: 'error.main', p: 3 }}>
+                <Typography>{error.message || 'Failed to load rooms'}</Typography>
+            </Box>
+        );
+    }
+
+    if (!rooms.length) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '200px',
+                    color: '#666',
+                    backgroundColor: '#fafbfc',
+                    borderRadius: '12px',
+                    border: '1px dashed #dee2e6'
+                }}
+            >
+                <Typography variant="body1" color="text.secondary">
+                    No rooms found in this network
+                </Typography>
+            </Box>
+        );
+    }
+
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <Typography>Loading rooms...</Typography>
-      </Box>
+        <Box>
+            {rooms.map((room) => (
+                <RoomItem key={room.roomId} room={room} networkId={networkId} />
+            ))}
+        </Box>
     );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ color: 'error.main', p: 3 }}>
-        <Typography>{error.message || 'Failed to load rooms'}</Typography>
-      </Box>
-    );
-  }
-
-  if (!rooms.length) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '200px',
-          color: '#666',
-          backgroundColor: '#fafbfc',
-          borderRadius: '12px',
-          border: '1px dashed #dee2e6'
-        }}
-      >
-        <Typography variant="body1" color="text.secondary">
-          No rooms found in this network
-        </Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Box>
-      {rooms.map((room) => (
-        <RoomItem key={room.roomId} room={room} networkId={networkId} />
-      ))}
-    </Box>
-  );
 };
 
 // 抽取成单独的组件以优化性能
 const RoomItem = ({ room, networkId }) => {
-  const { 
-    data: devices = [], 
-    isLoading: isLoadingDevices 
-  } = useRoomDevices(networkId, room.roomId);
+    const {
+        data: devices = [],
+        isLoading: isLoadingDevices
+    } = useRoomDevices(networkId, room.roomId);
 
-  return (
-    <Box key={room.roomId} sx={{ mb: 4 }}>
-      <Box sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        mb: 2,
-        pl: 0
-      }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 500,
-            color: '#fbcd0b',
-            mb: 0.5,
-            ml: 0.5
-          }}
-        >
-          {room.name}
-          <Typography
-            component="span"
-            variant="body2"
-            sx={{
-              color: '#95a5a6',
-              ml: 0.5,
-              fontWeight: 400
-            }}
-          >
-            - {room.roomId}
-          </Typography>
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            ml: 0.5,
-            color: 'text.secondary'
-          }}
-        >
-          ({devices.length} {devices.length === 1 ? 'device' : 'devices'})
-        </Typography>
-      </Box>
-
-      <TableContainer
-        component={Paper}
-        sx={{
-          boxShadow: 'none',
-          border: '1px solid #dee2e6',
-          borderRadius: '8px',
-          width: '100%'
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
-                Device Name
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {isLoadingDevices ? (
-              <TableRow>
-                <TableCell>Loading devices...</TableCell>
-              </TableRow>
-            ) : devices.map((device) => (
-              <TableRow
-                key={device.deviceId}
-                sx={{
-                  '&:last-child td, &:last-child th': { border: 0 },
-                  '&:hover': { backgroundColor: '#f8f9fa' }
-                }}
-              >
-                <TableCell>
-                  <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    overflow: 'hidden',
-                    maxWidth: '100%'
-                  }}>
-                    <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography
-                        variant="subtitle2"
+    return (
+        <Box key={room.roomId} sx={{ mb: 4 }}>
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                mb: 2,
+                pl: 0
+            }}>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontWeight: 500,
+                        color: '#fbcd0b',
+                        mb: 0.5,
+                        ml: 0.5
+                    }}
+                >
+                    {room.name}
+                    <Typography
+                        component="span"
+                        variant="body2"
                         sx={{
-                          fontWeight: 600,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {device.name}
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          sx={{
                             color: '#95a5a6',
                             ml: 0.5,
                             fontWeight: 400
-                          }}
-                        >
-                          - {device.deviceId}
-                        </Typography>
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
                         }}
-                      >
-                        {device.appearanceShortname}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
+                    >
+                        - {room.roomId}
+                    </Typography>
+                </Typography>
+                <Typography
+                    variant="body2"
+                    sx={{
+                        ml: 0.5,
+                        color: 'text.secondary'
+                    }}
+                >
+                    ({devices.length} {devices.length === 1 ? 'device' : 'devices'})
+                </Typography>
+            </Box>
+
+            <TableContainer
+                component={Paper}
+                sx={{
+                    boxShadow: 'none',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '8px',
+                    width: '100%'
+                }}
+            >
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
+                                Device Name
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>
+                                Location
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {isLoadingDevices ? (
+                            <TableRow>
+                                <TableCell colSpan={2}>Loading devices...</TableCell>
+                            </TableRow>
+                        ) : devices.map((device) => (
+                            <TableRow key={device.deviceId}>
+                                <TableCell>
+                                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                fontWeight: 600,
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                        >
+                                            {device.name}
+                                            <Typography
+                                                component="span"
+                                                variant="body2"
+                                                sx={{
+                                                    color: '#95a5a6',
+                                                    ml: 0.5,
+                                                    fontWeight: 400
+                                                }}
+                                            >
+                                                - {device.deviceId}
+                                            </Typography>
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                        >
+                                            {device.appearanceShortname}
+                                        </Typography>
+                                    </Box>
+                                </TableCell>
+                                <TableCell>
+                                    {`X: ${device.x}, Y: ${device.y}`}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
+    );
 };
 
 export default RoomList;

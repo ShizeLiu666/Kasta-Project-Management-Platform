@@ -59,6 +59,7 @@ export const queryFns = {
 };
 
 // Hooks
+// ** Members **
 export const useNetworkMembers = (networkId) => {
   return useQuery({
     queryKey: ['network-members', networkId],
@@ -69,6 +70,7 @@ export const useNetworkMembers = (networkId) => {
   });
 };
 
+// ** Devices **
 export const useNetworkDevices = (networkId) => {
   return useQuery({
     queryKey: ['network-devices', networkId],
@@ -79,6 +81,7 @@ export const useNetworkDevices = (networkId) => {
   });
 };
 
+// ** Group List **
 export const useNetworkGroups = (networkId) => {
   return useQuery({
     queryKey: ['network-groups', networkId],
@@ -89,26 +92,128 @@ export const useNetworkGroups = (networkId) => {
   });
 };
 
+// 特殊的查询（带额外参数的）
+// ** Group Devices **
+export const useGroupDevices = (networkId, groupId) => {
+    return useQuery({
+      queryKey: ['group-devices', networkId, groupId],
+      queryFn: async () => {
+        const token = getToken();
+        if (!token) throw new Error("No token found");
+  
+        const response = await axiosInstance.post('/groups/devices', {
+          groupId,
+          networkId
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (!response.data.success) {
+          throw new Error(response.data.errorMsg || 'Failed to fetch group devices');
+        }
+  
+        return response.data.data;
+      },
+      staleTime: 30000,
+      cacheTime: 5 * 60 * 1000,
+      enabled: !!groupId
+    });
+  };
+
+// ** Scene List **
 export const useNetworkScenes = (networkId) => {
   return useQuery({
     queryKey: ['network-scenes', networkId],
-    queryFn: () => queryFns.scenes(networkId),
+    queryFn: () => fetchPaginatedData('/scene/list', networkId),
     staleTime: 30000,
     cacheTime: 5 * 60 * 1000,
     enabled: !!networkId
   });
 };
 
+// ** Scene Devices **
+export const useSceneDevices = (networkId, sceneId) => {
+    return useQuery({
+      queryKey: ['scene-devices', networkId, sceneId],
+      queryFn: async () => {
+        const token = getToken();
+        if (!token) throw new Error("No token found");
+  
+        const response = await axiosInstance.post('/scene/get/items', {
+          sceneId,
+          networkId
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (!response.data.success) {
+          throw new Error(response.data.errorMsg || 'Failed to fetch scene devices');
+        }
+  
+        return response.data.data;
+      },
+      staleTime: 30000,
+      cacheTime: 5 * 60 * 1000,
+      enabled: !!sceneId
+    });
+  };
+
+// ** Room List **
 export const useNetworkRooms = (networkId) => {
   return useQuery({
     queryKey: ['network-rooms', networkId],
-    queryFn: () => queryFns.rooms(networkId),
+    queryFn: async () => {
+      const token = getToken();
+      if (!token) throw new Error("No token found");
+
+      const response = await axiosInstance.post('/rooms/list', {
+        networkId,
+        page: 1,
+        size: 100  // 或者其他合适的大小
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.errorMsg || 'Failed to fetch rooms');
+      }
+
+      return response.data.data.content;  // 返回 content 数组
+    },
     staleTime: 30000,
     cacheTime: 5 * 60 * 1000,
     enabled: !!networkId
   });
 };
 
+// ** Room Devices **
+export const useRoomDevices = (networkId, roomId) => {
+    return useQuery({
+      queryKey: ['room-devices', networkId, roomId],
+      queryFn: async () => {
+        const token = getToken();
+        if (!token) throw new Error("No token found");
+  
+        const response = await axiosInstance.post('/rooms/get/devices', {
+          roomId,
+          networkId
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (!response.data.success) {
+          throw new Error(response.data.errorMsg || 'Failed to fetch room devices');
+        }
+  
+        return response.data.data;
+      },
+      staleTime: 30000,
+      cacheTime: 5 * 60 * 1000,
+      enabled: !!roomId
+    });
+  };
+
+// ** Timers **
 export const useNetworkTimers = (networkId) => {
   return useQuery({
     queryKey: ['network-timers', networkId],
@@ -119,6 +224,7 @@ export const useNetworkTimers = (networkId) => {
   });
 };
 
+// ** Schedules **
 export const useNetworkSchedules = (networkId) => {
   return useQuery({
     queryKey: ['network-schedules', networkId],
@@ -126,58 +232,5 @@ export const useNetworkSchedules = (networkId) => {
     staleTime: 30000,
     cacheTime: 5 * 60 * 1000,
     enabled: !!networkId
-  });
-};
-
-// 特殊的查询（带额外参数的）
-export const useGroupDevices = (networkId, groupId) => {
-  return useQuery({
-    queryKey: ['group-devices', networkId, groupId],
-    queryFn: async () => {
-      const token = getToken();
-      if (!token) throw new Error("No token found");
-
-      const response = await axiosInstance.post('/groups/devices', {
-        groupId,
-        networkId
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!response.data.success) {
-        throw new Error(response.data.errorMsg || 'Failed to fetch group devices');
-      }
-
-      return response.data.data;
-    },
-    staleTime: 30000,
-    cacheTime: 5 * 60 * 1000,
-    enabled: !!groupId
-  });
-};
-
-export const useRoomDevices = (networkId, roomId) => {
-  return useQuery({
-    queryKey: ['room-devices', networkId, roomId],
-    queryFn: async () => {
-      const token = getToken();
-      if (!token) throw new Error("No token found");
-
-      const response = await axiosInstance.post('/rooms/devices', {
-        roomId,
-        networkId
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!response.data.success) {
-        throw new Error(response.data.errorMsg || 'Failed to fetch room devices');
-      }
-
-      return response.data.data;
-    },
-    staleTime: 30000,
-    cacheTime: 5 * 60 * 1000,
-    enabled: !!roomId
   });
 };

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
-import { useNetworkScenes } from '../useNetworkQueries';
+import { Box, Typography, Chip, Stack } from '@mui/material';
+import { useNetworkScenes, useSceneDevices } from '../useNetworkQueries';
+import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
 
 const SceneList = ({ networkId }) => {
   const { 
@@ -49,12 +50,120 @@ const SceneList = ({ networkId }) => {
 
   return (
     <Box>
-      {/* Scene list implementation will go here */}
-      {scenes.map(scene => (
-        <Box key={scene.sceneId}>
-          <Typography>{scene.name}</Typography>
-        </Box>
+      {scenes.map((scene) => (
+        <SceneItem key={scene.sceneId} scene={scene} networkId={networkId} />
       ))}
+    </Box>
+  );
+};
+
+const SceneItem = ({ scene, networkId }) => {
+  const { 
+    data: sceneItems = [], 
+  } = useSceneDevices(networkId, scene.sceneId);
+
+  const itemStats = sceneItems.reduce((acc, item) => {
+    if (item.entityType === 0) {
+      acc.devices.push(item);
+    } else {
+      acc.groups.push(item);
+    }
+    return acc;
+  }, { devices: [], groups: [] });
+
+  const devicesByProductType = itemStats.devices.reduce((acc, item) => {
+    const productType = PRODUCT_TYPE_MAP[item.productType];
+    if (productType) {
+      if (!acc[productType]) {
+        acc[productType] = [];
+      }
+      acc[productType].push(item);
+    }
+    return acc;
+  }, {});
+
+  const renderDeviceTable = (productType, devices) => {
+    try {
+      const DeviceComponent = require(`../Devices/Tables/${productType}/${devices[0].deviceType}`).default;
+      return (
+        <Box key={`${productType}-${devices[0].deviceType}`} sx={{ mb: 3 }}>
+          <DeviceComponent devices={devices} />
+        </Box>
+      );
+    } catch (error) {
+      console.error(`Failed to load component for ${productType}/${devices[0].deviceType}`, error);
+      return null;
+    }
+  };
+
+  return (
+    <Box key={scene.sceneId} sx={{ mb: 4 }}>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+        mb: 2
+      }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 500,
+            color: '#fbcd0b',
+          }}
+        >
+          {scene.name}
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{
+              color: '#95a5a6',
+              ml: 1,
+              fontWeight: 400
+            }}
+          >
+            - {scene.sceneId}
+          </Typography>
+        </Typography>
+
+        <Stack direction="row" spacing={1}>
+          {itemStats.devices.length > 0 && (
+            <Chip 
+              label={`Devices (${itemStats.devices.length})`}
+              size="small"
+              sx={{ 
+                backgroundColor: '#e1f5fe',
+                color: '#0288d1'
+              }}
+            />
+          )}
+          {itemStats.groups.length > 0 && (
+            <Chip 
+              label={`Groups (${itemStats.groups.length})`}
+              size="small"
+              sx={{ 
+                backgroundColor: '#f1f8e9',
+                color: '#558b2f'
+              }}
+            />
+          )}
+        </Stack>
+
+        {Object.entries(devicesByProductType)
+          .sort(([typeA], [typeB]) => typeA.localeCompare(typeB))
+          .map(([productType, devices]) => (
+            <React.Fragment key={productType}>
+              {renderDeviceTable(productType, devices)}
+            </React.Fragment>
+          ))}
+
+        {itemStats.groups.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1, color: '#558b2f' }}>
+              Groups
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };

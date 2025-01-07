@@ -1,17 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { useNetworkDevices } from '../useNetworkQueries';
-
-// 产品类型映射表
-const PRODUCT_TYPE_MAP = {
-  'myfiewpc': 'CCT_DOWNLIGHT',
-  '5atdh35u': 'DIMMER',
-  'tb7prezu': 'FAN', 
-  'xdddhvid': 'POWER_POINT',
-  'clniiasn': 'RGB_CW', 
-  'k8tngzhj': 'SOCKET_RELAY',                          
-  'fphjf3jj': 'THERMOSTAT',
-};
+import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
 
 const DeviceList = ({ networkId }) => {
   // 使用 React Query hook

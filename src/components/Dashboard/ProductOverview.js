@@ -19,7 +19,7 @@ const ProductOverview = () => {
   const [deviceTypes, setDeviceTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('all'); // 'all' 或 'supported'
+  const [viewMode, setViewMode] = useState('all');
 
   // 获取设备类型数据
   useEffect(() => {
@@ -106,7 +106,7 @@ const ProductOverview = () => {
               </Typography>
               <Grid container spacing={1}>
                 {devices.map((device) => (
-                  <Grid item xs={11.8} key={device.id}>
+                  <Grid item xs={6} sm={4} md={6} lg={4} key={device.id}>
                     <Card sx={{
                       boxShadow: 'none',
                       transition: 'transform 0.2s, box-shadow 0.2s',
@@ -118,8 +118,16 @@ const ProductOverview = () => {
                       borderStyle: 'solid',
                       borderColor: '#dee2e6',
                     }}>
-                      <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <CardContent sx={{ 
+                        py: 1,
+                        px: 1.5,
+                        '&:last-child': { pb: 1 }
+                      }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: 'column',
+                          gap: 0.5 
+                        }}>
                           <Chip
                             label={device.typeCode}
                             size="small"
@@ -127,15 +135,17 @@ const ProductOverview = () => {
                               backgroundColor: '95a5a6',
                               color: '#2c3e50',
                               fontWeight: 500,
-                              fontSize: '0.75rem'
+                              fontSize: '0.7rem'
                             }}
                           />
                           <Typography
                             variant="body2"
                             sx={{
                               color: '#666',
-                              fontSize: '0.75rem',
-                              ml: 1
+                              fontSize: '0.7rem',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
                             }}
                           >
                             {device.description}
@@ -171,7 +181,7 @@ const ProductOverview = () => {
               </Typography>
               <Grid container spacing={1}>
                 {models.map((model, index) => (
-                  <Grid item xs={11.8} key={index}>
+                  <Grid item xs={6} sm={4} md={6} lg={4} key={index}>
                     <Card sx={{
                       boxShadow: 'none',
                       transition: 'transform 0.2s, box-shadow 0.2s',
@@ -183,8 +193,16 @@ const ProductOverview = () => {
                       borderStyle: 'solid',
                       borderColor: '#dee2e6',
                     }}>
-                      <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CardContent sx={{ 
+                        py: 1,
+                        px: 1.5,
+                        '&:last-child': { pb: 1 }
+                      }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: 'column',
+                          gap: 0.5 
+                        }}>
                           <Chip
                             label={model}
                             size="small"
@@ -192,7 +210,7 @@ const ProductOverview = () => {
                               backgroundColor: '95a5a6',
                               color: '#2c3e50',
                               fontWeight: 500,
-                              fontSize: '0.75rem'
+                              fontSize: '0.7rem'
                             }}
                           />
                         </Box>
@@ -210,82 +228,115 @@ const ProductOverview = () => {
 
   return (
     <Box sx={{ 
-        p: 2, 
-        // height: '100%'  // 改为 100% 以适应父容器
-        overflow: 'auto' 
+        p: 1.5,
+        height: '420px',
+        display: 'flex',
+        flexDirection: 'column'
     }}>
-      <Box sx={{ mb: 2 }}>
-        {/* 第一行：标题和搜索框 */}
+      {/* 标题栏和搜索框组合 */}
+      <Box sx={{ mb: 1.5 }}>
         <Box sx={{ 
           display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' }, // 在小屏幕上垂直排列，大屏幕上水平排列
           justifyContent: 'space-between', 
-          alignItems: 'center',
-          mb: 2
+          alignItems: { xs: 'stretch', sm: 'center' }, // 在小屏幕上拉伸，大屏幕上居中
+          gap: 1, // 元素之间的间距
         }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#2c3e50', fontSize: '1rem' }}>
-            {viewMode === 'all' ? 'All Kasta Device Types' : 'Project Supported Device Types'}
-          </Typography>
-          <CustomSearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            placeholder="Search device types..."
-            width="200px"
-          />
-        </Box>
+          {/* 左侧：标题和切换按钮 */}
+          <Box sx={{ 
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 2,
+            minWidth: { sm: '50%' } // 在大屏幕上保持最小宽度
+          }}>
+            <Typography variant="h6" sx={{ 
+              fontWeight: 600, 
+              color: '#2c3e50', 
+              fontSize: '1rem',
+              whiteSpace: 'nowrap' // 防止标题换行
+            }}>
+              {viewMode === 'all' ? 'All Kasta Device Types' : 'Project Supported Types'}
+            </Typography>
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={handleViewModeChange}
+              size="small"
+            >
+              <ToggleButton
+                value="all"
+                disableRipple
+                sx={{ 
+                  textTransform: 'none',
+                  fontSize: '0.7rem',
+                  py: 0.3,
+                  px: 0.8,
+                  minWidth: 'auto',
+                  '&.Mui-selected': {
+                    backgroundColor: '#fbcd0b',
+                    color: '#2c3e50',
+                    '&:hover': {
+                      backgroundColor: '#fbcd0b',
+                    }
+                  }
+                }}
+              >
+                All
+              </ToggleButton>
+              <ToggleButton
+                value="supported"
+                disableRipple
+                sx={{ 
+                  textTransform: 'none',
+                  fontSize: '0.7rem',
+                  py: 0.3,
+                  px: 0.8,
+                  minWidth: 'auto',
+                  '&.Mui-selected': {
+                    backgroundColor: '#fbcd0b',
+                    color: '#2c3e50',
+                    '&:hover': {
+                      backgroundColor: '#fbcd0b',
+                    }
+                  }
+                }}
+              >
+                Supported
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
-        {/* 第二行：切换按钮组 */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            size="small"
-          >
-            <ToggleButton
-              value="all"
-              disableRipple
-              sx={{ 
-                textTransform: 'none',
-                '&.Mui-selected': {
-                  backgroundColor: '#fbcd0b',
-                  color: '#2c3e50',
-                  '&:hover': {
-                    backgroundColor: '#fbcd0b',
-                  }
-                }
-              }}
-            >
-              All Types
-            </ToggleButton>
-            <ToggleButton
-              value="supported"
-              disableRipple
-              sx={{ 
-                textTransform: 'none',
-                '&.Mui-selected': {
-                  backgroundColor: '#fbcd0b',
-                  color: '#2c3e50',
-                  '&:hover': {
-                    backgroundColor: '#fbcd0b',
-                  }
-                }
-              }}
-            >
-              Project Supported Types
-            </ToggleButton>
-          </ToggleButtonGroup>
+          {/* 右侧：搜索框 */}
+          <Box sx={{ 
+            flexGrow: 1,
+            maxWidth: { sm: '200px' } // 在大屏幕上限制搜索框宽度
+          }}>
+            <CustomSearchBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              placeholder="Search device types..."
+              width="100%"
+            />
+          </Box>
         </Box>
       </Box>
 
-      {isLoading ? (
-        <Grid container spacing={2}>
-          {[1, 2].map((item) => (
-            <Grid item xs={12} key={item}>
-              <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
-            </Grid>
-          ))}
-        </Grid>
-      ) : renderDeviceList()}
+      {/* 内容区域 */}
+      <Box sx={{ 
+        flexGrow: 1,
+        overflow: 'auto'
+      }}>
+        {isLoading ? (
+          <Grid container spacing={2}>
+            {[1, 2].map((item) => (
+              <Grid item xs={12} key={item}>
+                <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
+              </Grid>
+            ))}
+          </Grid>
+        ) : renderDeviceList()}
+      </Box>
     </Box>
   );
 };
