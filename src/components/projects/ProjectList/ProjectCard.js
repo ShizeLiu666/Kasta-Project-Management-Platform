@@ -141,6 +141,17 @@ const ProjectCard = ({
     // color: isHovered ? '#757575' : '#757575',
   };
 
+  // 添加一个新的函数来处理卡片点击
+  const handleCardClick = (event) => {
+    // 如果下拉菜单是打开的或者鼠标悬浮在下拉菜单按钮上，阻止卡片点击
+    if (isDropdownOpen || isDropdownHovered) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    onCardClick(event, project);
+  };
+
   return (
     <Card
       className="blog-card"
@@ -153,7 +164,7 @@ const ProjectCard = ({
         margin: '10px',
         overflow: 'hidden',
       }}
-      onClick={(event) => onCardClick(event, project)}
+      onClick={handleCardClick}  // 使用新的处理函数
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -167,11 +178,17 @@ const ProjectCard = ({
             <DropdownToggle 
               tag="span" 
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation();  // 确保点击按钮时不会触发卡片点击
                 handleMenuClick(e);
               }}
-              onMouseEnter={() => setIsDropdownHovered(true)}
-              onMouseLeave={() => setIsDropdownHovered(false)}
+              onMouseEnter={() => {
+                setIsDropdownHovered(true);
+                setMenuOpen(true);  // 通知父组件菜单被悬浮
+              }}
+              onMouseLeave={() => {
+                setIsDropdownHovered(false);
+                setMenuOpen(false);  // 通知父组件菜单不再被悬浮
+              }}
               style={{
                 cursor: 'pointer',
                 padding: '8px 8px 14px 8px',

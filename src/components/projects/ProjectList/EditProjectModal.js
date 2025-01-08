@@ -4,7 +4,7 @@ import { getToken } from '../../auth';
 import axiosInstance from '../../../config'; 
 import CustomModal from '../../CustomComponents/CustomModal';
 
-const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
+const EditProjectModal = ({ isOpen, toggle, fetchProjects, project, onEditSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -37,12 +37,11 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
   const isFormValid = () => {
     if (!project) return false;
     
-    // 检查每个字段是否有实际变更，同时处理可能的undefined值
-    const hasNameChange = formData.name.trim() !== (project.name || '').trim();
-    const hasAddressChange = formData.address.trim() !== (project.address || '').trim();
-    const hasDesChange = formData.des.trim() !== (project.des || '').trim();
-    
-    return hasNameChange || hasAddressChange || hasDesChange;
+    return (
+      formData.name !== project.name ||
+      formData.address !== project.address ||
+      formData.des !== project.des
+    );
   };
 
   const handleSubmit = async () => {
@@ -102,7 +101,16 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
         }
       );
       if (response.data.success) {
+        const updatedProject = {
+          ...project,
+          ...attributes
+        };
+        
         setSuccessAlert("Project updated successfully");
+        if (onEditSuccess) {
+          onEditSuccess(updatedProject);
+        }
+        
         setTimeout(() => {
           setSuccessAlert("");
           toggle();
@@ -113,7 +121,7 @@ const EditProjectModal = ({ isOpen, toggle, fetchProjects, project }) => {
       }
     } catch (err) {
       console.error("Error details:", err.response ? err.response.data : err);
-      setError("An unexpected error occurred.");
+      setError("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
     }
