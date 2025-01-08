@@ -191,6 +191,22 @@ const ProjectListComponent = () => {
     setFilteredProjects(filterProjects(searchTerm));
   }, [projects, searchTerm, filterProjects]);
 
+  const handleEditSuccess = (updatedProject) => {
+    setProjects(prevProjects => 
+      prevProjects.map(project => 
+        project.projectId === updatedProject.projectId 
+          ? { ...project, ...updatedProject }
+          : project
+      )
+    );
+    setAlert({
+      isOpen: true,
+      message: "Project updated successfully",
+      severity: "success",
+      duration: 1000
+    });
+  };
+
   return (
     <div>
       {/* <CustomAlert
@@ -366,6 +382,7 @@ const ProjectListComponent = () => {
         toggle={() => toggleEditProjectModal(null)}
         fetchProjects={fetchProjectList}
         project={selectedProject}
+        onEditSuccess={handleEditSuccess}
       />
 
       {selectedProject && (
