@@ -2,6 +2,23 @@ import React from 'react';
 import { Box, Typography, Chip, Stack } from '@mui/material';
 import { useNetworkScenes, useSceneDevices } from '../useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
+import CCT_DOWNLIGHT from '../Devices/Tables/CCT_DOWNLIGHT/CCT_DOWNLIGHT';
+import DIMMER from '../Devices/Tables/DIMMER/DIMMER';
+import FAN from '../Devices/Tables/FAN/FAN';
+import POWER_POINT from '../Devices/Tables/POWER_POINT/POWER_POINT';
+import RGB_CW from '../Devices/Tables/RGB_CW/RGB_CW';
+import SOCKET_RELAY from '../Devices/Tables/SOCKET_RELAY/SOCKET_RELAY';
+import THERMOSTAT from '../Devices/Tables/THERMOSTAT/THERMOSTAT';
+
+const DEVICE_COMPONENTS = {
+  CCT_DOWNLIGHT,
+  DIMMER,
+  FAN,
+  POWER_POINT,
+  RGB_CW,
+  SOCKET_RELAY,
+  THERMOSTAT
+};
 
 const SceneList = ({ networkId }) => {
   const { 
@@ -59,8 +76,13 @@ const SceneList = ({ networkId }) => {
 
 const SceneItem = ({ scene, networkId }) => {
   const { 
-    data: sceneItems = [], 
+    data: sceneItems = [],
+    isLoading,
   } = useSceneDevices(networkId, scene.sceneId);
+
+  console.log('Scene Items Raw:', sceneItems);
+  console.log('NetworkId:', networkId);
+  console.log('SceneId:', scene.sceneId);
 
   const itemStats = sceneItems.reduce((acc, item) => {
     if (item.entityType === 0) {
@@ -71,27 +93,69 @@ const SceneItem = ({ scene, networkId }) => {
     return acc;
   }, { devices: [], groups: [] });
 
+  console.log('Item Stats:', itemStats);
+
   const devicesByProductType = itemStats.devices.reduce((acc, item) => {
-    const productType = PRODUCT_TYPE_MAP[item.productType];
-    if (productType) {
-      if (!acc[productType]) {
-        acc[productType] = [];
+    console.log('Processing device item:', item);
+    console.log('Device Info:', item.deviceInfo);
+    
+    if (item.deviceInfo) {
+      const productType = PRODUCT_TYPE_MAP[item.deviceInfo.productType];
+      console.log('Product Type Mapping:', {
+        original: item.deviceInfo.productType,
+        mapped: productType
+      });
+      
+      if (productType) {
+        if (!acc[productType]) {
+          acc[productType] = [];
+        }
+        acc[productType].push({
+          ...item.deviceInfo,
+          specificAttributes: item.attributes
+        });
       }
-      acc[productType].push(item);
     }
     return acc;
   }, {});
 
+  console.log('Devices By Product Type:', devicesByProductType);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <Typography>Loading scene devices...</Typography>
+      </Box>
+    );
+  }
+
+  if (!sceneItems || sceneItems.length === 0) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography color="text.secondary">
+          No devices in this scene
+        </Typography>
+      </Box>
+    );
+  }
+
   const renderDeviceTable = (productType, devices) => {
     try {
-      const DeviceComponent = require(`../Devices/Tables/${productType}/${devices[0].deviceType}`).default;
+      const deviceType = devices[0].deviceType;
+      const DeviceComponent = DEVICE_COMPONENTS[deviceType];
+      
+      if (!DeviceComponent) {
+        console.warn(`No component found for device type: ${deviceType}`);
+        return null;
+      }
+
       return (
-        <Box key={`${productType}-${devices[0].deviceType}`} sx={{ mb: 3 }}>
+        <Box key={`${productType}-${deviceType}`} sx={{ mb: 3 }}>
           <DeviceComponent devices={devices} />
         </Box>
       );
     } catch (error) {
-      console.error(`Failed to load component for ${productType}/${devices[0].deviceType}`, error);
+      console.error(`Failed to load component for ${productType}`, error);
       return null;
     }
   };

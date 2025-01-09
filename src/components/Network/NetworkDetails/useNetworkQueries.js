@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { axiosInstance, getToken } from '../../../components/auth';
+import React from 'react';
 
 // 抽离通用的获取分页数据的函数
 const fetchPaginatedData = async (url, networkId) => {
@@ -133,30 +134,46 @@ export const useNetworkScenes = (networkId) => {
 
 // ** Scene Devices **
 export const useSceneDevices = (networkId, sceneId) => {
-    return useQuery({
-      queryKey: ['scene-devices', networkId, sceneId],
-      queryFn: async () => {
-        const token = getToken();
-        if (!token) throw new Error("No token found");
-  
-        const response = await axiosInstance.post('/scene/get/items', {
-          sceneId,
-          networkId
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-  
-        if (!response.data.success) {
-          throw new Error(response.data.errorMsg || 'Failed to fetch scene devices');
-        }
-  
-        return response.data.data;
-      },
-      staleTime: 30000,
-      cacheTime: 5 * 60 * 1000,
-      enabled: !!sceneId
-    });
-  };
+  // 获取网络中的所有设备作为查找表
+  const { data: networkDevices = [] } = useNetworkDevices(networkId);
+  const devicesMap = React.useMemo(() => {
+    return networkDevices.reduce((acc, device) => {
+      acc[device.deviceId] = device;
+      return acc;
+    }, {});
+  }, [networkDevices]);
+
+  // 获取场景设备
+  const sceneDevicesQuery = useQuery({
+    queryKey: ['scene-devices', networkId, sceneId],
+    queryFn: async () => {
+      const token = getToken();
+      if (!token) throw new Error("No token found");
+
+      const response = await axiosInstance.post('/scene/get/items', {
+        sceneId,
+        networkId
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.errorMsg || 'Failed to fetch scene devices');
+      }
+
+      // 合并设备信息和场景状态
+      return response.data.data.map(sceneDevice => ({
+        ...sceneDevice,
+        deviceInfo: devicesMap[sceneDevice.deviceId] || null,
+      }));
+    },
+    staleTime: 30000,
+    cacheTime: 5 * 60 * 1000,
+    enabled: !!sceneId && !!networkId
+  });
+
+  return sceneDevicesQuery;
+};
 
 // ** Room List **
 export const useNetworkRooms = (networkId) => {
