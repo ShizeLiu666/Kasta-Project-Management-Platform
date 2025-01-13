@@ -234,14 +234,9 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
               >
                 <Box display="flex" flexDirection="column" style={{ flex: 1 }}>
                   <Box display="flex" alignItems="center" justifyContent="space-between" style={{ width: '50%' }}>
-                    <span style={{ fontSize: '18px', fontWeight: '500' }}>
-                      {roomTypeName}
-                    </span>
-                  </Box>
-                  {roomDetails && userRole === 'OWNER' && (
-                    <Box display="flex" alignItems="center" style={{ marginTop: '5px' }}>
-                      <span style={{ fontSize: '14px', color: '#666' }}>
-                        Authorization Code: {roomDetails.authorizationCode} | Remaining Uses: {10 - roomDetails.count}
+                    <Box display="flex" alignItems="center">
+                      <span style={{ fontSize: '18px', fontWeight: '500', marginRight: '8px' }}>
+                        {roomTypeName}
                       </span>
                       <Tooltip title="Configuration Guidelines">
                         <IconButton
@@ -249,7 +244,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                           size="medium"
                           sx={{
                             color: '#fbcd0b',
-                            ml: 1,
                             padding: '4px',
                             '&:hover': {
                               color: '#e3b900',
@@ -259,6 +253,23 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                           <HelpOutlineIcon fontSize="medium"/>
                         </IconButton>
                       </Tooltip>
+                    </Box>
+                  </Box>
+                  {roomDetails && userRole === 'OWNER' && (
+                    <Box display="flex" flexDirection="column" style={{ marginTop: '5px' }}>
+                      <Box display="flex" alignItems="center">
+                        <span style={{ fontSize: '14px', color: '#666' }}>
+                          Authorization Code: {roomDetails.authorizationCode}
+                        </span>
+                      </Box>
+                      <Box display="flex" flexDirection="column" style={{ marginTop: '2px' }}>
+                        <span style={{ fontSize: '14px', color: '#666' }}>
+                          Config Uploads: --/10 | Commission Usage: --/50
+                        </span>
+                        {/* <span style={{ fontSize: '14px', color: '#666' }}>
+                          Remaining Uses: {10 - roomDetails.count}
+                        </span> */}
+                      </Box>
                     </Box>
                   )}
                 </Box>

@@ -36,6 +36,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
       if (response.data.success) {
         setRoomTypes(response.data.data);
         setFilteredRoomTypes(response.data.data);
+        console.log(response.data.data);
       } else {
         console.error("Error fetching room types:", response.data.errorMsg);
       }
