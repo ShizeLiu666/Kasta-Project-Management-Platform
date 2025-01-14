@@ -218,6 +218,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
         onRoomTypeCreated={handleRoomTypeCreated}
         validAuthCodes={validAuthCodes}
         refreshAuthCodes={loadAuthCodes}
+        existingRoomTypes={roomTypes}
       />
     </div>
   );

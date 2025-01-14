@@ -16,9 +16,10 @@ const CreateRoomTypeModal = ({
   projectId, 
   onRoomTypeCreated,
   validAuthCodes,
-  refreshAuthCodes
+  refreshAuthCodes,
+  existingRoomTypes
 }) => {
-  console.log('CreateRoomTypeModal validAuthCodes:', validAuthCodes);
+  // console.log('CreateRoomTypeModal validAuthCodes:', validAuthCodes);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -32,6 +33,7 @@ const CreateRoomTypeModal = ({
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(true);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   const resetState = () => {
     setFormData({
@@ -90,8 +92,20 @@ const CreateRoomTypeModal = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
     if (name === 'typeCode') {
       setIsTypeCodeManuallyEdited(true);
+    }
+    
+    if (name === 'name') {
+      const trimmedValue = value.trim();
+      if (trimmedValue && existingRoomTypes?.some(
+        room => room.name.toLowerCase() === trimmedValue.toLowerCase()
+      )) {
+        setNameError("* This room type name already exists");
+      } else {
+        setNameError("");
+      }
     }
   };
 
@@ -108,7 +122,10 @@ const CreateRoomTypeModal = ({
   };
 
   const isFormValid = () => {
-    return formData.name && formData.typeCode && formData.authorizationCode;
+    return formData.name && 
+           formData.typeCode && 
+           formData.authorizationCode && 
+           !nameError;
   };
 
   const handleSubmit = () => {
@@ -153,9 +170,13 @@ const CreateRoomTypeModal = ({
         resetState();
       } else {
         setError(response.data.errorMsg || "Error creating room type.");
+        setConfirmModalOpen(false);
+        setShowCreateModal(true);
       }
     } catch (error) {
       setError("An unexpected error occurred.");
+      setConfirmModalOpen(false);
+      setShowCreateModal(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -261,6 +282,15 @@ const CreateRoomTypeModal = ({
               onChange={handleChange}
               required
             />
+            {nameError && (
+              <div style={{ 
+                color: '#dc3545', 
+                fontSize: '0.875rem',
+                marginTop: '4px' 
+              }}>
+                {nameError}
+              </div>
+            )}
           </FormGroup>
           <FormGroup>
             <Label for="typeCode">
