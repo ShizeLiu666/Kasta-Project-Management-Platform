@@ -123,38 +123,6 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
     fetchRoomDetail();
   }, [projectRoomId, fetchRoomDetail]);
 
-  useEffect(() => {
-    if (roomDetails && roomDetails.count === 9 && userRole === 'OWNER') {
-      showAlert(
-        "You have only one use remaining. Please prepare to update your authorization code.",
-        "warning",
-        null  // 设置为 null 使得警告不会自动消失
-      );
-    }
-  }, [roomDetails, userRole]);
-
-  // useEffect(() => {
-  //   if (config) {
-  //     console.log('Config:', JSON.stringify(config, null, 2));
-  //     if (config.devices) {
-  //       console.log('Devices:', JSON.stringify(config.devices, null, 2));
-  //     }
-  //   }
-  // }, [config]);
-
-  // const processDevices = (devices) => {
-  //   if (Array.isArray(devices)) {
-  //     return devices;
-  //   }
-  //   if (typeof devices === 'object' && devices !== null) {
-  //     return Object.entries(devices).map(([key, value]) => ({
-  //       deviceName: key,
-  //       ...value
-  //     }));
-  //   }
-  //   return [];
-  // };
-
   const handleCloudUploadClick = () => {
     setIsEditing(true);
   };
@@ -213,6 +181,13 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
     fetchRoomDetail();
   };
 
+  const getUsageColor = (remaining, total) => {
+    const percentage = (remaining / total) * 100;
+    if (percentage <= 10) return '#dc3545'; // 红色：剩余 ≤ 10%
+    if (percentage <= 30) return '#ff9800'; // 橙色：剩余 ≤ 30%
+    return '#666';                          // 默认灰色
+  };
+
   return (
     <div>
       <CustomAlert
@@ -221,6 +196,12 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
         message={alert.message}
         severity={alert.severity}
         autoHideDuration={alert.duration}
+        style={{
+          position: 'sticky',
+          top: '16px',
+          zIndex: 1000,
+          marginBottom: '16px'
+        }}
       />
       <Row>
         <Col>
@@ -263,12 +244,22 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                         </span>
                       </Box>
                       <Box display="flex" flexDirection="column" style={{ marginTop: '2px' }}>
-                        <span style={{ fontSize: '14px', color: '#666' }}>
-                          Config Uploads: --/10 | Commission Usage: --/50
+                        <span style={{ fontSize: '14px' }}>
+                          Config Uploads:{' '}
+                          <span style={{ 
+                            color: getUsageColor(10 - roomDetails.configUploadCount, 10),
+                            fontWeight: 'bold'
+                          }}>
+                            {roomDetails.configUploadCount ? `${10 - roomDetails.configUploadCount}/10` : '10/10'}
+                          </span>
+                          {' '}| Commission Usage:{' '}
+                          <span style={{ 
+                            color: getUsageColor(50 - roomDetails.commissionCount, 50),
+                            fontWeight: 'bold'
+                          }}>
+                            {roomDetails.commissionCount ? `${50 - roomDetails.commissionCount}/50` : '50/50'}
+                          </span>
                         </span>
-                        {/* <span style={{ fontSize: '14px', color: '#666' }}>
-                          Remaining Uses: {10 - roomDetails.count}
-                        </span> */}
                       </Box>
                     </Box>
                   )}
@@ -289,7 +280,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                           Download JSON
                         </CustomButton>
                       )}
-                      {roomDetails && roomDetails.count < 10 && (
+                      {roomDetails && roomDetails.configUploadCount < 10 && (
                         <CustomButton
                           onClick={handleCloudUploadClick}
                           icon={<CloudUploadIcon />}
@@ -301,7 +292,7 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                           Upload / Overwrite
                         </CustomButton>
                       )}
-                      {roomDetails && roomDetails.count === 10 && (
+                      {roomDetails && roomDetails.configUploadCount === 10 && (
                         <CustomButton
                           onClick={handleUpdateAuthCode}
                           icon={<UpgradeIcon />}

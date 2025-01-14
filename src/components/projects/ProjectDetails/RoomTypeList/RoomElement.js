@@ -30,6 +30,8 @@ const UsageText = styled(Typography)(({ theme }) => ({
 
 const RoomElement = ({ roomType, onDelete, onEdit, onClick, userRole }) => {
   const isOwner = userRole === 'OWNER';
+  const remainingConfigUploads = 10 - (roomType.configUploadCount || 0);
+  const remainingCommissions = 50 - (roomType.commissionCount || 0);
 
   return (
     <Demo>
@@ -53,12 +55,10 @@ const RoomElement = ({ roomType, onDelete, onEdit, onClick, userRole }) => {
         />
         <UsageInfo>
           <UsageText>
-            {/* Config Uploads: {remainingConfigUploads}/10 */}
-            Config Uploads: --/10
+            Config Uploads: {remainingConfigUploads}/10
           </UsageText>
           <UsageText>
-            {/* Commission Usage: {remainingCommissions}/50 */}
-            Commission Usage: --/50
+            Commission Usage: {remainingCommissions}/50
           </UsageText>
         </UsageInfo>
         {isOwner && (

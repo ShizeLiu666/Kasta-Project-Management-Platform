@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, FormGroup, Label, Input } from "reactstrap";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
@@ -10,7 +10,16 @@ import CustomAlert from '../../../CustomComponents/CustomAlert';
 
 const filter = createFilterOptions();
 
-const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) => {
+const CreateRoomTypeModal = ({ 
+  isOpen, 
+  toggle, 
+  projectId, 
+  onRoomTypeCreated,
+  validAuthCodes,
+  refreshAuthCodes
+}) => {
+  console.log('CreateRoomTypeModal validAuthCodes:', validAuthCodes);
+  
   const [formData, setFormData] = useState({
     name: "",
     typeCode: "",
@@ -20,100 +29,9 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTypeCodeManuallyEdited, setIsTypeCodeManuallyEdited] = useState(false);
-  const [validAuthCodes, setValidAuthCodes] = useState([]);
-  const [isSuperUser, setIsSuperUser] = useState(false);
-  const [currentUsername, setCurrentUsername] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(true);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
-  useEffect(() => {
-    const userDetails = JSON.parse(localStorage.getItem('userDetails'));
-    if (userDetails) {
-      setIsSuperUser(userDetails.userType === 99999);
-      setCurrentUsername(userDetails.username);
-    }
-  }, []);
-
-  const fetchValidAuthCodes = useCallback(async (token) => {
-    try {
-      const response = await axiosInstance.get('/authorization-codes', {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { page: 0, size: 1000 },
-      });
-
-      if (response.data.success) {
-        const validCodes = response.data.data.content
-          .filter(code => 
-            code.usageCount < 10 && 
-            (!code.usedBy || code.usedBy === currentUsername) &&
-            code.valid === true
-          )
-          .map(code => ({
-            code: code.code,
-            label: `${code.code} (${10 - code.usageCount} uses left)`,
-            usageCount: code.usageCount
-          }));
-        setValidAuthCodes(validCodes);
-      } else {
-        console.error('Failed to fetch auth codes:', response.data.errorMsg);
-      }
-    } catch (error) {
-      console.error('Error fetching auth codes:', error);
-    }
-  }, [currentUsername]);
-
-  const fetchProjectRoomCodes = useCallback(async (token) => {
-    try {
-      const initialResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { page: 0, size: 1 },
-      });
-
-      if (initialResponse.data.success) {
-        const totalElements = initialResponse.data.data.totalElements;
-
-        const fullResponse = await axiosInstance.get('/authorization-codes/project-room-code', {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { page: 0, size: totalElements },
-        });
-
-        if (fullResponse.data.success) {
-          const validCodes = fullResponse.data.data.content
-            .filter(code => 
-              code.usageCount < 10 && 
-              (!code.usedBy || code.usedBy === currentUsername) &&
-              code.valid === true
-            )
-            .map(code => ({
-              code: code.code,
-              label: `${code.code} (${10 - code.usageCount} uses left)`,
-              usageCount: code.usageCount
-            }));
-          setValidAuthCodes(validCodes);
-        } else {
-          console.error('Failed to fetch project room codes:', fullResponse.data.errorMsg);
-        }
-      } else {
-        console.error('Failed to fetch initial project room codes:', initialResponse.data.errorMsg);
-      }
-    } catch (error) {
-      console.error('Error fetching project room codes:', error);
-    }
-  }, [currentUsername]);
-
-  const fetchAuthCodes = useCallback(async () => {
-    try {
-      const token = getToken();
-      if (isSuperUser) {
-        await fetchValidAuthCodes(token);
-      } else {
-        await fetchProjectRoomCodes(token);
-      }
-    } catch (error) {
-      console.error('Error fetching auth codes:', error);
-    }
-  }, [isSuperUser, fetchValidAuthCodes, fetchProjectRoomCodes]);
 
   const resetState = () => {
     setFormData({
@@ -131,9 +49,9 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
   useEffect(() => {
     if (isOpen) {
       resetState();
-      fetchAuthCodes();
+      refreshAuthCodes();
     }
-  }, [isOpen, fetchAuthCodes]);
+  }, [isOpen, refreshAuthCodes]);
 
   const handleMainToggle = () => {
     resetState();
@@ -179,16 +97,12 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
 
   const handleAuthCodeChange = (event, newValue) => {
     if (typeof newValue === 'string') {
-      // 用户输入了自定义的 Auth Code
       setFormData(prev => ({ ...prev, authorizationCode: newValue.trim() }));
     } else if (newValue && newValue.inputValue) {
-      // 用户创建了新的 Auth Code
       setFormData(prev => ({ ...prev, authorizationCode: newValue.inputValue.trim() }));
     } else if (newValue && newValue.code) {
-      // 用户选择了预设的 Auth Code
       setFormData(prev => ({ ...prev, authorizationCode: newValue.code.trim() }));
     } else {
-      // 清空选择
       setFormData(prev => ({ ...prev, authorizationCode: '' }));
     }
   };
@@ -267,7 +181,7 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
             </Label>
             <Autocomplete
               id="auth-code-select"
-              options={validAuthCodes}
+              options={validAuthCodes || []}
               getOptionLabel={(option) => {
                 if (typeof option === 'string') {
                   return option;
@@ -275,13 +189,15 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
                 if (option.inputValue) {
                   return option.inputValue;
                 }
-                return option.label;
+                return `${option.code} (${10 - option.configUploadCount} uploads left)`;
               }}
               filterOptions={(options, params) => {
                 const filtered = filter(options, params);
                 const { inputValue } = params;
-                // 建议创建新值
-                const isExisting = options.some((option) => inputValue === option.code);
+                const isExisting = options.some((option) => 
+                  option.code === inputValue || 
+                  option.label === inputValue
+                );
                 if (inputValue !== '' && !isExisting) {
                   filtered.push({
                     inputValue,
@@ -292,7 +208,7 @@ const CreateRoomTypeModal = ({ isOpen, toggle, projectId, onRoomTypeCreated }) =
               }}
               renderOption={(props, option) => (
                 <Box component="li" {...props} key={option.code || option.inputValue}>
-                  {option.label}
+                  {option.inputValue ? option.label : `${option.code} (${10 - option.configUploadCount} uploads left)`}
                 </Box>
               )}
               freeSolo
