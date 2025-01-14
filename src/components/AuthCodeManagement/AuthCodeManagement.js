@@ -22,9 +22,63 @@ import TableRow from '@mui/material/TableRow';
 import TablePagination from '@mui/material/TablePagination';
 import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
 // import { backdropClasses } from '@mui/material';
 
 // const { SearchBar } = Search;
+
+const TruncatedCell = ({ text, maxLength = 20, canCopy = false, onCopy }) => {
+  const truncatedText = text?.length > maxLength 
+    ? `${text.substring(0, maxLength)}...` 
+    : text || '-';
+
+  const cellContent = (
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center',
+      maxWidth: '100%'
+    }}>
+      {canCopy && (
+        <ContentCopyIcon 
+          style={{ marginRight: '10px', cursor: 'pointer', flexShrink: 0 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCopy(text);
+          }}
+          fontSize="small"
+        />
+      )}
+      <Tooltip 
+        title={text || '-'}
+        placement="top"
+        arrow
+        sx={{
+          tooltip: {
+            backgroundColor: '#333',
+            fontSize: '0.875rem',
+            padding: '8px 12px',
+            maxWidth: 'none'  // 允许 tooltip 根据内容自动调整宽度
+          },
+          arrow: {
+            color: '#333'
+          }
+        }}
+      >
+        <div
+          style={{ 
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {truncatedText}
+        </div>
+      </Tooltip>
+    </div>
+  );
+
+  return cellContent;
+};
 
 const AuthCodeManagement = () => {
   const [authCodes, setAuthCodes] = useState([]);
@@ -260,17 +314,19 @@ const AuthCodeManagement = () => {
                 component={Paper}
                 sx={{
                   boxShadow: 'none',
-                  border: '1px solid #dee2e6'
+                  border: '1px solid #dee2e6',
+                  overflowX: 'auto',    // 只启用水平滚动
+                  overflowY: 'hidden'   // 禁用垂直滚动
                 }}
               >
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Code</TableCell>
-                      <TableCell>Creator</TableCell>
+                      <TableCell sx={{ minWidth: 150, maxWidth: 150 }}>Code</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Creator</TableCell>
                       <TableCell 
                         onClick={() => handleRequestSort('createDate')}
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', minWidth: 160, maxWidth: 160 }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           Create Date
@@ -279,59 +335,39 @@ const AuthCodeManagement = () => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>Used By</TableCell>
-                      <TableCell 
-                        onClick={() => handleRequestSort('usageCount')}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          Usage Count
-                          {orderBy === 'usageCount' && (
-                            order === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell 
-                        onClick={() => handleRequestSort('valid')}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          Valid
-                          {orderBy === 'valid' && (
-                            order === 'asc' ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>Actions</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Used By</TableCell>
+                      <TableCell sx={{ minWidth: 120, maxWidth: 120 }}>Room ID</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Upload Cnt</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 120 }}>Comm. Cnt</TableCell>
+                      <TableCell sx={{ minWidth: 80, maxWidth: 80 }}>Valid</TableCell>
+                      <TableCell sx={{ minWidth: 150, maxWidth: 150 }}>Note</TableCell>
+                      <TableCell sx={{ minWidth: 100, maxWidth: 100 }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {sortData(filteredAuthCodes)
                       .slice(muiPage * rowsPerPage, muiPage * rowsPerPage + rowsPerPage)
                       .map((authCode) => (
-                        <TableRow
-                          key={authCode.code}
-                          sx={{
-                            '&:hover': {
-                              backgroundColor: '#f5f5f5',
-                              cursor: 'pointer',
-                            },
-                          }}
-                        >
+                        <TableRow key={authCode.code}>
                           <TableCell>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <ContentCopyIcon 
-                                style={{ marginRight: '10px', cursor: 'pointer' }}
-                                onClick={() => copyToClipboard(authCode.code)}
-                                fontSize="small"
-                              />
-                              {authCode.code}
-                            </div>
+                            <TruncatedCell 
+                              text={authCode.code} 
+                              canCopy={true} 
+                              onCopy={copyToClipboard}
+                            />
                           </TableCell>
-                          <TableCell>{authCode.creator}</TableCell>
+                          <TableCell>
+                            <TruncatedCell text={authCode.creator} />
+                          </TableCell>
                           <TableCell>{new Date(authCode.createDate).toLocaleString()}</TableCell>
-                          <TableCell>{authCode.usedBy}</TableCell>
-                          <TableCell>{authCode.usageCount}</TableCell>
+                          <TableCell>
+                            <TruncatedCell text={authCode.usedBy} />
+                          </TableCell>
+                          <TableCell>
+                            <TruncatedCell text={authCode.configRoomId} />
+                          </TableCell>
+                          <TableCell>{authCode.configUploadCount}</TableCell>
+                          <TableCell>{authCode.commissionCount}</TableCell>
                           <TableCell>
                             <Chip
                               label={authCode.valid ? 'Yes' : 'No'}
@@ -339,14 +375,15 @@ const AuthCodeManagement = () => {
                               size="small"
                               sx={{
                                 minWidth: '60px',
-                                '& .MuiChip-label': {
-                                  px: 2,
-                                },
+                                '& .MuiChip-label': { px: 2 },
                                 backgroundColor: authCode.valid ? '#e6f4ea' : '#fde7e7',
                                 color: authCode.valid ? '#1e4620' : '#c62828',
                                 borderRadius: '4px',
                               }}
                             />
+                          </TableCell>
+                          <TableCell>
+                            <TruncatedCell text={authCode.note} />
                           </TableCell>
                           <TableCell>
                             <Button
