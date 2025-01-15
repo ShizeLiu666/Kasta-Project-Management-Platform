@@ -313,16 +313,24 @@ const AuthCodeManagement = () => {
   };
 
   // 渲染表头单元格
-  const renderHeaderCell = (id, label, width) => {
+  const renderHeaderCell = (id, label, width, hideOnMobile = false) => {
     const isSortable = id in sortableColumns;
     
     return (
       <TableCell 
         key={id}
         sx={{ 
-          minWidth: width, 
+          minWidth: width,
           maxWidth: width,
           cursor: isSortable ? 'pointer' : 'default',
+          // 在小屏幕上隐藏非关键列
+          display: {
+            xs: hideOnMobile ? 'none' : 'table-cell',
+            md: 'table-cell'
+          },
+          // 允许文本换行
+          whiteSpace: 'normal',
+          wordBreak: 'break-word'
         }}
       >
         {isSortable ? (
@@ -331,9 +339,7 @@ const AuthCodeManagement = () => {
             direction={orderBy === id ? order : 'asc'}
             onClick={() => handleRequestSort(id)}
             sx={{
-              '&:hover': {
-                color: '#fbcd0b',
-              },
+              '&:hover': { color: '#fbcd0b' },
               '&.Mui-active': {
                 color: '#fbcd0b',
                 '& .MuiTableSortLabel-icon': {
@@ -524,13 +530,17 @@ const AuthCodeManagement = () => {
                 sx={{
                   boxShadow: 'none',
                   border: '1px solid #dee2e6',
-                  overflowX: 'auto',
-                  overflowY: 'hidden',
-                  // Disable ripple globally for the table
+                  width: '100%',
+                  '& .MuiTable-root': {
+                    tableLayout: 'fixed', // 使用固定表格布局
+                  },
+                  '& .MuiTableCell-root': {
+                    padding: {
+                      xs: '8px 4px', // 小屏幕使用更小的padding
+                      md: '16px 8px'
+                    }
+                  },
                   '& .MuiButtonBase-root': {
-                    // '&:hover': {
-                    //   backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                    // },
                     '& .MuiTouchRipple-root': {
                       display: 'none'
                     }
@@ -540,16 +550,16 @@ const AuthCodeManagement = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      {renderHeaderCell('code', 'Code', 150)}
-                      {renderHeaderCell('creator', 'Creator', 120)}
-                      {renderHeaderCell('createDate', 'Create Date', 160)}
-                      {renderHeaderCell('usedBy', 'Used By', 120)}
-                      {renderHeaderCell('configRoomId', 'Room ID', 120)}
-                      {renderHeaderCell('configUploadCount', 'Upload Cnt', 120)}
-                      {renderHeaderCell('commissionCount', 'Comm. Cnt', 120)}
-                      {renderHeaderCell('valid', 'Valid', 80)}
-                      {renderHeaderCell('note', 'Note', 150)}
-                      {renderHeaderCell('actions', 'Actions', 100)}
+                      {renderHeaderCell('code', 'Code', '15%')}
+                      {renderHeaderCell('creator', 'Creator', '10%')}
+                      {renderHeaderCell('createDate', 'Create Date', '15%')}
+                      {renderHeaderCell('usedBy', 'Used By', '10%', true)} {/* 小屏幕隐藏 */}
+                      {renderHeaderCell('configRoomId', 'Room ID', '10%', true)} {/* 小屏幕隐藏 */}
+                      {renderHeaderCell('configUploadCount', 'Upload Cnt', '10%')}
+                      {renderHeaderCell('commissionCount', 'Comm. Cnt', '10%')}
+                      {renderHeaderCell('valid', 'Valid', '8%')}
+                      {renderHeaderCell('note', 'Note', '12%', true)} {/* 小屏幕隐藏 */}
+                      {renderHeaderCell('actions', 'Actions', '10%')}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -557,26 +567,28 @@ const AuthCodeManagement = () => {
                       .slice(muiPage * rowsPerPage, muiPage * rowsPerPage + rowsPerPage)
                       .map((authCode) => (
                         <TableRow key={authCode.code}>
-                          <TableCell>
-                            <TruncatedCell 
-                              text={authCode.code} 
-                              canCopy={true} 
-                              onCopy={copyToClipboard}
-                            />
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                            <TruncatedCell text={authCode.code} canCopy={true} onCopy={copyToClipboard} />
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
                             <TruncatedCell text={authCode.creator} />
                           </TableCell>
-                          <TableCell>{new Date(authCode.createDate).toLocaleString()}</TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                            {new Date(authCode.createDate).toLocaleString()}
+                          </TableCell>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                             <TruncatedCell text={authCode.usedBy} />
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                             <TruncatedCell text={authCode.configRoomId} />
                           </TableCell>
-                          <TableCell>{authCode.configUploadCount}</TableCell>
-                          <TableCell>{authCode.commissionCount}</TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                            {authCode.configUploadCount}
+                          </TableCell>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                            {authCode.commissionCount}
+                          </TableCell>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
                             <Chip
                               label={authCode.valid ? 'Yes' : 'No'}
                               color={authCode.valid ? 'success' : 'error'}
@@ -590,10 +602,10 @@ const AuthCodeManagement = () => {
                               }}
                             />
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                             <TruncatedCell text={authCode.note} />
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
                             <Button
                               color="primary"
                               size="sm"
@@ -673,3 +685,4 @@ const AuthCodeManagement = () => {
 };
 
 export default AuthCodeManagement;
+

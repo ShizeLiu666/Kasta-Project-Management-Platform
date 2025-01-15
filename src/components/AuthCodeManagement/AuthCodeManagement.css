@@ -73,3 +73,34 @@
   .CreateAuthCodeModal_input {
     padding-bottom: 0.5rem;
   }
+  
+  /* 添加表格响应式样式 */
+  .MuiTableContainer-root {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .MuiTable-root {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* 确保单元格内容不会溢出 */
+  .MuiTableCell-root {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 小屏幕优化 */
+  @media (max-width: 768px) {
+    .MuiTableCell-root {
+      padding: 8px 4px;
+      font-size: 0.875rem;
+    }
+
+    /* 调整 Chip 组件在小屏幕上的样式 */
+    .MuiChip-root {
+      height: 24px;
+      font-size: 0.75rem;
+    }
+  }
