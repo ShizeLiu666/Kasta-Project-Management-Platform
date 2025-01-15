@@ -65,7 +65,7 @@ const CustomSearchBar = ({
         '& .MuiInputBase-input': {
           fontSize,
           padding: '8px 14px',
-          paddingLeft: '40px', // 为搜索图标留出空间
+          paddingLeft: '25px', // 为搜索图标留出空间
         }
       }}
       InputProps={{
