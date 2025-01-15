@@ -1,23 +1,77 @@
+/* 基础样式 */
+:root {
+  --header-height: 64px;
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 70px;
+  --content-padding: 1.5rem;
+}
+
+/* 容器基础样式 */
 .content-container {
   background-color: #f1f1f1;
-  min-height: calc(100vh - 64px); /* 假设header高度为64px */
+  min-height: calc(100vh - var(--header-height));
 }
 
 .contentArea {
   flex-grow: 1;
   transition: all 0.3s ease;
+  min-width: 0; /* 防止内容溢出 */
 }
 
 .sidebarArea {
   position: relative;
+  width: var(--sidebar-width);
   transition: all 0.3s ease;
+  background: #fff;
 }
 
-/* 响应式处理 */
-@media (max-width: 991.98px) {
+.sidebarArea.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+/* 响应式布局 */
+/* 超大屏幕 - 1800px 及以上 */
+@media (min-width: 1800px) {
+  :root {
+    --content-padding: 1.5rem;
+  }
+  
+  .p-4 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+/* 大屏幕 - 1440px 到 1799px */
+@media (min-width: 1440px) and (max-width: 1799px) {
+  :root {
+    --content-padding: 2rem;
+  }
+  
+  .p-4 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+/* 中等屏幕 - 992px 到 1439px */
+@media (min-width: 992px) and (max-width: 1439px) {
+  :root {
+    --content-padding: 1.75rem;
+  }
+  
+  .p-4 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+/* 平板 - 768px 到 991px */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  :root {
+    --content-padding: 1.5rem;
+  }
+
   .sidebarArea {
     position: fixed;
-    left: -260px;
+    left: calc(-1 * var(--sidebar-width));
     height: 100%;
     z-index: 1000;
   }
@@ -25,11 +79,49 @@
   .sidebarArea.showSidebar {
     left: 0;
   }
+  
+  .p-4 {
+    padding: var(--content-padding) !important;
+  }
 }
 
-.p-4 {
-  padding-top: 1.5rem !important;
-  padding-right: 1.5rem !important;
-  padding-left: 1.5rem !important;
-  padding-bottom: 0.5rem !important;
+/* 手机 - 768px 以下 */
+@media (max-width: 767.98px) {
+  :root {
+    --content-padding: 1.25rem;
+    --header-height: 56px;
+  }
+
+  .sidebarArea {
+    position: fixed;
+    left: calc(-1 * var(--sidebar-width));
+    height: 100%;
+    z-index: 1000;
+  }
+
+  .sidebarArea.showSidebar {
+    left: 0;
+  }
+  
+  .p-4 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .content-container {
+    background-color: #121212;
+  }
+  
+  .sidebarArea {
+    background: #1e1e1e;
+  }
+}
+
+/* 针对不同DPI的屏幕优化 */
+@media screen and (min-resolution: 192dpi) {
+  html {
+    font-size: 14px; /* 高DPI屏幕稍微减小基础字体大小 */
+  }
 }
