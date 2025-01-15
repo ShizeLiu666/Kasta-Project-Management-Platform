@@ -34,18 +34,18 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 // const { SearchBar } = Search;
 
 const TruncatedCell = ({ text, maxLength = 20, canCopy = false, onCopy }) => {
-  const truncatedText = text?.length > maxLength 
-    ? `${text.substring(0, maxLength)}...` 
+  const truncatedText = text?.length > maxLength
+    ? `${text.substring(0, maxLength)}...`
     : text || '-';
 
   const cellContent = (
-    <div style={{ 
-      display: 'flex', 
+    <div style={{
+      display: 'flex',
       alignItems: 'center',
       maxWidth: '100%'
     }}>
       {canCopy && (
-        <ContentCopyIcon 
+        <ContentCopyIcon
           style={{ marginRight: '10px', cursor: 'pointer', flexShrink: 0 }}
           onClick={(e) => {
             e.stopPropagation();
@@ -54,7 +54,7 @@ const TruncatedCell = ({ text, maxLength = 20, canCopy = false, onCopy }) => {
           fontSize="small"
         />
       )}
-      <Tooltip 
+      <Tooltip
         title={text || '-'}
         placement="top"
         arrow
@@ -71,7 +71,7 @@ const TruncatedCell = ({ text, maxLength = 20, canCopy = false, onCopy }) => {
         }}
       >
         <div
-          style={{ 
+          style={{
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -121,7 +121,7 @@ const AuthCodeManagement = () => {
     setLoading(true);
     try {
       const token = getToken();
-      
+
       // Step 1: Get total count first
       const countResponse = await axiosInstance.get('/authorization-codes', {
         headers: { Authorization: `Bearer ${token}` },
@@ -137,8 +137,8 @@ const AuthCodeManagement = () => {
       // Step 2: Fetch all data with the exact size needed
       const allDataResponse = await axiosInstance.get('/authorization-codes', {
         headers: { Authorization: `Bearer ${token}` },
-        params: { 
-          page: 0, 
+        params: {
+          page: 0,
           size: totalElements || 1 // Use exact count, fallback to 1 if count is 0
         }
       });
@@ -201,7 +201,7 @@ const AuthCodeManagement = () => {
   const fallbackCopyTextToClipboard = (text) => {
     const textArea = document.createElement("textarea");
     textArea.value = text;
-    
+
     // Avoid scrolling to bottom
     textArea.style.top = "0";
     textArea.style.left = "0";
@@ -261,7 +261,7 @@ const AuthCodeManagement = () => {
   // Enhanced filter function with field selection
   const filterAuthCodes = useCallback((searchValue) => {
     const searchTerm = searchValue.toLowerCase().trim();
-    
+
     if (!searchTerm) return authCodes;
 
     return authCodes.filter(authCode => {
@@ -315,11 +315,11 @@ const AuthCodeManagement = () => {
   // 渲染表头单元格
   const renderHeaderCell = (id, label, width, hideOnMobile = false) => {
     const isSortable = id in sortableColumns;
-    
+
     return (
-      <TableCell 
+      <TableCell
         key={id}
-        sx={{ 
+        sx={{
           minWidth: width,
           maxWidth: width,
           cursor: isSortable ? 'pointer' : 'default',
@@ -366,8 +366,8 @@ const AuthCodeManagement = () => {
         return order === 'asc' ? dateA - dateB : dateB - dateA;
       }
       if (orderBy === 'usageCount') {
-        return order === 'asc' 
-          ? a.usageCount - b.usageCount 
+        return order === 'asc'
+          ? a.usageCount - b.usageCount
           : b.usageCount - a.usageCount;
       }
       if (orderBy === 'valid') {
@@ -391,6 +391,19 @@ const AuthCodeManagement = () => {
     fetchAuthCodes();
   }, [authCodes, fetchAuthCodes]);
 
+  const headerCells = [
+    { id: 'code', label: 'Code', width: '15%' },
+    { id: 'creator', label: 'Creator', width: '10%' },
+    { id: 'createDate', label: 'Create Date', width: '20%' },
+    { id: 'usedBy', label: 'Used By', width: '10%', hideOnMobile: true },
+    { id: 'configRoomId', label: 'Room ID', width: '10%', hideOnMobile: true },
+    { id: 'configUploadCount', label: 'Upload Cnt', width: '10%' },
+    { id: 'commissionCount', label: 'Comm. Cnt', width: '10%' },
+    { id: 'valid', label: 'Valid', width: '8%' },
+    { id: 'note', label: 'Note', width: '12%', hideOnMobile: true },
+    { id: 'actions', label: 'Actions', width: '5%' }
+  ];
+
   return (
     <div>
       <CustomAlert
@@ -407,25 +420,26 @@ const AuthCodeManagement = () => {
             <ComponentCard title="Authorization Code Management">
               <div className="d-flex justify-content-between mb-3">
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <FormControl 
-                    size="small" 
-                    sx={{ 
+                  <FormControl
+                    size="small"
+                    sx={{
                       minWidth: 120,
                       '& .MuiOutlinedInput-root': {
                         height: '40px',
-                        backgroundColor: '#fff'
-                      },
-                      // Remove ripple effect
-                      '& .MuiMenuItem-root': {
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                        backgroundColor: '#fff',
+                        // Hover state
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#fbcd0b'
                         },
-                        '&.Mui-selected': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                          '&:hover': {
-                            backgroundColor: 'rgba(0, 0, 0, 0.12)'
-                          }
+                        // Focused state
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#fbcd0b',
+                          borderWidth: '1px'
                         }
+                      },
+                      // Label color when focused
+                      '& .Mui-focused': {
+                        color: '#212f4c'
                       }
                     }}
                   >
@@ -454,8 +468,8 @@ const AuthCodeManagement = () => {
                       }}
                     >
                       {searchFields.map(field => (
-                        <MenuItem 
-                          key={field.value} 
+                        <MenuItem
+                          key={field.value}
                           value={field.value}
                           // Disable ripple effect
                           TouchRippleProps={{ disabled: true }}
@@ -465,7 +479,7 @@ const AuthCodeManagement = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  
+
                   <CustomSearchBar
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
@@ -480,7 +494,7 @@ const AuthCodeManagement = () => {
                     debounceTime={300}
                   />
 
-                  <Box 
+                  <Box
                     sx={{
                       backgroundColor: '#fff',
                       border: '1px solid #ced4da',
@@ -525,7 +539,7 @@ const AuthCodeManagement = () => {
                 </CustomButton>
               </div>
 
-              <TableContainer 
+              <TableContainer
                 component={Paper}
                 sx={{
                   boxShadow: 'none',
@@ -550,16 +564,12 @@ const AuthCodeManagement = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      {renderHeaderCell('code', 'Code', '15%')}
-                      {renderHeaderCell('creator', 'Creator', '10%')}
-                      {renderHeaderCell('createDate', 'Create Date', '15%')}
-                      {renderHeaderCell('usedBy', 'Used By', '10%', true)} {/* 小屏幕隐藏 */}
-                      {renderHeaderCell('configRoomId', 'Room ID', '10%', true)} {/* 小屏幕隐藏 */}
-                      {renderHeaderCell('configUploadCount', 'Upload Cnt', '10%')}
-                      {renderHeaderCell('commissionCount', 'Comm. Cnt', '10%')}
-                      {renderHeaderCell('valid', 'Valid', '8%')}
-                      {renderHeaderCell('note', 'Note', '12%', true)} {/* 小屏幕隐藏 */}
-                      {renderHeaderCell('actions', 'Actions', '10%')}
+                      {headerCells.map(cell => renderHeaderCell(
+                        cell.id,
+                        cell.label,
+                        cell.width,
+                        cell.hideOnMobile
+                      ))}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -567,28 +577,36 @@ const AuthCodeManagement = () => {
                       .slice(muiPage * rowsPerPage, muiPage * rowsPerPage + rowsPerPage)
                       .map((authCode) => (
                         <TableRow key={authCode.code}>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '15%' }}>
                             <TruncatedCell text={authCode.code} canCopy={true} onCopy={copyToClipboard} />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '10%' }}>
                             <TruncatedCell text={authCode.creator} />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
-                            {new Date(authCode.createDate).toLocaleString()}
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '20%' }}>
+                            {new Date(authCode.createDate).toLocaleString('zh-CN', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              hour12: false  // 这里设置为 24 小时制
+                            })}
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '10%' }}>
                             <TruncatedCell text={authCode.usedBy} />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '10%' }}>
                             <TruncatedCell text={authCode.configRoomId} />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '10%' }}>
                             {authCode.configUploadCount}
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '10%' }}>
                             {authCode.commissionCount}
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '8%' }}>
                             <Chip
                               label={authCode.valid ? 'Yes' : 'No'}
                               color={authCode.valid ? 'success' : 'error'}
@@ -602,10 +620,16 @@ const AuthCodeManagement = () => {
                               }}
                             />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '12%' }}>
                             <TruncatedCell text={authCode.note} />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' } }}>
+                          <TableCell
+                            sx={{
+                              display: { xs: 'table-cell', md: 'table-cell' },
+                              width: '5%',
+                              minWidth: '60px'
+                            }}
+                          >
                             <Button
                               color="primary"
                               size="sm"
@@ -617,7 +641,7 @@ const AuthCodeManagement = () => {
                                 padding: '0',
                               }}
                             >
-                              <EditIcon fontSize="medium" style={{marginRight:"4px"}}/>
+                              <EditIcon fontSize="small" style={{ marginRight: "4px" }} />
                               Edit
                             </Button>
                           </TableCell>
@@ -634,11 +658,11 @@ const AuthCodeManagement = () => {
                   onRowsPerPageChange={handleChangeRowsPerPage}
                   rowsPerPageOptions={[10, 15, 20]}
                   labelRowsPerPage="Rows per page"
-                  labelDisplayedRows={({ from, to, count }) => 
+                  labelDisplayedRows={({ from, to, count }) =>
                     `${from}-${to} of ${count}`
                   }
                   sx={{
-                    borderTop: '1px solid #dee2e6',
+                    borderTop: '1px solid #ced4da',
                     '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
                       margin: 0,
                     },
@@ -665,13 +689,13 @@ const AuthCodeManagement = () => {
         toggle={toggleEditModal}
         authCode={selectedAuthCode}
         onEditAuthCode={(updatedAuthCode) => {
-          setAuthCodes(authCodes.map(code => 
+          setAuthCodes(authCodes.map(code =>
             code.code === updatedAuthCode.code ? updatedAuthCode : code
           ));
           setSelectedAuthCode(updatedAuthCode);
         }}
       />
-      <Box sx={{ 
+      <Box sx={{
         '& .MuiButtonBase-root': {
           '& .MuiTouchRipple-root': {
             display: 'none'
@@ -685,4 +709,3 @@ const AuthCodeManagement = () => {
 };
 
 export default AuthCodeManagement;
-
