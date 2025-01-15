@@ -92,6 +92,7 @@ const CreateRoomTypeModal = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    console.log('Form Data after handleChange:', formData);
     
     if (name === 'typeCode') {
       setIsTypeCodeManuallyEdited(true);
@@ -112,16 +113,21 @@ const CreateRoomTypeModal = ({
   const handleAuthCodeChange = (event, newValue) => {
     if (typeof newValue === 'string') {
       setFormData(prev => ({ ...prev, authorizationCode: newValue.trim() }));
-    } else if (newValue && newValue.inputValue) {
-      setFormData(prev => ({ ...prev, authorizationCode: newValue.inputValue.trim() }));
     } else if (newValue && newValue.code) {
       setFormData(prev => ({ ...prev, authorizationCode: newValue.code.trim() }));
-    } else {
+    } else if (newValue === null) {
       setFormData(prev => ({ ...prev, authorizationCode: '' }));
     }
+    console.log('Form Data after handleAuthCodeChange:', formData);
   };
 
   const isFormValid = () => {
+    console.log('Checking form validity:', {
+      name: formData.name,
+      typeCode: formData.typeCode,
+      authCode: formData.authorizationCode,
+      nameError
+    });
     return formData.name && 
            formData.typeCode && 
            formData.authorizationCode && 
@@ -207,37 +213,29 @@ const CreateRoomTypeModal = ({
                 if (typeof option === 'string') {
                   return option;
                 }
-                if (option.inputValue) {
-                  return option.inputValue;
-                }
                 return `${option.code} (${10 - option.configUploadCount} uploads left)`;
               }}
               filterOptions={(options, params) => {
                 const filtered = filter(options, params);
-                const { inputValue } = params;
-                const isExisting = options.some((option) => 
-                  option.code === inputValue || 
-                  option.label === inputValue
-                );
-                if (inputValue !== '' && !isExisting) {
-                  filtered.push({
-                    inputValue,
-                    label: `Use "${inputValue}"`,
-                  });
-                }
                 return filtered;
               }}
               renderOption={(props, option) => (
-                <Box component="li" {...props} key={option.code || option.inputValue}>
-                  {option.inputValue ? option.label : `${option.code} (${10 - option.configUploadCount} uploads left)`}
+                <Box component="li" {...props} key={option.code}>
+                  {`${option.code} (${10 - option.configUploadCount} uploads left)`}
                 </Box>
               )}
               freeSolo
               selectOnFocus
-              clearOnBlur
+              clearOnBlur={false}
               handleHomeEndKeys
               value={formData.authorizationCode}
               onChange={handleAuthCodeChange}
+              onInputChange={(event, newInputValue) => {
+                setFormData(prev => ({
+                  ...prev,
+                  authorizationCode: newInputValue.trim()
+                }));
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -249,7 +247,6 @@ const CreateRoomTypeModal = ({
                   autoComplete="off"
                 />
               )}
-              isOptionEqualToValue={(option, value) => option.code === value.code}
             />
             <div style={{ 
               marginTop: '8px',

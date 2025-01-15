@@ -19,6 +19,7 @@ import LeaveProjectModal from './LeaveProjectModal';
 import CustomButton from '../../../CustomComponents/CustomButton';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import RemoveMemberModal from './RemoveMemberModal';
+import Tooltip from '@mui/material/Tooltip';
 
 const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
   const [members, setMembers] = useState([]);
@@ -215,7 +216,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                       '&:hover': { backgroundColor: '#f8f9fa' }
                     }}
                   >
-                    <TableCell sx={{ width: '57.5%' }}>
+                    <TableCell sx={{ width: '45%' }}>
                       <Box sx={{ 
                         display: 'flex', 
                         alignItems: 'center',
@@ -246,19 +247,24 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                             alignItems: 'center',
                             maxWidth: '100%'
                           }}>
-                            <Typography 
-                              variant="subtitle2" 
-                              sx={{ 
-                                fontWeight: 600,
-                                fontSize: { xs: '0.875rem', sm: '1rem' },
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                maxWidth: '60%'
-                              }}
+                            <Tooltip 
+                              title={member.account || member.username}
+                              placement="top"
                             >
-                              {member.account || member.username}
-                            </Typography>
+                              <Typography 
+                                variant="subtitle2" 
+                                sx={{ 
+                                  fontWeight: 600,
+                                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  maxWidth: '60%'
+                                }}
+                              >
+                                {member.account || member.username}
+                              </Typography>
+                            </Tooltip>
                             <Typography 
                               variant="body2" 
                               sx={{ 
@@ -281,7 +287,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                               whiteSpace: 'nowrap'
                             }}
                           >
-                            {member.nickname || member.nickName}
+                            {member.email}
                           </Typography>
                         </Box>
                       </Box>

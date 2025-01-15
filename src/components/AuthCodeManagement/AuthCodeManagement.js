@@ -620,7 +620,7 @@ const AuthCodeManagement = () => {
                               }}
                             />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '12%' }}>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '5%' }}>
                             <TruncatedCell text={authCode.note} />
                           </TableCell>
                           <TableCell
