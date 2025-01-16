@@ -113,9 +113,8 @@ const AuthCodeManagement = () => {
     { value: 'code', label: 'Code' },
     { value: 'creator', label: 'Creator' },
     { value: 'usedBy', label: 'Used By' },
-    { value: 'configRoomId', label: 'Room ID' },
     { value: 'note', label: 'Note' }
-  ], []); // Empty dependency array as this never changes
+  ], []); // 移除了 configRoomId 选项
 
   const fetchAuthCodes = useCallback(async () => {
     setLoading(true);
@@ -281,8 +280,11 @@ const AuthCodeManagement = () => {
 
   // Get placeholder text based on selected field
   const getPlaceholder = () => {
+    if (searchField === 'all') {
+      return 'Search in all fields...';
+    }
     const field = searchFields.find(f => f.value === searchField);
-    return `Search by ${field.label}...`;
+    return field ? `Search by ${field.label}...` : 'Search...';
   };
 
   // 当 authCodes 或 searchTerm 改变时更新过滤结果
@@ -392,15 +394,14 @@ const AuthCodeManagement = () => {
   }, [authCodes, fetchAuthCodes]);
 
   const headerCells = [
-    { id: 'code', label: 'Code', width: '15%' },
-    { id: 'creator', label: 'Creator', width: '10%' },
+    { id: 'code', label: 'Code', width: '18%' },
+    { id: 'creator', label: 'Creator', width: '12%' },
     { id: 'createDate', label: 'Create Date', width: '20%' },
-    { id: 'usedBy', label: 'Used By', width: '10%', hideOnMobile: true },
-    { id: 'configRoomId', label: 'Room ID', width: '10%', hideOnMobile: true },
-    { id: 'configUploadCount', label: 'Upload Cnt', width: '10%' },
-    { id: 'commissionCount', label: 'Comm. Cnt', width: '10%' },
+    { id: 'usedBy', label: 'Used By', width: '16%', hideOnMobile: true },
+    { id: 'configUploadCount', label: 'Upload Cnt', width: '8%' },
+    { id: 'commissionCount', label: 'Comm. Cnt', width: '8%' },
     { id: 'valid', label: 'Valid', width: '8%' },
-    { id: 'note', label: 'Note', width: '12%', hideOnMobile: true },
+    { id: 'note', label: 'Note', width: '15%', hideOnMobile: true },
     { id: 'actions', label: 'Actions', width: '5%' }
   ];
 
@@ -439,7 +440,11 @@ const AuthCodeManagement = () => {
                       },
                       // Label color when focused
                       '& .Mui-focused': {
-                        color: '#212f4c'
+                        color: '#fbcd0b !important'
+                      },
+                      // InputLabel color when focused
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: '#fbcd0b'
                       }
                     }}
                   >
@@ -546,7 +551,7 @@ const AuthCodeManagement = () => {
                   border: '1px solid #dee2e6',
                   width: '100%',
                   '& .MuiTable-root': {
-                    tableLayout: 'fixed', // 使用固定表格布局
+                    tableLayout: 'fixed', // 添加这行来强制使用固定表格布局
                   },
                   '& .MuiTableCell-root': {
                     padding: {
@@ -577,10 +582,10 @@ const AuthCodeManagement = () => {
                       .slice(muiPage * rowsPerPage, muiPage * rowsPerPage + rowsPerPage)
                       .map((authCode) => (
                         <TableRow key={authCode.code}>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '15%' }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '18%' }}>
                             <TruncatedCell text={authCode.code} canCopy={true} onCopy={copyToClipboard} />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '10%' }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '12%' }}>
                             <TruncatedCell text={authCode.creator} />
                           </TableCell>
                           <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '20%' }}>
@@ -594,16 +599,13 @@ const AuthCodeManagement = () => {
                               hour12: false  // 这里设置为 24 小时制
                             })}
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '10%' }}>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '16%' }}>
                             <TruncatedCell text={authCode.usedBy} />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '10%' }}>
-                            <TruncatedCell text={authCode.configRoomId} />
-                          </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '10%' }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '8%' }}>
                             {authCode.configUploadCount}
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '10%' }}>
+                          <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '8%' }}>
                             {authCode.commissionCount}
                           </TableCell>
                           <TableCell sx={{ display: { xs: 'table-cell', md: 'table-cell' }, width: '8%' }}>
@@ -620,7 +622,7 @@ const AuthCodeManagement = () => {
                               }}
                             />
                           </TableCell>
-                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '5%' }}>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, width: '15%' }}>
                             <TruncatedCell text={authCode.note} />
                           </TableCell>
                           <TableCell

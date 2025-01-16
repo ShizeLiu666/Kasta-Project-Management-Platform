@@ -254,10 +254,10 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
                           </span>
                           {' '}| Commission Usage:{' '}
                           <span style={{ 
-                            color: getUsageColor(50 - roomDetails.commissionCount, 50),
+                            color: getUsageColor(25 - roomDetails.commissionCount, 25),
                             fontWeight: 'bold'
                           }}>
-                            {roomDetails.commissionCount ? `${50 - roomDetails.commissionCount}/50` : '50/50'}
+                            {roomDetails.commissionCount ? `${25 - roomDetails.commissionCount}/25` : '25/25'}
                           </span>
                         </span>
                       </Box>

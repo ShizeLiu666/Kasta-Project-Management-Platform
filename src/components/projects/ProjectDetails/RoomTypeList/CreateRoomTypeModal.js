@@ -263,7 +263,7 @@ const CreateRoomTypeModal = ({
               </div>
               <div>
                 <span style={{ color: 'red', marginRight: '4px' }}>•</span>
-                New authorization code usage limits: 10 times for web configuration uploads, 50 times for app configuration
+                New authorization code usage limits: 10 times for web configuration uploads, 25 times for app configuration
               </div>
             </div>
           </FormGroup>
