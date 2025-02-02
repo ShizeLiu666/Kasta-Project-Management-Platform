@@ -49,7 +49,7 @@ const CreateAuthCodeModal = ({ isOpen, toggle, onCreateAuthCodes }) => {
                     setSuccessAlert("");
                     onCreateAuthCodes(numCount);
                     toggle();
-                }, 1000);
+                }, 2000);
             } else {
                 setError(response.data.errorMsg || "Error creating authorization codes.");
             }

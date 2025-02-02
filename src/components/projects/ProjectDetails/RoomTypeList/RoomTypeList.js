@@ -8,6 +8,8 @@ import CustomSearchBar from '../../../CustomComponents/CustomSearchBar';
 import { getToken } from '../../../auth';
 import axiosInstance from '../../../../config'; 
 import CustomButton from '../../../CustomComponents/CustomButton';
+import { fetchAuthCodes, getCurrentUserInfo } from './authCodeUtils';
+import CustomAlert from '../../../CustomComponents/CustomAlert';
 
 const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const [roomTypes, setRoomTypes] = useState([]);
@@ -18,12 +20,59 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRoomTypes, setFilteredRoomTypes] = useState([]);
+  const [validAuthCodes, setValidAuthCodes] = useState([]);
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    message: "",
+    severity: "info",
+    duration: 3000
+  });
+
+  // 获取用户信息
+  const { isSuperUser, currentUsername } = getCurrentUserInfo();
+
+  const showAlert = (message, severity = "info", duration = 3000) => {
+    setAlert({ isOpen: true, message, severity, duration });
+  };
+
+  // 获取授权码
+  const loadAuthCodes = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      showAlert("No token found, please log in again.", "error");
+      return;
+    }
+
+    try {
+      await fetchAuthCodes({
+        token,
+        isSuperUser,
+        currentUsername,
+        onSuccess: (codes) => {
+          const formattedCodes = codes.map(code => ({
+            ...code,
+            label: code.code,
+            description: `(${10 - code.configUploadCount} uploads left)`,
+            value: code.code
+          }));
+          // console.log('Auth codes loaded successfully:', formattedCodes);
+          setValidAuthCodes(formattedCodes);
+        },
+        onError: (error) => {
+          console.error('Error loading auth codes:', error);
+          showAlert(error, "error")
+        }
+      });
+    } catch (error) {
+      console.error("Error in loadAuthCodes:", error);
+    }
+  }, [isSuperUser, currentUsername]);
 
   const fetchRoomTypes = useCallback(async () => {
     try {
       const token = getToken();
       if (!token) {
-        alert("No token found, please log in again.");
+        showAlert("No token found, please log in again.", "error");
         return;
       }
 
@@ -37,18 +86,21 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
         setRoomTypes(response.data.data);
         setFilteredRoomTypes(response.data.data);
       } else {
-        console.error("Error fetching room types:", response.data.errorMsg);
+        showAlert(`Error fetching room types: ${response.data.errorMsg}`, "error");
       }
-      setLoading(false);
     } catch (error) {
+      showAlert("Error fetching room types", "error");
       console.error("Error fetching room types:", error);
+    } finally {
       setLoading(false);
     }
   }, [projectId]);
 
+  // 初始化加载
   useEffect(() => {
     fetchRoomTypes();
-  }, [fetchRoomTypes]);
+    loadAuthCodes();
+  }, [fetchRoomTypes, loadAuthCodes]);
 
   const filterRoomTypes = (searchValue) => {
     return roomTypes.filter((roomType) =>
@@ -97,15 +149,21 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-          marginBottom: "10px",
-        }}
-      >
+      <CustomAlert
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        message={alert.message}
+        severity={alert.severity}
+        autoHideDuration={alert.duration}
+      />
+      
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: "10px",
+      }}>
         <CustomSearchBar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -158,6 +216,9 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
         toggle={() => setCreateModalOpen(!createModalOpen)}
         projectId={projectId}
         onRoomTypeCreated={handleRoomTypeCreated}
+        validAuthCodes={validAuthCodes}
+        refreshAuthCodes={loadAuthCodes}
+        existingRoomTypes={roomTypes}
       />
     </div>
   );
