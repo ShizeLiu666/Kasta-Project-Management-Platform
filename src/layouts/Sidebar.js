@@ -4,7 +4,6 @@ import { Link, useLocation } from "react-router-dom";
 import '../assets/scss/loader/Sidebar.css'
 import CloseIcon from '@mui/icons-material/Close';
 import MenuOpenIcon from '@mui/icons-material/KeyboardArrowRightTwoTone';
-// import KeyboardArrowLeftTwoToneIcon from '@mui/icons-material/KeyboardArrowLeftTwoTone';
 import MenuIcon from '@mui/icons-material/KeyboardArrowLeftTwoTone';
 
 const navigation = [
@@ -22,6 +21,12 @@ const navigation = [
     title: "AuthCode",
     href: "/admin/auth-code-management",
     icon: 'bi-key',
+    superUserOnly: true,
+  },
+  {
+    title: "Log",
+    href: "/admin/operation-log",
+    icon: 'bi-clock-history',
     superUserOnly: true,
   },
   // {

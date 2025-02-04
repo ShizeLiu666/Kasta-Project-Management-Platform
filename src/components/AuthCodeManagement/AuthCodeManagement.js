@@ -60,13 +60,13 @@ const TruncatedCell = ({ text, maxLength = 20, canCopy = false, onCopy }) => {
         arrow
         sx={{
           tooltip: {
-            backgroundColor: '#333',
+            backgroundColor: '#333', 
             fontSize: '0.875rem',
-            padding: '8px 12px',
+            padding: '8px 12px', 
             maxWidth: 'none'  // 允许 tooltip 根据内容自动调整宽度
           },
           arrow: {
-            color: '#333'
+            color: '#333' // 箭头颜色
           }
         }}
       >
