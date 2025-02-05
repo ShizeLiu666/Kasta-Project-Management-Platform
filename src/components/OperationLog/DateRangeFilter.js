@@ -1,27 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Box } from "@mui/material";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
+import EventRepeatIcon from '@mui/icons-material/EventRepeat';
 import CustomButton from "../CustomComponents/CustomButton";
 
-function DateRangeFilter({ onDateChange }) {
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+const DateRangeFilter = forwardRef(({ onDateChange, value }, ref) => {
+  const [startDate, setStartDate] = useState(value?.startDate || null);
+  const [endDate, setEndDate] = useState(value?.endDate || null);
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
   const today = new Date();
 
-  const handleStartDateChange = (date) => {
-    setStartDate(date);
-    onDateChange(date, endDate);
-  };
+  // Update local state when value prop changes
+  useEffect(() => {
+    setStartDate(value?.startDate || null);
+    setEndDate(value?.endDate || null);
+  }, [value]);
 
-  const handleEndDateChange = (date) => {
-    setEndDate(date);
-    onDateChange(startDate, date);
-  };
+  // When startDate changes, check if endDate needs to be cleared
+  useEffect(() => {
+    if (startDate && endDate && startDate > endDate) {
+      setEndDate(null);
+      onDateChange(startDate, null);
+    }
+  }, [startDate, endDate, onDateChange]);
 
   const clearDateFilter = () => {
     setStartDate(null);
@@ -29,8 +33,28 @@ function DateRangeFilter({ onDateChange }) {
     onDateChange(null, null);
   };
 
+  useImperativeHandle(ref, () => ({
+    reset: clearDateFilter,
+    getValues: () => ({ startDate, endDate })
+  }));
+
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    if (date && endDate && date > endDate) {
+      setEndDate(null);
+      onDateChange(date, null);
+    } else {
+      onDateChange(date, endDate);
+    }
+  };
+
+  const handleEndDateChange = (date) => {
+    setEndDate(date);
+    onDateChange(startDate, date);
+  };
+
   return (
-    <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DatePicker
           label="Start Date"
@@ -93,11 +117,16 @@ function DateRangeFilter({ onDateChange }) {
                     borderColor: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.23)',
                   },
                   '&.Mui-disabled': {
+                    cursor: 'not-allowed',
                     '&:hover fieldset': {
                       borderColor: 'rgba(0, 0, 0, 0.23)',
                     },
                     '& fieldset': {
                       borderColor: 'rgba(0, 0, 0, 0.23)',
+                    },
+                    '& .MuiInputBase-input': {
+                      cursor: 'not-allowed',
+                      '-webkit-text-fill-color': 'rgba(0, 0, 0, 0.38)',
                     }
                   }
                 },
@@ -122,18 +151,21 @@ function DateRangeFilter({ onDateChange }) {
       {(startDate || endDate) && (
         <CustomButton
           onClick={clearDateFilter}
-          icon={<FilterAltOffIcon />}
+          icon={<EventRepeatIcon />}
           style={{
             minWidth: 'auto',
             height: '38px',
-            padding: '0 12px'
+            padding: '0 12px',
+            width: '150px'
           }}
         >
-          Clear Filter
+          Reset Date
         </CustomButton>
       )}
     </Box>
   );
-}
+});
+
+DateRangeFilter.displayName = 'DateRangeFilter';
 
 export default DateRangeFilter; 
