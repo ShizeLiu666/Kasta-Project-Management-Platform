@@ -6,12 +6,18 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import EventRepeatIcon from '@mui/icons-material/EventRepeat';
 import CustomButton from "../CustomComponents/CustomButton";
 
-const DateRangeFilter = forwardRef(({ onDateChange, value }, ref) => {
+const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, ref) => {
   const [startDate, setStartDate] = useState(value?.startDate || null);
   const [endDate, setEndDate] = useState(value?.endDate || null);
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
   const today = new Date();
+
+  // 检查日期选择的有效性
+  useEffect(() => {
+    const isValid = (!startDate || (startDate && endDate));
+    onValidityChange?.(isValid);
+  }, [startDate, endDate, onValidityChange]);
 
   // Update local state when value prop changes
   useEffect(() => {

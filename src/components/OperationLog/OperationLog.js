@@ -30,8 +30,8 @@ import RefreshButton from '../CustomComponents/RefreshButton';
 function OperationLog() {
   // 搜索参数状态
   const [searchParams, setSearchParams] = useState({
-    searchTerm: '',
     searchField: 'all',
+    searchValue: '',     // 改名更清晰
     startDate: null,
     endDate: null
   });
@@ -55,6 +55,12 @@ function OperationLog() {
     { value: 'target_type', label: 'Target Type' },
     { value: 'description', label: 'Description' }
   ], []);
+
+  // 添加日期验证状态
+  const [isDateRangeValid, setIsDateRangeValid] = useState(true);
+
+  // 检查搜索是否可用
+  const isSearchDisabled = !isDateRangeValid;
 
   // 获取日志数据的函数
   const fetchLogs = useCallback(async (params) => {
@@ -87,7 +93,12 @@ function OperationLog() {
   const handleSearch = () => {
     const params = {
       ...searchParams,
-      page: 0 // 重置到第一页
+      page: 0,
+      // 处理日期，确保时间范围完整
+      startDate: searchParams.startDate ? 
+        new Date(new Date(searchParams.startDate).setHours(0, 0, 0, 0)).toISOString() : null,
+      endDate: searchParams.endDate ? 
+        new Date(new Date(searchParams.endDate).setHours(23, 59, 59, 999)).toISOString() : null
     };
     setPage(0);
     setQueryParams(params);
@@ -97,8 +108,8 @@ function OperationLog() {
   // 处理重置
   const handleReset = () => {
     setSearchParams({
-      searchTerm: '',
       searchField: 'all',
+      searchValue: '',
       startDate: null,
       endDate: null
     });
@@ -125,7 +136,7 @@ function OperationLog() {
 
   // 处理每页数量变更
   const handleChangeRowsPerPage = (event) => {
-    const newRowsPerPage = parseInt(event.target.value, 10);
+    const newRowsPerPage = parseInt(event.target.value, 10); // 转换为整数
     setRowsPerPage(newRowsPerPage);
     setPage(0);
     fetchLogs({ ...queryParams, page: 0, size: newRowsPerPage });
@@ -135,8 +146,8 @@ function OperationLog() {
   const handleRefreshAll = useCallback(() => {
     // 重置所有状态
     setSearchParams({
-      searchTerm: '',
       searchField: 'all',
+      searchValue: '',
       startDate: null,
       endDate: null
     });
@@ -175,16 +186,16 @@ function OperationLog() {
               }}>
                 <Box sx={{ flex: 1 }}>
                   <SearchWithField
-                    searchTerm={searchParams.searchTerm}
+                    searchTerm={searchParams.searchValue}
                     setSearchTerm={(term) => 
-                      setSearchParams(prev => ({ ...prev, searchTerm: term }))
+                      setSearchParams(prev => ({ ...prev, searchValue: term }))
                     }
                     searchField={searchParams.searchField}
                     setSearchField={(field) => 
                       setSearchParams(prev => ({ ...prev, searchField: field }))
                     }
                     searchFields={searchFields}
-                    onFilter={null} // 禁用实时搜索
+                    onFilter={null}
                   />
                 </Box>
                 <CustomButton
@@ -203,11 +214,14 @@ function OperationLog() {
                 <CustomButton
                   onClick={handleSearch}
                   icon={<SearchIcon />}
+                  disabled={isSearchDisabled}
                   style={{
                     backgroundColor: '#fbcd0b',
                     color: '#FFF',
                     minWidth: 'auto',
-                    height: '40px'
+                    height: '40px',
+                    opacity: isSearchDisabled ? 0.5 : 1,
+                    cursor: isSearchDisabled ? 'not-allowed' : 'pointer'
                   }}
                 >
                   Search
@@ -228,6 +242,7 @@ function OperationLog() {
                   startDate: searchParams.startDate, 
                   endDate: searchParams.endDate 
                 }}
+                onValidityChange={setIsDateRangeValid}
               />
             </Grid>
           </Grid>
