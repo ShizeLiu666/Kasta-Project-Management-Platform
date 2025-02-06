@@ -36,7 +36,7 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
   const clearDateFilter = () => {
     setStartDate(null);
     setEndDate(null);
-    onDateChange(null, null);
+    onDateChange(null, null);  // 只通知父组件日期已重置，不触发刷新
   };
 
   useImperativeHandle(ref, () => ({
@@ -85,7 +85,8 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
                 },
                 '& .MuiInputLabel-root.Mui-focused': {
                   color: '#fbcd0b',
-                }
+                },
+                width: '230px'
               }
             },
             popper: {
@@ -138,7 +139,8 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
                 },
                 '& .MuiInputLabel-root.Mui-focused': {
                   color: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.6)',
-                }
+                },
+                width: '230px'
               }
             },
             popper: {
@@ -162,10 +164,13 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
             minWidth: 'auto',
             height: '38px',
             padding: '0 12px',
-            width: '150px'
+            width: '150px',
+            backgroundColor: '#fff',
+            color: '#6c757d',
+            border: '1px solid #6c757d'
           }}
         >
-          Reset Date
+          Clear Date
         </CustomButton>
       )}
     </Box>

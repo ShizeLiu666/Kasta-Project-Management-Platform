@@ -11,15 +11,10 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Grid,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Typography
 } from "@mui/material";
-import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import DateRangeFilter from "./DateRangeFilter";
-import SearchWithField from '../CustomComponents/SearchWithField';
+import OperationLogSearch from './OperationLogSearch';
 import CustomButton from '../CustomComponents/CustomButton';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import SearchIcon from '@mui/icons-material/Search';
@@ -51,9 +46,9 @@ function OperationLog() {
   const searchFields = useMemo(() => [
     { value: 'all', label: 'All Fields' },
     { value: 'username', label: 'Username' },
+    { value: 'description', label: 'Description' },
     { value: 'operation_type', label: 'Operation Type' },
-    { value: 'target_type', label: 'Target Type' },
-    { value: 'description', label: 'Description' }
+    { value: 'target_type', label: 'Target Type' }
   ], []);
 
   // 添加日期验证状态
@@ -105,7 +100,7 @@ function OperationLog() {
     fetchLogs(params);
   };
 
-  // 处理重置
+  // 修改重置处理函数，只重置条件不刷新数据
   const handleReset = () => {
     setSearchParams({
       searchField: 'all',
@@ -116,7 +111,6 @@ function OperationLog() {
     setQueryParams(null);
     setPage(0);
     dateRangeRef.current?.reset();
-    fetchLogs({}); // 重新获取无筛选条件的数据
   };
 
   // 处理日期变更
@@ -142,7 +136,7 @@ function OperationLog() {
     fetchLogs({ ...queryParams, page: 0, size: newRowsPerPage });
   };
 
-  // 添加刷新处理函数
+  // 刷新按钮处理函数保持不变
   const handleRefreshAll = useCallback(() => {
     // 重置所有状态
     setSearchParams({
@@ -161,93 +155,106 @@ function OperationLog() {
 
   return (
     <ComponentCard title="Operation Log">
-      {/* 搜索面板 */}
-      <Accordion defaultExpanded>
-        <AccordionSummary 
-          expandIcon={<ExpandMoreIcon />}
-          sx={{
-            backgroundColor: '#f8f9fa',
-            '&:hover': {
-              backgroundColor: '#f0f1f2'
-            }
+      {/* 搜索区域 */}
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 3,
+          mb: 3,
+          border: '1px solid #dee2e6',
+          borderRadius: '4px',
+          backgroundColor: '#fff'
+        }}
+      >
+        <Typography 
+          variant="subtitle1" 
+          sx={{ 
+            mb: 2.5,
+            fontWeight: 600,
+            color: '#495057',
+            fontSize: '1rem'
           }}
         >
-          <Typography fontWeight="medium">Search Conditions</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Grid container spacing={2}>
-            {/* 搜索字段和按钮 */}
-            <Grid item xs={12}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 2,
-                width: '100%'
-              }}>
-                <Box sx={{ flex: 1 }}>
-                  <SearchWithField
-                    searchTerm={searchParams.searchValue}
-                    setSearchTerm={(term) => 
-                      setSearchParams(prev => ({ ...prev, searchValue: term }))
-                    }
-                    searchField={searchParams.searchField}
-                    setSearchField={(field) => 
-                      setSearchParams(prev => ({ ...prev, searchField: field }))
-                    }
-                    searchFields={searchFields}
-                    onFilter={null}
-                  />
-                </Box>
-                <CustomButton
-                  onClick={handleReset}
-                  icon={<FilterAltOffIcon />}
-                  style={{
-                    backgroundColor: '#fff',
-                    color: '#6c757d',
-                    border: '1px solid #6c757d',
-                    minWidth: 'auto',
-                    height: '40px'
-                  }}
-                >
-                  Reset
-                </CustomButton>
-                <CustomButton
-                  onClick={handleSearch}
-                  icon={<SearchIcon />}
-                  disabled={isSearchDisabled}
-                  style={{
-                    backgroundColor: '#fbcd0b',
-                    color: '#FFF',
-                    minWidth: 'auto',
-                    height: '40px',
-                    opacity: isSearchDisabled ? 0.5 : 1,
-                    cursor: isSearchDisabled ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  Search
-                </CustomButton>
-                <RefreshButton 
-                  onClick={handleRefreshAll}
-                  tooltip="Reset all filters and refresh data"
-                />
-              </Box>
-            </Grid>
+          Search Conditions
+        </Typography>
 
-            {/* 日期范围 */}
-            <Grid item xs={12}>
-              <DateRangeFilter 
-                ref={dateRangeRef}
-                onDateChange={handleDateChange}
-                value={{ 
-                  startDate: searchParams.startDate, 
-                  endDate: searchParams.endDate 
-                }}
-                onValidityChange={setIsDateRangeValid}
-              />
-            </Grid>
-          </Grid>
-        </AccordionDetails>
-      </Accordion>
+        {/* 搜索条件区域 - 单行布局 */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 2,
+          width: '100%',
+          mb: 2
+        }}>
+          {/* 日期选择器 */}
+          <DateRangeFilter 
+            ref={dateRangeRef}
+            onDateChange={handleDateChange}
+            value={{ 
+              startDate: searchParams.startDate, 
+              endDate: searchParams.endDate 
+            }}
+            onValidityChange={setIsDateRangeValid}
+            hideResetButton={true}
+          />
+
+          {/* 搜索字段和输入框 */}
+          <Box sx={{ flex: 1 }}>
+            <OperationLogSearch
+              searchValue={searchParams.searchValue}
+              setSearchValue={(value) => 
+                setSearchParams(prev => ({ ...prev, searchValue: value }))
+              }
+              searchField={searchParams.searchField}
+              setSearchField={(field) => 
+                setSearchParams(prev => ({ ...prev, searchField: field }))
+              }
+              searchFields={searchFields}
+              containerStyle={{ marginBottom: 0 }}
+            />
+          </Box>
+
+          {/* Action Buttons */}
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2
+          }}>
+            <CustomButton
+              onClick={handleReset}
+              icon={<FilterAltOffIcon />}
+              style={{
+                backgroundColor: '#fff',
+                color: '#6c757d',
+                border: '1px solid #6c757d',
+                minWidth: '215px',
+                height: '40px',
+                padding: '0 12px'
+              }}
+            >
+              Clear All Conditions
+            </CustomButton>
+            <CustomButton
+              onClick={handleSearch}
+              icon={<SearchIcon />}
+              disabled={isSearchDisabled}
+              style={{
+                backgroundColor: '#fbcd0b',
+                color: '#FFF',
+                minWidth: 'auto',
+                height: '40px',
+                opacity: isSearchDisabled ? 0.5 : 1,
+                cursor: isSearchDisabled ? 'not-allowed' : 'pointer'
+              }}
+            >
+              Search
+            </CustomButton>
+            <RefreshButton 
+              onClick={handleRefreshAll}
+              tooltip="Reset all filters and refresh data"
+            />
+          </Box>
+        </Box>
+      </Paper>
 
       {/* 数据显示 */}
       <Box sx={{ mt: 2 }}>
@@ -275,9 +282,9 @@ function OperationLog() {
                   <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
                     <TableCell>ID</TableCell>
                     <TableCell>Username</TableCell>
+                    <TableCell>Time</TableCell>
                     <TableCell>Operation Type</TableCell>
                     <TableCell>Target</TableCell>
-                    <TableCell>Time</TableCell>
                     <TableCell>Description</TableCell>
                   </TableRow>
                 </TableHead>

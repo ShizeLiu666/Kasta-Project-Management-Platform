@@ -39,7 +39,7 @@ function SearchWithField({
       <FormControl
         size="small"
         sx={{
-          minWidth: 120,
+          minWidth: 180,
           '& .MuiOutlinedInput-root': {
             height: '40px',
             backgroundColor: '#fff',
@@ -76,8 +76,9 @@ function SearchWithField({
                   },
                   '&.Mui-selected': {
                     backgroundColor: 'rgba(0, 0, 0, 0.08)'
-                  }
-                }
+                  },
+                  minWidth: 180,
+                },
               }
             }
           }}
