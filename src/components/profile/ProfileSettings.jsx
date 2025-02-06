@@ -250,6 +250,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                                     value={username}
                                     readOnly
                                     style={readOnlyStyle}
+                                    autoComplete="username"
                                 />
                             </FormGroup>
                         </Col>
@@ -261,6 +262,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                                     id="nickname"
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
+                                    autoComplete="nickname"
                                 />
                             </FormGroup>
                         </Col>
@@ -275,6 +277,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                                     value={email}
                                     readOnly
                                     style={readOnlyStyle}
+                                    autoComplete="email"
                                 />
                             </Col>
                             <Col md={2}>
@@ -316,6 +319,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                             id="password"
                             value={password}
                             onChange={handlePasswordChange}
+                            autoComplete="new-password"
                         />
                         {passwordError && <p style={errorMessageStyle}>{passwordError}</p>}
                     </FormGroup>
@@ -326,6 +330,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                             id="confirmPassword"
                             value={confirmPassword}
                             onChange={handleConfirmPasswordChange}
+                            autoComplete="new-password"
                         />
                         {confirmPasswordError && <p style={errorMessageStyle}>{confirmPasswordError}</p>}
                     </FormGroup>

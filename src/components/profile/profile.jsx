@@ -116,7 +116,10 @@ const Profile = () => {
           />
         </Col>
         <Col xs="12" md="12" lg="9" className="h-150">
-          <ProfileSettings userDetails={userDetails} />
+          <ProfileSettings 
+            userDetails={userDetails} 
+            autocomplete="new-password"
+          />
         </Col>
       </Row>
     </div>
