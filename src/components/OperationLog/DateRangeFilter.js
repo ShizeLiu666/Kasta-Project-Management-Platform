@@ -60,111 +60,123 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
   };
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <DatePicker
-          label="Start Date"
-          value={startDate}
-          onChange={handleStartDateChange}
-          maxDate={today}
-          open={startDateOpen}
-          onOpen={() => setStartDateOpen(true)}
-          onClose={() => setStartDateOpen(false)}
-          slotProps={{
-            textField: {
-              size: 'small',
-              onClick: () => setStartDateOpen(true),
-              sx: {
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#fbcd0b',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#fbcd0b',
-                  }
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#fbcd0b',
-                },
-                width: '230px'
-              }
-            },
-            popper: {
-              sx: {
-                '& .MuiPaper-root': {
-                  border: '1px solid #fbcd0b',
-                },
-                '& .MuiPickersDay-root.Mui-selected': {
-                  backgroundColor: '#fbcd0b',
-                }
-              }
-            }
-          }}
-        />
-        <DatePicker
-          label="End Date"
-          value={endDate}
-          onChange={handleEndDateChange}
-          minDate={startDate}
-          maxDate={today}
-          disabled={!startDate}
-          open={endDateOpen}
-          onOpen={() => setEndDateOpen(true)}
-          onClose={() => setEndDateOpen(false)}
-          slotProps={{
-            textField: {
-              size: 'small',
-              onClick: () => startDate && setEndDateOpen(true),
-              sx: {
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.23)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.23)',
-                  },
-                  '&.Mui-disabled': {
-                    cursor: 'not-allowed',
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: { xs: 'column', md: 'row' },
+      alignItems: { xs: 'stretch', md: 'center' },
+      gap: 2 
+    }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: 2,
+        flex: 1
+      }}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            label="Start Date"
+            value={startDate}
+            onChange={handleStartDateChange}
+            maxDate={today}
+            open={startDateOpen}
+            onOpen={() => setStartDateOpen(true)}
+            onClose={() => setStartDateOpen(false)}
+            slotProps={{
+              textField: {
+                size: 'small',
+                onClick: () => setStartDateOpen(true),
+                sx: {
+                  '& .MuiOutlinedInput-root': {
                     '&:hover fieldset': {
-                      borderColor: 'rgba(0, 0, 0, 0.23)',
+                      borderColor: '#fbcd0b',
                     },
-                    '& fieldset': {
-                      borderColor: 'rgba(0, 0, 0, 0.23)',
-                    },
-                    '& .MuiInputBase-input': {
-                      cursor: 'not-allowed',
-                      '-webkit-text-fill-color': 'rgba(0, 0, 0, 0.38)',
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#fbcd0b',
                     }
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: '#fbcd0b',
+                  },
+                  width: { xs: '100%', md: '230px' }
+                }
+              },
+              popper: {
+                sx: {
+                  '& .MuiPaper-root': {
+                    border: '1px solid #fbcd0b',
+                  },
+                  '& .MuiPickersDay-root.Mui-selected': {
+                    backgroundColor: '#fbcd0b',
                   }
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.6)',
-                },
-                width: '230px'
-              }
-            },
-            popper: {
-              sx: {
-                '& .MuiPaper-root': {
-                  border: '1px solid #fbcd0b',
-                },
-                '& .MuiPickersDay-root.Mui-selected': {
-                  backgroundColor: '#fbcd0b',
                 }
               }
-            }
-          }}
-        />
-      </LocalizationProvider>
+            }}
+          />
+          <DatePicker
+            label="End Date"
+            value={endDate}
+            onChange={handleEndDateChange}
+            minDate={startDate}
+            maxDate={today}
+            disabled={!startDate}
+            open={endDateOpen}
+            onOpen={() => setEndDateOpen(true)}
+            onClose={() => setEndDateOpen(false)}
+            slotProps={{
+              textField: {
+                size: 'small',
+                onClick: () => startDate && setEndDateOpen(true),
+                sx: {
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.23)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.23)',
+                    },
+                    '&.Mui-disabled': {
+                      cursor: 'not-allowed',
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(0, 0, 0, 0.23)',
+                      },
+                      '& fieldset': {
+                        borderColor: 'rgba(0, 0, 0, 0.23)',
+                      },
+                      '& .MuiInputBase-input': {
+                        cursor: 'not-allowed',
+                        '-webkit-text-fill-color': 'rgba(0, 0, 0, 0.38)',
+                      }
+                    }
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.6)',
+                  },
+                  width: { xs: '100%', md: '230px' }
+                }
+              },
+              popper: {
+                sx: {
+                  '& .MuiPaper-root': {
+                    border: '1px solid #fbcd0b',
+                  },
+                  '& .MuiPickersDay-root.Mui-selected': {
+                    backgroundColor: '#fbcd0b',
+                  }
+                }
+              }
+            }}
+          />
+        </LocalizationProvider>
+      </Box>
       {(startDate || endDate) && (
         <CustomButton
           onClick={clearDateFilter}
           icon={<EventRepeatIcon />}
           style={{
-            minWidth: 'auto',
+            minWidth: { xs: '100%', md: 'auto' },
             height: '38px',
             padding: '0 12px',
-            width: '150px',
+            width: { xs: '100%', md: '150px' },
             backgroundColor: '#fff',
             color: '#6c757d',
             border: '1px solid #6c757d'

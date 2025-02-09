@@ -159,7 +159,7 @@ function OperationLog() {
       <Paper 
         elevation={0}
         sx={{ 
-          p: 3,
+          p: { xs: 2, md: 3 },  // 在小屏幕上减小内边距
           mb: 3,
           border: '1px solid #dee2e6',
           borderRadius: '4px',
@@ -178,28 +178,37 @@ function OperationLog() {
           Search Conditions
         </Typography>
 
-        {/* 搜索条件区域 - 单行布局 */}
+        {/* 搜索条件区域 - 响应式布局 */}
         <Box sx={{ 
           display: 'flex', 
-          alignItems: 'center', 
+          flexDirection: { xs: 'column', md: 'row' },  // 在小屏幕上垂直堆叠
+          alignItems: { xs: 'stretch', md: 'center' }, 
           gap: 2,
           width: '100%',
           mb: 2
         }}>
           {/* 日期选择器 */}
-          <DateRangeFilter 
-            ref={dateRangeRef}
-            onDateChange={handleDateChange}
-            value={{ 
-              startDate: searchParams.startDate, 
-              endDate: searchParams.endDate 
-            }}
-            onValidityChange={setIsDateRangeValid}
-            hideResetButton={true}
-          />
+          <Box sx={{ 
+            flex: { xs: '1 1 auto', md: '0 0 auto' },
+            minWidth: { xs: '100%', md: 'auto' }
+          }}>
+            <DateRangeFilter 
+              ref={dateRangeRef}
+              onDateChange={handleDateChange}
+              value={{ 
+                startDate: searchParams.startDate, 
+                endDate: searchParams.endDate 
+              }}
+              onValidityChange={setIsDateRangeValid}
+              hideResetButton={true}
+            />
+          </Box>
 
           {/* 搜索字段和输入框 */}
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ 
+            flex: { xs: '1 1 auto', md: '1' },
+            minWidth: { xs: '100%', md: 'auto' }
+          }}>
             <OperationLogSearch
               searchValue={searchParams.searchValue}
               setSearchValue={(value) => 
@@ -217,7 +226,11 @@ function OperationLog() {
           {/* Action Buttons */}
           <Box sx={{ 
             display: 'flex', 
-            gap: 2
+            gap: 2,
+            flexDirection: { xs: 'row', md: 'row' },
+            justifyContent: { xs: 'space-between', md: 'flex-start' },
+            flex: { xs: '1 1 auto', md: '0 0 auto' },
+            minWidth: { xs: '100%', md: 'auto' }
           }}>
             <CustomButton
               onClick={handleReset}
@@ -226,32 +239,38 @@ function OperationLog() {
                 backgroundColor: '#fff',
                 color: '#6c757d',
                 border: '1px solid #6c757d',
-                minWidth: '215px',
+                minWidth: { xs: '45%', md: '215px' },
                 height: '40px',
                 padding: '0 12px'
               }}
             >
-              Clear All Conditions
+              Clear All
             </CustomButton>
-            <CustomButton
-              onClick={handleSearch}
-              icon={<SearchIcon />}
-              disabled={isSearchDisabled}
-              style={{
-                backgroundColor: '#fbcd0b',
-                color: '#FFF',
-                minWidth: 'auto',
-                height: '40px',
-                opacity: isSearchDisabled ? 0.5 : 1,
-                cursor: isSearchDisabled ? 'not-allowed' : 'pointer'
-              }}
-            >
-              Search
-            </CustomButton>
-            <RefreshButton 
-              onClick={handleRefreshAll}
-              tooltip="Reset all filters and refresh data"
-            />
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 1,
+              flex: { xs: '0 0 auto', md: '0 0 auto' }
+            }}>
+              <CustomButton
+                onClick={handleSearch}
+                icon={<SearchIcon />}
+                disabled={isSearchDisabled}
+                style={{
+                  backgroundColor: '#fbcd0b',
+                  color: '#FFF',
+                  minWidth: 'auto',
+                  height: '40px',
+                  opacity: isSearchDisabled ? 0.5 : 1,
+                  cursor: isSearchDisabled ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Search
+              </CustomButton>
+              <RefreshButton 
+                onClick={handleRefreshAll}
+                tooltip="Reset all filters and refresh data"
+              />
+            </Box>
           </Box>
         </Box>
       </Paper>
