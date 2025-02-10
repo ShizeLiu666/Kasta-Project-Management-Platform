@@ -207,7 +207,13 @@ function OperationLog() {
           {/* 搜索字段和输入框 */}
           <Box sx={{ 
             flex: { xs: '1 1 auto', md: '1' },
-            minWidth: { xs: '100%', md: 'auto' }
+            minWidth: { xs: '100%', md: 'auto' },
+            '& .MuiFormControl-root': {
+              minWidth: { xs: '100%', sm: 'auto' }
+            },
+            '& .MuiTextField-root': {
+              minWidth: { xs: '100%', sm: '250px' }
+            }
           }}>
             <OperationLogSearch
               searchValue={searchParams.searchValue}
@@ -219,7 +225,10 @@ function OperationLog() {
                 setSearchParams(prev => ({ ...prev, searchField: field }))
               }
               searchFields={searchFields}
-              containerStyle={{ marginBottom: 0 }}
+              containerStyle={{ 
+                marginBottom: 0,
+                width: '100%'
+              }}
             />
           </Box>
 

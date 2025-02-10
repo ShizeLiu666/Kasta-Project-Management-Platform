@@ -128,6 +128,7 @@ function OperationLogSearch({
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={`Search by ${searchFields.find(f => f.value === searchField)?.label || 'all fields'}...`}
             sx={{
+              minWidth: { xs: '200px', sm: '250px' },
               '& .MuiOutlinedInput-root': {
                 height: '40px',
                 '&:hover fieldset': {
@@ -144,12 +145,19 @@ function OperationLogSearch({
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ...containerStyle }}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: { xs: 'column', sm: 'row' },
+      alignItems: { xs: 'stretch', sm: 'center' }, 
+      gap: 2, 
+      ...containerStyle,
+      minWidth: { xs: '100%', sm: 'auto' }
+    }}>
       {/* Search Field Selector */}
       <FormControl
         size="small"
         sx={{
-          minWidth: 180,
+          minWidth: { xs: '100%', sm: '180px' },
           '& .MuiOutlinedInput-root': {
             height: '40px',
             backgroundColor: '#fff',
