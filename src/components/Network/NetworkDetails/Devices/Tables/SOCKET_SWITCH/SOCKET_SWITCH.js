@@ -1,6 +1,6 @@
 import React from 'react';
 import BasicTable from '../BasicTable';
-import switchIcon from '../../../../../../assets/icons/DeviceType/SWITCH.png';
+import SOCKET_SWITCHIcon from '../../../../../../assets/icons/DeviceType/SOCKET_SWITCH.png';
 
 const SWITCHType = ({ devices }) => {
   const columns = [
@@ -25,8 +25,8 @@ const SWITCHType = ({ devices }) => {
 
   return (
     <BasicTable
-      title="Switch"
-      icon={switchIcon}
+      title="Socket Switch"
+      icon={SOCKET_SWITCHIcon}
       devices={devices}
       columns={columns}
       nameColumnWidth="40%"  // 由于只有2列，给名称列分配较多空间

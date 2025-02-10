@@ -14,8 +14,8 @@ export const PRODUCT_TYPE_MAP = {
     // 5. SOCKET_RELAY (继电器插座)
     'k8tngzhj': 'SOCKET_RELAY',
     
-    // ToDO 6. SWITCH (开关)
-    'ay5nnjdm': 'SWITCH',
+    // ToDO 6. SWITCH (开关) - ok
+    'ay5nnjdm': 'SOCKET_SWITCH',
     
     // 7. THERMOSTAT (恒温器)
     'fphjf3jj': 'THERMOSTAT',
@@ -23,31 +23,31 @@ export const PRODUCT_TYPE_MAP = {
     // 8. POWER_POINT (电源插座)
     'xdddhvid': 'POWER_POINT',
     
-    // ToDO 9. DAYLIGHT_SENSOR (日光传感器)
+    // ToDO 9. DAYLIGHT_SENSOR (日光传感器) - ok
     'opz0gj1q': 'DAYLIGHT_SENSOR',
     
-    // ToDO 10. CURTAIN (窗帘)
+    // ToDO 10. CURTAIN (窗帘) - ok
     'ldiuak9c': 'CURTAIN',
     
-    // ToDO 11. DRY_CONTACT (干接点)
+    // ToDO 11. DRY_CONTACT (干接点) - ok
     'zphgv5n9': 'DRY_CONTACT',
     
-    // ToDO 12. VCAL_SOCKET (VCAL插座)
+    // ToDO 12. VCAL_SOCKET (VCAL插座) - icon? 竖版插座 半ppt 一个空位
     '7doxadh6': 'VCAL_SOCKET',
     
-    // ToDO 13. T3_SWITCH (三键开关)
+    // ToDO 13. T3_SWITCH (三键开关) - icon? 面板
     'acqhrjul': 'T3_SWITCH',
     
-    // ToDO 14. T3_DIMMER (三键调光器)
+    // ToDO 14. T3_DIMMER (三键调光器) - icon?
     'fybufemo': 'T3_DIMMER',
     
     // ToDO 15. PANGU (盘古)
     'eexc6xorj65omqap': 'PANGU',
     
-    // ToDO 16. TOUCH_PANEL (触摸面板)
+    // ToDO 16. TOUCH_PANEL (触摸面板) - 动态 icon 根据参数
     'skr8wl4o': 'TOUCH_PANEL',
     
-    // ToDO 17. RB02 (遥控器)
+    // ToDO 17. RB02 (遥控器) - 220 v / 电磁的
     'ng8eledm': 'RB02',
     
     // ToDO 18. FIVE_BUTTON (五键开关)
@@ -62,7 +62,7 @@ export const PRODUCT_TYPE_MAP = {
     // ToDO 21. MULTIVUE (多功能显示屏)
     'ng8eledv5': 'MULTIVUE',
     
-    // ToDO 22. SIX_INPUT_FOUR_OUTPUT (六进四出)
+    // ToDO 22. SIX_INPUT_FOUR_OUTPUT (六进四出) - 动态 icon 根据参数
     '5ozdgdrd': 'SIX_INPUT_FOUR_OUTPUT',
 
     // === 额外设备类型 ===
