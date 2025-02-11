@@ -24,20 +24,18 @@ import axiosInstance from '../../config';
 import { getToken } from '../auth';
 import RefreshButton from '../CustomComponents/RefreshButton';
 
-// 添加 TruncatedCell 组件
+// 修改 TruncatedCell 组件
 const TruncatedCell = ({ text, maxLength = 20 }) => {
   const truncatedText = text?.length > maxLength
     ? `${text.substring(0, maxLength)}...`
     : text || '-';
-
-  const isTextTruncated = text?.length > maxLength;
 
   return (
     <div style={{
       width: '100%',
       position: 'relative',
       display: 'flex',
-      justifyContent: isTextTruncated ? 'center' : 'flex-start' // 文本截断时居中，否则左对齐
+      justifyContent: 'flex-start'  // 始终左对齐
     }}>
       <Tooltip
         title={text || '-'}
@@ -60,7 +58,7 @@ const TruncatedCell = ({ text, maxLength = 20 }) => {
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           maxWidth: '100%',
-          display: 'inline-block' // 使用 inline-block 让容器宽度适应内容
+          display: 'inline-block'
         }}>
           {truncatedText}
         </div>
@@ -125,6 +123,31 @@ const OperationTypeChip = ({ type }) => {
   );
 };
 
+// 添加日期处理工具函数
+const formatDateForDisplay = (dateString) => {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+};
+
+const formatDateForAPI = (date, isEndDate = false) => {
+  if (!date) return null;
+  const d = new Date(date);
+  if (isEndDate) {
+    d.setHours(23, 59, 59, 999);
+  } else {
+    d.setHours(0, 0, 0, 0);
+  }
+  return d.toISOString();
+};
+
 function OperationLog() {
   // 搜索参数状态
   const [searchParams, setSearchParams] = useState({
@@ -150,27 +173,26 @@ function OperationLog() {
   // 检查搜索是否可用
   const isSearchDisabled = !isDateRangeValid;
 
-  // 获取日志数据的函数
+  // 1. 创建一个 ref 来追踪是否是首次加载
+  const isFirstLoad = useRef(true);
+
   const fetchLogs = useCallback(async (params) => {
     setLoading(true);
     try {
       const token = getToken();
       const requestData = {
-        page: params?.page ?? page,
-        size: params?.size ?? rowsPerPage,
-        searchValue: params?.searchValue || '',
-        searchField: params?.searchField || 'all',
-        startDate: params?.startDate ? 
-          new Date(new Date(params.startDate).setHours(0, 0, 0, 0)).toISOString() : null,
-        endDate: params?.endDate ? 
-          new Date(new Date(params.endDate).setHours(23, 59, 59, 999)).toISOString() : null
+        page: params.page,
+        size: params.size,
+        searchValue: params.searchValue || '',
+        searchField: params.searchField || 'all',
+        startDate: formatDateForAPI(params.startDate),
+        endDate: formatDateForAPI(params.endDate, true)
       };
 
-      // 添加请求参数日志
       console.log('Fetching logs with params:', {
         ...requestData,
-        startDate: requestData.startDate ? new Date(requestData.startDate).toLocaleString() : null,
-        endDate: requestData.endDate ? new Date(requestData.endDate).toLocaleString() : null
+        startDate: requestData.startDate ? formatDateForDisplay(requestData.startDate) : null,
+        endDate: requestData.endDate ? formatDateForDisplay(requestData.endDate) : null
       });
 
       const response = await axiosInstance.post('/logs/search', requestData, {
@@ -178,12 +200,6 @@ function OperationLog() {
       });
 
       if (response.data.success) {
-        console.log('Fetch logs response:', {
-          totalElements: response.data.data.totalElements,
-          currentPage: requestData.page,
-          pageSize: requestData.size,
-          contentLength: response.data.data.content.length
-        });
         setLogs(response.data.data.content);
         setTotal(response.data.data.totalElements);
       } else {
@@ -194,20 +210,21 @@ function OperationLog() {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage]);
+  }, []);
 
-  // 添加初始化加载
+  // 3. 修改 useEffect，只在首次加载时执行
   useEffect(() => {
-    // 使用默认参数发送初始请求
-    const initialParams = {
-      searchField: 'all',
-      searchValue: '',
-      startDate: null,
-      endDate: null,
-      page: 0,
-      size: rowsPerPage
-    };
-    fetchLogs(initialParams);
+    if (isFirstLoad.current) {
+      fetchLogs({
+        page: 0,
+        size: rowsPerPage,
+        searchField: 'all',
+        searchValue: '',
+        startDate: null,
+        endDate: null
+      });
+      isFirstLoad.current = false;
+    }
   }, [fetchLogs, rowsPerPage]);
 
   const searchFields = useMemo(() => [
@@ -284,7 +301,7 @@ function OperationLog() {
     fetchLogs(currentParams);
   };
 
-  // 刷新按钮处理函数
+  // 修改刷新函数
   const handleRefreshAll = useCallback(() => {
     setSearchParams({
       searchField: 'all',
@@ -293,11 +310,15 @@ function OperationLog() {
       endDate: null
     });
     setQueryParams(null);
-    setPage(0);
-    setRowsPerPage(10);
-    dateRangeRef.current?.reset();
-    fetchLogs({ page: 0, size: 10 });
-  }, [fetchLogs]);
+    fetchLogs({ 
+      page: 0,
+      size: rowsPerPage,
+      searchField: 'all',
+      searchValue: '',
+      startDate: null,
+      endDate: null
+    });
+  }, [rowsPerPage, fetchLogs]);
 
   return (
     <ComponentCard title="Operation Log">
@@ -454,26 +475,19 @@ function OperationLog() {
               <Table>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                    <TableCell width="20%">Time</TableCell>
-                    <TableCell width="15%">Username</TableCell>
-                    <TableCell width="12%">Operation Type</TableCell>
-                    <TableCell width="33%">Description</TableCell>
-                    <TableCell width="20%">Target</TableCell>
+                    <TableCell width="18%">Time</TableCell>
+                    <TableCell width="12%">Username</TableCell>
+                    <TableCell width="10%">Operation Type</TableCell>
+                    <TableCell width="25%">Description</TableCell>
+                    <TableCell width="20%">Target Type</TableCell>
+                    <TableCell width="15%">Target Id</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {logs.map((log) => (
                     <TableRow key={log.operationTime}>
                       <TableCell>
-                        {new Date(log.operationTime).toLocaleString('zh-CN', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                          hour12: false
-                        })}
+                        {formatDateForDisplay(log.operationTime)}
                       </TableCell>
                       <TableCell>
                         <TruncatedCell text={log.username} maxLength={15} />
@@ -485,10 +499,10 @@ function OperationLog() {
                         <TruncatedCell text={log.description} maxLength={50} />
                       </TableCell>
                       <TableCell>
-                        <TruncatedCell 
-                          text={log.targetType && log.targetId ? `${log.targetType} (${log.targetId})` : '-'} 
-                          maxLength={30} 
-                        />
+                        <TruncatedCell text={log.targetType} maxLength={30} />
+                      </TableCell>
+                      <TableCell>
+                        <TruncatedCell text={log.targetId} maxLength={20} />
                       </TableCell>
                     </TableRow>
                   ))}
