@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import ComponentCard from "../CustomComponents/ComponentCard";
 import {
   CircularProgress,
@@ -11,7 +11,9 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Typography
+  Typography,
+  Tooltip,
+  Chip
 } from "@mui/material";
 import DateRangeFilter from "./DateRangeFilter";
 import OperationLogSearch from './OperationLogSearch';
@@ -21,6 +23,107 @@ import SearchIcon from '@mui/icons-material/Search';
 import axiosInstance from '../../config';
 import { getToken } from '../auth';
 import RefreshButton from '../CustomComponents/RefreshButton';
+
+// 添加 TruncatedCell 组件
+const TruncatedCell = ({ text, maxLength = 20 }) => {
+  const truncatedText = text?.length > maxLength
+    ? `${text.substring(0, maxLength)}...`
+    : text || '-';
+
+  const isTextTruncated = text?.length > maxLength;
+
+  return (
+    <div style={{
+      width: '100%',
+      position: 'relative',
+      display: 'flex',
+      justifyContent: isTextTruncated ? 'center' : 'flex-start' // 文本截断时居中，否则左对齐
+    }}>
+      <Tooltip
+        title={text || '-'}
+        placement="top"
+        arrow
+        sx={{
+          tooltip: {
+            backgroundColor: '#333',
+            fontSize: '0.875rem',
+            padding: '8px 12px',
+            maxWidth: 'none'
+          },
+          arrow: {
+            color: '#333'
+          }
+        }}
+      >
+        <div style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          maxWidth: '100%',
+          display: 'inline-block' // 使用 inline-block 让容器宽度适应内容
+        }}>
+          {truncatedText}
+        </div>
+      </Tooltip>
+    </div>
+  );
+};
+
+// 在 TruncatedCell 组件后添加 OperationTypeChip 组件
+const OperationTypeChip = ({ type }) => {
+  const getChipProps = () => {
+    switch (type) {
+      case 'ADD':
+        return {
+          label: 'ADD',
+          color: '#e6f4ea',
+          textColor: '#1e4620'
+        };
+      case 'MOD':
+        return {
+          label: 'MOD',
+          color: '#fef7e0',
+          textColor: '#996500'
+        };
+      case 'DEL':
+        return {
+          label: 'DEL',
+          color: '#fde7e7',
+          textColor: '#c62828'
+        };
+      default:
+        return {
+          label: type || 'NULL',
+          color: '#f0f0f0',
+          textColor: '#666666'
+        };
+    }
+  };
+
+  const { label, color, textColor } = getChipProps();
+
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+      <Chip
+        label={label}
+        size="small"
+        sx={{
+          minWidth: '60px',
+          backgroundColor: color,
+          color: textColor,
+          borderRadius: '4px',
+          height: '24px',
+          '& .MuiChip-label': { 
+            px: 2,
+            fontSize: '0.8125rem',
+            lineHeight: '1.2',
+            fontWeight: 450
+          }
+        }}
+      />
+    </Box>
+  );
+};
 
 function OperationLog() {
   // 搜索参数状态
@@ -40,20 +143,10 @@ function OperationLog() {
   const [total, setTotal] = useState(0);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDateRangeValid, setIsDateRangeValid] = useState(true);
   
   const dateRangeRef = useRef(null);
   
-  const searchFields = useMemo(() => [
-    { value: 'all', label: 'All Fields' },
-    { value: 'username', label: 'Username' },
-    { value: 'description', label: 'Description' },
-    { value: 'operation_type', label: 'Operation Type' },
-    { value: 'target_type', label: 'Target Type' }
-  ], []);
-
-  // 添加日期验证状态
-  const [isDateRangeValid, setIsDateRangeValid] = useState(true);
-
   // 检查搜索是否可用
   const isSearchDisabled = !isDateRangeValid;
 
@@ -62,16 +155,35 @@ function OperationLog() {
     setLoading(true);
     try {
       const token = getToken();
-      const response = await axiosInstance.get('/operation-logs', {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          page,
-          size: rowsPerPage,
-          ...params
-        }
+      const requestData = {
+        page: params?.page ?? page,
+        size: params?.size ?? rowsPerPage,
+        searchValue: params?.searchValue || '',
+        searchField: params?.searchField || 'all',
+        startDate: params?.startDate ? 
+          new Date(new Date(params.startDate).setHours(0, 0, 0, 0)).toISOString() : null,
+        endDate: params?.endDate ? 
+          new Date(new Date(params.endDate).setHours(23, 59, 59, 999)).toISOString() : null
+      };
+
+      // 添加请求参数日志
+      console.log('Fetching logs with params:', {
+        ...requestData,
+        startDate: requestData.startDate ? new Date(requestData.startDate).toLocaleString() : null,
+        endDate: requestData.endDate ? new Date(requestData.endDate).toLocaleString() : null
+      });
+
+      const response = await axiosInstance.post('/logs/search', requestData, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
+        console.log('Fetch logs response:', {
+          totalElements: response.data.data.totalElements,
+          currentPage: requestData.page,
+          pageSize: requestData.size,
+          contentLength: response.data.data.content.length
+        });
         setLogs(response.data.data.content);
         setTotal(response.data.data.totalElements);
       } else {
@@ -84,16 +196,34 @@ function OperationLog() {
     }
   }, [page, rowsPerPage]);
 
+  // 添加初始化加载
+  useEffect(() => {
+    // 使用默认参数发送初始请求
+    const initialParams = {
+      searchField: 'all',
+      searchValue: '',
+      startDate: null,
+      endDate: null,
+      page: 0,
+      size: rowsPerPage
+    };
+    fetchLogs(initialParams);
+  }, [fetchLogs, rowsPerPage]);
+
+  const searchFields = useMemo(() => [
+    { value: 'all', label: 'All Fields' },
+    { value: 'username', label: 'Username' },
+    { value: 'description', label: 'Description' },
+    { value: 'operation_type', label: 'Operation Type' },
+    { value: 'target_type', label: 'Target Type' }
+  ], []);
+
   // 处理搜索
   const handleSearch = () => {
     const params = {
       ...searchParams,
       page: 0,
-      // 处理日期，确保时间范围完整
-      startDate: searchParams.startDate ? 
-        new Date(new Date(searchParams.startDate).setHours(0, 0, 0, 0)).toISOString() : null,
-      endDate: searchParams.endDate ? 
-        new Date(new Date(searchParams.endDate).setHours(23, 59, 59, 999)).toISOString() : null
+      size: rowsPerPage
     };
     setPage(0);
     setQueryParams(params);
@@ -124,21 +254,38 @@ function OperationLog() {
 
   // 处理分页变更
   const handleChangePage = (event, newPage) => {
+    console.log('Changing to page:', newPage);
+    // 先更新页码
     setPage(newPage);
-    fetchLogs({ ...queryParams, page: newPage });
+    // 构建查询参数，保持现有的搜索条件
+    const currentParams = {
+      ...(queryParams || searchParams), // 如果没有查询参数，使用当前搜索条件
+      page: newPage,
+      size: rowsPerPage
+    };
+    setQueryParams(currentParams);
+    fetchLogs(currentParams);
   };
 
   // 处理每页数量变更
   const handleChangeRowsPerPage = (event) => {
-    const newRowsPerPage = parseInt(event.target.value, 10); // 转换为整数
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    console.log('Changing rows per page to:', newRowsPerPage);
+    // 更新每页数量并重置页码
     setRowsPerPage(newRowsPerPage);
     setPage(0);
-    fetchLogs({ ...queryParams, page: 0, size: newRowsPerPage });
+    // 构建查询参数
+    const currentParams = {
+      ...(queryParams || searchParams), // 如果没有查询参数，使用当前搜索条件
+      page: 0,
+      size: newRowsPerPage
+    };
+    setQueryParams(currentParams);
+    fetchLogs(currentParams);
   };
 
-  // 刷新按钮处理函数保持不变
+  // 刷新按钮处理函数
   const handleRefreshAll = useCallback(() => {
-    // 重置所有状态
     setSearchParams({
       searchField: 'all',
       searchValue: '',
@@ -149,8 +296,7 @@ function OperationLog() {
     setPage(0);
     setRowsPerPage(10);
     dateRangeRef.current?.reset();
-    // 重新获取数据
-    fetchLogs({});
+    fetchLogs({ page: 0, size: 10 });
   }, [fetchLogs]);
 
   return (
@@ -308,23 +454,18 @@ function OperationLog() {
               <Table>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Username</TableCell>
-                    <TableCell>Time</TableCell>
-                    <TableCell>Operation Type</TableCell>
-                    <TableCell>Target</TableCell>
-                    <TableCell>Description</TableCell>
+                    <TableCell width="20%">Time</TableCell>
+                    <TableCell width="15%">Username</TableCell>
+                    <TableCell width="12%">Operation Type</TableCell>
+                    <TableCell width="33%">Description</TableCell>
+                    <TableCell width="20%">Target</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {logs.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell>{log.id}</TableCell>
-                      <TableCell>{log.username}</TableCell>
-                      <TableCell>{log.operation_type}</TableCell>
-                      <TableCell>{`${log.target_type} (${log.target_id})`}</TableCell>
+                    <TableRow key={log.operationTime}>
                       <TableCell>
-                        {new Date(log.operation_time).toLocaleString('zh-CN', {
+                        {new Date(log.operationTime).toLocaleString('zh-CN', {
                           year: 'numeric',
                           month: '2-digit',
                           day: '2-digit',
@@ -334,7 +475,21 @@ function OperationLog() {
                           hour12: false
                         })}
                       </TableCell>
-                      <TableCell>{log.description}</TableCell>
+                      <TableCell>
+                        <TruncatedCell text={log.username} maxLength={15} />
+                      </TableCell>
+                      <TableCell>
+                        <OperationTypeChip type={log.operationType} />
+                      </TableCell>
+                      <TableCell>
+                        <TruncatedCell text={log.description} maxLength={50} />
+                      </TableCell>
+                      <TableCell>
+                        <TruncatedCell 
+                          text={log.targetType && log.targetId ? `${log.targetType} (${log.targetId})` : '-'} 
+                          maxLength={30} 
+                        />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -348,6 +503,11 @@ function OperationLog() {
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[10, 25, 50]}
+              labelDisplayedRows={({ from, to, count }) => 
+                `${from}-${to} of ${count !== -1 ? count : 'more than ' + to}`
+              }
+              showFirstButton
+              showLastButton
               sx={{
                 borderTop: '1px solid #dee2e6',
                 '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
