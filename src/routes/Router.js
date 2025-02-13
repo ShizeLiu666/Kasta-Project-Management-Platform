@@ -68,9 +68,9 @@ import LoginPage from "../components/Login/LoginPage";
 import ProjectListComponent from "../components/projects/ProjectList/ProjectListComponent";
 import Profile from "../components/profile/profile";
 import AuthCodeManagement from "../components/AuthCodeManagement/AuthCodeManagement";
-// import TestComponent from "../components/Testing/TestComponent";
 import NetworkComponent from "../components/Network/NetworkList/NetworkComponent.js";
 import DashboardPage from "../components/Dashboard/DashboardPage";
+import OperationLog from "../components/OperationLog/OperationLog";
 
 /*****Routes******/
 const router = createBrowserRouter([
@@ -92,7 +92,7 @@ const router = createBrowserRouter([
       { path: "network", element: <NetworkComponent /> },
       { path: "profile", element: <Profile /> },
       { path: "auth-code-management", element: <AuthCodeManagement /> },
-      // { path: "testing", element: <TestComponent /> },
+      { path: "operation-log", element: <OperationLog /> },
     ],
   },
   {

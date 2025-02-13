@@ -1,41 +1,44 @@
 import React from 'react';
+import { Box, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-const RefreshButton = ({ onClick, isLoading }) => {
+function RefreshButton({ onClick, tooltip = "Reset and refresh data" }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={isLoading}
-      style={{
-        background: 'none',
-        border: 'none',
-        marginLeft: '5px',
-        padding: '8px',
+    <Box
+      sx={{
+        backgroundColor: '#fff',
+        border: '1px solid #ced4da',
         borderRadius: '4px',
         display: 'flex',
         alignItems: 'center',
-        transition: 'background-color 0.2s',
-        // cursor: isLoading ? 'wait' : 'pointer'
-      }}
-      onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-      onMouseLeave={(e) => !isLoading && (e.currentTarget.style.backgroundColor = 'transparent')}
-    >
-      <RefreshIcon 
-        sx={{ 
-          color: isLoading ? '#999' : '#666',
-          animation: isLoading ? 'spin 1s linear infinite' : 'none'
-        }} 
-      />
-      <style>
-        {`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        justifyContent: 'center',
+        height: '40px',
+        width: '40px',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          border: '1px solid #fbcd0b',
+          background: '#fbcd0b',
+          '& .MuiSvgIcon-root': {
+            color: '#fff'
           }
-        `}
-      </style>
-    </button>
+        }
+      }}
+    >
+      <IconButton
+        onClick={onClick}
+        size="small"
+        sx={{
+          padding: '8px',
+          '&:hover': {
+            backgroundColor: 'transparent'
+          }
+        }}
+        title={tooltip}
+      >
+        <RefreshIcon sx={{ transition: 'color 0.2s ease' }} />
+      </IconButton>
+    </Box>
   );
-};
+}
 
-export default RefreshButton;
+export default RefreshButton; 

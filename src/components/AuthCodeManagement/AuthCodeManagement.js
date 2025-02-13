@@ -10,7 +10,6 @@ import EditIcon from '@mui/icons-material/EditNote';  // 导入 EditIcon
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';  // 导入 ContentCopyIcon
 import CustomAlert from '../CustomComponents/CustomAlert';  // 导入 CustomAlert
 import CustomButton from '../CustomComponents/CustomButton';
-import CustomSearchBar from '../CustomComponents/CustomSearchBar';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -21,14 +20,9 @@ import TablePagination from '@mui/material/TablePagination';
 import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import Tooltip from '@mui/material/Tooltip';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
 import Box from '@mui/material/Box';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import IconButton from '@mui/material/IconButton';
 import TableSortLabel from '@mui/material/TableSortLabel';
+import SearchWithField from '../CustomComponents/SearchWithField';
 // import { backdropClasses } from '@mui/material';
 
 // const { SearchBar } = Search;
@@ -60,13 +54,13 @@ const TruncatedCell = ({ text, maxLength = 20, canCopy = false, onCopy }) => {
         arrow
         sx={{
           tooltip: {
-            backgroundColor: '#333',
+            backgroundColor: '#333', 
             fontSize: '0.875rem',
-            padding: '8px 12px',
+            padding: '8px 12px', 
             maxWidth: 'none'  // 允许 tooltip 根据内容自动调整宽度
           },
           arrow: {
-            color: '#333'
+            color: '#333' // 箭头颜色
           }
         }}
       >
@@ -278,15 +272,6 @@ const AuthCodeManagement = () => {
     });
   }, [authCodes, searchField, searchFields]);
 
-  // Get placeholder text based on selected field
-  const getPlaceholder = () => {
-    if (searchField === 'all') {
-      return 'Search in all fields...';
-    }
-    const field = searchFields.find(f => f.value === searchField);
-    return field ? `Search by ${field.label}...` : 'Search...';
-  };
-
   // 当 authCodes 或 searchTerm 改变时更新过滤结果
   useEffect(() => {
     setFilteredAuthCodes(filterAuthCodes(searchTerm));
@@ -383,15 +368,14 @@ const AuthCodeManagement = () => {
   };
 
   // Add reset function
-  const handleReset = useCallback(() => {
+  const handleRefresh = useCallback(() => {
     setSearchTerm('');
     setSearchField('all');
-    setFilteredAuthCodes(authCodes);
     setOrder('desc');
     setOrderBy('createDate');
     setMuiPage(0);
     fetchAuthCodes();
-  }, [authCodes, fetchAuthCodes]);
+  }, [fetchAuthCodes]);
 
   const headerCells = [
     { id: 'code', label: 'Code', width: '18%' },
@@ -421,118 +405,15 @@ const AuthCodeManagement = () => {
             <ComponentCard title="Authorization Code Management">
               <div className="d-flex justify-content-between mb-3">
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <FormControl
-                    size="small"
-                    sx={{
-                      minWidth: 120,
-                      '& .MuiOutlinedInput-root': {
-                        height: '40px',
-                        backgroundColor: '#fff',
-                        // Hover state
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#fbcd0b'
-                        },
-                        // Focused state
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#fbcd0b',
-                          borderWidth: '1px'
-                        }
-                      },
-                      // Label color when focused
-                      '& .Mui-focused': {
-                        color: '#fbcd0b !important'
-                      },
-                      // InputLabel color when focused
-                      '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#fbcd0b'
-                      }
-                    }}
-                  >
-                    <InputLabel>Search In</InputLabel>
-                    <Select
-                      value={searchField}
-                      label="Search In"
-                      onChange={(e) => {
-                        setSearchField(e.target.value);
-                        setSearchTerm('');
-                      }}
-                      // Disable ripple effect
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            '& .MuiMenuItem-root': {
-                              '&:hover': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                              },
-                              '&.Mui-selected': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.08)'
-                              }
-                            }
-                          }
-                        }
-                      }}
-                    >
-                      {searchFields.map(field => (
-                        <MenuItem
-                          key={field.value}
-                          value={field.value}
-                          // Disable ripple effect
-                          TouchRippleProps={{ disabled: true }}
-                        >
-                          {field.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <CustomSearchBar
+                  <SearchWithField
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
-                    placeholder={getPlaceholder()}
-                    width="300px"
-                    showBorder={true}
-                    onFilter={(value) => {
-                      const filtered = filterAuthCodes(value);
-                      setFilteredAuthCodes(filtered);
-                    }}
-                    tooltip={`Search in ${searchField === 'all' ? 'all fields' : searchFields.find(f => f.value === searchField).label}`}
-                    debounceTime={300}
+                    searchField={searchField}
+                    setSearchField={setSearchField}
+                    searchFields={searchFields}
+                    onFilter={filterAuthCodes}
+                    onRefresh={handleRefresh}
                   />
-
-                  <Box
-                    sx={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '40px',
-                      width: '40px',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        border: '1px solid #fbcd0b',
-                        background: '#fbcd0b',
-                        '& .MuiSvgIcon-root': {  // Target the icon when Box is hovered
-                          color: '#fff'
-                        }
-                      }
-                    }}
-                  >
-                    <IconButton
-                      onClick={handleReset}
-                      size="small"
-                      sx={{
-                        padding: '8px',
-                        '&:hover': {
-                          backgroundColor: 'transparent'
-                        }
-                      }}
-                      title="Reset and refresh data"
-                    >
-                      <RefreshIcon sx={{ transition: 'color 0.2s ease' }} />
-                    </IconButton>
-                  </Box>
                 </Box>
 
                 <CustomButton

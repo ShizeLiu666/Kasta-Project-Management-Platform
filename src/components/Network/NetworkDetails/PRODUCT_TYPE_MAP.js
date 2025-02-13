@@ -16,7 +16,7 @@ export const PRODUCT_TYPE_MAP = {
     
     // ToDO 6. SWITCH (开关) - ok
     'ay5nnjdm': 'SOCKET_SWITCH',
-    
+
     // 7. THERMOSTAT (恒温器)
     'fphjf3jj': 'THERMOSTAT',
     
