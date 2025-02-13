@@ -499,10 +499,22 @@ function OperationLog() {
           <>
             <TableContainer 
               component={Paper}
-              sx={{ 
+              sx={{
                 border: '1px solid #dee2e6',
                 borderRadius: '4px',
-                boxShadow: 'none'
+                boxShadow: 'none',
+                width: '100%',
+                '& .MuiTable-root': {
+                  tableLayout: 'fixed' // 强制使用固定表格布局
+                },
+                '& .MuiTableCell-root': {
+                  padding: { xs: '8px 4px', md: '16px 8px' } // 小屏幕和大屏幕不同的内边距
+                },
+                '& .MuiButtonBase-root': {
+                  '& .MuiTouchRipple-root': {
+                    display: 'none'
+                  }
+                }
               }}
             >
               <Table>
@@ -519,9 +531,7 @@ function OperationLog() {
                 <TableBody>
                   {logs.map((log) => (
                     <TableRow key={log.operationTime}>
-                      <TableCell>
-                        {formatDateForDisplay(log.operationTime)}
-                      </TableCell>
+                      <TableCell>{formatDateForDisplay(log.operationTime)}</TableCell>
                       <TableCell>
                         <TruncatedCell text={log.username} maxLength={15} />
                       </TableCell>
