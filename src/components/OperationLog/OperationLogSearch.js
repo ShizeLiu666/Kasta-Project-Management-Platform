@@ -5,7 +5,7 @@ const OPERATION_TYPES = [
   'ADD',
   'MOD',
   'DEL',
-  'Others',
+  'Other',
   // ... 添加其他操作类型
 ];
 

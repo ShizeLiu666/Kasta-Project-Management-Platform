@@ -23,7 +23,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import axiosInstance from '../../config';
 import { getToken } from '../auth';
 import RefreshButton from '../CustomComponents/RefreshButton';
-import { Row, Col } from 'reactstrap';
 
 // 修改 TruncatedCell 组件
 const TruncatedCell = ({ text, maxLength = 20 }) => {
@@ -339,256 +338,249 @@ function OperationLog() {
   );
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <ComponentCard title="Operation Log">
-            {/* 搜索区域 */}
-            <Paper 
-              elevation={0}
-              sx={{ 
-                p: { xs: 2, md: 3 },  // 在小屏幕上减小内边距
-                mb: 3,
-                border: '1px solid #dee2e6',
-                borderRadius: '4px',
-                backgroundColor: '#fff'
+    <ComponentCard title="Operation Log">
+      {/* 搜索区域 */}
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: { xs: 2, md: 3 },  // 内边距
+          mb: 3,
+          border: '1px solid #dee2e6',
+          borderRadius: '4px',
+          backgroundColor: '#fff'
+        }}
+      >
+        <Typography 
+          variant="subtitle1" 
+          sx={{ 
+            mb: 2.5,
+            fontWeight: 600,
+            color: '#495057',
+            fontSize: '1rem'
+          }}
+        >
+          Search Conditions
+        </Typography>
+
+        {/* 搜索条件区域 - 响应式布局 */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { xs: 'stretch', md: 'center' }, 
+          gap: 2,
+          width: '100%',  // 这里控制了整个搜索区域的宽度
+          mb: 2
+        }}>
+          {/* 日期选择器 */}
+          <Box sx={{ 
+            flex: { xs: '1 1 auto', md: '0 0 auto' },
+            minWidth: { xs: '100%', md: 'auto' }
+          }}>
+            <DateRangeFilter 
+              ref={dateRangeRef}
+              onDateChange={handleDateChange}
+              value={{ 
+                startDate: searchParams.startDate, 
+                endDate: searchParams.endDate 
               }}
+              onValidityChange={setIsDateRangeValid}
+              hideResetButton={true}
+            />
+          </Box>
+
+          {/* 搜索字段和输入框 */}
+          <Box sx={{ 
+            flex: { xs: '1 1 auto', md: '1' },
+            minWidth: { xs: '100%', md: 'auto' },
+            '& .MuiFormControl-root': {
+              minWidth: { xs: '100%', sm: 'auto' }
+            },
+            '& .MuiTextField-root': {
+              minWidth: { xs: '100%', sm: '250px' }
+            }
+          }}>
+            <OperationLogSearch
+              searchValue={searchParams.searchValue}
+              setSearchValue={(value) => 
+                setSearchParams(prev => ({ ...prev, searchValue: value }))
+              }
+              searchField={searchParams.searchField}
+              setSearchField={(field) => 
+                setSearchParams(prev => ({ ...prev, searchField: field }))
+              }
+              searchFields={searchFields}
+              containerStyle={{ 
+                marginBottom: 0,
+                width: '100%'
+              }}
+            />
+          </Box>
+
+          {/* Action Buttons */}
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2,
+            flexDirection: { xs: 'row', md: 'row' },
+            justifyContent: { xs: 'space-between', md: 'flex-start' },
+            flex: { xs: '1 1 auto', md: '0 0 auto' },
+            minWidth: { xs: '100%', md: 'auto' }
+          }}>
+            <CustomButton
+              onClick={handleReset}
+              icon={<FilterAltOffIcon />}
+              disabled={isSearchEmpty}
+              // 当搜索条件有任意输入时使用红色按钮样式（此处采用 CustomButton 的 "leave" 类型，即红色）
+              type={!isSearchEmpty ? 'leave' : undefined}
+              style={
+                !isSearchEmpty 
+                  ? {
+                      // 红色按钮样式
+                      backgroundColor: '#dc3545', 
+                      color: '#fff',
+                      border: 'none',
+                      minWidth: { xs: '45%', md: '215px' },
+                      height: '40px',
+                      padding: '0 12px'
+                    }
+                  : {
+                      // 默认静止状态样式
+                      backgroundColor: '#fff',
+                      color: '#6c757d',
+                      border: '1px solid #6c757d',
+                      minWidth: { xs: '45%', md: '215px' },
+                      height: '40px',
+                      padding: '0 12px'
+                    }
+              }
             >
-              <Typography 
-                variant="subtitle1" 
-                sx={{ 
-                  mb: 2.5,
-                  fontWeight: 600,
-                  color: '#495057',
-                  fontSize: '1rem'
+              Clear All
+            </CustomButton>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 1,
+              flex: { xs: '0 0 auto', md: '0 0 auto' }
+            }}>
+              <CustomButton
+                onClick={handleSearch}
+                icon={<SearchIcon />}
+                disabled={isSearchDisabled}
+                style={{
+                  backgroundColor: '#fbcd0b',
+                  color: '#FFF',
+                  minWidth: 'auto',
+                  height: '40px',
+                  opacity: isSearchDisabled ? 0.5 : 1,
+                  cursor: isSearchDisabled ? 'not-allowed' : 'pointer'
                 }}
               >
-                Search Conditions
-              </Typography>
-
-              {/* 搜索条件区域 - 响应式布局 */}
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: { xs: 'column', md: 'row' },  // 在小屏幕上垂直堆叠
-                alignItems: { xs: 'stretch', md: 'center' }, 
-                gap: 2,
-                width: '100%',
-                mb: 2
-              }}>
-                {/* 日期选择器 */}
-                <Box sx={{ 
-                  flex: { xs: '1 1 auto', md: '0 0 auto' },
-                  minWidth: { xs: '100%', md: 'auto' }
-                }}>
-                  <DateRangeFilter 
-                    ref={dateRangeRef}
-                    onDateChange={handleDateChange}
-                    value={{ 
-                      startDate: searchParams.startDate, 
-                      endDate: searchParams.endDate 
-                    }}
-                    onValidityChange={setIsDateRangeValid}
-                    hideResetButton={true}
-                  />
-                </Box>
-
-                {/* 搜索字段和输入框 */}
-                <Box sx={{ 
-                  flex: { xs: '1 1 auto', md: '1' },
-                  minWidth: { xs: '100%', md: 'auto' },
-                  '& .MuiFormControl-root': {
-                    minWidth: { xs: '100%', sm: 'auto' }
-                  },
-                  '& .MuiTextField-root': {
-                    minWidth: { xs: '100%', sm: '250px' }
-                  }
-                }}>
-                  <OperationLogSearch
-                    searchValue={searchParams.searchValue}
-                    setSearchValue={(value) => 
-                      setSearchParams(prev => ({ ...prev, searchValue: value }))
-                    }
-                    searchField={searchParams.searchField}
-                    setSearchField={(field) => 
-                      setSearchParams(prev => ({ ...prev, searchField: field }))
-                    }
-                    searchFields={searchFields}
-                    containerStyle={{ 
-                      marginBottom: 0,
-                      width: '100%'
-                    }}
-                  />
-                </Box>
-
-                {/* Action Buttons */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  gap: 2,
-                  flexDirection: { xs: 'row', md: 'row' },
-                  justifyContent: { xs: 'space-between', md: 'flex-start' },
-                  flex: { xs: '1 1 auto', md: '0 0 auto' },
-                  minWidth: { xs: '100%', md: 'auto' }
-                }}>
-                  <CustomButton
-                    onClick={handleReset}
-                    icon={<FilterAltOffIcon />}
-                    disabled={isSearchEmpty}
-                    // 当搜索条件有任意输入时使用红色按钮样式（此处采用 CustomButton 的 "leave" 类型，即红色）
-                    type={!isSearchEmpty ? 'leave' : undefined}
-                    style={
-                      !isSearchEmpty 
-                        ? {
-                            // 红色按钮样式
-                            backgroundColor: '#dc3545', 
-                            color: '#fff',
-                            border: 'none',
-                            minWidth: { xs: '45%', md: '215px' },
-                            height: '40px',
-                            padding: '0 12px'
-                          }
-                        : {
-                            // 默认静止状态样式
-                            backgroundColor: '#fff',
-                            color: '#6c757d',
-                            border: '1px solid #6c757d',
-                            minWidth: { xs: '45%', md: '215px' },
-                            height: '40px',
-                            padding: '0 12px'
-                          }
-                    }
-                  >
-                    Clear All
-                  </CustomButton>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    gap: 1,
-                    flex: { xs: '0 0 auto', md: '0 0 auto' }
-                  }}>
-                    <CustomButton
-                      onClick={handleSearch}
-                      icon={<SearchIcon />}
-                      disabled={isSearchDisabled}
-                      style={{
-                        backgroundColor: '#fbcd0b',
-                        color: '#FFF',
-                        minWidth: 'auto',
-                        height: '40px',
-                        opacity: isSearchDisabled ? 0.5 : 1,
-                        cursor: isSearchDisabled ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      Search
-                    </CustomButton>
-                    <RefreshButton 
-                      onClick={handleRefreshAll}
-                      tooltip="Reset all filters and refresh data"
-                    />
-                  </Box>
-                </Box>
-              </Box>
-            </Paper>
-
-            {/* 数据显示 */}
-            <Box sx={{ mt: 2 }}>
-              {loading ? (
-                <Box sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  minHeight: "200px",
-                }}>
-                  <CircularProgress sx={{ color: '#fbcd0b' }} />
-                </Box>
-              ) : (
-                <>
-                  <TableContainer 
-                    component={Paper}
-                    sx={{
-                      boxShadow: 'none',
-                      border: '1px solid #dee2e6',
-                      width: '100%',
-                      '& .MuiTable-root': {
-                        tableLayout: 'fixed',  // 固定表格布局
-                      },
-                      '& .MuiTableCell-root': {
-                        padding: {
-                          xs: '8px 4px',  // 小屏幕使用更小的padding
-                          md: '16px 8px'
-                        }
-                      }
-                    }}
-                  >
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ width: '18%', display: { xs: 'table-cell', md: 'table-cell' } }}>
-                            Time
-                          </TableCell>
-                          <TableCell width="12%">Username</TableCell>
-                          <TableCell width="10%">Operation Type</TableCell>
-                          <TableCell width="25%">Description</TableCell>
-                          <TableCell width="20%">Target Type</TableCell>
-                          <TableCell width="15%">Target Id</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {logs.map((log) => (
-                          <TableRow key={log.operationTime}>
-                            <TableCell sx={{ width: '18%', display: { xs: 'table-cell', md: 'table-cell' } }}>
-                              {formatDateForDisplay(log.operationTime)}
-                            </TableCell>
-                            <TableCell>
-                              <TruncatedCell text={log.username} maxLength={15} />
-                            </TableCell>
-                            <TableCell>
-                              <OperationTypeChip type={log.operationType} />
-                            </TableCell>
-                            <TableCell>
-                              <TruncatedCell text={log.description} maxLength={50} />
-                            </TableCell>
-                            <TableCell>
-                              <TruncatedCell text={log.targetType} maxLength={30} />
-                            </TableCell>
-                            <TableCell>
-                              <TruncatedCell text={log.targetId} maxLength={20} />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                  <TablePagination
-                    component="div"
-                    count={total}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[10, 25, 50]}
-                    labelDisplayedRows={({ from, to, count }) => 
-                      `${from}-${to} of ${count !== -1 ? count : 'more than ' + to}`
-                    }
-                    showFirstButton
-                    showLastButton
-                    sx={{
-                      borderTop: '1px solid #dee2e6',
-                      '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
-                        margin: 0,
-                      },
-                      '& .MuiButtonBase-root': {
-                        '& .MuiTouchRipple-root': {
-                          display: 'none'
-                        }
-                      }
-                    }}
-                  />
-                </>
-              )}
+                Search
+              </CustomButton>
+              <RefreshButton 
+                onClick={handleRefreshAll}
+                tooltip="Reset all filters and refresh data"
+              />
             </Box>
-          </ComponentCard>
-        </Col>
-      </Row>
-    </div>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* 数据显示 */}
+      <Box sx={{ mt: 2 }}>
+        {loading ? (
+          <Box sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "200px",
+          }}>
+            <CircularProgress sx={{ color: '#fbcd0b' }} />
+          </Box>
+        ) : (
+          <>
+            <TableContainer 
+              component={Paper}
+              sx={{ 
+                border: '1px solid #dee2e6',
+                borderRadius: '4px',
+                boxShadow: 'none',
+                width: '100%',
+                '& .MuiTable-root': {
+                  tableLayout: 'fixed',  // 添加固定表格布局
+                },
+                '& .MuiTableCell-root': {
+                  padding: {
+                    xs: '8px 4px',
+                    md: '16px 8px'
+                  }
+                }
+              }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                    <TableCell sx={{ width: '18%' }}>Time</TableCell>
+                    <TableCell sx={{ width: '12%' }}>Username</TableCell>
+                    <TableCell sx={{ width: '10%' }}>Operation Type</TableCell>
+                    <TableCell sx={{ width: '25%' }}>Description</TableCell>
+                    <TableCell sx={{ width: '20%' }}>Target Type</TableCell>
+                    <TableCell sx={{ width: '15%' }}>Target Id</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {logs.map((log) => (
+                    <TableRow key={log.operationTime}>
+                      <TableCell>
+                        {formatDateForDisplay(log.operationTime)}
+                      </TableCell>
+                      <TableCell>
+                        <TruncatedCell text={log.username} maxLength={15} />
+                      </TableCell>
+                      <TableCell>
+                        <OperationTypeChip type={log.operationType} />
+                      </TableCell>
+                      <TableCell>
+                        <TruncatedCell text={log.description} maxLength={50} />
+                      </TableCell>
+                      <TableCell>
+                        <TruncatedCell text={log.targetType} maxLength={30} />
+                      </TableCell>
+                      <TableCell>
+                        <TruncatedCell text={log.targetId} maxLength={20} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={total}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[10, 25, 50]}
+              labelDisplayedRows={({ from, to, count }) => 
+                `${from}-${to} of ${count !== -1 ? count : 'more than ' + to}`
+              }
+              showFirstButton
+              showLastButton
+              sx={{
+                borderTop: '1px solid #dee2e6',
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                  margin: 0,
+                },
+                '& .MuiButtonBase-root': {
+                  '& .MuiTouchRipple-root': {
+                    display: 'none'
+                  }
+                }
+              }}
+            />
+          </>
+        )}
+      </Box>
+    </ComponentCard>
   );
 }
 

@@ -97,7 +97,7 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
                   '& .MuiInputLabel-root.Mui-focused': {
                     color: '#fbcd0b',
                   },
-                  width: { xs: '100%', md: '230px' }
+                  width: { xs: '100%', md: '180px' }
                 }
               },
               popper: {
@@ -152,7 +152,7 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
                   '& .MuiInputLabel-root.Mui-focused': {
                     color: startDate ? '#fbcd0b' : 'rgba(0, 0, 0, 0.6)',
                   },
-                  width: { xs: '100%', md: '230px' }
+                  width: { xs: '100%', md: '180px' }
                 }
               },
               popper: {
