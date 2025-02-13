@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useNetworkDevices } from '../useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
+import CustomButton from '../../../CustomComponents/CustomButton';
+import AddDeviceModal from './AddDeviceModal';
 
 const DeviceList = ({ networkId }) => {
+  const [addDeviceModalOpen, setAddDeviceModalOpen] = useState(false);
+  
   // 使用 React Query hook
   const { 
     data: devices = [], 
     isLoading, 
-    error 
+    error,
+    refetch
   } = useNetworkDevices(networkId);
 
   // 处理加载状态
@@ -98,13 +103,36 @@ const DeviceList = ({ networkId }) => {
   const sortedProductTypes = Object.entries(devicesByProductType)
     .sort(([typeA], [typeB]) => typeA.localeCompare(typeB));
 
+  const handleAddDevice = () => {
+    setAddDeviceModalOpen(true);
+  };
+
   return (
     <>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+        <CustomButton
+          type="create"
+          onClick={handleAddDevice}
+        >
+          Add Device
+        </CustomButton>
+      </Box>
+
       {sortedProductTypes.map(([productType, devices]) => (
         <React.Fragment key={`${productType}-${devices[0]?.deviceType || 'unknown'}`}>
           {renderDeviceTable(productType, devices)}
         </React.Fragment>
       ))}
+
+      <AddDeviceModal
+        isOpen={addDeviceModalOpen}
+        toggle={() => setAddDeviceModalOpen(false)}
+        networkId={networkId}
+        onSuccess={() => {
+          setAddDeviceModalOpen(false);
+          refetch();
+        }}
+      />
     </>
   );
 };

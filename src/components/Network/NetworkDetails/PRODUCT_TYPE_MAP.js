@@ -14,7 +14,7 @@ export const PRODUCT_TYPE_MAP = {
     // 5. SOCKET_RELAY (继电器插座)
     'k8tngzhj': 'SOCKET_RELAY',
     
-    // ToDO 6. SWITCH (开关) - ok
+    // 6. SOCKET_SWITCH (开关) - ok
     'ay5nnjdm': 'SOCKET_SWITCH',
 
     // 7. THERMOSTAT (恒温器)
@@ -23,13 +23,13 @@ export const PRODUCT_TYPE_MAP = {
     // 8. POWER_POINT (电源插座)
     'xdddhvid': 'POWER_POINT',
     
-    // ToDO 9. DAYLIGHT_SENSOR (日光传感器) - ok
+    // 9. DAYLIGHT_SENSOR (日光传感器) - ok
     'opz0gj1q': 'DAYLIGHT_SENSOR',
     
-    // ToDO 10. CURTAIN (窗帘) - ok
+    // 10. CURTAIN (窗帘) - ok
     'ldiuak9c': 'CURTAIN',
     
-    // ToDO 11. DRY_CONTACT (干接点) - ok
+    // 11. DRY_CONTACT (干接点) - ok
     'zphgv5n9': 'DRY_CONTACT',
     
     // ToDO 12. VCAL_SOCKET (VCAL插座) - icon? 竖版插座 半ppt 一个空位
@@ -56,7 +56,7 @@ export const PRODUCT_TYPE_MAP = {
     // ToDO 19. FIVE_INPUT (五路输入)
     'ng8eledmi5': 'FIVE_INPUT',
     
-    // ToDO 20. PIR (人体感应器)
+    // ToDO 20. PIR
     'p9ms1caa': 'PIR',
     
     // ToDO 21. MULTIVUE (多功能显示屏)
