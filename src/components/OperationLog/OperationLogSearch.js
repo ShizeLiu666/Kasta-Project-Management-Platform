@@ -2,19 +2,9 @@ import React from 'react';
 import { Box, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
 
 const OPERATION_TYPES = [
-  'Create',
-  'Edit',
-  'Delete',
-  'Update',
-  // ... 添加其他操作类型
-];
-
-const TARGET_TYPES = [
-  'Project',
-  'User',
-  'Task',
-  'Room',
-  // ... 添加其他目标类型
+  'ADD',
+  'MOD',
+  'DEL',
 ];
 
 function OperationLogSearch({
@@ -25,123 +15,76 @@ function OperationLogSearch({
   searchFields,
   containerStyle,
 }) {
-  // 根据选择的搜索字段返回不同的输入组件
+  // 根据 searchField 渲染不同的输入组件
   const renderSearchInput = () => {
-    switch (searchField) {
-      case 'operation_type':
-        return (
-          <FormControl
-            size="small"
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                height: '40px',
-                '&:hover fieldset': {
-                  borderColor: '#fbcd0b',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#fbcd0b',
-                }
+    if (searchField === 'operationType') {
+      return (
+        <FormControl
+          size="small"
+          fullWidth
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              height: '40px',
+              '&:hover fieldset': {
+                borderColor: '#fbcd0b',
               },
-              '& .Mui-focused': {
-                color: '#fbcd0b !important'
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#fbcd0b'
-              },
-              '& .MuiSelect-select': {
-                '&:focus': {
-                  backgroundColor: 'transparent'
-                }
-              },
-              '& .MuiMenuItem-root.Mui-selected': {
-                backgroundColor: '#fbcd0b !important',
-                color: '#000'
+              '&.Mui-focused fieldset': {
+                borderColor: '#fbcd0b',
               }
-            }}
-          >
-            <InputLabel>Operation Type</InputLabel>
-            <Select
-              value={searchValue}
-              label="Operation Type"
-              onChange={(e) => setSearchValue(e.target.value)}
-            >
-              {OPERATION_TYPES.map(type => (
-                <MenuItem key={type} value={type}>{type}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        );
-
-      case 'target_type':
-        return (
-          <FormControl
-            size="small"
-            fullWidth
-            sx={{
-                '& .MuiOutlinedInput-root': {
-                  height: '40px',
-                  '&:hover fieldset': {
-                    borderColor: '#fbcd0b',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#fbcd0b',
-                  }
-                },
-                '& .Mui-focused': {
-                  color: '#fbcd0b !important'
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#fbcd0b'
-                },
-                '& .MuiSelect-select': {
-                  '&:focus': {
-                    backgroundColor: 'transparent'
-                  }
-                },
-                '& .MuiMenuItem-root.Mui-selected': {
-                  backgroundColor: '#fbcd0b !important',
-                  color: '#000'
-                }
-              }}
-          >
-            <InputLabel>Target Type</InputLabel>
-            <Select
-              value={searchValue}
-              label="Target Type"
-              onChange={(e) => setSearchValue(e.target.value)}
-            >
-              <MenuItem value="">All</MenuItem>
-              {TARGET_TYPES.map(type => (
-                <MenuItem key={type} value={type}>{type}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        );
-
-      default:
-        return (
-          <TextField
-            size="small"
-            fullWidth
+            },
+            '& .Mui-focused': {
+              color: '#fbcd0b !important'
+            },
+            '& .MuiInputLabel-root.Mui-focused': {
+              color: '#fbcd0b'
+            },
+            '& .MuiSelect-select': {
+              '&:focus': {
+                backgroundColor: 'transparent'
+              }
+            },
+            '& .MuiMenuItem-root.Mui-selected': {
+              backgroundColor: '#fbcd0b !important',
+              color: '#000'
+            }
+          }}
+        >
+          <InputLabel>Operation Type</InputLabel>
+          <Select
             value={searchValue}
+            label="Operation Type"
             onChange={(e) => setSearchValue(e.target.value)}
-            placeholder={`Search by ${searchFields.find(f => f.value === searchField)?.label || 'all fields'}...`}
-            sx={{
-              minWidth: { xs: '200px', sm: '250px' },
-              '& .MuiOutlinedInput-root': {
-                height: '40px',
-                '&:hover fieldset': {
-                  borderColor: '#fbcd0b',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#fbcd0b',
-                }
-              }
-            }}
-          />
-        );
+          >
+            {OPERATION_TYPES.map((type) => (
+              <MenuItem key={type} value={type}>
+                {type}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      );
     }
+    return (
+      <TextField
+        size="small"
+        fullWidth
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        placeholder={`Search by ${searchFields.find(f => f.value === searchField)?.label || 'all fields'}...`}
+        sx={{
+          minWidth: { xs: '200px', sm: '250px' },
+          '& .MuiOutlinedInput-root': {
+            height: '40px',
+            '&:hover fieldset': {
+              borderColor: '#fbcd0b',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#fbcd0b',
+            }
+          }
+        }}
+      />
+    );
   };
 
   return (
@@ -211,7 +154,7 @@ function OperationLogSearch({
         </Select>
       </FormControl>
 
-      {/* Search Input */}
+      {/* 根据条件渲染搜索输入框 */}
       {renderSearchInput()}
     </Box>
   );

@@ -231,8 +231,8 @@ function OperationLog() {
     { value: 'all', label: 'All Fields' },
     { value: 'username', label: 'Username' },
     { value: 'description', label: 'Description' },
-    { value: 'operation_type', label: 'Operation Type' },
-    { value: 'target_type', label: 'Target Type' }
+    { value: 'operationType', label: 'Operation Type' },
+    { value: 'targetType', label: 'Target Type' }
   ], []);
 
   // 处理搜索
@@ -319,6 +319,23 @@ function OperationLog() {
       endDate: null
     });
   }, [rowsPerPage, fetchLogs]);
+
+  // 假设在组件内定义 searchParams 的默认状态为：
+  const defaultSearchParams = {
+    searchField: 'all',
+    searchValue: '',
+    startDate: null,
+    endDate: null,
+  };
+
+  // 假设 searchParams 为当前的搜索条件状态
+  // 比较当前 searchParams 与默认状态，判断是否有任意输入
+  const isSearchEmpty = (
+    searchParams.searchField === defaultSearchParams.searchField &&
+    searchParams.searchValue === defaultSearchParams.searchValue &&
+    !searchParams.startDate &&
+    !searchParams.endDate
+  );
 
   return (
     <ComponentCard title="Operation Log">
@@ -411,14 +428,30 @@ function OperationLog() {
             <CustomButton
               onClick={handleReset}
               icon={<FilterAltOffIcon />}
-              style={{
-                backgroundColor: '#fff',
-                color: '#6c757d',
-                border: '1px solid #6c757d',
-                minWidth: { xs: '45%', md: '215px' },
-                height: '40px',
-                padding: '0 12px'
-              }}
+              disabled={isSearchEmpty}
+              // 当搜索条件有任意输入时使用红色按钮样式（此处采用 CustomButton 的 "leave" 类型，即红色）
+              type={!isSearchEmpty ? 'leave' : undefined}
+              style={
+                !isSearchEmpty 
+                  ? {
+                      // 红色按钮样式
+                      backgroundColor: '#dc3545', 
+                      color: '#fff',
+                      border: 'none',
+                      minWidth: { xs: '45%', md: '215px' },
+                      height: '40px',
+                      padding: '0 12px'
+                    }
+                  : {
+                      // 默认静止状态样式
+                      backgroundColor: '#fff',
+                      color: '#6c757d',
+                      border: '1px solid #6c757d',
+                      minWidth: { xs: '45%', md: '215px' },
+                      height: '40px',
+                      padding: '0 12px'
+                    }
+              }
             >
               Clear All
             </CustomButton>

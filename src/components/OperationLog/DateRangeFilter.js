@@ -3,8 +3,8 @@ import { Box } from "@mui/material";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import EventRepeatIcon from '@mui/icons-material/EventRepeat';
-import CustomButton from "../CustomComponents/CustomButton";
+// import EventRepeatIcon from '@mui/icons-material/EventRepeat';
+// import CustomButton from "../CustomComponents/CustomButton";
 
 const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, ref) => {
   const [startDate, setStartDate] = useState(value?.startDate || null);
@@ -106,7 +106,8 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
                     border: '1px solid #fbcd0b',
                   },
                   '& .MuiPickersDay-root.Mui-selected': {
-                    backgroundColor: '#fbcd0b',
+                    backgroundColor: '#fbcd0b !important',
+                    color: '#fff',
                   }
                 }
               }
@@ -160,7 +161,8 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
                     border: '1px solid #fbcd0b',
                   },
                   '& .MuiPickersDay-root.Mui-selected': {
-                    backgroundColor: '#fbcd0b',
+                    backgroundColor: '#fbcd0b !important',
+                    color: '#fff',
                   }
                 }
               }
@@ -168,7 +170,7 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
           />
         </LocalizationProvider>
       </Box>
-      {(startDate || endDate) && (
+      {/* {(startDate || endDate) && (
         <CustomButton
           onClick={clearDateFilter}
           icon={<EventRepeatIcon />}
@@ -184,7 +186,7 @@ const DateRangeFilter = forwardRef(({ onDateChange, value, onValidityChange }, r
         >
           Clear Date
         </CustomButton>
-      )}
+      )} */}
     </Box>
   );
 });
