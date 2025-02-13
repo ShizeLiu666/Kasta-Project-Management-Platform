@@ -5,6 +5,8 @@ const OPERATION_TYPES = [
   'ADD',
   'MOD',
   'DEL',
+  'Others',
+  // ... 添加其他操作类型
 ];
 
 function OperationLogSearch({
