@@ -88,14 +88,44 @@ const DeviceList = ({ networkId }) => {
 
   const renderDeviceTable = (productType, devices) => {
     try {
-      const DeviceComponent = require(`./Tables/${productType}/${devices[0].deviceType}`).default;
+      // 特殊处理 TOUCH_PANEL
+      if (productType === 'TOUCH_PANEL') {
+        // 按 deviceType 进一步分组
+        const devicesByType = devices.reduce((acc, device) => {
+          const type = device.deviceType;
+          if (!acc[type]) {
+            acc[type] = [];
+          }
+          acc[type].push(device);
+          return acc;
+        }, {});
+
+        // 渲染每种类型的面板
+        return Object.entries(devicesByType).map(([deviceType, typeDevices]) => {
+          try {
+            // 改用通用的 TouchPanel 组件，而不是尝试加载特定的组件
+            const TouchPanelComponent = require('./Tables/TOUCH_PANEL/TouchPanel').default;
+            return (
+              <Box key={`TOUCH_PANEL-${deviceType}`} sx={{ mb: 3 }}>
+                <TouchPanelComponent devices={typeDevices} />
+              </Box>
+            );
+          } catch (error) {
+            console.error(`Failed to load TouchPanel component`, error);
+            return null;
+          }
+        });
+      }
+
+      // 其他设备类型保持原有逻辑
+      const DeviceComponent = require(`./Tables/${productType}/${productType}`).default;
       return (
-        <Box key={`${productType}-${devices[0].deviceType}`} sx={{ mb: 3 }}>
+        <Box key={productType} sx={{ mb: 3 }}>
           <DeviceComponent devices={devices} />
         </Box>
       );
     } catch (error) {
-      console.error(`Failed to load component for ${productType}/${devices[0].deviceType}`, error);
+      console.error(`Failed to load component for ${productType}`, error);
       return null;
     }
   };

@@ -5,6 +5,99 @@ import axiosInstance from '../../../../config';
 import { getToken } from '../../../auth';
 import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
 
+// TOUCH_PANEL 设备类型映射
+const TOUCH_PANEL_DEVICE_TYPES = {
+  // 标准面板
+  "1BWS": "1 button panel",
+  "2BWS": "2 button panel",
+  "3BWS": "3 button panel",
+  "4BWS": "4 button panel",
+  "6BWS": "6 button panel",
+  
+  // T3 版本
+  "KT1RSB": "1 button panel (T3 Version)",
+  "KT2RSB": "2 button panel (T3 Version)",
+  "KT3RSB": "3 button panel (T3 Version)",
+  "KT4RSB": "4 button panel (T3 Version)",
+  "KT6RSB": "6 button panel (T3 Version)",
+  
+  // D8 版本
+  "KD1RSB": "1 button panel (D8 Version)",
+  "KD2RSB": "2 button panel (D8 Version)",
+  "KD3RSB": "3 button panel (D8 Version)",
+  "KD4RSB": "4 button panel (D8 Version)",
+  "KD6RSB": "6 button panel (D8 Version)",
+  
+  // T3 开关版本
+  "KT1RSB_SWITCH": "1 panel switch (T3 Version)",
+  "KT2RSB_SWITCH": "2 panel switch (T3 Version)",
+  "KT3RSB_SWITCH": "3 panel switch (T3 Version)",
+  
+  // T3 调光版本
+  "KT1RSB_DIMMER": "1 panel switch (T3 Version)",
+  "KT2RSB_DIMMER": "2 panel switch (T3 Version)",
+  "KT3RSB_DIMMER": "3 panel switch (T3 Version)",
+  
+  // Edgy 版本
+  "EDGY1RB": "1 button panel (Edgy Version)",
+  "EDGY2RB": "2 button panel (Edgy Version)",
+  "EDGY3RB": "3 button panel (Edgy Version)",
+  "EDGY4RB": "4 button panel (Edgy Version)",
+  "EDGY5RB": "5 button panel (Edgy Version)",
+  "EDGY6RB": "6 button panel (Edgy Version)",
+  
+  // Integral 版本
+  "INTEGRAL1RB": "1 button panel (Push-button, with backlight option)",
+  "INTEGRAL2RB": "2 button panel (Push-button, with backlight option)",
+  "INTEGRAL3RB": "3 button panel (Push-button, with backlight option)",
+  "INTEGRAL4RB": "4 button panel (Push-button, with backlight option)",
+  "INTEGRAL5RB": "5 button panel (Push-button, with backlight option)",
+  "INTEGRAL6RB": "6 button panel (Push-button, with backlight option)",
+  
+  // Hesperus 版本
+  "HESPERUS1CSB": "1 button panel (Push-button, no backlight option)",
+  "HESPERUS2CSB": "2 button panel (Push-button, no backlight option)",
+  "HESPERUS3CSB": "3 button panel (Push-button, no backlight option)",
+  "HESPERUS4CSB": "4 button panel (Push-button, no backlight option)",
+  "HESPERUS6CSB": "6 button panel (Push-button, no backlight option)",
+  
+  // 特殊面板
+  "CW_PANEL": "cct panel (T3 Version)",
+  "RGB_PANEL": "rgb panel (T3 Version)",
+  "RGBCW_PANEL": "rgbCw panel (T3 Version)",
+  
+  // P 版本
+  "KD1RS": "1 button panel (P Version)",
+  "KD2RS": "2 button panel (P Version)",
+  "KD3RS": "3 button panel (P Version)",
+  "KD4RS": "4 button panel (P Version)",
+  "KD6RS": "6 button panel (P Version)",
+  
+  // P 版本开关
+  "KD1TS_SWITCH": "1 panel switch (P Version)",
+  "KD2TS_SWITCH": "2 panel switch (P Version)",
+  "KD3TS_SWITCH": "3 panel switch (P Version)",
+  
+  // P 版本调光器
+  "KD1TS_DIMMER": "1 panel switch (P Version)",
+  "KD2TS_DIMMER": "2 panel switch (P Version)",
+  "KD3TS_DIMMER": "3 panel switch (P Version)",
+  
+  // Co base 版本
+  "HS1RSCB": "1 button panel (Push-button, Co base)",
+  "HS2RSCB": "2 button panel (Push-button, Co base)",
+  "HS3RSCB": "3 button panel (Push-button, Co base)",
+  "HS4RSCB": "4 button panel (Push-button, Co base)",
+  "HS5RSCB": "5 button panel (Push-button, Co base)",
+  "HS6RSCB": "6 button panel (Push-button, Co base)"
+};
+
+// RB02 设备类型映射
+const RB02_DEVICE_TYPES = {
+  "RB02_REMOTE": "Standard Remote",
+  "ACRB02_REMOTE": "AC Remote"
+};
+
 const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
   // 生成随机整数的辅助函数
   const generateRandomInt = (min, max) => {
@@ -63,17 +156,39 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
   const [error, setError] = useState('');
 
   // 获取所有可用的设备类型名称
-  const deviceTypeOptions = Object.values(PRODUCT_TYPE_MAP)
-    .sort((a, b) => a.localeCompare(b));
+  // const deviceTypeOptions = Object.values(PRODUCT_TYPE_MAP).sort((a, b) => a.localeCompare(b));
 
-  // 当 productType 改变时，自动设置对应的 deviceType
+  // 修改 getDeviceTypeOptions 函数
+  const getDeviceTypeOptions = (productType) => {
+    switch (productType) {
+      case 'skr8wl4o': // TOUCH_PANEL
+        return Object.entries(TOUCH_PANEL_DEVICE_TYPES).map(([code, name]) => ({
+          code,
+          name: `${code} - ${name}`
+        })).sort((a, b) => a.name.localeCompare(b.name));
+      
+      case 'ng8eledm': // RB02
+        return Object.entries(RB02_DEVICE_TYPES).map(([code, name]) => ({
+          code,
+          name: `${code} - ${name}`
+        })).sort((a, b) => a.name.localeCompare(b.name));
+      
+      default:
+        return []; // 其他产品类型不显示设备类型选项
+    }
+  };
+
+  // 修改 handleInputChange 函数
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'productType') {
+      // 检查是否是需要设备类型选择的产品类型
+      const needsDeviceType = ['skr8wl4o', 'ng8eledm'].includes(value);
       setFormData(prev => ({
         ...prev,
         [name]: value,
-        deviceType: PRODUCT_TYPE_MAP[value] || ''
+        // 如果不需要设备类型选择，直接使用产品类型值作为设备类型
+        deviceType: needsDeviceType ? '' : value
       }));
     } else {
       setFormData(prev => ({
@@ -185,11 +300,12 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
             id="deviceType"
             value={formData.deviceType}
             onChange={handleInputChange}
+            disabled={!['skr8wl4o', 'ng8eledm'].includes(formData.productType)}
           >
             <option value="">Select a device type</option>
-            {deviceTypeOptions.map((type) => (
-              <option key={type} value={type}>
-                {type}
+            {formData.productType && getDeviceTypeOptions(formData.productType).map(({ code, name }) => (
+              <option key={code} value={code}>
+                {name}
               </option>
             ))}
           </Input>

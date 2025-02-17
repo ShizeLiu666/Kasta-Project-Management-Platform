@@ -10,14 +10,14 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Typography,
+  Typography 
 } from '@mui/material';
 
 const BindingDialog = ({ open, onClose, bindings }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        PIR Sensor Bindings
+        Remote Bindings
       </DialogTitle>
       <DialogContent>
         {bindings.length > 0 ? (
@@ -53,7 +53,7 @@ const BindingDialog = ({ open, onClose, bindings }) => {
           </List>
         ) : (
           <Typography color="textSecondary">
-            No bindings for this PIR sensor
+            No bindings for this remote
           </Typography>
         )}
       </DialogContent>
@@ -66,7 +66,7 @@ const BindingDialog = ({ open, onClose, bindings }) => {
   );
 };
 
-const PIR = ({ devices }) => {
+const RB02 = ({ devices }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedBindings, setSelectedBindings] = useState([]);
 
@@ -79,9 +79,9 @@ const PIR = ({ devices }) => {
 
   const columns = [
     {
-      id: 'configuration',
-      label: 'Configuration',
-      format: (attrs) => attrs?.isConfig ? 'Configured' : 'Not Configured'
+      id: 'checkTime',
+      label: 'Check Time',
+      format: (attrs) => attrs?.checkTime || 'N/A'
     },
     {
       id: 'bindings',
@@ -106,8 +106,8 @@ const PIR = ({ devices }) => {
   return (
     <>
       <BasicTable
-        title="PIR Motion Sensor"
-        icon={require('../../../../../../assets/icons/DeviceType/PIR.png')}
+        title="Battery Powered Remote Switch"
+        icon={require('../../../../../../assets/icons/DeviceType/RB02.png')}
         devices={devices}
         columns={columns}
         nameColumnWidth="25%"
@@ -122,4 +122,4 @@ const PIR = ({ devices }) => {
   );
 };
 
-export default PIR; 
+export default RB02; 

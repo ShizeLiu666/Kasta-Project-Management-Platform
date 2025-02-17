@@ -35,19 +35,19 @@ export const PRODUCT_TYPE_MAP = {
     // 12. VCAL_SOCKET (VCAL插座) - 竖版插座 半ppt 一个空位
     '7doxadh6': 'VCAL_SOCKET',
     
-    // ToDO 13. T3_SWITCH (三键开关) - icon? ！！！ 按 3 键 先做
+    // ToDO 13. T3_SWITCH (三键开关) - icon? ！！！ Ignore it for now
     'acqhrjul': 'T3_SWITCH',
     
-    // ToDO 14. T3_DIMMER (三键调光器) - icon? ！！！ 按 3 键 先做
+    // ToDO 14. T3_DIMMER (三键调光器) - icon? ！！！ Ignore it for now
     'fybufemo': 'T3_DIMMER',
     
     // 15. PANGU - ok !!! 有派生 - sub_devic
     'eexc6xorj65omqap': 'PANGU',
     
-    // ToDO 16. TOUCH_PANEL (触摸面板) - 动态 icon 根据参数 !!! 有派生
+    // ToDO 16. TOUCH_PANEL (触摸面板) - 动态 icon 根据参数 !!! 有派生 ~
     'skr8wl4o': 'TOUCH_PANEL',
     
-    // ToDO 17. RB02 (遥控器) - 220 v / 电磁的 !!! 有派生
+    // ToDO 17. RB02 (遥控器) - 220 v / 电磁的 !!! 有派生 ~
     'ng8eledm': 'RB02',
     
     // ToDO 18. FIVE_BUTTON (五键开关) !!! 有派生
@@ -56,10 +56,10 @@ export const PRODUCT_TYPE_MAP = {
     // ToDO 19. FIVE_INPUT (五路输入) !!! 有派生 - SignalInputBind
     'ng8eledmi5': 'FIVE_INPUT',
     
-    // 20. PIR - ok !!! 有派生 - SignalInputBind
+    // ToDo  20. PIR - ok !!! 有派生 - SignalInputBind ~ 两个按钮
     'p9ms1caa': 'PIR',
     
-    // 21. MULTIVUE - ok
+    // ToDo  21. MULTIVUE - ok 
     'ng8eledv5': 'MULTIVUE',
     
     // ToDO 22. SIX_INPUT_FOUR_OUTPUT (六进四出) - 动态 icon 根据参数
