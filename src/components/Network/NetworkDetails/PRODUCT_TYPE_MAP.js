@@ -11,7 +11,7 @@ export const PRODUCT_TYPE_MAP = {
     // 4. DIMMER (调光器)
     '5atdh35u': 'DIMMER',
     
-    // 5. SOCKET_RELAY (继电器插座)
+    // ToDo 5. SOCKET_RELAY (继电器插座)  !!! 有派生
     'k8tngzhj': 'SOCKET_RELAY',
     
     // 6. SOCKET_SWITCH (开关) - ok
@@ -32,49 +32,36 @@ export const PRODUCT_TYPE_MAP = {
     // 11. DRY_CONTACT (干接点) - ok
     'zphgv5n9': 'DRY_CONTACT',
     
-    // ToDO 12. VCAL_SOCKET (VCAL插座) - icon? 竖版插座 半ppt 一个空位
+    // 12. VCAL_SOCKET (VCAL插座) - 竖版插座 半ppt 一个空位
     '7doxadh6': 'VCAL_SOCKET',
     
-    // ToDO 13. T3_SWITCH (三键开关) - icon? 面板
+    // ToDO 13. T3_SWITCH (三键开关) - icon? ！！！ 按 3 键 先做
     'acqhrjul': 'T3_SWITCH',
     
-    // ToDO 14. T3_DIMMER (三键调光器) - icon?
+    // ToDO 14. T3_DIMMER (三键调光器) - icon? ！！！ 按 3 键 先做
     'fybufemo': 'T3_DIMMER',
     
-    // ToDO 15. PANGU (盘古)
+    // 15. PANGU - ok !!! 有派生 - sub_devic
     'eexc6xorj65omqap': 'PANGU',
     
-    // ToDO 16. TOUCH_PANEL (触摸面板) - 动态 icon 根据参数
+    // ToDO 16. TOUCH_PANEL (触摸面板) - 动态 icon 根据参数 !!! 有派生
     'skr8wl4o': 'TOUCH_PANEL',
     
-    // ToDO 17. RB02 (遥控器) - 220 v / 电磁的
+    // ToDO 17. RB02 (遥控器) - 220 v / 电磁的 !!! 有派生
     'ng8eledm': 'RB02',
     
-    // ToDO 18. FIVE_BUTTON (五键开关)
+    // ToDO 18. FIVE_BUTTON (五键开关) !!! 有派生
     'ng8eledm5': 'FIVE_BUTTON',
     
-    // ToDO 19. FIVE_INPUT (五路输入)
+    // ToDO 19. FIVE_INPUT (五路输入) !!! 有派生 - SignalInputBind
     'ng8eledmi5': 'FIVE_INPUT',
     
-    // ToDO 20. PIR
+    // 20. PIR - ok !!! 有派生 - SignalInputBind
     'p9ms1caa': 'PIR',
     
-    // ToDO 21. MULTIVUE (多功能显示屏)
+    // 21. MULTIVUE - ok
     'ng8eledv5': 'MULTIVUE',
     
     // ToDO 22. SIX_INPUT_FOUR_OUTPUT (六进四出) - 动态 icon 根据参数
     '5ozdgdrd': 'SIX_INPUT_FOUR_OUTPUT',
-
-    // === 额外设备类型 ===
-    // SOCKET_DIMMER (插座调光器)
-    'bofkqirg': 'SOCKET_DIMMER',
-    
-    // GATEWAY_MESH (网关MESH)
-    'awpf6wip': 'GATEWAY_MESH',
-    
-    // GATEWAY (网关)
-    '3sqq8siv': 'GATEWAY',
-    
-    // INTERCOM (对讲机)
-    'kttfsip8': 'INTERCOM'
 };
