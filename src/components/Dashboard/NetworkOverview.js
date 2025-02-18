@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
 import GroupIconMUI from '@mui/icons-material/Group';
 import { motion } from 'framer-motion';
+import axiosInstance from '../../config';
+import { getToken } from '../auth';
 // import NetworkIcon from '../../assets/icons/NetworkOverview/Network.png';
 import DeviceIcon from '../../assets/icons/NetworkOverview/Device.png';
 import GroupIcon from '../../assets/icons/NetworkOverview/Group.png';
@@ -11,20 +13,91 @@ import TimerIcon from '../../assets/icons/NetworkOverview/Timer.png';
 import ScheduleIcon from '../../assets/icons/NetworkOverview/Schedule.png';
 
 const NetworkOverview = () => {
-  // 使用模拟数据
-  const mockNetworkStats = {
-    totalNetworks: 5,
-    totalDevices: 25,
-    totalMembers: 8,
-    totalGroups: 6,
-    totalScenes: 4,
-    totalRooms: 3,
-    totalTimers: 5,
-    totalSchedules: 2,
-    currentNetwork: {
-      meshName: "Home Network"
-    }
-  };
+  const [networkStats, setNetworkStats] = useState(null);
+
+  useEffect(() => {
+    const fetchPrimaryNetwork = async () => {
+      try {
+        const token = getToken();
+        if (!token) return;
+
+        const response = await axiosInstance.get('/networks/primary-network', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.data.success) {
+          setNetworkStats({
+            deviceCount: response.data.data.deviceCount || 0,
+            groupCount: response.data.data.groupCount || 0,
+            roomCount: response.data.data.roomCount || 0,
+            sceneCount: response.data.data.sceneCount || 0,
+            timerCount: response.data.data.timerCount || 0,
+            scheduleCount: response.data.data.scheduleCount || 0,
+            memberCount: response.data.data.memberCount || 0,
+            networkId: response.data.data.networkId
+          });
+        } else {
+          // 如果没有 primary network，尝试获取所有网络并设置第一个为 primary
+          const networksResponse = await axiosInstance.get('/networks', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          if (networksResponse.data.success && networksResponse.data.data.length > 0) {
+            const firstNetwork = networksResponse.data.data[0];
+            // 设置第一个网络为 primary network
+            await axiosInstance.post(
+              `/networks/${firstNetwork.networkId}/set-primary-network`,
+              null,
+              {
+                headers: { Authorization: `Bearer ${token}` }
+              }
+            );
+            // 重新获取 primary network 数据
+            fetchPrimaryNetwork();
+          } else {
+            setNetworkStats(null);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch network stats:', error);
+        setNetworkStats(null);
+      }
+    };
+
+    fetchPrimaryNetwork();
+  }, []);
+
+  // 如果没有数据，显示空状态
+  if (!networkStats) {
+    return (
+      <Box p={1.5}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 600, 
+            color: '#2c3e50', 
+            fontSize: '1rem',
+            mb: 0.5
+          }}
+        >
+          Primary Network Overview
+        </Typography>
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: '#95a5a6',
+            fontSize: '0.875rem'
+          }}
+        >
+          No network available
+        </Typography>
+      </Box>
+    );
+  }
 
   const StatCard = ({ icon, title, value, color }) => (
     <motion.div
@@ -83,10 +156,10 @@ const NetworkOverview = () => {
           mb: 0.5
         }}
       >
-        Network Overview
+        Primary Network Overview
       </Typography>
       
-      {mockNetworkStats.currentNetwork && (
+      {networkStats && (
         <Typography 
           variant="subtitle2"
           sx={{
@@ -97,7 +170,7 @@ const NetworkOverview = () => {
             fontSize: '0.7rem'
           }}
         >
-          Current Network: {mockNetworkStats.currentNetwork.meshName}
+          Current Network: {networkStats.networkId}
         </Typography>
       )}
 
@@ -124,7 +197,7 @@ const NetworkOverview = () => {
           <StatCard
             icon={<GroupIconMUI fontSize="large" />}
             title="Members"
-            value={mockNetworkStats.totalMembers}
+            value={networkStats.memberCount}
             color="#ff9800"
           />
         </Grid>
@@ -142,7 +215,7 @@ const NetworkOverview = () => {
               />
             }
             title="Devices"
-            value={mockNetworkStats.totalDevices}
+            value={networkStats.deviceCount}
             color="#fbcd0b"
           />
         </Grid>
@@ -160,7 +233,7 @@ const NetworkOverview = () => {
               />
             }
             title="Groups"
-            value={mockNetworkStats.totalGroups}
+            value={networkStats.groupCount}
             color="#009688"
           />
         </Grid>
@@ -178,7 +251,7 @@ const NetworkOverview = () => {
               />
             }
             title="Scenes"
-            value={mockNetworkStats.totalScenes}
+            value={networkStats.sceneCount}
             color="#9C27B0"
           />
         </Grid>
@@ -196,7 +269,7 @@ const NetworkOverview = () => {
               />
             }
             title="Rooms"
-            value={mockNetworkStats.totalRooms}
+            value={networkStats.roomCount}
             color="#1976D2"
           />
         </Grid>
@@ -214,7 +287,7 @@ const NetworkOverview = () => {
               />
             }
             title="Timers"
-            value={mockNetworkStats.totalTimers}
+            value={networkStats.timerCount}
             color="#E91E63"
           />
         </Grid>
@@ -232,7 +305,7 @@ const NetworkOverview = () => {
               />
             }
             title="Schedules"
-            value={mockNetworkStats.totalSchedules}
+            value={networkStats.scheduleCount}
             color="#FAEBD7"
           />
         </Grid>

@@ -90,7 +90,6 @@ const DeviceList = ({ networkId }) => {
     try {
       // 特殊处理 TOUCH_PANEL
       if (productType === 'TOUCH_PANEL') {
-        // 按 deviceType 进一步分组
         const devicesByType = devices.reduce((acc, device) => {
           const type = device.deviceType;
           if (!acc[type]) {
@@ -100,24 +99,38 @@ const DeviceList = ({ networkId }) => {
           return acc;
         }, {});
 
-        // 渲染每种类型的面板
-        return Object.entries(devicesByType).map(([deviceType, typeDevices]) => {
-          try {
-            // 改用通用的 TouchPanel 组件，而不是尝试加载特定的组件
-            const TouchPanelComponent = require('./Tables/TOUCH_PANEL/TouchPanel').default;
-            return (
-              <Box key={`TOUCH_PANEL-${deviceType}`} sx={{ mb: 3 }}>
-                <TouchPanelComponent devices={typeDevices} />
-              </Box>
-            );
-          } catch (error) {
-            console.error(`Failed to load TouchPanel component`, error);
-            return null;
-          }
+        return Object.entries(devicesByType).map(([type, typeDevices]) => {
+          const DeviceComponent = require('./Tables/TOUCH_PANEL/TOUCH_PANEL').default;
+          return (
+            <Box key={`${productType}-${type}`} sx={{ mb: 3 }}>
+              <DeviceComponent devices={typeDevices} />
+            </Box>
+          );
         });
       }
 
-      // 其他设备类型保持原有逻辑
+      // 特殊处理 SIX_INPUT_FOUR_OUTPUT
+      if (productType === 'SIX_INPUT_FOUR_OUTPUT') {
+        const devicesByType = devices.reduce((acc, device) => {
+          const type = device.deviceType === '6RSIBH' ? 'SIX_INPUT' : 'FOUR_OUTPUT';
+          if (!acc[type]) {
+            acc[type] = [];
+          }
+          acc[type].push(device);
+          return acc;
+        }, {});
+
+        return Object.entries(devicesByType).map(([type, typeDevices]) => {
+          const DeviceComponent = require(`./Tables/${type}/${type}`).default;
+          return (
+            <Box key={`${productType}-${type}`} sx={{ mb: 3 }}>
+              <DeviceComponent devices={typeDevices} />
+            </Box>
+          );
+        });
+      }
+
+      // 其他设备类型（统一命名规范）
       const DeviceComponent = require(`./Tables/${productType}/${productType}`).default;
       return (
         <Box key={productType} sx={{ mb: 3 }}>

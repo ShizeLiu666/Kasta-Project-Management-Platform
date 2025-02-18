@@ -98,6 +98,12 @@ const RB02_DEVICE_TYPES = {
   "ACRB02_REMOTE": "AC Remote"
 };
 
+// 添加 SIX_INPUT_FOUR_OUTPUT 设备类型映射
+const SIX_INPUT_FOUR_OUTPUT_DEVICE_TYPES = {
+  "6RSIBH": "6-Channel Input Device",
+  "4DCOB": "4-Channel Output Device"
+};
+
 const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
   // 生成随机整数的辅助函数
   const generateRandomInt = (min, max) => {
@@ -173,6 +179,12 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
           name: `${code} - ${name}`
         })).sort((a, b) => a.name.localeCompare(b.name));
       
+      case '5ozdgdrd': // SIX_INPUT_FOUR_OUTPUT
+        return Object.entries(SIX_INPUT_FOUR_OUTPUT_DEVICE_TYPES).map(([code, name]) => ({
+          code,
+          name: `${code} - ${name}`
+        })).sort((a, b) => a.name.localeCompare(b.name));
+
       default:
         return []; // 其他产品类型不显示设备类型选项
     }
@@ -183,11 +195,10 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
     const { name, value } = e.target;
     if (name === 'productType') {
       // 检查是否是需要设备类型选择的产品类型
-      const needsDeviceType = ['skr8wl4o', 'ng8eledm'].includes(value);
+      const needsDeviceType = ['skr8wl4o', 'ng8eledm', '5ozdgdrd'].includes(value);
       setFormData(prev => ({
         ...prev,
         [name]: value,
-        // 如果不需要设备类型选择，直接使用产品类型值作为设备类型
         deviceType: needsDeviceType ? '' : value
       }));
     } else {
@@ -300,7 +311,7 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
             id="deviceType"
             value={formData.deviceType}
             onChange={handleInputChange}
-            disabled={!['skr8wl4o', 'ng8eledm'].includes(formData.productType)}
+            disabled={!['skr8wl4o', 'ng8eledm', '5ozdgdrd'].includes(formData.productType)}
           >
             <option value="">Select a device type</option>
             {formData.productType && getDeviceTypeOptions(formData.productType).map(({ code, name }) => (

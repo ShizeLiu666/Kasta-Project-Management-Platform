@@ -12,7 +12,7 @@ import {
   Divider,
   Typography 
 } from '@mui/material';
-import pirIcon from '../../../../../../assets/icons/DeviceType/PIR.png';
+import fiveInputIcon from '../../../../../../assets/icons/DeviceType/FIVE_INPUT.png';
 
 const ChannelBindingDialog = ({ open, onClose, bindings, channelIndex }) => {
   return (
@@ -73,14 +73,14 @@ const ChannelBindingDialog = ({ open, onClose, bindings, channelIndex }) => {
   );
 };
 
-const PIR = ({ devices }) => {
+const FIVE_INPUT = ({ devices }) => {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedBindings, setSelectedBindings] = useState([]);
 
   if (!devices || devices.length === 0) return null;
 
-  const CHANNEL_COUNT = 2; // PIR 有两路输入通道
+  const CHANNEL_COUNT = 5; // 固定5个输入通道
   
   const handleChannelClick = (bindings, channelIndex) => {
     setSelectedChannel(channelIndex);
@@ -138,11 +138,11 @@ const PIR = ({ devices }) => {
   return (
     <>
       <BasicTable
-        title="PIR Motion Sensor"
-        icon={pirIcon}
+        title="5-Channel Input Device"
+        icon={fiveInputIcon}
         devices={devices}
         columns={columns}
-        nameColumnWidth="25%"
+        nameColumnWidth="20%"
       />
       
       <ChannelBindingDialog
@@ -155,4 +155,4 @@ const PIR = ({ devices }) => {
   );
 };
 
-export default PIR; 
+export default FIVE_INPUT; 

@@ -149,7 +149,7 @@ const ButtonBindingDialog = ({ open, onClose, bindings, buttonIndex }) => {
   );
 };
 
-const TouchPanel = ({ devices }) => {
+const TOUCH_PANEL = ({ devices }) => {
   const [selectedButton, setSelectedButton] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedBindings, setSelectedBindings] = useState([]);
@@ -228,4 +228,4 @@ const TouchPanel = ({ devices }) => {
   );
 };
 
-export default TouchPanel; 
+export default TOUCH_PANEL; 

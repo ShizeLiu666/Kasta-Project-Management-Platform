@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -10,9 +10,28 @@ import SceneList from './Scenes/SceneList';
 import RoomList from './Rooms/RoomList';
 import TimerList from './Timers/TimerList';
 import ScheduleList from './Schedules/ScheduleList';
+import { useParams } from 'react-router-dom';
 
 const NetworkDetails = ({ network }) => {
   const [selectedTab, setSelectedTab] = React.useState(0);
+  const { tab } = useParams(); // 获取 URL 参数
+
+  // 根据 URL 参数设置选中的 tab
+  useEffect(() => {
+    const tabMap = {
+      'member': 0,
+      'device': 1,
+      'group': 2,
+      'scene': 3,
+      'room': 4,
+      'timer': 5,
+      'schedule': 6
+    };
+    
+    if (tab && tabMap[tab] !== undefined) {
+      setSelectedTab(tabMap[tab]);
+    }
+  }, [tab]);
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
@@ -43,7 +62,11 @@ const NetworkDetails = ({ network }) => {
   return (
     <Fade in={true} timeout={300}>
       <Box>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Box sx={{ 
+          borderBottom: 1, 
+          borderColor: 'divider', 
+          mb: 1
+        }}>
           <Tabs 
             value={selectedTab} 
             onChange={handleTabChange}

@@ -33,6 +33,12 @@ import { Typography } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { queryFns } from '../NetworkDetails/useNetworkQueries';
 import CustomLoading from '../../../components/CustomComponents/CustomLoading';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarIcon from '@mui/icons-material/Star';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Box from '@mui/material/Box';
+import SetPrimaryNetworkModal from './SetPrimaryNetworkModal';
 
 // 创建 QueryClient 实例
 const queryClient = new QueryClient({
@@ -75,7 +81,7 @@ const NetworkComponent = () => {
   });
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(null);
-  const [currentNetworkId, setCurrentNetworkId] = useState(null);
+  const [primaryNetworkId, setPrimaryNetworkId] = useState(null);
   const [switchModalOpen, setSwitchModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [showNetworkDetails, setShowNetworkDetails] = useState(false);
@@ -85,9 +91,40 @@ const NetworkComponent = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isNetworkLoading, setIsNetworkLoading] = useState(false);
+  const [setPrimaryModalOpen, setSetPrimaryModalOpen] = useState(false);
 
-  // 获取网络列表并检查当前网络
-  const fetchNetworks = async () => {
+  // 获取 Primary Network 的函数
+  const fetchPrimaryNetwork = useCallback(async () => {
+    try {
+      const token = getToken();
+      if (!token) {
+        setAlert({
+          isOpen: true,
+          message: "Authentication token not found",
+          severity: 'error',
+          duration: 2000
+        });
+        return;
+      }
+
+      const response = await axiosInstance.get('/networks/primary-network', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.success) {
+        setPrimaryNetworkId(response.data.data.networkId);
+      } else {
+        console.warn('No primary network found, will use first network as primary');
+      }
+    } catch (err) {
+      console.warn('Failed to fetch primary network, will use first network as primary');
+    }
+  }, []);
+
+  // 修改获取网络列表的函数
+  const fetchNetworks = useCallback(async () => {
     try {
       const token = getToken();
       if (!token) {
@@ -102,24 +139,18 @@ const NetworkComponent = () => {
 
       const response = await axiosInstance.get('/networks', {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log('GET /networks Response:', {
-        success: response.data.success,
-        data: response.data.data,
-        errorMsg: response.data.errorMsg,
-        errorCode: response.data.errorCode
+          Authorization: `Bearer ${token}`
+        }
       });
 
       if (response.data.success) {
-        setNetworks(response.data.data);
-        setFilteredNetworks(response.data.data);
-        // 设置当前网络
-        const currentNetwork = response.data.data.find(network => network.isCurrentNetwork);
-        if (currentNetwork) {
-          setCurrentNetworkId(currentNetwork.networkId);
+        const networksList = response.data.data;
+        setNetworks(networksList);
+        setFilteredNetworks(networksList);
+        
+        // 如果没有 primaryNetworkId，使用第一个网络作为 primary
+        if (!primaryNetworkId && networksList.length > 0) {
+          setPrimaryNetworkId(networksList[0].networkId);
         }
       } else {
         setAlert({
@@ -137,11 +168,12 @@ const NetworkComponent = () => {
         duration: 2000
       });
     }
-  };
+  }, [primaryNetworkId]);
 
   useEffect(() => {
-    fetchNetworks();
-  }, []);
+    // 先获取 primary network，然后获取网络列表
+    fetchPrimaryNetwork().then(fetchNetworks);
+  }, [fetchPrimaryNetwork, fetchNetworks]);
 
   // 修改过滤网络的函数，只搜索 meshName
   const filterNetworks = useCallback((searchValue) => {
@@ -307,46 +339,117 @@ const NetworkComponent = () => {
             <ComponentCard showTitle={false}>
               <Row>
                 <Col>
-                  <Breadcrumb>
-                    <BreadcrumbItem>
-                      {showNetworkDetails ? (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleBackToList();
-                          }}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "blue",
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            padding: 0,
-                            font: "inherit",
-                          }}
-                        >
-                          Networks
-                        </button>
-                      ) : (
-                        "Networks"
-                      )}
-                    </BreadcrumbItem>
-                    {showNetworkDetails && (
-                      <BreadcrumbItem active>
-                        {activeNetwork?.meshName}<Typography
-                          component="span"
-                          variant="body2"
-                          sx={{
-                            color: '#95a5a6',
-                            ml: 0.5,
-                            fontWeight: 400
-                          }}
-                        >
-                          - {activeNetwork.networkId}
-                        </Typography>
+                  <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 3
+                  }}>
+                    <Breadcrumb>
+                      <BreadcrumbItem>
+                        {showNetworkDetails ? (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleBackToList();
+                            }}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "blue",
+                              textDecoration: "underline",
+                              cursor: "pointer",
+                              padding: 0,
+                              font: "inherit",
+                            }}
+                          >
+                            Networks
+                          </button>
+                        ) : (
+                          "Networks"
+                        )}
                       </BreadcrumbItem>
+                      {showNetworkDetails && (
+                        <BreadcrumbItem active>
+                          {activeNetwork?.meshName}
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{
+                              color: '#95a5a6',
+                              ml: 0.5,
+                              fontWeight: 400
+                            }}
+                          >
+                            - {activeNetwork.networkId}
+                          </Typography>
+                        </BreadcrumbItem>
+                      )}
+                    </Breadcrumb>
+                    
+                    {showNetworkDetails && (
+                      activeNetwork?.networkId === primaryNetworkId ? (
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          ml: 2,  // 添加左边距
+                          backgroundColor: 'rgba(251, 205, 11, 0.1)',
+                          padding: '4px 12px',
+                          borderRadius: '4px'
+                        }}>
+                          <StarIcon 
+                            sx={{ 
+                              color: '#fbcd0b',
+                              fontSize: 20
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: '#fbcd0b',
+                              ml: 0.5,
+                              fontWeight: 500
+                            }}
+                          >
+                            Primary Network
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Tooltip title="Set as Primary Network">
+                          <IconButton
+                            onClick={() => setSetPrimaryModalOpen(true)}
+                            sx={{ 
+                              ml: 2,  // 添加左边距
+                              padding: '4px 12px',
+                              borderRadius: '4px',
+                              '&:hover': {
+                                backgroundColor: 'rgba(251, 205, 11, 0.1)',
+                                '& .MuiSvgIcon-root, & .MuiTypography-root': {
+                                  color: '#fbcd0b'
+                                }
+                              }
+                            }}
+                          >
+                            <StarBorderIcon 
+                              sx={{ 
+                                fontSize: 20,
+                                color: '#95a5a6'
+                              }}
+                            />
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: '#95a5a6',
+                                ml: 0.5
+                              }}
+                            >
+                              Set as Primary
+                            </Typography>
+                          </IconButton>
+                        </Tooltip>
+                      )
                     )}
-                  </Breadcrumb>
+                  </Box>
                 </Col>
               </Row>
 
@@ -416,7 +519,7 @@ const NetworkComponent = () => {
                               className="network-row"
                               onClick={(e) => handleNetworkClick(e, network)}
                               sx={{
-                                backgroundColor: network.isCurrentNetwork ? '#f8f9fa' : 'inherit',
+                                backgroundColor: network.networkId === primaryNetworkId ? '#f8f9fa' : 'inherit',
                                 '&:hover': {
                                   backgroundColor: '#f0f0f0',
                                   cursor: 'pointer',
@@ -426,14 +529,14 @@ const NetworkComponent = () => {
                               <TableCell className="selectable-text">
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   {network.meshName}
-                                  {network.isCurrentNetwork && (
+                                  {network.networkId === primaryNetworkId && (
                                     <span style={{
                                       color: '#fbcd0b',
                                       marginLeft: '8px',
                                       fontSize: '14px',
                                       fontWeight: 'bold'
                                     }}>
-                                      * Current Network
+                                      * Primary Network
                                     </span>
                                   )}
                                 </div>
@@ -475,7 +578,19 @@ const NetworkComponent = () => {
                 </>
               ) : (
                 // 使用新的 NetworkDetails 组件
-                <NetworkDetails network={activeNetwork} />
+                <NetworkDetails 
+                  network={activeNetwork}
+                  isPrimaryNetwork={activeNetwork?.networkId === primaryNetworkId}
+                  onPrimaryNetworkChange={(networkId) => {
+                    setPrimaryNetworkId(networkId);
+                    setAlert({
+                      isOpen: true,
+                      message: 'Primary network updated successfully',
+                      severity: 'success',
+                      duration: 2000
+                    });
+                  }}
+                />
               )}
             </ComponentCard>
           </Col>
@@ -486,7 +601,7 @@ const NetworkComponent = () => {
           isOpen={isModalOpen}
           toggle={toggleModal}
           onSuccess={handleCreateSuccess}
-          currentNetworkId={currentNetworkId}
+          currentNetworkId={primaryNetworkId}
         />
         <DeleteNetworkModal
           isOpen={deleteModalOpen}
@@ -504,7 +619,7 @@ const NetworkComponent = () => {
             setSelectedNetwork(null);
           }}
           network={selectedNetwork}
-          currentNetworkId={currentNetworkId}
+          currentNetworkId={primaryNetworkId}
           onSuccess={handleSwitchSuccess}
         />
         <EditNetworkModal
@@ -515,6 +630,20 @@ const NetworkComponent = () => {
           }}
           network={selectedNetwork}
           onSuccess={handleOperationSuccess}
+        />
+        <SetPrimaryNetworkModal
+          isOpen={setPrimaryModalOpen}
+          toggle={() => setSetPrimaryModalOpen(false)}
+          network={activeNetwork}
+          onSuccess={(message) => {
+            setPrimaryNetworkId(activeNetwork.networkId);
+            setAlert({
+              isOpen: true,
+              message: 'Primary network updated successfully',
+              severity: 'success',
+              duration: 2000
+            });
+          }}
         />
         <style>
           {`
