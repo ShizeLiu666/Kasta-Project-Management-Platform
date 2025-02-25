@@ -4,9 +4,13 @@ import { useNetworkDevices } from '../useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
 import CustomButton from '../../../CustomComponents/CustomButton';
 import AddDeviceModal from './AddDeviceModal';
+import UpdateDeviceModal from './UpdateDeviceModal';
+import DeleteDeviceModal from './DeleteDeviceModal';
 
 const DeviceList = ({ networkId }) => {
   const [addDeviceModalOpen, setAddDeviceModalOpen] = useState(false);
+  const [updateDeviceModalOpen, setUpdateDeviceModalOpen] = useState(false);
+  const [deleteDeviceModalOpen, setDeleteDeviceModalOpen] = useState(false);
   
   // 使用 React Query hook
   const { 
@@ -152,7 +156,19 @@ const DeviceList = ({ networkId }) => {
 
   return (
     <>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <CustomButton
+          type="remove"
+          onClick={() => setDeleteDeviceModalOpen(true)}
+        >
+          Delete Device
+        </CustomButton>
+        <CustomButton
+          type="create"
+          onClick={() => setUpdateDeviceModalOpen(true)}
+        >
+          Update Device Status
+        </CustomButton>
         <CustomButton
           type="create"
           onClick={handleAddDevice}
@@ -173,6 +189,27 @@ const DeviceList = ({ networkId }) => {
         networkId={networkId}
         onSuccess={() => {
           setAddDeviceModalOpen(false);
+          refetch();
+        }}
+      />
+
+      <UpdateDeviceModal
+        isOpen={updateDeviceModalOpen}
+        toggle={() => setUpdateDeviceModalOpen(false)}
+        devices={devices}
+        onSuccess={() => {
+          setUpdateDeviceModalOpen(false);
+          refetch();
+        }}
+      />
+
+      <DeleteDeviceModal
+        isOpen={deleteDeviceModalOpen}
+        toggle={() => setDeleteDeviceModalOpen(false)}
+        devices={devices}
+        networkId={networkId}
+        onSuccess={() => {
+          setDeleteDeviceModalOpen(false);
           refetch();
         }}
       />

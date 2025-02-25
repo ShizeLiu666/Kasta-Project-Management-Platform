@@ -12,12 +12,24 @@ import {
     Typography
 } from '@mui/material';
 
+// 辅助函数：安全地将任何值转换为可渲染的字符串
+const safeRender = (value) => {
+    if (value === null || value === undefined) {
+        return 'N/A';
+    }
+    if (typeof value === 'object') {
+        return JSON.stringify(value);
+    }
+    return String(value);
+};
+
 const BasicTable = ({
     // 基础配置
     title,                    // 表格标题
     icon,                     // 表格图标
     devices,                  // 设备数据
     columns,                  // 列配置
+    formatWithDevice = false, // 是否将整个设备对象传递给format函数
 
     // 样式配置(可选)
     nameColumnWidth = '30%',  // 名称列宽度
@@ -178,12 +190,38 @@ const BasicTable = ({
                                         );
                                     }
 
+                                    // 处理其他列
+                                    let cellContent;
+                                    
+                                    if (column.format) {
+                                        // 使用format函数，确保返回的是可渲染的内容
+                                        try {
+                                            // 获取属性值
+                                            const attrValue = device.specificAttributes && device.specificAttributes[column.id];
+                                            
+                                            // 根据formatWithDevice选项决定传递什么参数给format函数
+                                            const formattedContent = formatWithDevice 
+                                                ? column.format(attrValue, device) // 传递属性值和整个设备对象
+                                                : column.format(attrValue);        // 只传递属性值
+                                            
+                                            // 检查format函数返回的是否是React元素
+                                            cellContent = React.isValidElement(formattedContent) 
+                                                ? formattedContent 
+                                                : safeRender(formattedContent);
+                                        } catch (error) {
+                                            console.error(`Error formatting column ${column.id}:`, error);
+                                            cellContent = 'Error';
+                                        }
+                                    } else {
+                                        // 直接访问specificAttributes
+                                        const value = device.specificAttributes && device.specificAttributes[column.id];
+                                        cellContent = safeRender(value);
+                                    }
+
                                     return (
                                         <TableCell key={column.id} align="left">
                                             <Typography variant="body2">
-                                                {column.format ?
-                                                    column.format(device.specificAttributes[column.id]) :
-                                                    device.specificAttributes[column.id]}
+                                                {cellContent}
                                             </Typography>
                                         </TableCell>
                                     );
