@@ -14,18 +14,6 @@ const CURTAINType = ({ devices }) => {
       }
     },
     {
-      id: 'curtainAction',
-      label: 'Action',
-      format: (value) => {
-        switch (value) {
-          case 0: return 'Stop';
-          case 1: return 'Open';
-          case 2: return 'Close';
-          default: return '-';
-        }
-      }
-    },
-    {
       id: 'isConfig',
       label: 'Configured',
       format: (value) => {
@@ -39,15 +27,15 @@ const CURTAINType = ({ devices }) => {
       label: 'Delay',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}min`;
+        return `${value} min`;
       }
     },
     {
       id: 'isDirection',
       label: 'Direction',
       format: (value) => {
-        if (value === 1) return 'Forward';
-        if (value === 0) return 'Reverse';
+        if (value === 0) return 'Forward';
+        if (value === 1) return 'Reverse';
         return '-';
       }
     }
@@ -59,7 +47,7 @@ const CURTAINType = ({ devices }) => {
       icon={curtainIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="25%"  // 由于有5列，给名称列分配较少空间
+      nameColumnWidth="30%"  // 由于现在只有4列，调整名称列宽度
     />
   );
 };

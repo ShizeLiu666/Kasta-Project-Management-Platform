@@ -26,10 +26,10 @@ const DEVICE_ATTRIBUTES_CONFIG = {
     color: { type: 'text', label: 'Color (HEX)', placeholder: '#RRGGBB' }
   },
   CCT_DOWNLIGHT: {
-    power: { type: 'select', label: 'Power', options: [0, 1] },
-    level: { type: 'number', label: 'Brightness Level', min: 0, max: 100 },
-    colorTemperature: { type: 'number', label: 'Color Temperature', min: 2700, max: 6500 }, // ? 2700 ~ 6500 
-    delay: { type: 'number', label: 'Delay (ms)', min: 0, max: 10000 } // ?
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    level: { type: 'number', label: 'level', min: 0, max: 255 },
+    colorTemperature: { type: 'number', label: 'Color Temp', min: 0, max: 65535 },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
   },
   DIMMER: {
     power: { type: 'select', label: 'Power', options: ['ON', 'OFF'] },
@@ -44,11 +44,10 @@ const DEVICE_ATTRIBUTES_CONFIG = {
     mode: { type: 'select', label: 'Mode', options: ['HEAT', 'COOL', 'AUTO'] }
   },
   CURTAIN: {
-    power: { type: 'number', label: 'Power', min: 0, max: 1 }, // ? 0 1 ?
-    curtainAction: { type: 'select', label: 'Curtain Action', options: [0, 1, 2] }, // ? 0: STOP, 1: OPEN, 2: CLOSE
-    isConfig: { type: 'number', label: 'Is Config', min: 0, max: 1 },
-    delay: { type: 'number', label: 'Delay (ms)', min: 0, max: 10000 },
-    isDirection: { type: 'number', label: 'Is Direction', min: 0, max: 1 }
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    isConfig: { type: 'select', label: 'Is Config', options: [0, 1], optionLabels: ['No', 'Yes'] },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 },
+    isDirection: { type: 'select', label: 'Direction', options: [0, 1], optionLabels: ['Forward', 'Reverse'] }
   },
   PIR: {
     sensitivity: { type: 'select', label: 'Sensitivity', options: ['LOW', 'MEDIUM', 'HIGH'] },

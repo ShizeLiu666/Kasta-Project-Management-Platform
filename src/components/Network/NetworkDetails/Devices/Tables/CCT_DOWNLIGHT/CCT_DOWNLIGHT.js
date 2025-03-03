@@ -16,7 +16,7 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
     },
     {
       id: 'level',
-      label: 'Brightness',
+      label: 'level',
       format: (value) => {
         if (value === undefined || value === null) return '-';
         return `${Math.round((value / 255) * 100)}%`;
@@ -27,7 +27,15 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
       label: 'Color Temp',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}K`;
+        return value.toString();
+      }
+    },
+    {
+      id: 'delay',
+      label: 'Delay',
+      format: (value) => {
+        if (value === undefined || value === null) return '-';
+        return `${value} min`;
       }
     }
   ];
@@ -38,7 +46,7 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
       icon={cctDownlightIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="40%"  // 其他2列平均分配60%
+      nameColumnWidth="30%"  // 其他3列平均分配70%
     />
   );
 };
