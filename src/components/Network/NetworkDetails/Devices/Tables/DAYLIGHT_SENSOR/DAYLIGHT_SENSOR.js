@@ -1,25 +1,19 @@
 import React from 'react';
 import BasicTable from '../BasicTable';
 import daylightSensorIcon from '../../../../../../assets/icons/DeviceType/DAYLIGHT_SENSOR.png';
+import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 
 const DAYLIGHT_SENSORType = ({ devices }) => {
   const columns = [
     {
       id: 'power',
       label: 'Power',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
+      format: (value) => DEVICE_CONFIGS.DAYLIGHT_SENSOR.helpers.getPowerStateText(value)
     },
     {
       id: 'sensorBindID',
       label: 'Sensor Bind ID',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return value;
-      }
+      format: (value) => DEVICE_CONFIGS.DAYLIGHT_SENSOR.helpers.getSensorBindIDText(value)
     }
   ];
 

@@ -144,18 +144,9 @@ const DEVICE_ATTRIBUTES_CONFIG = {
     isConfig: { type: 'select', label: 'Configured', options: [0, 1], optionLabels: ['No', 'Yes'] },
     delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
   },
-  POWER_POINT: {
+  DAYLIGHT_SENSOR: {
     power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
-    leftPower: { type: 'select', label: 'Left Power', options: [0, 1], optionLabels: ['Off', 'On'] },
-    rightPower: { type: 'select', label: 'Right Power', options: [0, 1], optionLabels: ['Off', 'On'] },
-    leftName: { type: 'text', label: 'Left Name' },
-    rightName: { type: 'text', label: 'Right Name' },
-    leftLock: { type: 'select', label: 'Left Lock', options: [0, 1], optionLabels: ['Lock', 'Unlock'] },
-    rightLock: { type: 'select', label: 'Right Lock', options: [0, 1], optionLabels: ['Lock', 'Unlock'] },
-    leftDelay: { type: 'number', label: 'Left Delay', min: 0, max: 59 },
-    rightDelay: { type: 'number', label: 'Right Delay', min: 0, max: 59 },
-    leftBackLight: { type: 'number', label: 'Left LED', min: 0, max: 30, description: 'LED brightness (0-5=Low, 6-15=Medium, 16-30=High)' },
-    rightBackLight: { type: 'number', label: 'Right LED', min: 0, max: 30, description: 'LED brightness (0-5=Low, 6-15=Medium, 16-30=High)' }
+    sensorBindID: { type: 'number', label: 'Sensor Bind ID', description: 'ID of the device to bind with this sensor' }
   },
 };
 
