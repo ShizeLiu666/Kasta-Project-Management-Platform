@@ -37,12 +37,11 @@ public class ProductTypeAttributesMapping {
         // ?
         productTypeAttributesMap.put(ProductTypeEnum.T3_DIMMER.getPid(), new HashSet<>(Arrays.asList("powerFirst", "powerSecond", "powerThird", "levelFirst", "levelSecond", "levelThird", "delayFirst", "delaySecond", "delayThird")));
         
-        productTypeAttributesMap.put(ProductTypeEnum.PANGU.getPid(), new HashSet<>(Arrays.asList("connectState", "subDevices")));
-        productTypeAttributesMap.put(ProductTypeEnum.TOUCH_PANEL.getPid(), new HashSet<>(Arrays.asList("isHorizontal", "blColorId", "activeButtonIdx", "backLightEnabled", "sleepTimer", "remoteBind")));
-        productTypeAttributesMap.put(ProductTypeEnum.RB02.getPid(), new HashSet<>(Arrays.asList("checkTime", "remoteBind")));
+        productTypeAttributesMap.put(ProductTypeEnum.PANGU.getPid(), new HashSet<>(Arrays.asList("connectState", "subDevices"))); // connectState int wifi bluetooth subDevices
+        productTypeAttributesMap.put(ProductTypeEnum.TOUCH_PANEL.getPid(), new HashSet<>(Arrays.asList("isHorizontal", "blColorId", "activeButtonIdx", "backLightEnabled", "sleepTimer", "remoteBind"))); // sleepTimer min uni; remoteBind 一对一绑定；activeButtonIdx 去除；isHorizontal 0 - vertical 1-
         // productTypeAttributesMap.put(ProductTypeEnum.FIVE_BUTTON.getPid(), new HashSet<>(Arrays.asList("checkTime", "remoteBind")));
         productTypeAttributesMap.put(ProductTypeEnum.FIVE_INPUT.getPid(), new HashSet<>(Arrays.asList("isConfig", "remoteBind")));
-        productTypeAttributesMap.put(ProductTypeEnum.PIR.getPid(), new HashSet<>(Arrays.asList("isConfig", "remoteBind")));
+        productTypeAttributesMap.put(ProductTypeEnum.PIR.getPid(), new HashSet<>(Arrays.asList("isConfig", "remoteBind"))); // 两路，个绑定
         productTypeAttributesMap.put(ProductTypeEnum.MULTIVUE.getPid(), new HashSet<>(Arrays.asList(
                 "scBrightness", "sleepTimer", "dateFormat", "dayFormat", "timeFormat",
                 "tempFormat", "language", "btnBrightness", "btnColorId", "btnRed",
