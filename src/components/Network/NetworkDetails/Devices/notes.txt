@@ -1,0 +1,68 @@
+package com.kasta.cloud.map;
+
+/**
+ * Copyright (C), Haneco
+ * Author: Ben
+ * Date: 2024/8/21 13:30
+ * Description: 定义一个Map来存放设备的我有属性
+ */
+
+import com.kasta.cloud.enums.ProductTypeEnum;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+
+@Component
+public class ProductTypeAttributesMapping {
+
+    private final Map<String, Set<String>> productTypeAttributesMap = new HashMap<>();
+
+    public ProductTypeAttributesMapping() {
+
+        // productTypeAttributesMap.put(ProductTypeEnum.FAN.getPid(), new HashSet<>(Arrays.asList("fanLightState", "fanState", "isHaveFanLight", "isConfigFanLight", "delay")));
+        // productTypeAttributesMap.put(ProductTypeEnum.RGB_CW.getPid(), new HashSet<>(Arrays.asList("power", "level", "colorTemperature", "red", "green", "blue", "blinkSpeed", "delay", "isRgb")));
+        // productTypeAttributesMap.put(ProductTypeEnum.CCT_DOWNLIGHT.getPid(), new HashSet<>(Arrays.asList("power", "level", "colorTemperature", "delay")));
+        // productTypeAttributesMap.put(ProductTypeEnum.DIMMER.getPid(), new HashSet<>(Arrays.asList("power", "level", "delay")));
+        // ?
+        productTypeAttributesMap.put(ProductTypeEnum.SOCKET_RELAY.getPid(), new HashSet<>(Arrays.asList("power", "delay", "socketErrors", "pValue")));
+        // productTypeAttributesMap.put(ProductTypeEnum.SWITCH.getPid(), new HashSet<>(Arrays.asList("power", "delay")));
+        // productTypeAttributesMap.put(ProductTypeEnum.THERMOSTAT.getPid(), new HashSet<>(Arrays.asList("power", "mode", "setTemperature", "currentTemperature", "fanSpeed", "delay")));
+        // productTypeAttributesMap.put(ProductTypeEnum.POWER_POINT.getPid(), new HashSet<>(Arrays.asList("power", "leftPower", "rightPower", "leftName", "rightName", "leftLock", "rightLock", "leftDelay", "rightDelay", "leftBackLight", "rightBackLight")));
+        // productTypeAttributesMap.put(ProductTypeEnum.DAYLIGHT_SENSOR.getPid(), new HashSet<>(Arrays.asList("power", "sensorBindID")));
+        // productTypeAttributesMap.put(ProductTypeEnum.CURTAIN.getPid(), new HashSet<>(Arrays.asList("power", "curtainAction", "isConfig", "delay", "isDirection")));
+        // productTypeAttributesMap.put(ProductTypeEnum.DRY_CONTACT.getPid(), new HashSet<>(Arrays.asList("power", "dryType", "isConfig", "delay")));
+        // productTypeAttributesMap.put(ProductTypeEnum.VCAL_SOCKET.getPid(), new HashSet<>(Arrays.asList("power", "lockStatus", "backLight", "delay")));
+        // ?
+        productTypeAttributesMap.put(ProductTypeEnum.T3_SWITCH.getPid(), new HashSet<>(Arrays.asList("powerFirst", "powerSecond", "powerThird", "delayFirst", "delaySecond", "delayThird")));
+        // ?
+        productTypeAttributesMap.put(ProductTypeEnum.T3_DIMMER.getPid(), new HashSet<>(Arrays.asList("powerFirst", "powerSecond", "powerThird", "levelFirst", "levelSecond", "levelThird", "delayFirst", "delaySecond", "delayThird")));
+        
+        productTypeAttributesMap.put(ProductTypeEnum.PANGU.getPid(), new HashSet<>(Arrays.asList("connectState", "subDevices")));
+        productTypeAttributesMap.put(ProductTypeEnum.TOUCH_PANEL.getPid(), new HashSet<>(Arrays.asList("isHorizontal", "blColorId", "activeButtonIdx", "backLightEnabled", "sleepTimer", "remoteBind")));
+        productTypeAttributesMap.put(ProductTypeEnum.RB02.getPid(), new HashSet<>(Arrays.asList("checkTime", "remoteBind")));
+        // productTypeAttributesMap.put(ProductTypeEnum.FIVE_BUTTON.getPid(), new HashSet<>(Arrays.asList("checkTime", "remoteBind")));
+        productTypeAttributesMap.put(ProductTypeEnum.FIVE_INPUT.getPid(), new HashSet<>(Arrays.asList("isConfig", "remoteBind")));
+        productTypeAttributesMap.put(ProductTypeEnum.PIR.getPid(), new HashSet<>(Arrays.asList("isConfig", "remoteBind")));
+        productTypeAttributesMap.put(ProductTypeEnum.MULTIVUE.getPid(), new HashSet<>(Arrays.asList(
+                "scBrightness", "sleepTimer", "dateFormat", "dayFormat", "timeFormat",
+                "tempFormat", "language", "btnBrightness", "btnColorId", "btnRed",
+                "btnGreen", "btnBlue", "scCloseTimer", "btnBeep", "wakeUpMotion",
+                "boldFont", "wakeupInterface", "gestureSensitivity", "fontVersion",
+                "iconVersion", "memo", "pageNames", "multiVueBinds"
+        )));
+        productTypeAttributesMap.put(
+                ProductTypeEnum.SIX_INPUT_FOUR_OUTPUT.getPid(),
+                new HashSet<>(Arrays.asList("virtualDryContacts", "signals", "remoteBind", "automts"))
+        );
+
+    }
+
+    public boolean isValidAttribute(String productType, String attribute) {
+        Set<String> validAttributes = productTypeAttributesMap.get(productType);
+        return validAttributes != null && validAttributes.contains(attribute);
+    }
+
+    public Set<String> getValidAttributes(String productType) {
+        return productTypeAttributesMap.get(productType);
+    }
+}

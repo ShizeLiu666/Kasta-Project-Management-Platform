@@ -15,9 +15,14 @@ const DEVICE_ATTRIBUTES_CONFIG = {
   },
   SOCKET_RELAY: {
     power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
-    delay: { type: 'number', label: 'Delay', min: 0, max: 59 },
-    pValue: { type: 'number', label: 'Power Value', readOnly: true },
-    socketErrors: { type: 'number', label: 'Error Logs', readOnly: true }
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59, description: 'Delay time in minutes (0-59)' },
+    pValue: { type: 'number', label: 'Power Value', readOnly: true, description: 'Current power consumption value' },
+    socketErrors: { 
+      type: 'array', 
+      label: 'Error Logs', 
+      readOnly: true,
+      description: 'Socket error logs with channel information (0=Left, 1=Right)'
+    }
   },
   FAN: {
     fanLightState: { type: 'select', label: 'Light Status', options: [0, 1], optionLabels: ['Off', 'On'] },

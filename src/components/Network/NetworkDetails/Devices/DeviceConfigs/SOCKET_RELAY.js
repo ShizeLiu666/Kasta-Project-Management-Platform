@@ -13,6 +13,12 @@ const ERROR_TYPES = {
   ERR_DISABLED: 82  // Energy alert disabled (0x52)
 };
 
+// Channel constants
+const CHANNELS = {
+  LEFT: 0,
+  RIGHT: 1
+};
+
 // Valid error type values
 const VALID_ERROR_TYPES = new Set([
   ERROR_TYPES.ERR_LOW,      // 0
@@ -63,7 +69,7 @@ const SOCKET_RELAY_CONFIG = {
         },
         channel: {
           type: 'number',
-          description: 'Product channel'
+          description: 'Product channel (0=Left, 1=Right)'
         }
       }
     }
@@ -130,6 +136,45 @@ const SOCKET_RELAY_CONFIG = {
         default:
           return 'Unknown error type';
       }
+    },
+    getChannelText: (channel) => {
+      switch (Number(channel)) {
+        case CHANNELS.LEFT: return 'Left';
+        case CHANNELS.RIGHT: return 'Right';
+        default: return `Channel ${channel}`;
+      }
+    },
+    // Get summary of errors for display in table
+    getErrorSummary: (errors) => {
+      if (!errors || !Array.isArray(errors) || errors.length === 0) {
+        return { hasErrors: false, summary: 'No Errors' };
+      }
+      
+      // Count errors by channel
+      const channelCounts = {};
+      errors.forEach(error => {
+        const channelKey = error.channel.toString();
+        if (!channelCounts[channelKey]) {
+          channelCounts[channelKey] = 0;
+        }
+        channelCounts[channelKey]++;
+      });
+      
+      // Create summary text
+      const channelSummaries = Object.keys(channelCounts).map(channel => {
+        const channelText = Number(channel) === CHANNELS.LEFT ? 'Left' : 
+                           Number(channel) === CHANNELS.RIGHT ? 'Right' : 
+                           `Channel ${channel}`;
+        return `${channelText}: ${channelCounts[channel]}`;
+      });
+      
+      return { 
+        hasErrors: true, 
+        count: errors.length,
+        channelCounts,
+        summary: channelSummaries.join(', '),
+        latestError: errors[errors.length - 1]
+      };
     }
   }
 };
