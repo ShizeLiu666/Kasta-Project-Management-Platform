@@ -27,11 +27,11 @@ const FanType = ({ devices }) => {
       id: 'fanState',
       label: 'Fan Status',
       format: (value) => {
-        switch (value) {
-          case 0: return 'Off';
-          case 1: return 'Slow';
+        switch (Number(value)) {
+          case 0: return 'Close';
+          case 1: return 'Low';
           case 2: return 'Medium';
-          case 3: return 'Fast';
+          case 3: return 'High';
           default: return '-';
         }
       }
@@ -44,6 +44,14 @@ const FanType = ({ devices }) => {
         if (value === 0) return 'No';
         return '-';
       }
+    },
+    {
+      id: 'delay',
+      label: 'Delay',
+      format: (value) => {
+        if (value === undefined || value === null) return '-';
+        return `${value} min`;
+      }
     }
   ];
 
@@ -53,6 +61,7 @@ const FanType = ({ devices }) => {
       icon={fanIcon}
       devices={devices}
       columns={columns}
+      nameColumnWidth="25%"  // 由于有5列，给名称列分配较少空间
     />
   );
 };

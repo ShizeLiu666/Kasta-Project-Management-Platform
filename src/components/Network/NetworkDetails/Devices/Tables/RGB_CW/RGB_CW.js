@@ -2,6 +2,7 @@
 import React from 'react';
 import BasicTable from '../BasicTable';
 import rgbcwIcon from '../../../../../../assets/icons/DeviceType/RGB_CW.png';
+import { Box, Typography } from '@mui/material';
 
 const RGB_CWType = ({ devices }) => {
   const columns = [
@@ -16,7 +17,7 @@ const RGB_CWType = ({ devices }) => {
     },
     { 
       id: 'level', 
-      label: 'Brightness',
+      label: 'level',
       format: (value) => {
         if (value === undefined || value === null) return '-';
         return `${Math.round((value / 255) * 100)}%`;
@@ -27,42 +28,70 @@ const RGB_CWType = ({ devices }) => {
       label: 'Color Temp',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}K`;
+        return value.toString();
       }
     },
     { 
-      id: 'red', 
-      label: 'Red',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return value;
-      }
-    },
-    { 
-      id: 'green', 
-      label: 'Green',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return value;
-      }
-    },
-    { 
-      id: 'blue', 
-      label: 'Blue',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return value;
+      id: 'rgb', 
+      label: 'RGB',
+      format: (_, device) => {
+        const red = device.specificAttributes?.red;
+        const green = device.specificAttributes?.green;
+        const blue = device.specificAttributes?.blue;
+        
+        if (red === undefined || green === undefined || blue === undefined) {
+          return '-';
+        }
+        
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography component="span" sx={{ color: '#e74c3c', fontWeight: 'bold' }}>
+            {red}
+            </Typography>
+            <Typography component="span">
+              ,
+            </Typography>
+            <Typography component="span" sx={{ color: '#2ecc71', fontWeight: 'bold' }}>
+            {green}
+            </Typography>
+            <Typography component="span">
+              ,
+            </Typography>
+            <Typography component="span" sx={{ color: '#3498db', fontWeight: 'bold' }}>
+            {blue}
+            </Typography>
+          </Box>
+        );
       }
     },
     { 
       id: 'blinkSpeed', 
       label: 'Blink Speed',
       format: (value) => {
-        switch (value) {
+        switch (Number(value)) {
           case -1: return 'None';
           case 0: return 'Slow';
           case 1: return 'Medium';
           case 2: return 'Fast';
+          default: return '-';
+        }
+      }
+    },
+    { 
+      id: 'delay', 
+      label: 'Delay',
+      format: (value) => {
+        if (value === undefined || value === null) return '-';
+        return `${value} min`;
+      }
+    },
+    { 
+      id: 'isRgb', 
+      label: 'Mode',
+      format: (value) => {
+        switch (Number(value)) {
+          case 0: return 'Color Temperature';
+          case 1: return 'RGB';
           default: return '-';
         }
       }
@@ -75,7 +104,8 @@ const RGB_CWType = ({ devices }) => {
       icon={rgbcwIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="25%"  // 其他6列平均分配75%
+      formatWithDevice={true}
+      nameColumnWidth="20%"  // 其他6列平均分配80%
     />
   );
 };

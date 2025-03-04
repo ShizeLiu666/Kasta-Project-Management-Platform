@@ -80,10 +80,6 @@ const DeleteDeviceModal = ({ isOpen, toggle, devices, networkId, onSuccess }) =>
       submitButtonColor="#dc3545"
     >
       <Form>
-        <Alert color="warning" style={{ marginBottom: '20px' }}>
-          Warning: This action cannot be undone. The device will be permanently removed from the network.
-        </Alert>
-        
         <FormGroup>
           <Label for="deviceSelect">Select Device to Delete</Label>
           <Input

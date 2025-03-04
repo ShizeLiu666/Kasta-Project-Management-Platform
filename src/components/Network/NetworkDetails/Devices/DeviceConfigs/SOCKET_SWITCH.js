@@ -1,9 +1,9 @@
 /**
- * DIMMER Device Configuration
- * Defines the properties and form configuration for Dimmer devices
+ * SOCKET_SWITCH Device Configuration
+ * Defines the properties and form configuration for Socket Switch devices
  */
-
-const DIMMER_CONFIG = {
+// productTypeAttributesMap.put(ProductTypeEnum.SWITCH.getPid(), new HashSet<>(Arrays.asList("power", "delay")));
+const SOCKET_SWITCH_CONFIG = {
   // Device attributes configuration
   attributes: {
     power: { 
@@ -12,13 +12,6 @@ const DIMMER_CONFIG = {
       options: [0, 1],
       optionLabels: ['Off', 'On'],
       description: 'Power state (0=Off, 1=On)'
-    },
-    level: { 
-      type: 'number', 
-      label: 'level', 
-      min: 0, 
-      max: 255,
-      description: 'Brightness level (0-255, displays as 0-100%)'
     },
     delay: { 
       type: 'number', 
@@ -30,15 +23,15 @@ const DIMMER_CONFIG = {
   },
   
   // Device description
-  description: 'Dimmer device for controlling light brightness',
+  description: 'Socket switch device for controlling power outlets',
   
   // Device icon
-  icon: 'DIMMER.png',
+  icon: 'SOCKET_SWITCH.png',
   
   // Device category
-  category: 'lighting',
+  category: 'switch',
   
-  // Helper functions for dimmer state display
+  // Helper functions for socket switch state display
   helpers: {
     getPowerStateText: (state) => {
       switch (Number(state)) {
@@ -47,10 +40,6 @@ const DIMMER_CONFIG = {
         default: return '-';
       }
     },
-    getDimmingPercentage: (level) => {
-      if (level === undefined || level === null) return '-';
-      return `${Math.round((level / 255) * 100)}%`;
-    },
     getDelayMinutes: (delay) => {
       if (delay === undefined || delay === null) return '-';
       return `${delay} min`;
@@ -58,4 +47,4 @@ const DIMMER_CONFIG = {
   }
 };
 
-export default DIMMER_CONFIG; 
+export default SOCKET_SWITCH_CONFIG; 

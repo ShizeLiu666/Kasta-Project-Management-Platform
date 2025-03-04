@@ -7,12 +7,14 @@ import {
   DialogContent,
   DialogActions,
   Typography,
-  Box
+  Box,
+  Tooltip
 } from '@mui/material';
 import BasicTable from '../BasicTable';
 import socketRelayIcon from '../../../../../../assets/icons/DeviceType/SOCKET_RELAY.png';
+import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 
-// 异常日志对话框组件
+// Error log dialog component
 const ErrorLogDialog = ({ open, onClose, errors }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -27,13 +29,19 @@ const ErrorLogDialog = ({ open, onClose, errors }) => {
                 Channel {error.channel}
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Error Type: {
-                  error.errorType === 0 ? 'Low Energy' :
-                  error.errorType === 1 ? 'Threshold Warning' :
-                  error.errorType === 0x50 ? 'Config Error' :
-                  error.errorType === 0x51 ? 'Alert Enabled' :
-                  error.errorType === 0x52 ? 'Alert Disabled' : '-'
-                }
+                Error Type: {DEVICE_CONFIGS.SOCKET_RELAY.helpers.getErrorTypeText(error.errorType)}
+                <Tooltip title={DEVICE_CONFIGS.SOCKET_RELAY.helpers.getErrorDescription(error.errorType)} arrow>
+                  <Box component="span" sx={{ 
+                    ml: 1, 
+                    cursor: 'help',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    color: 'info.main',
+                    '&:hover': { textDecoration: 'underline' }
+                  }}>
+                    ({error.errorType})
+                  </Box>
+                </Tooltip>
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 Value: {error.value || '-'}
@@ -73,19 +81,12 @@ const SOCKET_RELAYType = ({ devices }) => {
     {
       id: 'power',
       label: 'Power',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
+      format: (value) => DEVICE_CONFIGS.SOCKET_RELAY.helpers.getPowerStateText(value)
     },
     {
       id: 'delay',
       label: 'Delay',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return `${value}min`;
-      }
+      format: (value) => DEVICE_CONFIGS.SOCKET_RELAY.helpers.getDelayMinutes(value)
     },
     {
       id: 'pValue',
@@ -97,19 +98,32 @@ const SOCKET_RELAYType = ({ devices }) => {
       label: 'Error Logs',
       format: (attrs) => {
         const errors = attrs?.socketErrors || [];
+        const hasErrors = errors.length > 0;
+        const errorCount = errors.length;
+        const latestError = hasErrors ? errors[errors.length - 1] : null;
+        
+        if (!hasErrors) {
+          return 'No Errors';
+        }
+
         return (
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => handleErrorClick(errors)}
-            disabled={!errors.length}
-            color={errors.length ? "warning" : "inherit"}
-            sx={{
-              minWidth: '120px'
+          <Box 
+            onClick={() => handleErrorClick(errors)} 
+            sx={{ 
+              cursor: 'pointer',
+              color: 'warning.main',
+              '&:hover': { textDecoration: 'underline' }
             }}
           >
-            {errors.length ? `${errors.length} Error${errors.length > 1 ? 's' : ''}` : 'No Errors'}
-          </Button>
+            <Tooltip 
+              title={`Latest: ${DEVICE_CONFIGS.SOCKET_RELAY.helpers.getErrorTypeText(latestError.errorType)} (${latestError.errorType})`} 
+              arrow
+            >
+              <Typography component="span">
+                {`${errorCount} Error${errorCount > 1 ? 's' : ''}`}
+              </Typography>
+            </Tooltip>
+          </Box>
         );
       }
     }

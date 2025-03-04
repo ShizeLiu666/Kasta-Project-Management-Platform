@@ -10,60 +10,63 @@ const RGB_CW_CONFIG = {
       type: 'select', 
       label: 'Power', 
       options: [0, 1],
+      optionLabels: ['Off', 'On'],
       description: 'Power state (0=Off, 1=On)'
     },
     level: { 
       type: 'number', 
-      label: 'Brightness', 
+      label: 'level', 
       min: 0, 
       max: 255,
-      description: 'Brightness level (0-255, 1 byte)'
+      description: 'level (0-255, displays as 0-100%)'
     },
     colorTemperature: { 
       type: 'number', 
-      label: 'Color Temperature', 
-      min: 2700, 
-      max: 6500,
-      description: 'Color temperature in Kelvin (2700K-6500K)'
+      label: 'Color Temp', 
+      min: 0, 
+      max: 65535,
+      description: 'Color temperature raw value (0-65535)'
     },
     red: { 
       type: 'number', 
       label: 'Red', 
       min: 0, 
       max: 255,
-      description: 'Red color component (0-255, 1 byte)'
+      description: 'Red color component (0-255)'
     },
     green: { 
       type: 'number', 
       label: 'Green', 
       min: 0, 
       max: 255,
-      description: 'Green color component (0-255, 1 byte)'
+      description: 'Green color component (0-255)'
     },
     blue: { 
       type: 'number', 
       label: 'Blue', 
       min: 0, 
       max: 255,
-      description: 'Blue color component (0-255, 1 byte)'
+      description: 'Blue color component (0-255)'
     },
     blinkSpeed: { 
       type: 'select', 
       label: 'Blink Speed', 
       options: [-1, 0, 1, 2],
+      optionLabels: ['None', 'Slow', 'Medium', 'Fast'],
       description: 'Blinking speed (-1=None, 0=Slow, 1=Medium, 2=Fast)'
     },
     delay: { 
       type: 'number', 
-      label: 'Delay (ms)', 
+      label: 'Delay', 
       min: 0, 
-      max: 10000,
-      description: 'Delay time (milliseconds)'
+      max: 59,
+      description: 'Delay time in minutes (0-59)'
     },
     isRgb: { 
       type: 'select', 
       label: 'Mode', 
       options: [0, 1],
+      optionLabels: ['Color Temperature', 'RGB'],
       description: 'Device mode (0=Color Temperature, 1=RGB)'
     }
   },
@@ -105,6 +108,10 @@ const RGB_CW_CONFIG = {
         case 1: return 'RGB';
         default: return '-';
       }
+    },
+    getDelayMinutes: (delay) => {
+      if (delay === undefined || delay === null) return '-';
+      return `${delay} min`;
     },
     // Convert RGB values to hex color code
     rgbToHex: (r, g, b) => {

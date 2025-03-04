@@ -10,32 +10,36 @@ const FAN_CONFIG = {
       type: 'select', 
       label: 'Light Status', 
       options: [0, 1],
+      optionLabels: ['Off', 'On'],
       description: 'Fan light state (0=Off, 1=On)'
     },
     fanState: { 
       type: 'select', 
       label: 'Fan Status', 
       options: [0, 1, 2, 3],
-      description: 'Fan speed state (0=Off, 1=Slow, 2=Medium, 3=Fast)'
+      optionLabels: ['Close', 'Low', 'Medium', 'High'],
+      description: 'Fan speed state (0=Close, 1=Low, 2=Medium, 3=High)'
     },
     isHaveFanLight: { 
       type: 'select', 
       label: 'Has Light', 
       options: [0, 1],
+      optionLabels: ['No', 'Yes'],
       description: 'Whether the fan has a light (0=No, 1=Yes)'
     },
     isConfigFanLight: { 
       type: 'select', 
       label: 'Light Configured', 
       options: [0, 1],
+      optionLabels: ['No', 'Yes'],
       description: 'Whether the fan light is configured (0=No, 1=Yes)'
     },
     delay: { 
       type: 'number', 
-      label: 'Delay (ms)', 
+      label: 'Delay', 
       min: 0, 
-      max: 10000,
-      description: 'Delay time (milliseconds)'
+      max: 59,
+      description: 'Delay time in minutes (0-59)'
     }
   },
   
@@ -52,10 +56,10 @@ const FAN_CONFIG = {
   helpers: {
     getFanStateText: (state) => {
       switch (Number(state)) {
-        case 0: return 'Off';
-        case 1: return 'Slow';
+        case 0: return 'Close';
+        case 1: return 'Low';
         case 2: return 'Medium';
-        case 3: return 'Fast';
+        case 3: return 'High';
         default: return '-';
       }
     },
@@ -72,6 +76,10 @@ const FAN_CONFIG = {
         case 1: return 'Yes';
         default: return '-';
       }
+    },
+    getDelayMinutes: (delay) => {
+      if (delay === undefined || delay === null) return '-';
+      return `${delay} min`;
     }
   }
 };

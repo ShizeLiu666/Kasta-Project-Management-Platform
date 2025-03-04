@@ -16,10 +16,18 @@ const DimmerType = ({ devices }) => {
     },
     {
       id: 'level',
-      label: 'Dimming Level',
+      label: 'level',
       format: (value) => {
         if (value === undefined || value === null) return '-';
         return `${Math.round((value / 255) * 100)}%`;
+      }
+    },
+    {
+      id: 'delay',
+      label: 'Delay',
+      format: (value) => {
+        if (value === undefined || value === null) return '-';
+        return `${value} min`;
       }
     }
   ];
@@ -30,7 +38,7 @@ const DimmerType = ({ devices }) => {
       icon={dimmerIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="40%"
+      nameColumnWidth="30%"
     />
   );
 };

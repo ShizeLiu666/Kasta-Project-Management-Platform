@@ -18,7 +18,7 @@ const SWITCHType = ({ devices }) => {
       label: 'Delay',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${value}min`;
+        return `${value} min`;
       }
     }
   ];

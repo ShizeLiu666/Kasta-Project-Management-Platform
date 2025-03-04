@@ -14,16 +14,28 @@ const DEVICE_ATTRIBUTES_CONFIG = {
     state: { type: 'select', label: 'State', options: ['ON', 'OFF'] }
   },
   SOCKET_RELAY: {
-    power: { type: 'select', label: 'Power', options: ['ON', 'OFF'] }
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 },
+    pValue: { type: 'number', label: 'Power Value', readOnly: true },
+    socketErrors: { type: 'number', label: 'Error Logs', readOnly: true }
   },
   FAN: {
-    power: { type: 'select', label: 'Power', options: ['ON', 'OFF'] },
-    speed: { type: 'number', label: 'Fan Speed', min: 1, max: 5 }
+    fanLightState: { type: 'select', label: 'Light Status', options: [0, 1], optionLabels: ['Off', 'On'] },
+    fanState: { type: 'select', label: 'Fan Status', options: [0, 1, 2, 3], optionLabels: ['Close', 'Low', 'Medium', 'High'] },
+    isHaveFanLight: { type: 'select', label: 'Has Light', options: [0, 1], optionLabels: ['No', 'Yes'] },
+    isConfigFanLight: { type: 'select', label: 'Light Configured', options: [0, 1], optionLabels: ['No', 'Yes'] },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
   },
   RGB_CW: {
-    power: { type: 'select', label: 'Power', options: ['ON', 'OFF'] },
-    brightness: { type: 'number', label: 'Brightness', min: 0, max: 100 },
-    color: { type: 'text', label: 'Color (HEX)', placeholder: '#RRGGBB' }
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    level: { type: 'number', label: 'Brightness', min: 0, max: 255 },
+    colorTemperature: { type: 'number', label: 'Color Temp', min: 0, max: 65535 },
+    red: { type: 'number', label: 'Red', min: 0, max: 255 },
+    green: { type: 'number', label: 'Green', min: 0, max: 255 },
+    blue: { type: 'number', label: 'Blue', min: 0, max: 255 },
+    blinkSpeed: { type: 'select', label: 'Blink Speed', options: [-1, 0, 1, 2], optionLabels: ['None', 'Slow', 'Medium', 'Fast'] },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 },
+    isRgb: { type: 'select', label: 'Mode', options: [0, 1], optionLabels: ['Color Temperature', 'RGB'] }
   },
   CCT_DOWNLIGHT: {
     power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
@@ -32,16 +44,46 @@ const DEVICE_ATTRIBUTES_CONFIG = {
     delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
   },
   DIMMER: {
-    power: { type: 'select', label: 'Power', options: ['ON', 'OFF'] },
-    level: { type: 'number', label: 'Dimming Level', min: 0, max: 100 }
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    level: { type: 'number', label: 'level', min: 0, max: 255 },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
   },
   SOCKET_SWITCH: {
-    state: { type: 'select', label: 'Switch State', options: ['ON', 'OFF'] }
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
   },
   THERMOSTAT: {
-    power: { type: 'select', label: 'Power', options: ['ON', 'OFF'] },
-    temperature: { type: 'number', label: 'Target Temperature', min: 16, max: 32 },
-    mode: { type: 'select', label: 'Mode', options: ['HEAT', 'COOL', 'AUTO'] }
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    mode: { type: 'select', label: 'Mode', options: [0, 1, 2, 3], optionLabels: ['Cool', 'Fan', 'Heat', 'Auto'] },
+    setTemperature: { type: 'number', label: 'Set Temperature', min: 160, max: 320, description: 'Value will be multiplied by 0.1°C' },
+    currentTemperature: { type: 'number', label: 'Current Temperature', readOnly: true, description: 'Value will be multiplied by 0.1°C' },
+    fanSpeed: { type: 'select', label: 'Fan Speed', options: [0, 1, 2, 3], optionLabels: ['Auto', 'Slow', 'Medium', 'Fast'] },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
+  },
+  VCAL_SOCKET: {
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    lockStatus: { type: 'select', label: 'Lock Status', options: [0, 1], optionLabels: ['Lock', 'Unlock'] },
+    backLight: { type: 'number', label: 'Back Light', min: 0, max: 30, description: 'Backlight level (0-5=Low, 6-15=Medium, 16-30=High)' },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
+  },
+  T3_SWITCH: {
+    powerFirst: { type: 'select', label: 'Power 1', options: [0, 1], optionLabels: ['Off', 'On'] },
+    powerSecond: { type: 'select', label: 'Power 2', options: [0, 1], optionLabels: ['Off', 'On'] },
+    powerThird: { type: 'select', label: 'Power 3', options: [0, 1], optionLabels: ['Off', 'On'] },
+    delayFirst: { type: 'number', label: 'Delay 1', min: 0, max: 59 },
+    delaySecond: { type: 'number', label: 'Delay 2', min: 0, max: 59 },
+    delayThird: { type: 'number', label: 'Delay 3', min: 0, max: 59 }
+  },
+  T3_DIMMER: {
+    powerFirst: { type: 'select', label: 'Power 1', options: [0, 1], optionLabels: ['Off', 'On'] },
+    powerSecond: { type: 'select', label: 'Power 2', options: [0, 1], optionLabels: ['Off', 'On'] },
+    powerThird: { type: 'select', label: 'Power 3', options: [0, 1], optionLabels: ['Off', 'On'] },
+    levelFirst: { type: 'number', label: 'Level 1', min: 0, max: 255, description: 'Brightness level (0-255)' },
+    levelSecond: { type: 'number', label: 'Level 2', min: 0, max: 255, description: 'Brightness level (0-255)' },
+    levelThird: { type: 'number', label: 'Level 3', min: 0, max: 255, description: 'Brightness level (0-255)' },
+    delayFirst: { type: 'number', label: 'Delay 1', min: 0, max: 59 },
+    delaySecond: { type: 'number', label: 'Delay 2', min: 0, max: 59 },
+    delayThird: { type: 'number', label: 'Delay 3', min: 0, max: 59 }
   },
   CURTAIN: {
     power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
@@ -95,7 +137,26 @@ const DEVICE_ATTRIBUTES_CONFIG = {
 - hole: 按钮孔位 (1-5, 对应按钮1-5)
 - bindChannel: 绑定通道 (0=左, 1=右)`
     }
-  }
+  },
+  DRY_CONTACT: {
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    dryType: { type: 'select', label: 'Type', options: [0, 1, 6, 9], optionLabels: ['Toggle', 'Momentary 1s', 'Momentary 6s', 'Momentary 9s'] },
+    isConfig: { type: 'select', label: 'Configured', options: [0, 1], optionLabels: ['No', 'Yes'] },
+    delay: { type: 'number', label: 'Delay', min: 0, max: 59 }
+  },
+  POWER_POINT: {
+    power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    leftPower: { type: 'select', label: 'Left Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    rightPower: { type: 'select', label: 'Right Power', options: [0, 1], optionLabels: ['Off', 'On'] },
+    leftName: { type: 'text', label: 'Left Name' },
+    rightName: { type: 'text', label: 'Right Name' },
+    leftLock: { type: 'select', label: 'Left Lock', options: [0, 1], optionLabels: ['Lock', 'Unlock'] },
+    rightLock: { type: 'select', label: 'Right Lock', options: [0, 1], optionLabels: ['Lock', 'Unlock'] },
+    leftDelay: { type: 'number', label: 'Left Delay', min: 0, max: 59 },
+    rightDelay: { type: 'number', label: 'Right Delay', min: 0, max: 59 },
+    leftBackLight: { type: 'number', label: 'Left LED', min: 0, max: 30, description: 'LED brightness (0-5=Low, 6-15=Medium, 16-30=High)' },
+    rightBackLight: { type: 'number', label: 'Right LED', min: 0, max: 30, description: 'LED brightness (0-5=Low, 6-15=Medium, 16-30=High)' }
+  },
 };
 
 const UpdateDeviceModal = ({ isOpen, toggle, devices, onSuccess }) => {
@@ -279,7 +340,6 @@ const UpdateDeviceModal = ({ isOpen, toggle, devices, onSuccess }) => {
       );
     } else {
       // 使用旧的配置格式渲染表单
-      // 如果没有找到对应的配置，显示一个通用的状态选择
       const config = DEVICE_ATTRIBUTES_CONFIG[deviceType] || {
         state: { type: 'select', label: 'State', options: ['ON', 'OFF'] }
       };

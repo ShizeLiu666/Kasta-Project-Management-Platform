@@ -1,43 +1,29 @@
 import React from 'react';
 import BasicTable from '../BasicTable';
 import vcalSocketIcon from '../../../../../../assets/icons/DeviceType/VCAL_SOCKET.png';
+import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 
 const VCAL_SOCKETType = ({ devices }) => {
   const columns = [
     {
       id: 'power',
       label: 'Power',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
+      format: (value) => DEVICE_CONFIGS.VCAL_SOCKET.helpers.getPowerStateText(value)
     },
     {
       id: 'lockStatus',
       label: 'Lock Status',
-      format: (value) => {
-        if (value === 1) return 'Locked';
-        if (value === 0) return 'Unlocked';
-        return '-';
-      }
+      format: (value) => DEVICE_CONFIGS.VCAL_SOCKET.helpers.getLockStatusText(value)
     },
     {
       id: 'backLight',
       label: 'Back Light',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
+      format: (value) => DEVICE_CONFIGS.VCAL_SOCKET.helpers.getBackLightText(value)
     },
     {
       id: 'delay',
       label: 'Delay',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return `${value}min`;
-      }
+      format: (value) => DEVICE_CONFIGS.VCAL_SOCKET.helpers.getDelayMinutes(value)
     }
   ];
 

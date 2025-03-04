@@ -1,45 +1,29 @@
 import React from 'react';
 import BasicTable from '../BasicTable';
 import dryContactIcon from '../../../../../../assets/icons/DeviceType/DRY_CONTACT.png';
+import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 
 const DRY_CONTACTType = ({ devices }) => {
   const columns = [
     {
       id: 'power',
       label: 'Power',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
+      format: (value) => DEVICE_CONFIGS.DRY_CONTACT.helpers.getPowerStateText(value)
     },
     {
       id: 'dryType',
       label: 'Type',
-      format: (value) => {
-        switch (value) {
-          case 0: return 'Normal Open';
-          case 1: return 'Normal Close';
-          default: return '-';
-        }
-      }
+      format: (value) => DEVICE_CONFIGS.DRY_CONTACT.helpers.getDryTypeText(value)
     },
     {
       id: 'isConfig',
       label: 'Configured',
-      format: (value) => {
-        if (value === 1) return 'Yes';
-        if (value === 0) return 'No';
-        return '-';
-      }
+      format: (value) => DEVICE_CONFIGS.DRY_CONTACT.helpers.getConfigStatusText(value)
     },
     {
       id: 'delay',
       label: 'Delay',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return `${value}min`;
-      }
+      format: (value) => DEVICE_CONFIGS.DRY_CONTACT.helpers.getDelayMinutes(value)
     }
   ];
 

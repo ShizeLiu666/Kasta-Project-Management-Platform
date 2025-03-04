@@ -1,98 +1,46 @@
-// src/components/Network/NetworkDetails/Devices/Tables/PPT/PPT.js
+// src/components/Network/NetworkDetails/Devices/Tables/POWER_POINT/POWER_POINT.js
 import React from 'react';
 import BasicTable from '../BasicTable';
 import pptIcon from '../../../../../../assets/icons/DeviceType/POWER_POINT.png';
+import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 
 const POWER_POINTType = ({ devices }) => {
+  // 使用更紧凑的列布局
   const columns = [
     {
       id: 'power',
-      label: 'Power',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
+      label: 'Main Power',
+      format: (value) => DEVICE_CONFIGS.POWER_POINT.helpers.getPowerStateText(value)
     },
     {
-      id: 'leftName',
-      label: 'Left Name',
-      format: (value) => value || '-'
+      id: 'leftSocket',
+      label: 'Left',
+      format: (_, device) => (
+        <div style={{ fontSize: '0.9em' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{device.leftName || '-'}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div>Power: {DEVICE_CONFIGS.POWER_POINT.helpers.getPowerStateText(device.leftPower)}</div>
+            <div>Lock: {DEVICE_CONFIGS.POWER_POINT.helpers.getLockStateText(device.leftLock)}</div>
+            <div>Delay: {DEVICE_CONFIGS.POWER_POINT.helpers.getDelayMinutes(device.leftDelay)}</div>
+            <div>LED: {DEVICE_CONFIGS.POWER_POINT.helpers.getBackLightLevel(device.leftBackLight)}</div>
+          </div>
+        </div>
+      )
     },
     {
-      id: 'leftPower',
-      label: 'Left Power',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
-    },
-    {
-      id: 'rightName',
-      label: 'Right Name',
-      format: (value) => value || '-'
-    },
-    {
-      id: 'rightPower',
-      label: 'Right Power',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
-    },
-    {
-      id: 'leftLock',
-      label: 'Left Lock',
-      format: (value) => {
-        if (value === 1) return 'Locked';
-        if (value === 0) return 'Unlocked';
-        return '-';
-      }
-    },
-    {
-      id: 'rightLock',
-      label: 'Right Lock',
-      format: (value) => {
-        if (value === 1) return 'Locked';
-        if (value === 0) return 'Unlocked';
-        return '-';
-      }
-    },
-    {
-      id: 'leftDelay',
-      label: 'Left Delay',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return `${value}min`;
-      }
-    },
-    {
-      id: 'rightDelay',
-      label: 'Right Delay',
-      format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return `${value}min`;
-      }
-    },
-    {
-      id: 'leftBackLight',
-      label: 'Left LED',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
-    },
-    {
-      id: 'rightBackLight',
-      label: 'Right LED',
-      format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
+      id: 'rightSocket',
+      label: 'Right',
+      format: (_, device) => (
+        <div style={{ fontSize: '0.9em' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{device.rightName || '-'}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div>Power: {DEVICE_CONFIGS.POWER_POINT.helpers.getPowerStateText(device.rightPower)}</div>
+            <div>Lock: {DEVICE_CONFIGS.POWER_POINT.helpers.getLockStateText(device.rightLock)}</div>
+            <div>Delay: {DEVICE_CONFIGS.POWER_POINT.helpers.getDelayMinutes(device.rightDelay)}</div>
+            <div>LED: {DEVICE_CONFIGS.POWER_POINT.helpers.getBackLightLevel(device.rightBackLight)}</div>
+          </div>
+        </div>
+      )
     }
   ];
 
@@ -102,7 +50,7 @@ const POWER_POINTType = ({ devices }) => {
       icon={pptIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="20%" // 由于列较多，给name列分配较少空间
+      nameColumnWidth="20%"
     />
   );
 };
