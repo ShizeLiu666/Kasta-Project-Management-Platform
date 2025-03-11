@@ -3,63 +3,94 @@ import BasicTable from '../BasicTable';
 import t3DimmerIcon from '../../../../../../assets/icons/DeviceType/T3_DIMMER.png';
 import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 
-const T3_DIMMERType = ({ devices }) => {
-  const columns = [
-    {
-      id: 'powerFirst',
-      label: 'Power 1',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getPowerStateText(value)
-    },
-    {
-      id: 'powerSecond',
-      label: 'Power 2',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getPowerStateText(value)
-    },
-    {
-      id: 'powerThird',
-      label: 'Power 3',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getPowerStateText(value)
-    },
-    {
-      id: 'levelFirst',
-      label: 'Level 1',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getLevelPercentage(value)
-    },
-    {
-      id: 'levelSecond',
-      label: 'Level 2',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getLevelPercentage(value)
-    },
-    {
-      id: 'levelThird',
-      label: 'Level 3',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getLevelPercentage(value)
-    },
-    {
-      id: 'delayFirst',
-      label: 'Delay 1',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getDelayMinutes(value)
-    },
-    {
-      id: 'delaySecond',
-      label: 'Delay 2',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getDelayMinutes(value)
-    },
-    {
-      id: 'delayThird',
-      label: 'Delay 3',
-      format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getDelayMinutes(value)
+// 解析设备类型，获取按键数量
+const parseDeviceType = (deviceType) => {
+  // 默认为3键
+  let buttonCount = 3;
+  
+  // 从设备类型中提取按键数量
+  if (deviceType.startsWith('KT') && deviceType.includes('RSB_DIMMER')) {
+    const match = deviceType.match(/KT(\d)RSB_DIMMER/);
+    if (match && match[1]) {
+      buttonCount = parseInt(match[1]);
     }
-  ];
+  }
+  
+  return { buttonCount };
+};
 
+// 获取对应按键数量的图标
+const getDimmerIcon = (buttonCount) => {
+  try {
+    return require(`../../../../../../assets/icons/DeviceType/T3_DIMMER_${buttonCount}.png`);
+  } catch (error) {
+    console.warn(`Icon not found for ${buttonCount}-button dimmer, using default`);
+    return t3DimmerIcon;
+  }
+};
+
+const T3_DIMMERType = ({ devices }) => {
+  // 按设备类型分组
+  const devicesByType = {};
+  
+  devices.forEach(device => {
+    if (!devicesByType[device.deviceType]) {
+      devicesByType[device.deviceType] = [];
+    }
+    devicesByType[device.deviceType].push(device);
+  });
+  
+  // 渲染每种类型的设备表格
   return (
-    <BasicTable
-      title="T3 Dimmer"
-      icon={t3DimmerIcon}
-      devices={devices}
-      columns={columns}
-      nameColumnWidth="15%"  // 由于列非常多，进一步减少名称列宽度
-    />
+    <>
+      {Object.entries(devicesByType).map(([deviceType, typeDevices]) => {
+        // 获取按键数量
+        const { buttonCount } = parseDeviceType(deviceType);
+        
+        // 获取对应图标
+        const dimmerIcon = getDimmerIcon(buttonCount);
+        
+        // 根据按键数量动态生成列
+        const columns = [];
+        
+        // 只显示设备实际拥有的按键数量
+        for (let i = 1; i <= buttonCount; i++) {
+          const powerKey = i === 1 ? 'powerFirst' : i === 2 ? 'powerSecond' : 'powerThird';
+          const levelKey = i === 1 ? 'levelFirst' : i === 2 ? 'levelSecond' : 'levelThird';
+          const delayKey = i === 1 ? 'delayFirst' : i === 2 ? 'delaySecond' : 'delayThird';
+          
+          columns.push({
+            id: powerKey,
+            label: `Power ${i}`,
+            format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getPowerStateText(value)
+          });
+          
+          columns.push({
+            id: levelKey,
+            label: `Brightness ${i}`,
+            format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getLevelPercentage(value)
+          });
+          
+          columns.push({
+            id: delayKey,
+            label: `Delay ${i}`,
+            format: (value) => DEVICE_CONFIGS.T3_DIMMER.helpers.getDelayMinutes(value)
+          });
+        }
+        
+        return (
+          <div key={deviceType} style={{ marginBottom: '20px' }}>
+            <BasicTable
+              title={`${buttonCount}-Button T3 Dimmer`}
+              icon={dimmerIcon}
+              devices={typeDevices}
+              columns={columns}
+              nameColumnWidth="15%"  // 由于列较多，减少名称列宽度
+            />
+          </div>
+        );
+      })}
+    </>
   );
 };
 

@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import { 
   Modal,
-  ModalHeader,
   ModalBody
 } from 'reactstrap';
 import BasicTable from '../BasicTable';
@@ -16,20 +15,39 @@ import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 import CustomButton from '../../../../../CustomComponents/CustomButton';
 import DownloadIcon from '@mui/icons-material/Download';
 
-// 自定义错误日志模态框组件 - 不包含底部按钮
-const SimpleErrorModal = ({ isOpen, toggle, title, children }) => {
+// 自定义错误日志模态框组件 - 不包含标题栏，只有关闭按钮
+const SimpleErrorModal = ({ isOpen, toggle, children }) => {
   return (
     <Modal 
       isOpen={isOpen} 
       toggle={toggle}
       centered
       scrollable
-      size="lg" // 使用更大的模态框
+      size="lg"
     >
-      <ModalHeader toggle={toggle} style={{ backgroundColor: '#fbcd0b', color: '#fff' }}>
-        {title}
-      </ModalHeader>
-      <ModalBody>
+      <div style={{ position: 'relative' }}>
+        {/* 只有关闭按钮，没有标题栏 */}
+        <button
+          type="button"
+          className="close"
+          onClick={toggle}
+          style={{
+            position: 'absolute',
+            top: '15px',
+            right: '15px',
+            zIndex: 10,
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: '#666',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <ModalBody style={{ paddingTop: '40px' }}>
         {children}
       </ModalBody>
     </Modal>
@@ -116,29 +134,40 @@ const ErrorLogModal = ({ isOpen, toggle, errors }) => {
     <SimpleErrorModal
       isOpen={isOpen}
       toggle={toggle}
-      title={`Error Logs (${errors?.length || 0} total)`}
     >
       <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          {/* 通道筛选 */}
-          <div>
-            <label htmlFor="channelFilter" style={{ marginRight: '10px' }}>Channel:</label>
-            <select 
-              id="channelFilter"
-              value={currentChannel}
-              onChange={(e) => setCurrentChannel(e.target.value)}
-              style={{ padding: '5px', borderRadius: '4px', borderColor: '#ddd' }}
-            >
-              <option value="all">All Channels</option>
-              {Object.keys(errorsByChannel).map(channel => (
-                <option key={channel} value={channel}>
-                  {DEVICE_CONFIGS.SOCKET_RELAY.helpers.getChannelText(channel)} Channel
-                </option>
-              ))}
-            </select>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '15px',
+          borderBottom: '1px solid #eee',
+          paddingBottom: '10px',
+          paddingRight: '30px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <Typography variant="subtitle1" style={{ fontWeight: 'bold' }}>
+              {errors?.length || 0} total error{(errors?.length !== 1) ? 's' : ''}
+            </Typography>
+            
+            <div>
+              <label htmlFor="channelFilter" style={{ marginRight: '10px' }}>Channel:</label>
+              <select 
+                id="channelFilter"
+                value={currentChannel}
+                onChange={(e) => setCurrentChannel(e.target.value)}
+                style={{ padding: '5px', borderRadius: '4px', borderColor: '#ddd' }}
+              >
+                <option value="all">All Channels</option>
+                {Object.keys(errorsByChannel).map(channel => (
+                  <option key={channel} value={channel}>
+                    {DEVICE_CONFIGS.SOCKET_RELAY.helpers.getChannelText(channel)} Channel
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* 下载按钮 */}
           <CustomButton
             onClick={downloadErrorLogs}
             icon={<DownloadIcon />}

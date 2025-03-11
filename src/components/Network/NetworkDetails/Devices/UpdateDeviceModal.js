@@ -153,6 +153,38 @@ const DEVICE_ATTRIBUTES_CONFIG = {
     power: { type: 'select', label: 'Power', options: [0, 1], optionLabels: ['Off', 'On'] },
     sensorBindID: { type: 'number', label: 'Sensor Bind ID', description: 'ID of the device to bind with this sensor' }
   },
+  PANGU: {
+    connectState: { 
+      type: 'number', 
+      label: 'Connection State', 
+      min: 0, 
+      max: 15,
+      description: 'Connection state bitmap: bit 0=WiFi, bit 1=Ethernet, bit 2=Internet, bit 3=Kasta Cloud'
+    },
+    isBearer: {
+      type: 'select',
+      label: 'Is Bearer',
+      options: [0, 1],
+      optionLabels: ['No', 'Yes'],
+      description: 'Indicates if this device is a bearer'
+    },
+    subDevices: { 
+      type: 'textarea', 
+      label: 'Sub Devices (JSON format)', 
+      placeholder: `[
+  {
+    "sendDeviceId": "67890",
+    "sendDid": 54321,
+    "isAuth": 1
+  }
+]`,
+      rows: 10,
+      help: `字段说明:
+- sendDeviceId: 发送设备ID (字符串)
+- sendDid: 发送DID (整数)
+- isAuth: 是否已授权 (0=否, 1=是)`
+    }
+  },
 };
 
 const UpdateDeviceModal = ({ isOpen, toggle, devices, onSuccess }) => {
@@ -184,44 +216,81 @@ const UpdateDeviceModal = ({ isOpen, toggle, devices, onSuccess }) => {
       // 初始化表单数据
       const initialFormData = {};
       
-      // 检查是否有新的设备配置
-      const deviceConfig = DEVICE_CONFIGS[type];
-      if (deviceConfig && deviceConfig.fields) {
-        // 使用新的配置格式
-        deviceConfig.fields.forEach(field => {
-          if (field.type === 'custom' && field.component === 'RemoteBindEditor') {
-            // 为 RemoteBindEditor 组件预设一个空数组
-            initialFormData[field.name] = '[]';
-          } else {
-            initialFormData[field.name] = '';
+      // 特殊处理 T3_SWITCH 和 T3_DIMMER
+      if (type === 'T3_SWITCH' || type === 'T3_DIMMER') {
+        // 解析设备类型，获取按键数量
+        let buttonCount = 3; // 默认为3键
+        
+        if (selectedDevice.deviceType.startsWith('KT') && 
+            (selectedDevice.deviceType.includes('RSB_SWITCH') || selectedDevice.deviceType.includes('RSB_DIMMER'))) {
+          const match = selectedDevice.deviceType.match(/KT(\d)RSB/);
+          if (match && match[1]) {
+            buttonCount = parseInt(match[1]);
           }
-        });
-      } else if (DEVICE_ATTRIBUTES_CONFIG[type]) {
-        // 使用旧的配置格式
-        Object.keys(DEVICE_ATTRIBUTES_CONFIG[type]).forEach(key => {
-          // 特殊处理 FIVE_BUTTON 的 remoteBind 属性，预填充模板
-          if (type === 'FIVE_BUTTON' && key === 'remoteBind') {
-            const template = [
-              {
-                "bindType": 0,
-                "bindId": 0,
-                "hour": 0,
-                "min": 0,
-                "state": 0,
-                "enable": 1,
-                "hasTimer": 0,
-                "hole": 1,
-                "bindChannel": 0
-              }
-            ];
-            initialFormData[key] = JSON.stringify(template, null, 2);
-          } else {
-            initialFormData[key] = '';
+        }
+        
+        // 根据按键数量设置可用属性
+        if (type === 'T3_SWITCH') {
+          // 只添加设备实际拥有的按键数量对应的属性
+          for (let i = 1; i <= buttonCount; i++) {
+            const powerKey = i === 1 ? 'powerFirst' : i === 2 ? 'powerSecond' : 'powerThird';
+            const delayKey = i === 1 ? 'delayFirst' : i === 2 ? 'delaySecond' : 'delayThird';
+            
+            initialFormData[powerKey] = '';
+            initialFormData[delayKey] = '';
           }
-        });
+        } else if (type === 'T3_DIMMER') {
+          // 只添加设备实际拥有的按键数量对应的属性
+          for (let i = 1; i <= buttonCount; i++) {
+            const powerKey = i === 1 ? 'powerFirst' : i === 2 ? 'powerSecond' : 'powerThird';
+            const levelKey = i === 1 ? 'levelFirst' : i === 2 ? 'levelSecond' : 'levelThird';
+            const delayKey = i === 1 ? 'delayFirst' : i === 2 ? 'delaySecond' : 'delayThird';
+            
+            initialFormData[powerKey] = '';
+            initialFormData[levelKey] = '';
+            initialFormData[delayKey] = '';
+          }
+        }
       } else {
-        // 如果没有找到对应的配置，添加一个通用属性
-        initialFormData.state = '';
+        // 检查是否有新的设备配置
+        const deviceConfig = DEVICE_CONFIGS[type];
+        if (deviceConfig && deviceConfig.fields) {
+          // 使用新的配置格式
+          deviceConfig.fields.forEach(field => {
+            if (field.type === 'custom' && field.component === 'RemoteBindEditor') {
+              // 为 RemoteBindEditor 组件预设一个空数组
+              initialFormData[field.name] = '[]';
+            } else {
+              initialFormData[field.name] = '';
+            }
+          });
+        } else if (DEVICE_ATTRIBUTES_CONFIG[type]) {
+          // 使用旧的配置格式
+          Object.keys(DEVICE_ATTRIBUTES_CONFIG[type]).forEach(key => {
+            // 特殊处理 FIVE_BUTTON 的 remoteBind 属性，预填充模板
+            if (type === 'FIVE_BUTTON' && key === 'remoteBind') {
+              const template = [
+                {
+                  "bindType": 0,
+                  "bindId": 0,
+                  "hour": 0,
+                  "min": 0,
+                  "state": 0,
+                  "enable": 1,
+                  "hasTimer": 0,
+                  "hole": 1,
+                  "bindChannel": 0
+                }
+              ];
+              initialFormData[key] = JSON.stringify(template, null, 2);
+            } else {
+              initialFormData[key] = '';
+            }
+          });
+        } else {
+          // 如果没有找到对应的配置，添加一个通用属性
+          initialFormData.state = '';
+        }
       }
       
       setFormData(initialFormData);
@@ -326,6 +395,86 @@ const UpdateDeviceModal = ({ isOpen, toggle, devices, onSuccess }) => {
   const renderFormFields = () => {
     if (!selectedDevice) return null;
 
+    // 特殊处理 T3_SWITCH 和 T3_DIMMER
+    if (deviceType === 'T3_SWITCH' || deviceType === 'T3_DIMMER') {
+      // 解析设备类型，获取按键数量
+      let buttonCount = 3; // 默认为3键
+      
+      if (selectedDevice.deviceType.startsWith('KT') && 
+          (selectedDevice.deviceType.includes('RSB_SWITCH') || selectedDevice.deviceType.includes('RSB_DIMMER'))) {
+        const match = selectedDevice.deviceType.match(/KT(\d)RSB/);
+        if (match && match[1]) {
+          buttonCount = parseInt(match[1]);
+        }
+      }
+      
+      // 获取配置
+      const config = DEVICE_ATTRIBUTES_CONFIG[deviceType];
+      const fields = [];
+      
+      // 根据按键数量生成表单字段
+      if (deviceType === 'T3_SWITCH') {
+        for (let i = 1; i <= buttonCount; i++) {
+          const powerKey = i === 1 ? 'powerFirst' : i === 2 ? 'powerSecond' : 'powerThird';
+          const delayKey = i === 1 ? 'delayFirst' : i === 2 ? 'delaySecond' : 'delayThird';
+          
+          fields.push(renderField({
+            name: powerKey,
+            type: config[powerKey].type,
+            label: config[powerKey].label,
+            options: config[powerKey].options,
+            optionLabels: config[powerKey].optionLabels,
+            description: config[powerKey].description
+          }, formData[powerKey], (value) => handleFieldChange(powerKey, value), formErrors));
+          
+          fields.push(renderField({
+            name: delayKey,
+            type: config[delayKey].type,
+            label: config[delayKey].label,
+            min: config[delayKey].min,
+            max: config[delayKey].max,
+            description: config[delayKey].description
+          }, formData[delayKey], (value) => handleFieldChange(delayKey, value), formErrors));
+        }
+      } else if (deviceType === 'T3_DIMMER') {
+        for (let i = 1; i <= buttonCount; i++) {
+          const powerKey = i === 1 ? 'powerFirst' : i === 2 ? 'powerSecond' : 'powerThird';
+          const levelKey = i === 1 ? 'levelFirst' : i === 2 ? 'levelSecond' : 'levelThird';
+          const delayKey = i === 1 ? 'delayFirst' : i === 2 ? 'delaySecond' : 'delayThird';
+          
+          fields.push(renderField({
+            name: powerKey,
+            type: config[powerKey].type,
+            label: config[powerKey].label,
+            options: config[powerKey].options,
+            optionLabels: config[powerKey].optionLabels,
+            description: config[powerKey].description
+          }, formData[powerKey], (value) => handleFieldChange(powerKey, value), formErrors));
+          
+          fields.push(renderField({
+            name: levelKey,
+            type: config[levelKey].type,
+            label: config[levelKey].label,
+            min: config[levelKey].min,
+            max: config[levelKey].max,
+            description: config[levelKey].description
+          }, formData[levelKey], (value) => handleFieldChange(levelKey, value), formErrors));
+          
+          fields.push(renderField({
+            name: delayKey,
+            type: config[delayKey].type,
+            label: config[delayKey].label,
+            min: config[delayKey].min,
+            max: config[delayKey].max,
+            description: config[delayKey].description
+          }, formData[delayKey], (value) => handleFieldChange(delayKey, value), formErrors));
+        }
+      }
+      
+      return fields;
+    }
+
+    // 其他设备类型的处理保持不变
     // 检查是否有新的设备配置
     const deviceConfig = DEVICE_CONFIGS[deviceType];
     
@@ -372,64 +521,81 @@ const UpdateDeviceModal = ({ isOpen, toggle, devices, onSuccess }) => {
       // 过滤掉空值并转换类型
       const attributes = {};
       let hasValidationErrors = false;
-      
-      // 检查是否有新的设备配置
-      const deviceConfig = DEVICE_CONFIGS[deviceType];
       const newErrors = {};
       
-      if (deviceConfig && deviceConfig.fields) {
-        // 使用新的配置格式处理数据
-        deviceConfig.fields.forEach(field => {
-          const value = formData[field.name];
-          if (value !== undefined && value !== '') {
-            if (field.type === 'custom' && field.component === 'RemoteBindEditor') {
-              // 处理 RemoteBindEditor 组件的值
-              try {
-                attributes[field.name] = JSON.parse(value);
-              } catch (e) {
-                console.error(`Failed to parse ${field.name} value as JSON`, e);
-                newErrors[field.name] = `Invalid JSON format in ${field.label}`;
-                hasValidationErrors = true;
-              }
-            } else if (field.type === 'number') {
-              attributes[field.name] = Number(value);
-            } else if (field.type === 'select' && !isNaN(Number(value))) {
-              attributes[field.name] = Number(value);
-            } else {
-              attributes[field.name] = value;
-            }
-          }
-        });
-      } else {
-        // 使用旧的配置格式处理数据
+      // 特殊处理 T3_SWITCH 和 T3_DIMMER
+      if (deviceType === 'T3_SWITCH' || deviceType === 'T3_DIMMER') {
+        // 只处理表单中存在的字段
         Object.entries(formData).forEach(([key, value]) => {
           if (value !== '') {
-            // 检查当前设备类型的配置
-            const config = DEVICE_ATTRIBUTES_CONFIG[deviceType];
-            if (config && config[key]) {
-              if (config[key].type === 'textarea' && key === 'remoteBind') {
-                // 特殊处理 remoteBind 文本区域，尝试解析为JSON
-                try {
-                  attributes[key] = JSON.parse(value);
-                } catch (e) {
-                  console.error(`Failed to parse ${key} textarea value as JSON`, e);
-                  newErrors[key] = `Invalid JSON format in ${config[key].label}`;
-                  hasValidationErrors = true;
-                }
-              } else if (config[key].type === 'number') {
-                // 如果是数字类型，转换为数字
-                attributes[key] = Number(value);
-              } else if (config[key].type === 'select' && !isNaN(Number(value))) {
-                // 如果是选择类型但值是数字形式的字符串，转换为数字
-                attributes[key] = Number(value);
-              } else {
-                attributes[key] = value;
-              }
+            if (key.startsWith('power') || key.startsWith('delay')) {
+              attributes[key] = Number(value);
+            } else if (key.startsWith('level')) {
+              attributes[key] = Number(value);
             } else {
               attributes[key] = value;
             }
           }
         });
+      } else {
+        // 其他设备类型的处理保持不变
+        // 检查是否有新的设备配置
+        const deviceConfig = DEVICE_CONFIGS[deviceType];
+        
+        if (deviceConfig && deviceConfig.fields) {
+          // 使用新的配置格式处理数据
+          deviceConfig.fields.forEach(field => {
+            const value = formData[field.name];
+            if (value !== undefined && value !== '') {
+              if (field.type === 'custom' && field.component === 'RemoteBindEditor') {
+                // 处理 RemoteBindEditor 组件的值
+                try {
+                  attributes[field.name] = JSON.parse(value);
+                } catch (e) {
+                  console.error(`Failed to parse ${field.name} value as JSON`, e);
+                  newErrors[field.name] = `Invalid JSON format in ${field.label}`;
+                  hasValidationErrors = true;
+                }
+              } else if (field.type === 'number') {
+                attributes[field.name] = Number(value);
+              } else if (field.type === 'select' && !isNaN(Number(value))) {
+                attributes[field.name] = Number(value);
+              } else {
+                attributes[field.name] = value;
+              }
+            }
+          });
+        } else {
+          // 使用旧的配置格式处理数据
+          Object.entries(formData).forEach(([key, value]) => {
+            if (value !== '') {
+              // 检查当前设备类型的配置
+              const config = DEVICE_ATTRIBUTES_CONFIG[deviceType];
+              if (config && config[key]) {
+                if (config[key].type === 'textarea' && key === 'remoteBind') {
+                  // 特殊处理 remoteBind 文本区域，尝试解析为JSON
+                  try {
+                    attributes[key] = JSON.parse(value);
+                  } catch (e) {
+                    console.error(`Failed to parse ${key} textarea value as JSON`, e);
+                    newErrors[key] = `Invalid JSON format in ${config[key].label}`;
+                    hasValidationErrors = true;
+                  }
+                } else if (config[key].type === 'number') {
+                  // 如果是数字类型，转换为数字
+                  attributes[key] = Number(value);
+                } else if (config[key].type === 'select' && !isNaN(Number(value))) {
+                  // 如果是选择类型但值是数字形式的字符串，转换为数字
+                  attributes[key] = Number(value);
+                } else {
+                  attributes[key] = value;
+                }
+              } else {
+                attributes[key] = value;
+              }
+            }
+          });
+        }
       }
       
       if (hasValidationErrors) {

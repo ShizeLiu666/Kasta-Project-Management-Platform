@@ -104,6 +104,20 @@ const SIX_INPUT_FOUR_OUTPUT_DEVICE_TYPES = {
   "4DCOB": "4-Channel Output Device"
 };
 
+// T3_SWITCH 设备类型映射
+const T3_SWITCH_DEVICE_TYPES = {
+  "KT1RSB_SWITCH": "1 panel switch (T3 Version)",
+  "KT2RSB_SWITCH": "2 panel switch (T3 Version)",
+  "KT3RSB_SWITCH": "3 panel switch (T3 Version)"
+};
+
+// T3_DIMMER 设备类型映射
+const T3_DIMMER_DEVICE_TYPES = {
+  "KT1RSB_DIMMER": "1 panel dimmer (T3 Version)",
+  "KT2RSB_DIMMER": "2 panel dimmer (T3 Version)",
+  "KT3RSB_DIMMER": "3 panel dimmer (T3 Version)"
+};
+
 const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
   // 生成随机整数的辅助函数
   const generateRandomInt = (min, max) => {
@@ -184,6 +198,18 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
           code,
           name: `${code} - ${name}`
         })).sort((a, b) => a.name.localeCompare(b.name));
+      
+      case 'acqhrjul': // T3_SWITCH
+        return Object.entries(T3_SWITCH_DEVICE_TYPES).map(([code, name]) => ({
+          code,
+          name: `${code} - ${name}`
+        })).sort((a, b) => a.name.localeCompare(b.name));
+      
+      case 'fybufemo': // T3_DIMMER
+        return Object.entries(T3_DIMMER_DEVICE_TYPES).map(([code, name]) => ({
+          code,
+          name: `${code} - ${name}`
+        })).sort((a, b) => a.name.localeCompare(b.name));
 
       default:
         return []; // 其他产品类型不显示设备类型选项
@@ -195,7 +221,7 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
     const { name, value } = e.target;
     if (name === 'productType') {
       // 检查是否是需要设备类型选择的产品类型
-      const needsDeviceType = ['skr8wl4o', 'ng8eledm', '5ozdgdrd'].includes(value);
+      const needsDeviceType = ['skr8wl4o', 'ng8eledm', '5ozdgdrd', 'acqhrjul', 'fybufemo'].includes(value);
       setFormData(prev => ({
         ...prev,
         [name]: value,
@@ -311,7 +337,7 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
             id="deviceType"
             value={formData.deviceType}
             onChange={handleInputChange}
-            disabled={!['skr8wl4o', 'ng8eledm', '5ozdgdrd'].includes(formData.productType)}
+            disabled={!['skr8wl4o', 'ng8eledm', '5ozdgdrd', 'acqhrjul', 'fybufemo'].includes(formData.productType)}
           >
             <option value="">Select a device type</option>
             {formData.productType && getDeviceTypeOptions(formData.productType).map(({ code, name }) => (

@@ -65,3 +65,6 @@ export const PRODUCT_TYPE_MAP = {
     // ToDO 22. SIX_INPUT_FOUR_OUTPUT (六进四出) - 动态 icon 根据参数 ~
     '5ozdgdrd': 'SIX_INPUT_FOUR_OUTPUT',
 };
+
+// 在控制台中运行
+// console.log(Object.entries(PRODUCT_TYPE_MAP).filter(([_, value]) => value === 'T3_SWITCH').map(([key]) => key));

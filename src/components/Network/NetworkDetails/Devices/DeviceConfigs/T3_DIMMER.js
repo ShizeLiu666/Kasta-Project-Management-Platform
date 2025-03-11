@@ -29,24 +29,24 @@ const T3_DIMMER_CONFIG = {
     },
     levelFirst: {
       type: 'number',
-      label: 'Level 1',
+      label: 'Brightness 1',
       min: 0,
       max: 255,
-      description: 'Brightness level for dimmer 1 (0-255)'
+      description: 'Brightness level for dimmer 1 (0-255, displayed as percentage)'
     },
     levelSecond: {
       type: 'number',
-      label: 'Level 2',
+      label: 'Brightness 2',
       min: 0,
       max: 255,
-      description: 'Brightness level for dimmer 2 (0-255)'
+      description: 'Brightness level for dimmer 2 (0-255, displayed as percentage)'
     },
     levelThird: {
       type: 'number',
-      label: 'Level 3',
+      label: 'Brightness 3',
       min: 0,
       max: 255,
-      description: 'Brightness level for dimmer 3 (0-255)'
+      description: 'Brightness level for dimmer 3 (0-255, displayed as percentage)'
     },
     delayFirst: {
       type: 'number',
@@ -91,7 +91,8 @@ const T3_DIMMER_CONFIG = {
     },
     getLevelPercentage: (level) => {
       if (level === undefined || level === null) return '-';
-      return `${Math.round((level / 255) * 100)}%`;
+      const percentage = Math.round((level / 255) * 100);
+      return `${percentage}%`;
     },
     getDelayMinutes: (delay) => {
       if (delay === undefined || delay === null) return '-';
