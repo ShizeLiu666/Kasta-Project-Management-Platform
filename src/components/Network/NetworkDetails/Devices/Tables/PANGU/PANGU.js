@@ -153,25 +153,41 @@ const ConnectionStateDetails = ({ connectState }) => {
       <Chip 
         label="WiFi" 
         size="small" 
-        color={details.wifi ? "success" : "default"}
+        sx={{ 
+          bgcolor: details.wifi ? "#fbcd0b" : "transparent",
+          color: details.wifi ? "white" : "default",
+          borderColor: details.wifi ? "#fbcd0b" : undefined
+        }}
         variant={details.wifi ? "filled" : "outlined"}
       />
       <Chip 
         label="Ethernet" 
         size="small" 
-        color={details.ethernet ? "success" : "default"}
+        sx={{ 
+          bgcolor: details.ethernet ? "#fbcd0b" : "transparent",
+          color: details.ethernet ? "white" : "default",
+          borderColor: details.ethernet ? "#fbcd0b" : undefined
+        }}
         variant={details.ethernet ? "filled" : "outlined"}
       />
       <Chip 
         label="Internet" 
         size="small" 
-        color={details.internet ? "success" : "default"}
+        sx={{ 
+          bgcolor: details.internet ? "#fbcd0b" : "transparent",
+          color: details.internet ? "white" : "default",
+          borderColor: details.internet ? "#fbcd0b" : undefined
+        }}
         variant={details.internet ? "filled" : "outlined"}
       />
       <Chip 
         label="Kasta Cloud" 
         size="small" 
-        color={details.kastaCloud ? "success" : "default"}
+        sx={{ 
+          bgcolor: details.kastaCloud ? "#fbcd0b" : "transparent",
+          color: details.kastaCloud ? "white" : "default",
+          borderColor: details.kastaCloud ? "#fbcd0b" : undefined
+        }}
         variant={details.kastaCloud ? "filled" : "outlined"}
       />
     </Box>
