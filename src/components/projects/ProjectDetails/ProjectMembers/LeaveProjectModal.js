@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CustomModal from '../../../CustomComponents/CustomModal';
 import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth';
+import { getToken } from '../../../auth/auth';
 
 const LeaveProjectModal = ({ isOpen, toggle, projectId, onLeaveSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

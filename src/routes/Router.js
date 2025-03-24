@@ -69,6 +69,7 @@ import ProjectListComponent from "../components/projects/ProjectList/ProjectList
 import Profile from "../components/profile/profile";
 import AuthCodeManagement from "../components/AuthCodeManagement/AuthCodeManagement";
 import OperationLog from "../components/OperationLog/OperationLog";
+import AuthGuard from "../components/auth/AuthGuard";
 
 /*****Routes******/
 const router = createBrowserRouter([
@@ -82,7 +83,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <FullLayout />,
+    element: (
+      <AuthGuard>
+        <FullLayout />
+      </AuthGuard>
+    ),
     children: [
       { index: true, element: <Navigate to="/admin/projects" /> },
       { path: "projects", element: <ProjectListComponent /> },
@@ -95,6 +100,11 @@ const router = createBrowserRouter([
     path: "*",
     element: <Navigate to="/login" />,
   },
-]);
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+});
 
 export default router;

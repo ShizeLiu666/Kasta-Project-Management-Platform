@@ -7,7 +7,7 @@ import "./LoginPage.css";
 import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { setToken, saveUsername, saveUserDetails } from '../auth';
+import { setToken, saveUsername, saveUserDetails } from '../auth/auth';
 import axiosInstance from '../../config'; 
 import CustomAlert from '../CustomComponents/CustomAlert';
 
@@ -201,6 +201,8 @@ const LoginPage = () => {
   return (
     <>
       <section className="h-100 gradient-form">
+        {/* 移除浮动圆点元素 */}
+        
         <div className="container py-5 h-100">
           <div className="row d-flex justify-content-center align-items-center h-100">
             <div className="col-xl-10">

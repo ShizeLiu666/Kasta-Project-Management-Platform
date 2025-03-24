@@ -14,7 +14,7 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axiosInstance from '../../config';
-import { getToken, saveUserDetails } from '../auth';
+import { getToken, saveUserDetails } from '../auth/auth';
 import CustomButton from '../CustomComponents/CustomButton';
 import DeleteAccountModal from './DeleteAccountModal';
 

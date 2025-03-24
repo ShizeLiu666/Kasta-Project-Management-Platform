@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import axiosInstance from '../../config';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 import CustomModal from '../CustomComponents/CustomModal';
 
 const CreateAuthCodeModal = ({ isOpen, toggle, onCreateAuthCodes }) => {

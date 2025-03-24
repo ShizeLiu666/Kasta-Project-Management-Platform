@@ -7,7 +7,7 @@ import RoomConfigList from "../RoomConfigurations/RoomConfigList";
 import CreateProjectModal from "./CreateProjectModal";
 import DeleteProjectModal from "./DeleteProjectModal";
 import EditProjectModal from './EditProjectModal';
-import { getToken } from '../../auth';
+import { getToken } from '../../auth/auth';
 import UploadBackgroundModal from "./UploadBackgroundModal";
 import CustomAlert from '../../CustomComponents/CustomAlert';
 import InvitationModal from '../../UserInvitations/InvitationModal';

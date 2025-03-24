@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Row, Col, Button } from 'reactstrap';
 import ComponentCard from '../CustomComponents/ComponentCard';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 import axiosInstance from '../../config';
 import CreateAuthCodeModal from './CreateAuthCodeModal';
 import EditAuthCodeModal from './EditAuthCodeModal';

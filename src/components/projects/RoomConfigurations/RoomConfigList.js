@@ -11,7 +11,7 @@ import DeleteRoomConfigModal from "./DeleteRoomConfigModal";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import Steps from "./form-steps/Steps";
 import { renderConfigTables } from './ConfigTables';
-import { getToken } from '../../auth';
+import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config';
 import CustomAlert from '../../CustomComponents/CustomAlert';
 import ComponentCard from '../../CustomComponents/ComponentCard';

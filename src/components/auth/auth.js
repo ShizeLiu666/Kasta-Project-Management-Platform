@@ -1,7 +1,7 @@
 import React from 'react';
-import axiosInstance from '../config';
+import axiosInstance from '../../config';
 import Alert from '@mui/material/Alert';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 export const setToken = (token, rememberMe) => {
     if (rememberMe) {
@@ -61,7 +61,8 @@ const showAlert = (severity, message) => {
   const alertContainer = document.createElement('div');
   document.body.appendChild(alertContainer);
 
-  ReactDOM.render(
+  const root = createRoot(alertContainer);
+  root.render(
     <Alert 
       severity={severity}
       style={{
@@ -73,33 +74,80 @@ const showAlert = (severity, message) => {
       }}
     >
       {message}
-    </Alert>,
-    alertContainer
+    </Alert>
   );
 
   setTimeout(() => {
-    ReactDOM.unmountComponentAtNode(alertContainer);
+    root.unmount();
     document.body.removeChild(alertContainer);
   }, 3000);
 };
+
+// 新增：集中处理未认证的情况
+export const handleUnauthenticated = (message = "Your session has expired. Please log in again.") => {
+  // 清除认证相关数据
+  removeToken();
+  removeUsername();
+  localStorage.removeItem('userDetails');
+  
+  // 显示警告
+  showAlert('warning', message);
+  
+  // 重定向到登录页面
+  setTimeout(() => {
+    window.location.href = '/login';
+  }, 3000);
+};
+
+// 请求拦截器 - 检查token是否存在
+axiosInstance.interceptors.request.use(
+  (config) => {
+    console.log('Request URL in interceptor:', config.url);
+    
+    // 登录和注册等不需要token的路径
+    if (config.url && (
+      config.url.includes('/login') || 
+      config.url.includes('/register') || 
+      config.url.includes('/forgot-password') ||
+      config.url.includes('/reset-password')
+    )) {
+      console.log('Skipping token check for authentication route');
+      return config;
+    }
+    
+    // 已经有Authorization头的请求不需要再添加
+    if (config.headers.Authorization) {
+      console.log('Request already has Authorization header');
+      return config;
+    }
+    
+    // 获取token并检查
+    const token = getToken();
+    if (!token) {
+      // 只有在非登录/注册页面才显示警告
+      if (!window.location.href.includes('/login')) {
+        console.log('No token found and not on login page, redirecting');
+        handleUnauthenticated("No token found, please log in again.");
+      } else {
+        console.log('No token found but on login page, continuing without warning');
+      }
+      return Promise.reject(new Error('No authentication token found'));
+    }
+    
+    // 添加token到请求头
+    config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // 添加拦截器来处理 token 过期
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token 过期
-      removeToken();
-      removeUsername();
-      localStorage.removeItem('userDetails');
-      
-      // 显示警告
-      showAlert('warning', 'Your session has expired. Please log in again.');
-      
-      // 重定向到登录页面
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 3000);
+      // Token 过期，使用集中处理函数
+      handleUnauthenticated();
     }
     return Promise.reject(error);
   }

@@ -5,7 +5,7 @@ import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
 import { CircularProgress } from "@mui/material";
 import CustomSearchBar from '../../../CustomComponents/CustomSearchBar';
-import { getToken } from '../../../auth';
+import { getToken } from '../../../auth/auth';
 import axiosInstance from '../../../../config'; 
 import CustomButton from '../../../CustomComponents/CustomButton';
 import { fetchAuthCodes, getCurrentUserInfo } from './authCodeUtils';
