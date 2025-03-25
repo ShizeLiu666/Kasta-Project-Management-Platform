@@ -23,6 +23,20 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
   const [canRequestAgain, setCanRequestAgain] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  // 组件挂载时防止浏览器自动填充
+  useEffect(() => {
+    // 重置所有表单字段
+    setEmail("");
+    setnewPassword("");
+    setCode("");
+    
+    // 防止浏览器自动填充
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      input.setAttribute('autocomplete', 'new-password');
+    });
+  }, []);
+
   // Email validation
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -191,10 +205,10 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
               <Input
                 type="email"
                 id="email"
-                placeholder=""
+                // placeholder="Enter your email address"
                 value={email}
                 onChange={handleEmailChange}
-                autoComplete="off"
+                autoComplete="nope"
               />
               {emailError && (
                 <p className="error-message" style={{ marginBottom: "5px" }}>
@@ -236,10 +250,10 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
           <Input
             type="password"
             id="password"
-            placeholder=""
+            // placeholder="Enter your new password"
             value={newPassword}
             onChange={handlePasswordChange}
-            autoComplete="off"
+            autoComplete="new-password"
           />
           {passwordError && <p className="error-message">{passwordError}</p>}
         </FormGroup>
@@ -248,11 +262,13 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
           <Label for="code">Email Validation</Label>
           <Input
             type="text"
+            id="code"
             maxLength="6"
             value={code}
             onChange={handleCodeChange}
-            placeholder="Enter 6-digit code"
+            placeholder="Enter 6-digit verification code"
             className="text-left"
+            autoComplete="nope"
           />
         </FormGroup>
 

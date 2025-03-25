@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, FormGroup, Input, Button, Label } from "reactstrap";
+import { Form, FormGroup, Input, Label } from "reactstrap";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./LoginPage.css";
 import kastaLogo from "../../assets/images/logos/kasta_logo.png";
 import CreateAccountModal from "./CreateAccountModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
-import { setToken, saveUsername, saveUserDetails } from '../auth/auth';
+import { setToken, saveUsername, saveUserDetails } from '../../components/auth/auth';
 import axiosInstance from '../../config'; 
 import CustomAlert from '../CustomComponents/CustomAlert';
+import CustomButton from '../CustomComponents/CustomButton';
 
 const DEFAULT_ALERT_DURATION = 3000;
 
@@ -201,7 +202,8 @@ const LoginPage = () => {
   return (
     <>
       <section className="h-100 gradient-form">
-        {/* 移除浮动圆点元素 */}
+        {/* 添加大星星层 */}
+        <div className="star-layer"></div>
         
         <div className="container py-5 h-100">
           <div className="row d-flex justify-content-center align-items-center h-100">
@@ -324,20 +326,17 @@ const LoginPage = () => {
                             </FormGroup>
 
                             <div className="text-center pt-1 mb-1 pb-0 move-down">
-                              <Button
-                                className="btn-block fa-lg mb-2 login-button"
-                                style={{
-                                  backgroundColor: "#fbcd0b",
-                                  borderColor: "#fbcd0b",
-                                  fontWeight: "bold",
-                                  opacity: isLoading ? 0.7 : 1,
-                                }}
-                                type="submit"
+                              <CustomButton
                                 onClick={handleLogin}
                                 disabled={isLoading}
+                                style={{
+                                  width: '100%',
+                                  fontWeight: "bold",
+                                  marginBottom: '8px',
+                                }}
                               >
                                 {isLoading ? "Logging in..." : "Log in"}
-                              </Button>
+                              </CustomButton>
                             </div>
 
                             <div className="d-flex justify-content-center align-items-center mb-1">

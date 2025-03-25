@@ -22,3 +22,9 @@
   padding-left: 5px;
   padding-right: 5px;
 } */
+
+/* 必填字段标记样式 */
+.required-field {
+  color: red;
+  margin-left: 2px;
+}

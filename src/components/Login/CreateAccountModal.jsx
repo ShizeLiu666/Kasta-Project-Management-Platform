@@ -36,6 +36,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   const [countdown, setCountdown] = useState(60);
   const [canRequestAgain, setCanRequestAgain] = useState(true);
   const [userRole, setUserRole] = useState(null);
+  const [openRoleDropdown, setOpenRoleDropdown] = useState(false);
 
   const userRoleOptions = [
     { value: "project", label: "Project", icon: <EngineeringIcon fontSize = "medium"/> },
@@ -43,12 +44,18 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
   ];
 
   useEffect(() => {
-    // setUsername(""); // 注释掉 Username 初始化
+    // 组件挂载时重置所有表单字段
     setCountryCode(null);
     setEmail("");
     setPassword("");
     setConfirmPassword("");
     setNickname("");
+    
+    // 添加防止浏览器自动填充的钩子
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      input.setAttribute('autocomplete', 'new-password');
+    });
   }, []);
 
   // 倒计时逻辑
@@ -280,10 +287,10 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
           <Input
             type="email"
             id="email"
-            placeholder=""
+            // placeholder="Enter your email address"
             value={email}
             onChange={handleEmailChange}
-            autoComplete="off"
+            autoComplete="nope"
           />
           {emailError && <p className="error-message">{emailError}</p>}
         </FormGroup>
@@ -298,7 +305,7 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
                 placeholder="(Optional)"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-                autoComplete="off"
+                autoComplete="nope"
               />
             </Col>
             <Col md={6}>
@@ -315,6 +322,10 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
                 )}
                 value={userRole}
                 onChange={(event, newValue) => setUserRole(newValue)}
+                open={openRoleDropdown}
+                onOpen={() => setOpenRoleDropdown(true)}
+                onClose={() => setOpenRoleDropdown(false)}
+                disableClearable={true}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -323,6 +334,10 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
                     fullWidth
                     className="custom-form-control"
                     InputLabelProps={{ shrink: true }}
+                    inputProps={{
+                      ...params.inputProps,
+                      autoComplete: "nope",
+                    }}
                   />
                 )}
                 isOptionEqualToValue={(option, value) => option.value === value.value}
@@ -332,19 +347,21 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
           </Row>
         </FormGroup>
 
-        <FormGroup className="mb-3">
-          <CountryCodeSelect value={countryCode} onChange={setCountryCode} />
-        </FormGroup>
+        <CountryCodeSelect 
+          value={countryCode} 
+          onChange={setCountryCode} 
+          requiredField={false}
+        />
 
         <FormGroup className="mb-3">
           <Label for="password">Password</Label>
           <Input
             type="password"
             id="password"
-            placeholder=""
+            // placeholder="Enter your password"
             value={password}
             onChange={handlePasswordChange}
-            autoComplete="off"
+            autoComplete="new-password"
           />
           {passwordError && <p className="error-message">{passwordError}</p>}
         </FormGroup>
@@ -354,10 +371,10 @@ const CreateAccountModal = ({ handleBackToLogin }) => {
           <Input
             type="password"
             id="confirmPassword"
-            placeholder=""
+            // placeholder="Confirm your password"
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
-            autoComplete="off"
+            autoComplete="new-password"
           />
           {confirmPasswordError && (
             <p style={{ color: "red" }}>{confirmPasswordError}</p>
