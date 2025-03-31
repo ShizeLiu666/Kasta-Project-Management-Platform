@@ -128,7 +128,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
       verificationCode: code,
     };
   
-    console.log("Reset Password Data to be submitted:", userData);
+    // console.log("Reset Password Data to be submitted:", userData);
   
     setLoading(true);
   
@@ -144,7 +144,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
         showAlertWithTimeout(response.data.errorMsg || "Password reset failed.", "error");
       }
     } catch (error) {
-      console.error("Error during password reset:", error);
+      // console.error("Error during password reset:", error);
       showAlertWithTimeout("An error occurred during password reset. Please try again.", "error");
     } finally {
       setLoading(false);
@@ -194,7 +194,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
                 placeholder=""
                 value={email}
                 onChange={handleEmailChange}
-                autoComplete="off"
+                autoComplete="new-password"
               />
               {emailError && (
                 <p className="error-message" style={{ marginBottom: "5px" }}>
@@ -239,7 +239,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
             placeholder=""
             value={newPassword}
             onChange={handlePasswordChange}
-            autoComplete="off"
+            autoComplete="new-password"
           />
           {passwordError && <p className="error-message">{passwordError}</p>}
         </FormGroup>
@@ -253,6 +253,7 @@ const ForgotPasswordModal = ({ handleBackToLogin }) => {
             onChange={handleCodeChange}
             placeholder="Enter 6-digit code"
             className="text-left"
+            autoComplete="off"
           />
         </FormGroup>
 

@@ -102,22 +102,33 @@ export const handleUnauthenticated = (message = "Your session has expired. Pleas
 // 请求拦截器 - 检查token是否存在
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log('Request URL in interceptor:', config.url);
-    
     // 登录和注册等不需要token的路径
-    if (config.url && (
-      config.url.includes('/login') || 
-      config.url.includes('/register') || 
-      config.url.includes('/forgot-password') ||
-      config.url.includes('/reset-password')
-    )) {
-      console.log('Skipping token check for authentication route');
+    const authRoutes = [
+      '/login',
+      '/register',
+      '/forgot-password',
+      '/reset-password',
+      '/send-verification-code',
+      '/users/modify/pwd'
+    ];
+    
+    // 检查是否是认证相关的路由
+    const isAuthRoute = authRoutes.some(route => {
+      // 移除 baseURL 前缀（如果有）后再检查
+      const url = config.url.replace('/api', '');
+      return url.includes(route);
+    });
+    
+    if (isAuthRoute) {
+      // 只在开发环境下显示认证路由日志
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Auth] Skipping token check for: ${config.url}`);
+      }
       return config;
     }
     
     // 已经有Authorization头的请求不需要再添加
     if (config.headers.Authorization) {
-      console.log('Request already has Authorization header');
       return config;
     }
     
@@ -126,10 +137,8 @@ axiosInstance.interceptors.request.use(
     if (!token) {
       // 只有在非登录/注册页面才显示警告
       if (!window.location.href.includes('/login')) {
-        console.log('No token found and not on login page, redirecting');
+        console.warn('[Auth] No token found, redirecting to login');
         handleUnauthenticated("No token found, please log in again.");
-      } else {
-        console.log('No token found but on login page, continuing without warning');
       }
       return Promise.reject(new Error('No authentication token found'));
     }
@@ -146,7 +155,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token 过期，使用集中处理函数
+      console.warn('[Auth] Token expired, redirecting to login');
       handleUnauthenticated();
     }
     return Promise.reject(error);
