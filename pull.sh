@@ -4,6 +4,9 @@
 # 下拉最新版本
 git pull origin main
 
+# 安装依赖
+npm install --force
+
 # 生成静态文件
 npm run build
 
