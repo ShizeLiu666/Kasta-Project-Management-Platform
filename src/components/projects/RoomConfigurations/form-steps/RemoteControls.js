@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef } from "react";
+import React, { useState, useEffect, useImperativeHandle, forwardRef, useRef, useCallback } from "react";
 import { Alert, AlertTitle } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -43,10 +43,11 @@ const RemoteControls = forwardRef(({
   const [remoteControlData, setRemoteControlData] = useState({});
   const [parameterData, setParameterData] = useState(null);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(2);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const hasValidated = useRef(false);
   const [remoteControlSuccess, setRemoteControlSuccess] = useState(false);
   const [parameterSuccess, setParameterSuccess] = useState(false);
+  const [unconfiguredDevices, setUnconfiguredDevices] = useState([]);
 
   useEffect(() => {
     if (!splitData || !splitData.remoteControls || !deviceNameToType || hasValidated.current) {
@@ -110,10 +111,26 @@ const RemoteControls = forwardRef(({
     hasValidated.current = false;
   };
 
-  useImperativeHandle(ref, () => ({
-    isValidated: () => success,
-    resetValidation
-  }));
+  // 将 getMaxKeyCount 函数用 useCallback 包装
+  const getMaxKeyCount = useCallback((deviceName, deviceNameToType) => {
+    const deviceType = deviceNameToType[deviceName];
+    if (!deviceType) return null;
+
+    // 处理 Input Module 类型
+    if (deviceType === "5 Input Module") {
+      return 5;
+    }
+
+    // 处理 Remote Control 类型
+    if (deviceType.includes("Remote Control")) {
+      const modelMatch = deviceType.match(/\((.*?)\)/);
+      if (modelMatch && modelMatch[1]) {
+        const model = modelMatch[1];
+        return parseInt(model.match(/\d+/)[0]);
+      }
+    }
+    return null;
+  }, []); // 由于这个函数不依赖任何外部变量，依赖数组为空
 
   // 修改 determineTargetType 函数
   const determineTargetType = (content, registeredDeviceNames, registeredGroupNames, registeredSceneNames) => {
@@ -136,8 +153,48 @@ const RemoteControls = forwardRef(({
     DEVICE: '#fbcd0b',   // 设备 - 黄色
     GROUP: '#009688',    // 组 - 绿色
     SCENE: '#9C27B0',    // 场景 - 紫色
-    UNKNOWN: '#95A5A6'   // 未知 - 灰色
+    UNKNOWN: '#95A5A6',  // 未知 - 灰色
+    UNCONFIGURED: '#E0E0E0'  // 未配置 - 浅灰色
   };
+
+  // 将 checkUnconfiguredDevices 移到 useEffect 外部
+  const checkUnconfiguredDevices = React.useCallback((remoteControlData, deviceNameToType) => {
+    const unconfigured = [];
+    
+    Object.entries(remoteControlData).forEach(([deviceName, controls]) => {
+      const maxKeyCount = getMaxKeyCount(deviceName, deviceNameToType);
+      const configuredKeys = new Set(controls.map(control => parseInt(control.split(':')[0])));
+      
+      if (configuredKeys.size < maxKeyCount) {
+        const deviceType = deviceNameToType[deviceName];
+        unconfigured.push({
+          name: deviceName,
+          type: deviceType,
+          configured: configuredKeys.size,
+          total: maxKeyCount
+        });
+      }
+    });
+    
+    return unconfigured;
+  }, [getMaxKeyCount]);
+
+  // 修改 useEffect，添加 checkUnconfiguredDevices 到依赖数组
+  useEffect(() => {
+    if (remoteControlSuccess && remoteControlData) {
+      const unconfigured = checkUnconfiguredDevices(remoteControlData, deviceNameToType);
+      setUnconfiguredDevices(unconfigured);
+    }
+  }, [remoteControlData, deviceNameToType, remoteControlSuccess, checkUnconfiguredDevices]);
+
+  // 修改 isValidated 函数
+  useImperativeHandle(ref, () => ({
+    isValidated: () => {
+      if (!success) return false;
+      return true;
+    },
+    resetValidation
+  }));
 
   return (
     <div className="step step5 mt-5">
@@ -178,8 +235,39 @@ const RemoteControls = forwardRef(({
 
           {remoteControlSuccess && (
             <>
-              <Alert severity="success" style={{ marginTop: "10px" }}>
-                <AlertTitle>The following remote controls have been identified:</AlertTitle>
+              <Alert 
+                severity={unconfiguredDevices.length > 0 ? "warning" : "success"} 
+                style={{ marginTop: "10px" }}
+              >
+                <AlertTitle>
+                  {unconfiguredDevices.length > 0 
+                    ? "Remote Controls Configuration Status" 
+                    : "The following remote controls have been identified:"}
+                </AlertTitle>
+                {unconfiguredDevices.length > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <div style={{ marginBottom: '8px' }}>
+                      The following remote controls have unconfigured buttons:
+                    </div>
+                    {unconfiguredDevices.map((device, index) => (
+                      <div 
+                        key={index} 
+                        style={{ 
+                          marginBottom: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        <span>•</span>
+                        <span style={{ fontWeight: 'bold' }}>{device.name}</span>
+                        <span style={{ color: '#666' }}>
+                          ({device.configured} of {device.total} buttons configured)
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Alert>
 
               <TableContainer component={Paper} style={{ marginTop: "20px" }}>
@@ -195,8 +283,15 @@ const RemoteControls = forwardRef(({
                   <TableBody>
                     {Object.entries(remoteControlData)
                       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map(([remoteControlName, controls]) => (
-                        controls.map((control, index) => {
+                      .map(([remoteControlName, controls]) => {
+                        const maxKeyCount = getMaxKeyCount(remoteControlName, deviceNameToType);
+                        const configuredKeys = new Set(controls.map(control => parseInt(control.split(':')[0])));
+                        
+                        // 创建所有按键的行
+                        const allRows = [];
+                        
+                        // 添加已配置的按键
+                        controls.forEach((control, index) => {
                           const [button, content] = control.split(':').map(part => part.trim());
                           const targetType = determineTargetType(
                             content, 
@@ -205,11 +300,20 @@ const RemoteControls = forwardRef(({
                             registeredSceneNames
                           );
                           
-                          return (
+                          allRows.push(
                             <TableRow key={`${remoteControlName}-${index}`}>
                               {index === 0 && (
-                                <TableCell rowSpan={controls.length}>
-                                  {remoteControlName}
+                                <TableCell rowSpan={maxKeyCount}>
+                                  <div>
+                                    {remoteControlName}
+                                    <div style={{ 
+                                      fontSize: '0.8rem', 
+                                      color: '#666',
+                                      marginTop: '4px' 
+                                    }}>
+                                      Configured: {configuredKeys.size}/{maxKeyCount} buttons
+                                    </div>
+                                  </div>
                                 </TableCell>
                               )}
                               <TableCell>{button}</TableCell>
@@ -228,8 +332,36 @@ const RemoteControls = forwardRef(({
                               <TableCell>{content}</TableCell>
                             </TableRow>
                           );
-                        })
-                      ))}
+                        });
+
+                        // 添加未配置的按键
+                        for (let i = 1; i <= maxKeyCount; i++) {
+                          if (!configuredKeys.has(i)) {
+                            allRows.push(
+                              <TableRow key={`${remoteControlName}-unconfigured-${i}`}>
+                                <TableCell>{i}</TableCell>
+                                <TableCell>
+                                  <span style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    backgroundColor: TYPE_COLORS.UNCONFIGURED,
+                                    color: '#666',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.8rem'
+                                  }}>
+                                    UNCONFIGURED
+                                  </span>
+                                </TableCell>
+                                <TableCell style={{ color: '#999', fontStyle: 'italic' }}>
+                                  Not configured
+                                </TableCell>
+                              </TableRow>
+                            );
+                          }
+                        }
+
+                        return allRows;
+                      })}
                   </TableBody>
                 </Table>
 
