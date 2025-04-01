@@ -1,3 +1,129 @@
+.dashboard-container {
+    min-height: calc(100vh - 100px); /* 减去头部导航的高度 */
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+}
+
+.dashboard-row {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.carousel-container {
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.carousel-container .MuiBox-root {
+    height: 100%;
+}
+
+.carousel-container .css-ohwg9z {
+    height: 100%;
+}
+
+.carousel-container .css-1m9128y {
+    height: 100%;
+}
+
+.carousel-container .CarouselItem {
+    height: 100% !important;
+    width: 100%;
+}
+
+.info-section {
+    flex: 1;
+    min-height: 360px;
+}
+
+.info-card {
+    height: 100%;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.dashboard-component-card {
+    height: 100%;
+}
+
 .dashboard-component-card .component-card-body {
     padding: 8px !important;
+    height: 100%;
+}
+
+/* 确保卡片内容区域也是 flex 布局 */
+.dashboard-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .dashboard-container {
+        min-height: calc(100vh - 80px);
+        padding: 12px;
+    }
+    
+    .dashboard-content {
+        gap: 12px;
+    }
+
+    .carousel-section {
+        height: 280px;
+        margin-bottom: 12px;
+    }
+    
+    .info-section {
+        min-height: auto;
+    }
+
+    /* 调整轮播图导航按钮在移动端的大小和位置 */
+    .carousel-container .MuiIconButton-root {
+        padding: 8px !important;
+        margin: 0 4px !important;
+    }
+
+    /* 调整轮播图文字在移动端的大小 */
+    .carousel-container h3 {
+        font-size: 1.2rem !important;
+    }
+
+    .carousel-container p {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* 小屏幕手机的特殊处理 */
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: 8px;
+    }
+
+    .carousel-section {
+        height: 220px;
+        margin-bottom: 8px;
+    }
+
+    .dashboard-content {
+        gap: 8px;
+    }
+
+    /* 进一步调整轮播图文字大小 */
+    .carousel-container h3 {
+        font-size: 1rem !important;
+    }
+
+    .carousel-container p {
+        font-size: 0.8rem !important;
+    }
 } 

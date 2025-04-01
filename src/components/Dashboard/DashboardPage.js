@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col } from 'reactstrap';
-import ComponentCard from '../CustomComponents/ComponentCard';
+// import ComponentCard from '../CustomComponents/ComponentCard';
 import Carousel from 'react-material-ui-carousel';
 import { Paper } from '@mui/material';
 import kastaImage from '../../assets/images/CarouseItems/kasta.jpg';
@@ -44,121 +44,107 @@ const DashboardPage = () => {
     };
 
     return (
-        <div>
-            <Row>
-                <Col md="12">
-                    <div className="dashboard-component-card">
-                        <ComponentCard title="" showTitle={false}>
-                            <Row className="mb-4">
-                                <Col md="8">
-                                    <div style={{
-                                        height: '316px',
-                                        overflow: 'auto',
-                                        borderRadius: '0.1rem',
-                                        boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
-                                    }}>
-                                        <Carousel
-                                            animation="fade"
-                                            interval={20000}
-                                            indicators={true}
-                                            navButtonsAlwaysVisible={true}
-                                            navButtonsProps={{
-                                                style: {
-                                                    backgroundColor: '#000000',
-                                                    borderRadius: 0,
-                                                    padding: '10px',
-                                                    top: '50%',
-                                                    transform: 'translateY(-50%)',
-                                                }
-                                            }}
-                                            indicatorContainerProps={{
-                                                style: {
-                                                    position: 'absolute',
-                                                    bottom: '10px',
-                                                    zIndex: 1
-                                                }
-                                            }}
-                                        >
-                                            {carouselItems.map((item, index) => (
-                                                <Paper
-                                                    key={index}
-                                                    elevation={0}
-                                                    onClick={() => handleCarouselClick(item.link)}
-                                                    sx={{
-                                                        height: '316px',
-                                                        backgroundColor: item.bgColor,
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'center',
-                                                        alignItems: 'center',
-                                                        color: 'white',
-                                                        padding: '20px',
-                                                        textAlign: 'center',
-                                                        borderRadius: '4px',
-                                                        backgroundImage: `url(${item.image})`,
-                                                        backgroundSize: 'cover',
-                                                        backgroundPosition: 'center',
-                                                        backgroundRepeat: 'no-repeat',
-                                                        cursor: 'pointer',
-                                                        position: 'relative',
-                                                        '&::after': {
-                                                            content: '""',
-                                                            position: 'absolute',
-                                                            bottom: 0,
-                                                            left: 0,
-                                                            right: 0,
-                                                            height: '40%',
-                                                            background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
-                                                            borderRadius: '0 0 4px 4px',
-                                                        }
-                                                    }}
-                                                >
-                                                    <div style={{
-                                                        position: 'absolute',
-                                                        bottom: '25px',
-                                                        zIndex: 1,
-                                                        color: 'white',
-                                                        textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-                                                    }}>
-                                                        <h3 style={{ margin: 0 }}>{item.name}</h3>
-                                                        <p style={{ margin: '8px 0' }}>{item.description}</p>
-                                                    </div>
-                                                </Paper>
-                                            ))}
-                                        </Carousel>
-                                    </div>
-                                </Col>
-                                <Col md="4">
-                                    <UserInfo userDetails={userDetails} />
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col md="5">
-                                    <div style={{
-                                        height: '360px',
-                                        backgroundColor: '#fff',
-                                        borderRadius: '12px',
-                                        boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
-                                    }}>
-                                        <NetworkOverview />
-                                    </div>
-                                </Col>
-                                <Col md="7">
-                                    <div style={{
-                                        height: '360px',
-                                        overflow: 'hidden',
-                                        backgroundColor: '#fff',
-                                        borderRadius: '0.1rem',
-                                        boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
-                                    }}>
-                                        <ProductOverview />
-                                    </div>
-                                </Col>
-                            </Row>
-                        </ComponentCard>
-                    </div>
-                </Col>
-            </Row>
+        <div className="dashboard-container">
+            <div className="dashboard-content">
+                <Row className="carousel-section g-2 g-md-3">
+                    <Col lg="8" md="7" sm="12">
+                        <div className="carousel-container">
+                            <Carousel
+                                animation="fade"
+                                interval={20000}
+                                indicators={true}
+                                navButtonsAlwaysVisible={true}
+                                height="100%"
+                                navButtonsProps={{
+                                    style: {
+                                        backgroundColor: '#000000',
+                                        borderRadius: 0,
+                                        padding: '10px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                    }
+                                }}
+                                indicatorContainerProps={{
+                                    style: {
+                                        position: 'absolute',
+                                        bottom: '10px',
+                                        zIndex: 1
+                                    }
+                                }}
+                                sx={{ height: '100%' }}
+                            >
+                                {carouselItems.map((item, index) => (
+                                    <Paper
+                                        key={index}
+                                        elevation={0}
+                                        onClick={() => handleCarouselClick(item.link)}
+                                        className="CarouselItem"
+                                        sx={{
+                                            height: '100% !important',
+                                            backgroundColor: item.bgColor,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: 'white',
+                                            padding: '20px',
+                                            textAlign: 'center',
+                                            borderRadius: '8px',
+                                            backgroundImage: `url(${item.image})`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                            backgroundRepeat: 'no-repeat',
+                                            cursor: 'pointer',
+                                            position: 'relative',
+                                            '&::after': {
+                                                content: '""',
+                                                position: 'absolute',
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                height: '40%',
+                                                background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                                                borderRadius: '0 0 8px 8px',
+                                            }
+                                        }}
+                                    >
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '25px',
+                                            zIndex: 1,
+                                            width: '100%',
+                                            color: 'white',
+                                            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                                            padding: '0 20px'
+                                        }}>
+                                            <h3 style={{ margin: 0 }}>{item.name}</h3>
+                                            <p style={{ margin: '8px 0' }}>{item.description}</p>
+                                        </div>
+                                    </Paper>
+                                ))}
+                            </Carousel>
+                        </div>
+                    </Col>
+                    <Col lg="4" md="5" sm="12">
+                        <div className="info-card">
+                            <UserInfo userDetails={userDetails} />
+                        </div>
+                    </Col>
+                </Row>
+
+                <Row className="info-section g-2 g-md-3">
+                    <Col lg="5" md="12">
+                        <div className="info-card">
+                            <NetworkOverview />
+                        </div>
+                    </Col>
+                    <Col lg="7" md="12">
+                        <div className="info-card">
+                            <ProductOverview />
+                        </div>
+                    </Col>
+                </Row>
+            </div>
         </div>
     );
 };
