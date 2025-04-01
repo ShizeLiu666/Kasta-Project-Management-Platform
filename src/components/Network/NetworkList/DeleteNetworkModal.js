@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getToken } from '../../auth';
+import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config';
 import CustomModal from '../../CustomComponents/CustomModal';
 

@@ -4,7 +4,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import defaultAvatar from '../../assets/images/users/normal_user.jpg';
 import { countryOptions } from '../Login/CountryCodeSelect';
 import axiosInstance from '../../config';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 import './UserInfo.css';
 
 const UserInfo = ({ userDetails }) => {

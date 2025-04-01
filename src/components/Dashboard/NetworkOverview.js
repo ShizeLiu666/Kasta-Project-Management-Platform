@@ -3,7 +3,7 @@ import { Box, Typography, Paper, Grid } from '@mui/material';
 import GroupIconMUI from '@mui/icons-material/Group';
 import { motion } from 'framer-motion';
 import axiosInstance from '../../config';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 // import NetworkIcon from '../../assets/icons/NetworkOverview/Network.png';
 import DeviceIcon from '../../assets/icons/NetworkOverview/Device.png';
 import GroupIcon from '../../assets/icons/NetworkOverview/Group.png';

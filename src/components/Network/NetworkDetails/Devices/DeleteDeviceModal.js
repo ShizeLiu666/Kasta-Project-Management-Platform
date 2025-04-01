@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, FormGroup, Label, Input, Alert } from 'reactstrap';
 import CustomModal from '../../../CustomComponents/CustomModal';
 import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth';
+import { getToken } from '../../../auth/auth';
 import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
 
 const DeleteDeviceModal = ({ isOpen, toggle, devices, networkId, onSuccess }) => {

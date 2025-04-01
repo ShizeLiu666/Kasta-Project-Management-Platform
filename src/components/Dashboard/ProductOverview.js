@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import CustomSearchBar from '../CustomComponents/CustomSearchBar';
 import axiosInstance from '../../config';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 import { AllDeviceTypes } from '../projects/RoomConfigurations/ExcelProcessor/ExcelProcessor';
 
 const ProductOverview = () => {

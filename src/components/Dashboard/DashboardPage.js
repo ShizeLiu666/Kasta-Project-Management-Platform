@@ -5,7 +5,7 @@ import Carousel from 'react-material-ui-carousel';
 import { Paper } from '@mui/material';
 import kastaImage from '../../assets/images/CarouseItems/kasta.jpg';
 import kastaSolutionImage from '../../assets/images/CarouseItems/kasta_solution.jpg';
-import { getUserDetails } from '../auth';
+import { getUserDetails } from '../../components/auth/auth';
 import UserInfo from './UserInfo';
 import './UserInfo.css';
 import ProductOverview from './ProductOverview';

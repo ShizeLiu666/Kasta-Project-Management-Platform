@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import CustomModal from '../../CustomComponents/CustomModal';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import axiosInstance from '../../../config';
-import { getToken } from '../../auth';
+import { getToken } from '../../auth/auth';
 
 const CreateNetworkModal = ({ isOpen, toggle, onSuccess, currentNetworkId }) => {
   const [networkData, setNetworkData] = useState({

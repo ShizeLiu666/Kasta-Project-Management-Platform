@@ -10,7 +10,7 @@ import ForgotPasswordModal from "./ForgotPasswordModal";
 import { setToken, saveUsername, saveUserDetails } from '../auth/auth';
 import axiosInstance from '../../config'; 
 import CustomAlert from '../CustomComponents/CustomAlert';
-import { motion, AnimatePresence } from 'framer-motion';
+// import { motion, AnimatePresence } from 'framer-motion';
 
 const DEFAULT_ALERT_DURATION = 3000;
 
@@ -30,7 +30,6 @@ const LoginPage = () => {
   const usernameInputRef = useRef(null);
   const passwordInputRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const navigate = useNavigate();
 
@@ -139,7 +138,7 @@ const LoginPage = () => {
       const loginResult = await attemptLogin(username, true);
       
       if (loginResult.success) {
-        setLoginSuccess(true); // 触发成功动画
+        // 触发成功动画
       } else {
         showAlert(loginResult.error || "Login failed", "error");
       }

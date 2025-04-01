@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { axiosInstance, getToken } from '../../../components/auth';
+import { axiosInstance, getToken } from '../../auth/auth';
 import React from 'react';
 
 // 抽离通用的获取分页数据的函数

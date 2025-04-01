@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CustomModal from '../../CustomComponents/CustomModal';
 import axiosInstance from '../../../config';
-import { getToken } from '../../auth';
+import { getToken } from '../../auth/auth';
 
 const SetPrimaryNetworkModal = ({ isOpen, toggle, network, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

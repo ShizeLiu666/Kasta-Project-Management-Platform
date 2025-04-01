@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 // import Button from '@mui/material/Button';
 import axiosInstance from '../../../config';
-import { getToken } from '../../auth';
+import { getToken } from '../../auth/auth';
 import ComponentCard from '../../CustomComponents/ComponentCard';
 // import CustomButton from '../../CustomButton';
 import CreateNetworkModal from './CreateNetworkModal';
