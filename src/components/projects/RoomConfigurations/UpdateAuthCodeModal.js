@@ -4,7 +4,7 @@ import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import CustomModal from '../../CustomComponents/CustomModal';
-import { getToken } from '../../auth';
+import { getToken } from '../../auth/auth';
 import axiosInstance from '../../../config';
 import { fetchAuthCodes, getCurrentUserInfo } from '../ProjectDetails/RoomTypeList/authCodeUtils';
 

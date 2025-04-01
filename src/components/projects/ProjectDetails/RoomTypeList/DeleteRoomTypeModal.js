@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth';
+import { getToken } from '../../../auth/auth';
 import CustomModal from '../../../CustomComponents/CustomModal';
 
 const DeleteRoomTypeModal = ({ isOpen, toggle, selectedRoomType, onRoomTypeDeleted }) => {

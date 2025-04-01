@@ -21,7 +21,7 @@ import CustomButton from '../CustomComponents/CustomButton';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import SearchIcon from '@mui/icons-material/Search';
 import axiosInstance from '../../config';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 import RefreshButton from '../CustomComponents/RefreshButton';
 
 // 修改 TruncatedCell 组件

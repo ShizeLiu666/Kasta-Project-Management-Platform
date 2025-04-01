@@ -15,12 +15,14 @@ const axiosInstance = axios.create({
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log('Request:', config.method.toUpperCase(), config.url);
-    console.log('Full URL:', config.baseURL + config.url);
+    // 只在开发环境下显示请求日志
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[API Request] ${config.method.toUpperCase()} ${config.url}`);
+    }
     return config;
   },
   (error) => {
-    console.error('Request Error:', error);
+    console.error('[API Request Error]', error.message);
     return Promise.reject(error);
   }
 );
@@ -28,14 +30,18 @@ axiosInstance.interceptors.request.use(
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log('Response:', response.status, response.config.url);
+    // 只在开发环境下显示响应日志
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[API Response] ${response.status} ${response.config.url}`);
+    }
     return response;
   },
   (error) => {
-    console.error('Response Error:', error);
+    // 只记录错误状态和消息
     if (error.response) {
-      console.error('Error Status:', error.response.status);
-      console.error('Error Data:', error.response.data);
+      console.error(`[API Error] ${error.response.status}: ${error.response.data.errorMsg || error.message}`);
+    } else {
+      console.error('[API Error]', error.message);
     }
     return Promise.reject(error);
   }

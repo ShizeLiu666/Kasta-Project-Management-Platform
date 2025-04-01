@@ -1,7 +1,11 @@
+/* 导入字体 */
+@import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
+
 body, html {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-family: 'Poppins', sans-serif;
 }
 
 #root {
@@ -10,17 +14,104 @@ body, html {
   flex-direction: column;
 }
 
+/* 星星动画 */
+@keyframes animateStar {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-2000px);
+  }
+}
+
+/* 登录页背景 */
 .gradient-form {
   flex: 1;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url("../../assets/images/logos/background.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+}
+
+/* 星星容器 1 - 小星星 */
+.gradient-form::before {
+  content: "";
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  box-shadow: 
+    1044px 901px #fff, 733px 629px #fff, 1898px 1729px #fff, 1032px 784px #fff,
+    709px 629px #fff, 1549px 530px #fff, 285px 1165px #fff, 1825px 891px #fff,
+    1694px 35px #fff, 910px 1159px #fff, 25px 959px #fff, 1046px 895px #fff,
+    242px 1687px #fff, 1856px 1690px #fff, 352px 1141px #fff, 633px 989px #fff,
+    1456px 1573px #fff, 100px 749px #fff, 510px 440px #fff, 532px 542px #fff,
+    1012px 1195px #fff, 630px 1391px #fff, 1581px 838px #fff, 777px 1744px #fff,
+    273px 1263px #fff, 1621px 1182px #fff, 401px 1122px #fff, 560px 44px #fff,
+    1315px 776px #fff, 1261px 1010px #fff, 592px 689px #fff, 1897px 1124px #fff,
+    585px 933px #fff, 1553px 1078px #fff, 980px 1349px #fff, 779px 700px #fff,
+    1862px 1428px #fff, 359px 18px #fff, 1661px 1522px #fff, 1655px 107px #fff,
+    1872px 1595px #fff, 1046px 226px #fff, 1528px 366px #fff, 1577px 124px #fff,
+    1492px 283px #fff, 1752px 1002px #fff, 1485px 1031px #fff, 1617px 22px #fff,
+    1475px 1613px #fff, 1078px 1260px #fff, 127px 1627px #fff, 1488px 1154px #fff,
+    95px 289px #fff, 1099px 1311px #fff, 1955px 1847px #fff, 600px 1547px #fff;
+  animation: animateStar 50s linear infinite;
+  z-index: 1;
+}
+
+/* 星星容器 2 - 中等星星 */
+.gradient-form::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  box-shadow: 
+    409px 513px #fff, 675px 755px #fff, 1073px 632px #fff, 84px 854px #fff,
+    1705px 147px #fff, 1138px 907px #fff, 140px 414px #fff, 1378px 151px #fff,
+    511px 388px #fff, 1574px 1017px #fff, 1027px 798px #fff, 694px 308px #fff,
+    1237px 1284px #fff, 805px 627px #fff, 1842px 1308px #fff, 1478px 511px #fff,
+    809px 663px #fff, 1837px 444px #fff, 121px 305px #fff, 1454px 271px #fff,
+    1797px 1602px #fff, 276px 614px #fff, 1855px 450px #fbcd0b,
+    1720px 1579px #fff, 1620px 1352px #fff, 1655px 857px #fff, 1897px 539px #fff,
+    1505px 1049px #fff, 1528px 12px #fff, 1070px 727px #fff, 1183px 134px #fff,
+    1582px 82px #fff, 595px 1192px #fff, 277px 694px #fff, 1498px 1309px #fff;
+  animation: animateStar 100s linear infinite;
+  z-index: 1;
+}
+
+/* 添加第三层星星 - 大星星 */
+.star-layer {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  box-shadow: 
+    1448px 416px #fbcd0b, 1775px 1392px #fff, 1340px 880px #fff, 198px 1080px #fff,
+    1188px 1380px #fff, 824px 1485px #fff, 1743px 1242px #fff, 723px 1419px #fbcd0b,
+    356px 1642px #fff, 767px 592px #fff, 1752px 464px #fff, 1555px 1195px #fff,
+    1292px 392px #fff, 1706px 1642px #fff, 446px 1469px #fbcd0b, 1293px 1391px #fff,
+    134px 46px #fff, 1058px 567px #fff, 324px 1273px #fff, 707px 502px #fff,
+    1077px 1469px #fff, 1731px 1296px #fff, 1295px 520px #fbcd0b, 1264px 1013px #fbcd0b,
+    182px 1736px #fff, 1706px 780px #fff, 600px 204px #fff, 1745px 1101px #fff;
+  animation: animateStar 150s linear infinite;
+  z-index: 1;
 }
 
 .card {
@@ -32,6 +123,10 @@ body, html {
   max-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 2;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 .card-body {

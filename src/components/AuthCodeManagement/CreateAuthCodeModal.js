@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import axiosInstance from '../../config';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 import CustomModal from '../CustomComponents/CustomModal';
+import CustomButton from '../CustomComponents/CustomButton';
 
 const CreateAuthCodeModal = ({ isOpen, toggle, onCreateAuthCodes }) => {
     const [count, setCount] = useState('1');
@@ -15,10 +16,13 @@ const CreateAuthCodeModal = ({ isOpen, toggle, onCreateAuthCodes }) => {
             setError("");
             setSuccessAlert("");
             setCount('1');
+            setIsSubmitting(false);
         }
     }, [isOpen]);
 
     const handleSubmit = async () => {
+        if (isSubmitting) return; // 防止重复提交
+
         const numCount = parseInt(count, 10);
         if (numCount < 1 || numCount > 10) {
             setError('Please enter a number between 1 and 10.');
@@ -66,10 +70,19 @@ const CreateAuthCodeModal = ({ isOpen, toggle, onCreateAuthCodes }) => {
             toggle={toggle}
             title="Create Authorization Codes"
             onSubmit={handleSubmit}
-            submitText="Create"
+            submitText={isSubmitting ? "Creating..." : "Create"}
             successAlert={successAlert}
             error={error}
             isSubmitting={isSubmitting}
+            submitButton={
+                <CustomButton
+                    type="submit"
+                    disabled={isSubmitting}
+                    onClick={handleSubmit}
+                >
+                    {isSubmitting ? "Creating..." : "Create"}
+                </CustomButton>
+            }
         >
             <Form>
                 <FormGroup>
@@ -85,6 +98,7 @@ const CreateAuthCodeModal = ({ isOpen, toggle, onCreateAuthCodes }) => {
                         min="1"
                         max="10"
                         required
+                        disabled={isSubmitting}
                     />
                 </FormGroup>
             </Form>

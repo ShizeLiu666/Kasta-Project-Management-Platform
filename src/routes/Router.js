@@ -71,6 +71,7 @@ import AuthCodeManagement from "../components/AuthCodeManagement/AuthCodeManagem
 import NetworkComponent from "../components/Network/NetworkList/NetworkComponent.js";
 import DashboardPage from "../components/Dashboard/DashboardPage";
 import OperationLog from "../components/OperationLog/OperationLog";
+import AuthGuard from "../components/auth/AuthGuard";
 
 /*****Routes******/
 const router = createBrowserRouter([
@@ -84,7 +85,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <FullLayout />,
+    element: (
+      <AuthGuard>
+        <FullLayout />
+      </AuthGuard>
+    ),
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" /> },
       { path: "dashboard", element: <DashboardPage /> },
@@ -99,6 +104,11 @@ const router = createBrowserRouter([
     path: "*",
     element: <Navigate to="/login" />,
   },
-]);
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+});
 
 export default router;

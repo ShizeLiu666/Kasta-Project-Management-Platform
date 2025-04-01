@@ -11,7 +11,7 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import axiosInstance from '../../../../config';
-import { getToken } from '../../../auth';
+import { getToken } from '../../../auth/auth';
 import defaultAvatar from '../../../../assets/images/users/normal_user.jpg'; // 请确保有一个默认头像图片
 import ComponentCard from '../../../CustomComponents/ComponentCard';
 import InviteMemberModal from './InviteMemberModal';

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomModal from '../CustomComponents/CustomModal';
 import axiosInstance from '../../config';
-import { getToken } from '../auth';
+import { getToken } from '../auth/auth';
 
 const DeleteAccountModal = ({ isOpen, toggle }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
