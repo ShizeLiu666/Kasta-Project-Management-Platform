@@ -67,11 +67,30 @@ const DashboardPage = () => {
                                 indicatorContainerProps={{
                                     style: {
                                         position: 'absolute',
-                                        bottom: '10px',
-                                        zIndex: 1
+                                        bottom: '16px',
+                                        left: '0',
+                                        right: '0',
+                                        zIndex: 2,
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        background: 'transparent',
                                     }
                                 }}
-                                sx={{ height: '100%' }}
+                                sx={{ 
+                                    height: '100%',
+                                    position: 'relative',
+                                    '& .MuiIconButton-root': {
+                                        padding: '2px',
+                                        margin: '0 4px',
+                                    },
+                                    '& .MuiSvgIcon-root': {
+                                        fontSize: '10px',
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                    },
+                                    '& .Mui-selected .MuiSvgIcon-root': {
+                                        color: '#fff',
+                                    }
+                                }}
                             >
                                 {carouselItems.map((item, index) => (
                                     <Paper

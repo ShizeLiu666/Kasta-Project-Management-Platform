@@ -20,21 +20,36 @@
     box-shadow: 0 2px 12px rgba(0,0,0,0.05);
 }
 
-.carousel-container .MuiBox-root {
-    height: 100%;
-}
-
-.carousel-container .css-ohwg9z {
-    height: 100%;
-}
-
-.carousel-container .css-1m9128y {
+.carousel-container > div {
     height: 100%;
 }
 
 .carousel-container .CarouselItem {
     height: 100% !important;
     width: 100%;
+}
+
+/* 轮播图区域样式 */
+.carousel-section {
+    height: 380px;
+    margin-bottom: 20px;
+}
+
+/* 自定义指示器样式 */
+.carousel-container .css-1m9128y {
+    position: absolute;
+    bottom: 16px !important;
+    top: auto !important;
+    z-index: 2;
+}
+
+.carousel-container .MuiIconButton-root.MuiIconButton-sizeMedium {
+    padding: 2px;
+    margin: 0 4px;
+}
+
+.carousel-container .Mui-selected .MuiSvgIcon-root {
+    color: #fff;
 }
 
 .info-section {
