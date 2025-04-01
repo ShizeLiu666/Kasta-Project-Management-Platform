@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
 import GroupIconMUI from '@mui/icons-material/Group';
-import { motion } from 'framer-motion';
 import axiosInstance from '../../config';
 import { getToken } from '../auth/auth';
 // import NetworkIcon from '../../assets/icons/NetworkOverview/Network.png';
@@ -11,6 +10,7 @@ import SceneIcon from '../../assets/icons/NetworkOverview/Scene.png';
 import RoomIcon from '../../assets/icons/NetworkOverview/Room.png';
 import TimerIcon from '../../assets/icons/NetworkOverview/Timer.png';
 import ScheduleIcon from '../../assets/icons/NetworkOverview/Schedule.png';
+import './NetworkOverview.css'; // 添加 CSS 文件引用
 
 const NetworkOverview = () => {
   const [networkStats, setNetworkStats] = useState(null);
@@ -100,10 +100,7 @@ const NetworkOverview = () => {
   }
 
   const StatCard = ({ icon, title, value, color }) => (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 300 }}
-    >
+    <div className="stat-card-wrapper">
       <Paper
         elevation={0}
         sx={{
@@ -114,7 +111,12 @@ const NetworkOverview = () => {
           border: '1px solid rgba(0, 0, 0, 0.1)',
           display: 'flex',
           alignItems: 'center',
-          gap: 1.5
+          gap: 1.5,
+          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'scale(1.02)',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+          }
         }}
       >
         <Box
@@ -142,7 +144,7 @@ const NetworkOverview = () => {
           </Typography>
         </Box>
       </Paper>
-    </motion.div>
+    </div>
   );
 
   return (
