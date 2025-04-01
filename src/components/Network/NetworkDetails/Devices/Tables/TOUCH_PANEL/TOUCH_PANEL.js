@@ -85,17 +85,6 @@ const parseDeviceType = (deviceType) => {
   return { buttonCount, type, hasBacklight };
 };
 
-// 动态导入图标
-const getPanelIcon = (buttonCount) => {
-  try {
-    return require(`../../../../../../assets/icons/DeviceType/TOUCH_PANEL_${buttonCount}.png`);
-  } catch (error) {
-    console.warn(`Icon not found for ${buttonCount}-button panel, using default`);
-    // 如果找不到对应的图标，可以返回一个默认图标
-    return require('../../../../../../assets/icons/DeviceType/TOUCH_PANEL_1.png');
-  }
-};
-
 const ButtonBindingDialog = ({ open, onClose, bindings, buttonIndex }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -156,10 +145,14 @@ const TOUCH_PANEL = ({ devices }) => {
 
   if (!devices || devices.length === 0) return null;
   
-  const { buttonCount } = parseDeviceType(devices[0].deviceType);
+  // 根据 Orientation 分组设备
+  const horizontalDevices = devices.filter(device => {
+    const isHorizontal = device.specificAttributes?.isHorizontal;
+    return isHorizontal === null || isHorizontal === 0;  // 默认显示为水平
+  });
+  const verticalDevices = devices.filter(device => device.specificAttributes?.isHorizontal === 1);
   
-  // 获取对应按键数量的图标
-  const panelIcon = getPanelIcon(buttonCount);
+  const { buttonCount } = parseDeviceType(devices[0].deviceType);
 
   const handleButtonClick = (bindings, buttonIndex) => {
     setSelectedButton(buttonIndex);
@@ -191,11 +184,6 @@ const TOUCH_PANEL = ({ devices }) => {
 
   const columns = [
     {
-      id: 'orientation',
-      label: 'Orientation',
-      format: (attrs) => attrs?.isHorizontal ? 'Horizontal' : 'Vertical'
-    },
-    {
       id: 'backlight',
       label: 'Backlight',
       format: (attrs) => {
@@ -208,15 +196,37 @@ const TOUCH_PANEL = ({ devices }) => {
     ...buttonColumns
   ];
 
+  // 获取图标路径
+  const getIconPath = (count, orientation) => {
+    try {
+      return require(`../../../../../../assets/icons/DeviceType/TOUCH_PANEL_${count}_${orientation}.png`);
+    } catch (error) {
+      console.warn(`Failed to load icon: TOUCH_PANEL_${count}_${orientation}.png`);
+      return null;
+    }
+  };
+
   return (
     <>
-      <BasicTable
-        title={`${buttonCount}-Button Touch Panel`}
-        icon={panelIcon}
-        devices={devices}
-        columns={columns}
-        nameColumnWidth="20%"
-      />
+      {horizontalDevices.length > 0 && (
+        <BasicTable
+          title={`${buttonCount}-Button Touch Panel (Horizontal)`}
+          icon={getIconPath(buttonCount, 'h')}
+          devices={horizontalDevices}
+          columns={columns}
+          nameColumnWidth="20%"
+        />
+      )}
+      
+      {verticalDevices.length > 0 && (
+        <BasicTable
+          title={`${buttonCount}-Button Touch Panel (Vertical)`}
+          icon={getIconPath(buttonCount, 'v')}
+          devices={verticalDevices}
+          columns={columns}
+          nameColumnWidth="20%"
+        />
+      )}
       
       <ButtonBindingDialog
         open={dialogOpen}
