@@ -57,44 +57,86 @@ const FIVE_BUTTON = ({ devices }) => {
     return remoteBind.find(binding => Number(binding.hole) === buttonIndex) || null;
   };
 
-  // 渲染按钮绑定信息
+  // 渲染按钮绑定信息 - 更新样式与TOUCH_PANEL一致
   const renderButtonBinding = (binding) => {
-    if (!binding) return <Typography variant="body2" color="text.secondary">No Binding</Typography>;
+    if (!binding) {
+      return (
+        <Box sx={{ 
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100%',
+          padding: '12px 0'
+        }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ 
+              opacity: 0.7,
+              fontStyle: 'italic'
+            }}
+          >
+            No Binding
+          </Typography>
+        </Box>
+      );
+    }
     
     return (
-      <Box sx={{ padding: 1, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#f9f9f9' }}>
-        <Typography variant="caption" color="text.secondary" display="block">Device Type</Typography>
-        <Typography variant="body2" fontWeight="medium">{binding.bindType}</Typography>
+      <Box sx={{ 
+        padding: '12px 16px',
+        borderRadius: 1.5,
+        bgcolor: '#f8f9fa',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        // borderLeft: '3px solid #fbcd0b',
+        height: '100%'
+      }}>
+        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
+          Device Type
+        </Typography>
+        <Typography variant="body2" fontWeight="medium" mb={1}>
+          {binding.bindType}
+        </Typography>
         
-        <Typography variant="caption" color="text.secondary" display="block" mt={1}>Device ID</Typography>
-        <Typography variant="body2" fontWeight="medium">{binding.bindId}</Typography>
+        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
+          Device ID
+        </Typography>
+        <Typography variant="body2" fontWeight="medium" mb={1}>
+          {binding.bindId}
+        </Typography>
         
-        <Typography variant="caption" color="text.secondary" display="block" mt={1}>Channel</Typography>
-        <Typography variant="body2" fontWeight="medium">{binding.bindChannel ? 'Right' : 'Left'}</Typography>
+        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
+          Channel
+        </Typography>
+        <Typography variant="body2" fontWeight="medium" mb={1}>
+          {binding.bindChannel ? 'Right' : 'Left'}
+        </Typography>
         
-        <Typography variant="caption" color="text.secondary" display="block" mt={1}>Status</Typography>
-        <Typography variant="body2" fontWeight="medium">{binding.enable ? 'Enabled' : 'Disabled'}</Typography>
+        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
+          Status
+        </Typography>
+        <Typography variant="body2" fontWeight="medium">
+          {binding.enable ? 'Enabled' : 'Disabled'}
+        </Typography>
       </Box>
     );
   };
 
-  // 检查设备是否有特定按钮的绑定
-  const hasButtonBinding = (device, buttonIndex) => {
-    return !!getButtonBinding(device, buttonIndex);
-  };
-
   // 检查是否有任何设备绑定了特定按钮
   const anyDeviceHasButtonBinding = (buttonIndex) => {
-    return processedDevices.some(device => hasButtonBinding(device, buttonIndex));
+    return processedDevices.some(device => {
+      const remoteBind = device.specificAttributes?.remoteBind || [];
+      return remoteBind.some(b => Number(b.hole) === buttonIndex);
+    });
   };
 
   return (
-    <Box>
+    <Box sx={{ mb: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <img
           src={require('../../../../../../assets/icons/DeviceType/FIVE_BUTTON.png')}
           alt="5-Button Remote"
-          style={{ width: 30, height: 30, marginRight: 8 }}
+          style={{ width: 30, height: 30, marginRight: 12 }}
         />
         <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
           5-Button Remote
@@ -104,43 +146,102 @@ const FIVE_BUTTON = ({ devices }) => {
         </Typography>
       </Box>
       
-      <TableContainer component={Paper} variant="outlined">
-        <Table sx={{ minWidth: 650 }} size="small">
+      <TableContainer 
+        component={Paper} 
+        elevation={0}
+        variant="outlined" 
+        sx={{ 
+          borderRadius: 2,
+          overflow: 'hidden',
+          borderColor: 'rgba(224, 224, 224, 0.7)'
+        }}
+      >
+        <Table size="medium" sx={{ tableLayout: 'fixed' }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-              <TableCell width="20%">Device</TableCell>
-              <TableCell width="10%">Check Time</TableCell>
-              <TableCell colSpan={5} align="center">Button Bindings</TableCell>
+            {/* 表头第一行 */}
+            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+              <TableCell 
+                width="20%" 
+                sx={{ 
+                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                  fontWeight: 500,
+                  padding: '12px 16px'
+                }}
+              >
+                Device
+              </TableCell>
+              <TableCell 
+                width="10%" 
+                sx={{ 
+                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                  fontWeight: 500,
+                  padding: '12px 16px'
+                }}
+              >
+                Check Time
+              </TableCell>
+              <TableCell 
+                colSpan={5} 
+                align="center"
+                sx={{ 
+                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                  fontWeight: 500,
+                  padding: '12px 16px'
+                }}
+              >
+                Button Bindings
+              </TableCell>
             </TableRow>
-            <TableRow sx={{ 
-              backgroundColor: '#ffffff',
-              '& th, & td': {
-                borderBottom: 'none'
-              }
-            }}>
-              <TableCell colSpan={2}></TableCell>
-              {[1, 2, 3, 4, 5].map(buttonIndex => (
-                <TableCell key={buttonIndex} align="center" width="14%">
-                  <Chip 
-                    label={`Button ${buttonIndex}`} 
-                    size="small" 
+            
+            {/* 表头第二行 - 按钮标签 */}
+            <TableRow>
+              <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
+              <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
+              {[1, 2, 3, 4, 5].map(buttonIndex => {
+                const hasBinding = anyDeviceHasButtonBinding(buttonIndex);
+                
+                return (
+                  <TableCell 
+                    key={buttonIndex} 
+                    align="center" 
                     sx={{ 
-                      bgcolor: anyDeviceHasButtonBinding(buttonIndex) ? '#fbcd0b' : '#9e9e9e',
-                      color: '#ffffff',
-                      fontWeight: 500
+                      padding: '8px',
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
                     }}
-                  />
-                </TableCell>
-              ))}
+                  >
+                    <Chip 
+                      label={`Button ${buttonIndex}`} 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
+                        color: '#ffffff',
+                        fontWeight: 500,
+                        padding: '0 2px'
+                      }}
+                    />
+                  </TableCell>
+                );
+              })}
             </TableRow>
           </TableHead>
+          
           <TableBody>
-            {processedDevices.map((device) => (
+            {processedDevices.map((device, deviceIndex) => (
               <TableRow
                 key={device.deviceId}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                sx={{ 
+                  bgcolor: 'white', // 统一设置为白色，移除斑马纹
+                }}
               >
-                <TableCell component="th" scope="row">
+                {/* 设备名称列 */}
+                <TableCell 
+                  component="th" 
+                  scope="row" 
+                  sx={{ 
+                    padding: '16px',
+                    borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                  }}
+                >
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                       {device.name}
@@ -157,20 +258,28 @@ const FIVE_BUTTON = ({ devices }) => {
                     </Typography>
                   </Box>
                 </TableCell>
-                <TableCell>{device.specificAttributes?.checkTime || 'N/A'}</TableCell>
+                
+                {/* 检查时间列 */}
+                <TableCell 
+                  sx={{ 
+                    padding: '16px', 
+                    borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                  }}
+                >
+                  {device.specificAttributes?.checkTime || 'N/A'}
+                </TableCell>
                 
                 {/* 按钮绑定单元格 */}
                 {[1, 2, 3, 4, 5].map(buttonIndex => {
                   const binding = getButtonBinding(device, buttonIndex);
-                  const isButtonBound = !!binding;
+                  
                   return (
                     <TableCell 
                       key={buttonIndex} 
                       align="center"
                       sx={{
-                        borderLeft: isButtonBound ? '2px solid #fbcd0b' : 'none',
-                        backgroundColor: 'transparent',
-                        padding: '0px 16px 6px 16px'
+                        padding: '16px 8px',
+                        borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                       }}
                     >
                       {renderButtonBinding(binding)}

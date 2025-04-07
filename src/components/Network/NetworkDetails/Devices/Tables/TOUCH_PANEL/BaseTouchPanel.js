@@ -44,10 +44,16 @@ const BaseTouchPanel = ({
       id: 'backlight',
       label: 'Backlight',
       format: (attrs) => {
-        if (!hasBacklight) return 'N/A';
         const enabled = attrs?.backLightEnabled;
-        const color = attrs?.blColorId || 0;
-        return enabled ? `On (Color: ${color})` : 'Off';
+        
+        // 直接根据 backLightEnabled 的值判断
+        if (enabled === 1) {
+          return 'On';
+        } else if (enabled === 0) {
+          return 'Off';
+        } else {
+          return 'N/A';
+        }
       }
     },
     {

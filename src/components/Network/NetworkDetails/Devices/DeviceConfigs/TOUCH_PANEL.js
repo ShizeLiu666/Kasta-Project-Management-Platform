@@ -32,10 +32,9 @@ const TOUCH_PANEL_CONFIG = {
     {
       name: 'sleepTimer',
       type: 'number',
-      label: 'Sleep Timer',
+      label: 'Sleep Timer (seconds)',
       min: 0,
-      max: 60,
-      description: 'Sleep timer in minutes (0-60)'
+      description: 'Sleep timer in seconds'
     },
     {
       name: 'remoteBind',
@@ -44,52 +43,39 @@ const TOUCH_PANEL_CONFIG = {
       config: {
         template: [
           {
-            bindType: 0,
-            bindId: 0,
-            hour: 0,
-            min: 0,
-            state: 0,
-            enable: 1,
-            hasTimer: 0,
-            hole: 1,
-            bindChannel: 0
+            bindType: 0,    // 0=device, 2=group
+            bindId: 0,      // target device/group ID
+            hole: 1,        // button position
+            // bindChannel: 0  // 0=left, 1=right
           }
         ],
         fields: {
-          bindType: { label: 'Binding Type', type: 'number'},
-          bindId: { label: 'Binding ID (did)', type: 'number'},
-          hour: { label: 'Hour (0-23)', type: 'number', min: 0, max: 23},
-          min: { label: 'Minute (0-59)', type: 'number', min: 0, max: 59},
-          state: { 
-            label: 'State (after timer)', 
-            type: 'select', 
-            options: [0, 1], 
-            optionLabels: ['Off', 'On'],  
+          bindType: { 
+            label: 'Binding Type', 
+            type: 'select',
+            options: [0, 2],
+            optionLabels: ['Device', 'Group'],
+            description: 'Type of target to bind (Device or Group)'
           },
-          enable: { 
-            label: 'Enable Status', 
-            type: 'select', 
-            options: [0, 1], 
-            optionLabels: ['Disabled', 'Enabled'], 
-          },
-          hasTimer: { 
-            label: 'Timer', 
-            type: 'select', 
-            options: [0, 1], 
-            optionLabels: ['No Timer', 'Has Timer'],
+          bindId: { 
+            label: 'Target ID', 
+            type: 'number',
+            description: 'ID of the target device or group'
           },
           hole: { 
             label: 'Button Position', 
             type: 'select', 
             options: [1, 2, 3, 4, 5, 6], 
-            optionLabels: ['Button 1', 'Button 2', 'Button 3', 'Button 4', 'Button 5', 'Button 6'], 
+            optionLabels: ['Button 1', 'Button 2', 'Button 3', 'Button 4', 'Button 5', 'Button 6'],
+            description: 'Which button to bind'
           },
-          bindChannel: { 
-            label: 'Binding Channel', 
-            type: 'select', 
-            options: [0, 1], 
-            optionLabels: ['Left Channel', 'Right Channel'], 
-          }
+          // bindChannel: { 
+          //   label: 'Target Channel', 
+          //   type: 'select', 
+          //   options: [0, 1], 
+          //   optionLabels: ['Left Channel', 'Right Channel'],
+          //   description: 'Which channel of the target to control'
+          // }
         }
       }
     }

@@ -43,9 +43,6 @@ const DeviceList = ({ networkId }) => {
     refetch
   } = useNetworkDevices(networkId);
 
-  // 在 useNetworkDevices 调用后添加
-  console.log("Raw devices data from API:", devices);
-
   // 处理加载状态
   if (isLoading) {
     return (
@@ -104,27 +101,20 @@ const DeviceList = ({ networkId }) => {
 
   // 按 ProductType 分组设备
   const devicesByProductType = devices.reduce((acc, device) => {
-    console.log(`Processing device: ${device.name}, productType: ${device.productType}`);
     const productType = PRODUCT_TYPE_MAP[device.productType];
-    console.log(`Mapped productType: ${productType}`);
     
     if (productType) {
       if (!acc[productType]) {
         acc[productType] = [];
       }
       acc[productType].push(device);
-      console.log(`Added device to ${productType} group`);
     } else {
       console.warn(`Unknown product type: ${device.productType} for device ${device.name}`);
     }
     return acc;
   }, {});
 
-  console.log("Devices grouped by product type:", devicesByProductType);
-  console.log("PANGU devices:", devicesByProductType['PANGU']);
-
   const renderDeviceTable = (productType, devices) => {
-    console.log(`Rendering table for ${productType} with ${devices.length} devices`);
     try {
       const groupedDevices = groupDevicesByType(devices, productType);
 

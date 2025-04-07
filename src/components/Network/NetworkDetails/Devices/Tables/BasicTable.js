@@ -220,9 +220,12 @@ const BasicTable = ({
 
                                     return (
                                         <TableCell key={column.id} align="left">
-                                            <Typography variant="body2">
+                                            <Box sx={{ 
+                                                typography: 'body2',  // 保持排版样式不变
+                                                fontSize: '0.875rem'   // 相当于 body2 的大小
+                                            }}>
                                                 {cellContent}
-                                            </Typography>
+                                            </Box>
                                         </TableCell>
                                     );
                                 })}
