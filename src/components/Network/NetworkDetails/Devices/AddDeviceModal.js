@@ -168,7 +168,11 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
     appearanceShortname: '',
     iconLocal: '',
     passphrase: '',
-    networkId: networkId
+    networkId: networkId,
+    orientation: '',
+    specificAttributes: {
+      isHorizontal: null
+    }
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -345,6 +349,21 @@ const AddDeviceModal = ({ isOpen, toggle, networkId, onSuccess }) => {
                 {name}
               </option>
             ))}
+          </Input>
+        </FormGroup>
+        <FormGroup>
+          <Label for="orientation">Panel Orientation</Label>
+          <Input
+            type="select"
+            name="orientation"
+            id="orientation"
+            value={formData.orientation}
+            onChange={handleInputChange}
+            disabled={formData.productType !== 'skr8wl4o'}
+          >
+            <option value="">Select orientation</option>
+            <option value="0">Vertical</option>
+            <option value="1">Horizontal</option>
           </Input>
         </FormGroup>
         <FormGroup>

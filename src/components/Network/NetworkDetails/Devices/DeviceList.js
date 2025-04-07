@@ -7,6 +7,29 @@ import AddDeviceModal from './AddDeviceModal';
 import UpdateDeviceModal from './UpdateDeviceModal';
 import DeleteDeviceModal from './DeleteDeviceModal';
 
+// 添加设备分组函数
+const groupDevicesByType = (devices, productType) => {
+  switch (productType) {
+    case 'TOUCH_PANEL':
+      return {
+        horizontal: devices.filter(device => {
+          const isHorizontal = device.specificAttributes?.isHorizontal;
+          return isHorizontal === null || isHorizontal === 0;
+        }),
+        vertical: devices.filter(device => 
+          device.specificAttributes?.isHorizontal === 1
+        )
+      };
+    case 'SIX_INPUT_FOUR_OUTPUT':
+      return {
+        input: devices.filter(device => device.deviceType === '6RSIBH'),
+        output: devices.filter(device => device.deviceType !== '6RSIBH')
+      };
+    default:
+      return { default: devices };
+  }
+};
+
 const DeviceList = ({ networkId }) => {
   const [addDeviceModalOpen, setAddDeviceModalOpen] = useState(false);
   const [updateDeviceModalOpen, setUpdateDeviceModalOpen] = useState(false);
@@ -103,49 +126,34 @@ const DeviceList = ({ networkId }) => {
   const renderDeviceTable = (productType, devices) => {
     console.log(`Rendering table for ${productType} with ${devices.length} devices`);
     try {
+      const groupedDevices = groupDevicesByType(devices, productType);
+
       // 特殊处理 TOUCH_PANEL
       if (productType === 'TOUCH_PANEL') {
-        const devicesByType = devices.reduce((acc, device) => {
-          const type = device.deviceType;
-          if (!acc[type]) {
-            acc[type] = [];
-          }
-          acc[type].push(device);
-          return acc;
-        }, {});
-
-        return Object.entries(devicesByType).map(([type, typeDevices]) => {
-          const DeviceComponent = require('./Tables/TOUCH_PANEL/TOUCH_PANEL').default;
-          return (
-            <Box key={`${productType}-${type}`} sx={{ mb: 3 }}>
-              <DeviceComponent devices={typeDevices} />
-            </Box>
-          );
-        });
+        const DeviceComponent = require('./Tables/TOUCH_PANEL/TOUCH_PANEL').default;
+        return <DeviceComponent groupedDevices={groupedDevices} />;
       }
 
       // 特殊处理 SIX_INPUT_FOUR_OUTPUT
       if (productType === 'SIX_INPUT_FOUR_OUTPUT') {
-        const devicesByType = devices.reduce((acc, device) => {
-          const type = device.deviceType === '6RSIBH' ? 'SIX_INPUT' : 'FOUR_OUTPUT';
-          if (!acc[type]) {
-            acc[type] = [];
-          }
-          acc[type].push(device);
-          return acc;
-        }, {});
-
-        return Object.entries(devicesByType).map(([type, typeDevices]) => {
-          const DeviceComponent = require(`./Tables/${type}/${type}`).default;
-          return (
-            <Box key={`${productType}-${type}`} sx={{ mb: 3 }}>
-              <DeviceComponent devices={typeDevices} />
-            </Box>
-          );
-        });
+        const { input, output } = groupedDevices;
+        return (
+          <>
+            {input.length > 0 && (
+              <Box key="input" sx={{ mb: 3 }}>
+                {require('./Tables/SIX_INPUT/SIX_INPUT').default({ devices: input })}
+              </Box>
+            )}
+            {output.length > 0 && (
+              <Box key="output" sx={{ mb: 3 }}>
+                {require('./Tables/FOUR_OUTPUT/FOUR_OUTPUT').default({ devices: output })}
+              </Box>
+            )}
+          </>
+        );
       }
 
-      // 其他设备类型（统一命名规范）
+      // 其他设备类型的处理保持不变
       const DeviceComponent = require(`./Tables/${productType}/${productType}`).default;
       return (
         <Box key={productType} sx={{ mb: 3 }}>

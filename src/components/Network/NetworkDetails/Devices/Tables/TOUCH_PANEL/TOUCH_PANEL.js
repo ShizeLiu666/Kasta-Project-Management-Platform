@@ -10,7 +10,8 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Typography 
+  Typography,
+  Box
 } from '@mui/material';
 
 // 解析设备类型信息
@@ -138,21 +139,29 @@ const ButtonBindingDialog = ({ open, onClose, bindings, buttonIndex }) => {
   );
 };
 
-const TOUCH_PANEL = ({ devices }) => {
+const TOUCH_PANEL = ({ groupedDevices }) => {
   const [selectedButton, setSelectedButton] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedBindings, setSelectedBindings] = useState([]);
 
-  if (!devices || devices.length === 0) return null;
-  
-  // 根据 Orientation 分组设备
-  const horizontalDevices = devices.filter(device => {
-    const isHorizontal = device.specificAttributes?.isHorizontal;
-    return isHorizontal === null || isHorizontal === 0;  // 默认显示为水平
-  });
-  const verticalDevices = devices.filter(device => device.specificAttributes?.isHorizontal === 1);
-  
-  const { buttonCount } = parseDeviceType(devices[0].deviceType);
+  const { horizontal: horizontalDevices, vertical: verticalDevices } = groupedDevices;
+
+  if (!horizontalDevices?.length && !verticalDevices?.length) return null;
+
+  // 按按键数量进一步分组
+  const groupByButtonCount = (devices) => {
+    return devices.reduce((acc, device) => {
+      const { buttonCount } = parseDeviceType(device.deviceType);
+      if (!acc[buttonCount]) {
+        acc[buttonCount] = [];
+      }
+      acc[buttonCount].push(device);
+      return acc;
+    }, {});
+  };
+
+  const horizontalGrouped = groupByButtonCount(horizontalDevices || []);
+  const verticalGrouped = groupByButtonCount(verticalDevices || []);
 
   const handleButtonClick = (bindings, buttonIndex) => {
     setSelectedButton(buttonIndex);
@@ -160,41 +169,43 @@ const TOUCH_PANEL = ({ devices }) => {
     setDialogOpen(true);
   };
 
-  // 根据按键数量生成按键状态列
-  const buttonColumns = Array.from({ length: buttonCount }, (_, index) => ({
-    id: `button${index + 1}`,
-    label: `Button ${index + 1}`,
-    format: (attrs) => {
-      const bindings = attrs?.remoteBind?.filter(b => b.hole === index + 1) || [];
-      const isActive = attrs?.activeButtonIdx === index + 1;
-      
-      return (
-        <Button
-          variant={isActive ? "contained" : "outlined"}
-          size="small"
-          color={bindings.length ? "primary" : "inherit"}
-          onClick={() => handleButtonClick(bindings, index + 1)}
-          disabled={!bindings.length}
-        >
-          {bindings.length ? `${bindings.length} Binding(s)` : 'No Binding'}
-        </Button>
-      );
-    }
-  }));
-
-  const columns = [
-    {
-      id: 'backlight',
-      label: 'Backlight',
+  // 生成特定按键数量的列
+  const generateColumns = (buttonCount) => {
+    const buttonColumns = Array.from({ length: buttonCount }, (_, index) => ({
+      id: `button${index + 1}`,
+      label: `Button ${index + 1}`,
       format: (attrs) => {
-        if (!attrs?.hasBacklight) return 'N/A';
-        const enabled = attrs?.backLightEnabled;
-        const color = attrs?.blColorId || 0;
-        return enabled ? `On (Color: ${color})` : 'Off';
+        const bindings = attrs?.remoteBind?.filter(b => b.hole === index + 1) || [];
+        const isActive = attrs?.activeButtonIdx === index + 1;
+        
+        return (
+          <Button
+            variant={isActive ? "contained" : "outlined"}
+            size="small"
+            color={bindings.length ? "primary" : "inherit"}
+            onClick={() => handleButtonClick(bindings, index + 1)}
+            disabled={!bindings.length}
+          >
+            {bindings.length ? `${bindings.length} Binding(s)` : 'No Binding'}
+          </Button>
+        );
       }
-    },
-    ...buttonColumns
-  ];
+    }));
+
+    return [
+      {
+        id: 'backlight',
+        label: 'Backlight',
+        format: (attrs) => {
+          if (!attrs?.hasBacklight) return 'N/A';
+          const enabled = attrs?.backLightEnabled;
+          const color = attrs?.blColorId || 0;
+          return enabled ? `On (Color: ${color})` : 'Off';
+        }
+      },
+      ...buttonColumns
+    ];
+  };
 
   // 获取图标路径
   const getIconPath = (count, orientation) => {
@@ -208,25 +219,36 @@ const TOUCH_PANEL = ({ devices }) => {
 
   return (
     <>
-      {horizontalDevices.length > 0 && (
-        <BasicTable
-          title={`${buttonCount}-Button Touch Panel (Horizontal)`}
-          icon={getIconPath(buttonCount, 'h')}
-          devices={horizontalDevices}
-          columns={columns}
-          nameColumnWidth="20%"
-        />
+      {/* 渲染水平面板 */}
+      {Object.entries(horizontalGrouped).map(([buttonCount, devices], index) => (
+        <Box key={`h-${buttonCount}`} sx={{ mb: index < Object.keys(horizontalGrouped).length - 1 ? 3 : 0 }}>
+          <BasicTable
+            title={`${buttonCount}-Button Touch Panel (Horizontal)`}
+            icon={getIconPath(buttonCount, 'h')}
+            devices={devices}
+            columns={generateColumns(parseInt(buttonCount))}
+            nameColumnWidth="20%"
+          />
+        </Box>
+      ))}
+      
+      {/* 如果同时存在水平和垂直面板，添加额外间距 */}
+      {Object.keys(horizontalGrouped).length > 0 && Object.keys(verticalGrouped).length > 0 && (
+        <Box sx={{ mb: 3 }} />
       )}
       
-      {verticalDevices.length > 0 && (
-        <BasicTable
-          title={`${buttonCount}-Button Touch Panel (Vertical)`}
-          icon={getIconPath(buttonCount, 'v')}
-          devices={verticalDevices}
-          columns={columns}
-          nameColumnWidth="20%"
-        />
-      )}
+      {/* 渲染垂直面板 */}
+      {Object.entries(verticalGrouped).map(([buttonCount, devices], index) => (
+        <Box key={`v-${buttonCount}`} sx={{ mb: index < Object.keys(verticalGrouped).length - 1 ? 3 : 0 }}>
+          <BasicTable
+            title={`${buttonCount}-Button Touch Panel (Vertical)`}
+            icon={getIconPath(buttonCount, 'v')}
+            devices={devices}
+            columns={generateColumns(parseInt(buttonCount))}
+            nameColumnWidth="20%"
+          />
+        </Box>
+      ))}
       
       <ButtonBindingDialog
         open={dialogOpen}
