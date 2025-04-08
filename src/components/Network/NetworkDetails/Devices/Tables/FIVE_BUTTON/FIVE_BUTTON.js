@@ -9,20 +9,127 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Chip
+  Chip,
+  Tooltip
 } from '@mui/material';
+import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
+import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
-const FIVE_BUTTON = ({ devices }) => {
+const getDeviceTypeFromProductType = (productType) => {
+  const entry = Object.entries(PRODUCT_TYPE_MAP).find(([key, value]) => key === productType);
+  return entry ? entry[1] : null;
+};
+
+const getDeviceIcon = (productType) => {
+  try {
+    const deviceType = getDeviceTypeFromProductType(productType);
+    if (!deviceType) return null;
+    return require(`../../../../../../assets/icons/DeviceType/${deviceType}.png`);
+  } catch (error) {
+    return require(`../../../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
+  }
+};
+
+const formatDisplayText = (text) => {
+  return text
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+const TruncatedText = ({ text, maxLength = 20 }) => {
+  const truncatedText = text?.length > maxLength
+    ? `${text.substring(0, maxLength)}...`
+    : text || '-';
+
+  return (
+    <Tooltip
+      title={text || '-'}
+      placement="top"
+      arrow
+      sx={{
+        tooltip: {
+          backgroundColor: '#333',
+          fontSize: '0.875rem',
+          padding: '8px 12px',
+          maxWidth: 'none'
+        },
+        arrow: {
+          color: '#333'
+        }
+      }}
+    >
+      <span
+        style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          display: 'block'
+        }}
+      >
+        {truncatedText}
+      </span>
+    </Tooltip>
+  );
+};
+
+const FIVE_BUTTON = ({ devices, networkId }) => {
   const [processedDevices, setProcessedDevices] = useState([]);
+  
+  // 获取所有设备和组的数据用于名称映射
+  const { data: allDevices = [] } = useNetworkDevices(networkId);
+  const { data: allGroups = [] } = useNetworkGroups(networkId);
+
+  // 创建设备和组的映射
+  const deviceMap = React.useMemo(() => {
+    return allDevices.reduce((acc, device) => {
+      acc[device.did] = device.name;
+      return acc;
+    }, {});
+  }, [allDevices]);
+
+  const groupMap = React.useMemo(() => {
+    return allGroups.reduce((acc, group) => {
+      acc[group.groupId] = group.name;
+      return acc;
+    }, {});
+  }, [allGroups]);
+
+  // 获取绑定类型显示文本
+  // const getBindingTypeText = (type) => {
+  //   switch (type) {
+  //     case 0:
+  //       return 'Device';
+  //     case 1:
+  //       return 'Group';
+  //     case 2:
+  //       return 'Scene';
+  //     default:
+  //       return 'Unknown';
+  //   }
+  // };
+
+  // 获取绑定目标的名称
+  const getBindingName = (binding) => {
+    if (!binding) return '';
+    
+    switch (binding.bindType) {
+      case 0: // Device
+        return deviceMap[binding.bindId] || `Unknown Device`;
+      case 1: // Group
+        return groupMap[binding.bindId] || `Unknown Group`;
+      case 2: // Scene
+        return `Scene ${binding.bindId}`;
+      default:
+        return `Unknown`;
+    }
+  };
 
   // 预处理设备数据，确保remoteBind字段正确
   useEffect(() => {
     if (devices && devices.length > 0) {
       const processed = devices.map(device => {
-        // 确保specificAttributes存在
         const specificAttributes = device.specificAttributes || {};
-        
-        // 确保remoteBind是数组
         let remoteBind = specificAttributes.remoteBind || [];
         if (typeof remoteBind === 'string') {
           try {
@@ -32,8 +139,6 @@ const FIVE_BUTTON = ({ devices }) => {
             remoteBind = [];
           }
         }
-        
-        // 返回处理后的设备对象
         return {
           ...device,
           specificAttributes: {
@@ -42,7 +147,6 @@ const FIVE_BUTTON = ({ devices }) => {
           }
         };
       });
-      
       setProcessedDevices(processed);
     } else {
       setProcessedDevices([]);
@@ -57,16 +161,20 @@ const FIVE_BUTTON = ({ devices }) => {
     return remoteBind.find(binding => Number(binding.hole) === buttonIndex) || null;
   };
 
-  // 渲染按钮绑定信息 - 更新样式与TOUCH_PANEL一致
+  // 渲染按钮绑定信息
   const renderButtonBinding = (binding) => {
     if (!binding) {
       return (
         <Box sx={{ 
+          padding: '12px',
+          borderRadius: 1.5,
+          bgcolor: '#f8f9fa',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          height: '160px',
+          width: '100%',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-          padding: '12px 0'
+          alignItems: 'center'
         }}>
           <Typography 
             variant="body2" 
@@ -82,42 +190,106 @@ const FIVE_BUTTON = ({ devices }) => {
       );
     }
     
+    const boundDevice = allDevices.find(device => device.did === binding.bindId);
+    const deviceType = boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : null;
+    
     return (
       <Box sx={{ 
-        padding: '12px 16px',
+        padding: '12px',
         borderRadius: 1.5,
         bgcolor: '#f8f9fa',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        // borderLeft: '3px solid #fbcd0b',
-        height: '100%'
+        height: '160px',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
-        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-          Device Type
-        </Typography>
-        <Typography variant="body2" fontWeight="medium" mb={1}>
-          {binding.bindType}
-        </Typography>
+        {binding.bindType === 0 && boundDevice && deviceType && (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%'
+          }}>
+            <img
+              src={getDeviceIcon(boundDevice.productType)}
+              alt="Device Icon"
+              style={{ 
+                width: 28,
+                height: 28,
+                marginBottom: 4
+              }}
+            />
+            <Box sx={{ 
+              width: '100%', 
+              textAlign: 'center',
+            }}>
+              <Typography
+                variant="caption"
+                component="div"
+                sx={{
+                  color: '#666',
+                  fontWeight: 500,
+                  letterSpacing: '0.2px',
+                  textTransform: 'uppercase',
+                  fontSize: '0.7rem'
+                }}
+              >
+                {formatDisplayText(deviceType)}
+              </Typography>
+            </Box>
+          </Box>
+        )}
         
-        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-          Device ID
-        </Typography>
-        <Typography variant="body2" fontWeight="medium" mb={1}>
-          {binding.bindId}
-        </Typography>
+        <Box sx={{ 
+          width: '100%',
+          textAlign: 'center'
+        }}>
+          <Typography
+            variant="body2"
+            component="div"
+            sx={{
+              color: '#2c3e50',
+              fontWeight: 600,
+              fontSize: '0.875rem'
+            }}
+          >
+            <TruncatedText 
+              text={getBindingName(binding)} 
+              maxLength={20}
+            />
+          </Typography>
+        </Box>
         
-        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-          Channel
-        </Typography>
-        <Typography variant="body2" fontWeight="medium" mb={1}>
-          {binding.bindChannel ? 'Right' : 'Left'}
-        </Typography>
-        
-        <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-          Status
-        </Typography>
-        <Typography variant="body2" fontWeight="medium">
-          {binding.enable ? 'Enabled' : 'Disabled'}
-        </Typography>
+        {binding.bindChannel !== null && (
+          <Box sx={{ 
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            <Typography 
+              variant="caption" 
+              sx={{
+                color: '#95a5a6',
+                display: 'block',
+                fontSize: '0.7rem'
+              }}
+            >
+              Channel
+            </Typography>
+            <Typography 
+              variant="body2"
+              sx={{
+                color: '#34495e',
+                fontWeight: 500
+              }}
+            >
+              {binding.bindChannel ? 'Right' : 'Left'}
+            </Typography>
+          </Box>
+        )}
       </Box>
     );
   };

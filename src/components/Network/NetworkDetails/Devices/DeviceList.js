@@ -121,7 +121,7 @@ const DeviceList = ({ networkId }) => {
       // 特殊处理 TOUCH_PANEL
       if (productType === 'TOUCH_PANEL') {
         const DeviceComponent = require('./Tables/TOUCH_PANEL/TOUCH_PANEL').default;
-        return <DeviceComponent groupedDevices={groupedDevices} />;
+        return <DeviceComponent groupedDevices={groupedDevices} networkId={networkId} />;
       }
 
       // 特殊处理 SIX_INPUT_FOUR_OUTPUT
@@ -141,6 +141,12 @@ const DeviceList = ({ networkId }) => {
             )}
           </>
         );
+      }
+
+      // 特殊处理 FIVE_BUTTON
+      if (productType === 'FIVE_BUTTON') {
+        const DeviceComponent = require('./Tables/FIVE_BUTTON/FIVE_BUTTON').default;
+        return <DeviceComponent devices={devices} networkId={networkId} />;
       }
 
       // 其他设备类型的处理保持不变

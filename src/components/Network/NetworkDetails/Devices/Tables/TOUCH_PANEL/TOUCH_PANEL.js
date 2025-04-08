@@ -9,8 +9,11 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Chip
+  Chip,
+  Tooltip
 } from '@mui/material';
+import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
+import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
 // 解析设备类型信息
 const parseDeviceType = (deviceType) => {
@@ -84,83 +87,271 @@ const parseDeviceType = (deviceType) => {
   return { buttonCount, type, hasBacklight };
 };
 
-// 渲染按钮绑定信息 - 修复Fragment key问题
-const renderButtonBinding = (binding) => {
-  if (!binding) {
-    return (
-      <Box sx={{ 
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%',
-        padding: '12px 0'
-      }}>
-        <Typography 
-          variant="body2" 
-          color="text.secondary"
-          sx={{ 
-            opacity: 0.7,
-            fontStyle: 'italic'
-          }}
-        >
-          No Binding
-        </Typography>
-      </Box>
-    );
+// 首先添加一个反向映射函数
+const getDeviceTypeFromProductType = (productType) => {
+  const entry = Object.entries(PRODUCT_TYPE_MAP).find(([key, value]) => key === productType);
+  return entry ? entry[1] : null;
+};
+
+// 获取设备图标的函数
+const getDeviceIcon = (productType) => {
+  try {
+    const deviceType = getDeviceTypeFromProductType(productType);
+    if (!deviceType) return null;
+    return require(`../../../../../../assets/icons/DeviceType/${deviceType}.png`);
+  } catch (error) {
+    return require(`../../../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
   }
-  
+};
+
+// 添加格式化显示文本的函数
+const formatDisplayText = (text) => {
+  return text
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+// 修改 TruncatedText 组件
+const TruncatedText = ({ text, maxLength = 20 }) => {
+  const truncatedText = text?.length > maxLength
+    ? `${text.substring(0, maxLength)}...`
+    : text || '-';
+
   return (
-    <Box sx={{ 
-      padding: '12px 16px',
-      borderRadius: 1.5,
-      bgcolor: '#f8f9fa',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-      // borderLeft: '3px solid #fbcd0b',
-      height: '100%'
-    }}>
-      <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-        Device Type
-      </Typography>
-      <Typography variant="body2" fontWeight="medium" mb={1}>
-        {binding.bindType}
-      </Typography>
-      
-      <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-        Device ID
-      </Typography>
-      <Typography variant="body2" fontWeight="medium" mb={binding.bindChannel !== null || binding.enable !== null ? 1 : 0}>
-        {binding.bindId}
-      </Typography>
-      
-      {/* 添加通道信息 - 使用React.Fragment带key */}
-      {binding.bindChannel !== null && (
-        <React.Fragment key="channel-info">
-          <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-            Channel
-                        </Typography>
-          <Typography variant="body2" fontWeight="medium" mb={binding.enable !== null ? 1 : 0}>
-            {binding.bindChannel ? 'Right' : 'Left'}
-                          </Typography>
-        </React.Fragment>
-      )}
-      
-      {/* 添加状态信息 - 使用React.Fragment带key */}
-      {binding.enable !== null && (
-        <React.Fragment key="status-info">
-          <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-            Status
-                        </Typography>
-          <Typography variant="body2" fontWeight="medium">
-            {binding.enable ? 'Enabled' : 'Disabled'}
-                        </Typography>
-              </React.Fragment>
-      )}
-    </Box>
+    <Tooltip
+      title={text || '-'}
+      placement="top"
+      arrow
+      sx={{
+        tooltip: {
+          backgroundColor: '#333',
+          fontSize: '0.875rem',
+          padding: '8px 12px',
+          maxWidth: 'none'
+        },
+        arrow: {
+          color: '#333'
+        }
+      }}
+    >
+      <span  // 改用 span 而不是 Typography
+        style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          display: 'block'
+        }}
+      >
+        {truncatedText}
+      </span>
+    </Tooltip>
   );
 };
 
-const TOUCH_PANEL = ({ groupedDevices }) => {
+const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
   const { horizontal: horizontalDevices, vertical: verticalDevices } = groupedDevices;
+  
+  // 获取所有设备和组的数据
+  const { data: allDevices = [] } = useNetworkDevices(networkId);
+  const { data: allGroups = [] } = useNetworkGroups(networkId);
+
+  // 创建设备和组的映射 - 修改为使用 did
+  const deviceMap = React.useMemo(() => {
+    return allDevices.reduce((acc, device) => {
+      acc[device.did] = device.name;
+      return acc;
+    }, {});
+  }, [allDevices]);
+
+  const groupMap = React.useMemo(() => {
+    return allGroups.reduce((acc, group) => {
+      acc[group.groupId] = group.name;
+      return acc;
+    }, {});
+  }, [allGroups]);
+
+  // 获取绑定目标的名称 - 修改 Device 类型的处理
+  const getBindingName = (binding) => {
+    if (!binding) return '';
+    
+    switch (binding.bindType) {
+      case 0: // Device
+        return deviceMap[binding.bindId] || `Unknown Device`;
+      case 1: // Group
+        return groupMap[binding.bindId] || `Unknown Group`;
+      case 2: // Scene
+        return `Scene ${binding.bindId}`;
+      default:
+        return `Unknown`;
+    }
+  };
+
+  // 修改 renderButtonBinding 函数
+  const renderButtonBinding = (binding) => {
+    if (!binding) {
+      return (
+        <Box sx={{ 
+          padding: '12px',
+          borderRadius: 1.5,
+          bgcolor: '#f8f9fa',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          height: '120px',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ 
+              opacity: 0.7,
+              fontStyle: 'italic'
+            }}
+          >
+            No Binding
+          </Typography>
+        </Box>
+      );
+    }
+
+    const boundDevice = allDevices.find(device => device.did === binding.bindId);
+    const deviceType = boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : null;
+      
+      return (
+      <Box sx={{ 
+        padding: '12px',
+        borderRadius: 1.5,
+        bgcolor: '#f8f9fa',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        height: '120px',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {binding.bindType === 0 && boundDevice && deviceType && (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%'
+          }}>
+            <img
+              src={getDeviceIcon(boundDevice.productType)}
+              alt="Device Icon"
+              style={{ 
+                width: 28,
+                height: 28,
+                marginBottom: 4
+              }}
+            />
+            <Box sx={{ 
+              width: '100%', 
+              textAlign: 'center',
+            }}>
+              {/* Product Type - 小号字体，灰色 */}
+              <Typography
+                variant="caption"
+                component="div"
+                sx={{
+                  color: '#666',
+                  fontWeight: 500,
+                  letterSpacing: '0.2px',
+                  textTransform: 'uppercase',
+                  fontSize: '0.7rem'
+                }}
+              >
+                {formatDisplayText(deviceType)}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+        
+        <Box sx={{ 
+          width: '100%',
+          textAlign: 'center'
+        }}>
+          {/* Device/Group Name - 较大字体，深色，加粗 */}
+          <Typography
+            variant="body2"
+            component="div"
+            sx={{
+              color: '#2c3e50',
+              fontWeight: 600,
+              fontSize: '0.875rem'
+            }}
+          >
+            <TruncatedText 
+              text={getBindingName(binding)} 
+              maxLength={20}
+            />
+          </Typography>
+        </Box>
+        
+        {binding.bindChannel !== null && (
+          <Box sx={{ 
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            {/* Channel Label - 小号字体，浅灰色 */}
+            <Typography 
+              variant="caption" 
+              sx={{
+                color: '#95a5a6',
+                display: 'block',
+                fontSize: '0.7rem'
+              }}
+            >
+              Channel
+            </Typography>
+            {/* Channel Value - 中等字体，正常粗细 */}
+            <Typography 
+              variant="body2"
+              sx={{
+                color: '#34495e',
+                fontWeight: 500
+              }}
+            >
+              {binding.bindChannel ? 'Right' : 'Left'}
+            </Typography>
+          </Box>
+        )}
+        
+        {binding.enable !== null && (
+          <Box sx={{ 
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            {/* Status Label - 小号字体，浅灰色 */}
+            <Typography 
+              variant="caption" 
+              sx={{
+                color: '#95a5a6',
+                display: 'block',
+                fontSize: '0.7rem'
+              }}
+            >
+              Status
+            </Typography>
+            {/* Status Value - 中等字体，正常粗细 */}
+            <Typography 
+              variant="body2"
+              sx={{
+                color: '#34495e',
+                fontWeight: 500
+              }}
+            >
+              {binding.enable ? 'Enabled' : 'Disabled'}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    );
+  };
 
   if (!horizontalDevices?.length && !verticalDevices?.length) return null;
   
@@ -335,7 +526,9 @@ const TOUCH_PANEL = ({ groupedDevices }) => {
                         key={`${device.deviceId}-button-${buttonIndex}`}
                         align="center"
                         sx={{
-                          padding: '16px 8px',
+                          padding: '8px',
+                          width: `${75 / buttonCount}%`, // 确保所有按钮单元格宽度相等
+                          height: '140px', // 固定表格单元格高度
                           borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                         }}
                       >
