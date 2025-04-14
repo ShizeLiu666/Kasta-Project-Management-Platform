@@ -185,6 +185,44 @@ const DEVICE_ATTRIBUTES_CONFIG = {
 - isAuth: 是否已授权 (0=否, 1=是)`
     }
   },
+  FIVE_INPUT: {
+    isConfig: { 
+      type: 'select', 
+      label: 'Configuration Status', 
+      options: [0, 1], 
+      optionLabels: ['Not Configured', 'Configured']
+    },
+    remoteBind: { 
+      type: 'textarea', 
+      label: 'Remote Bindings (JSON format)',
+      placeholder: `[
+  {
+    "inputType": 0,
+    "bindType": 0,
+    "bindId": 0,
+    "hour": 0,
+    "min": 0,
+    "state": 0,
+    "enable": 1,
+    "hasTimer": 0,
+    "hole": 1,
+    "bindChannel": 0
+  }
+]`,
+      rows: 10,
+      help: `字段说明:
+- inputType: 输入类型 (0=Toggle, 1=Momentary)
+- bindType: 绑定类型 (0=设备, 1=组, 2=场景)
+- bindId: 绑定ID (设备ID/组ID/场景ID)
+- hour: 小时 (0-23)
+- min: 分钟 (0-59)
+- state: 状态 (0=关闭, 1=开启)
+- enable: 启用状态 (0=禁用, 1=启用)
+- hasTimer: 是否有定时器 (0=无, 1=有)
+- hole: 输入孔位 (1-5, 对应输入1-5)
+- bindChannel: 绑定通道 (0=左, 1=右)`
+    }
+  },
 };
 
 const UpdateDeviceModal = ({ isOpen, toggle, devices, onSuccess }) => {
