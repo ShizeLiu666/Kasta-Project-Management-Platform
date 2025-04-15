@@ -7,8 +7,7 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
-  Divider,
-  Paper
+  Divider
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -170,24 +169,57 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
   );
 };
 
-// 修改触发器显示组件
-const TriggerItem = ({ trigger }) => (
-  <Typography variant="body2" sx={{ mb: 1 }}>
-    {`${trigger.conditionNum}: ${trigger.elementName || 'Trigger'} (${TRIGGER_ACTIVE_TYPES[trigger.activeType] || 'Unknown'})`}
-  </Typography>
-);
+// 修改触发器显示组件，添加设备名称显示
+const TriggerItem = ({ trigger, deviceMap, groupMap }) => {
+  // 获取设备/组名称
+  const getTargetName = () => {
+    if (trigger.activeType === 1 || trigger.activeType === 0) { // Device or Signal
+      return deviceMap[String(trigger.dstAddress)] || `Unknown Device (${trigger.dstAddress})`;
+    } else if (trigger.activeType === 2) { // Group
+      return groupMap[trigger.dstAddress] || `Unknown Group (${trigger.dstAddress})`;
+    } else if (trigger.activeType === 8) { // Virtual Dry Contact
+      return `Virtual Contact (${trigger.dstAddress})`;
+    } else {
+      return `${trigger.dstAddress || 'Unknown'}`;
+    }
+  };
 
-// 修改动作显示组件
-const ActionItem = ({ action }) => (
-  <Typography variant="body2" sx={{ mb: 1 }}>
-    {`${action.conditionNum}: ${action.elementName || 'Action'}`}
-    <Typography variant="caption" component="div" color="text.secondary">
-      {`Duration: ${action.duration} ${action.durationType === 0 ? 'seconds' : 'minutes'}`}
+  return (
+    <Typography variant="body2" sx={{ mb: 1 }}>
+      {`${trigger.conditionNum}: ${trigger.elementName || 'Trigger'} (${TRIGGER_ACTIVE_TYPES[trigger.activeType] || 'Unknown'})`}
+      <Typography variant="caption" component="div" color="text.secondary">
+        {`Target: ${getTargetName()}, Channel: ${trigger.bindChannel || '-'}`}
+      </Typography>
     </Typography>
-  </Typography>
-);
+  );
+};
 
-// 自动化对话框组件 
+// 修改动作显示组件，添加设备名称显示
+const ActionItem = ({ action, deviceMap, groupMap }) => {
+  // 获取设备/组名称
+  const getTargetName = () => {
+    if (action.actionPowerType !== undefined) { // 确保有实际绑定目标
+      return deviceMap[String(action.dstAddress)] || 
+             groupMap[action.dstAddress] || 
+             `Unknown (${action.dstAddress})`;
+    }
+    return 'Not specified';
+  };
+
+  return (
+    <Typography variant="body2" sx={{ mb: 1 }}>
+      {`${action.conditionNum}: ${action.elementName || 'Action'}`}
+      <Typography variant="caption" component="div" color="text.secondary">
+        {`Target: ${getTargetName()}, Channel: ${action.bindChannel || '-'}`}
+      </Typography>
+      <Typography variant="caption" component="div" color="text.secondary">
+        {`Action: ${ACTION_POWER_TYPES[action.actionPowerType] || 'Unknown'}, Duration: ${action.duration} ${action.durationType === 0 ? 'seconds' : 'minutes'}`}
+      </Typography>
+    </Typography>
+  );
+};
+
+// 自动化对话框组件 - 传递 deviceMap 和 groupMap 给子组件
 export const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMap }) => {
   if (!automation) return null;
 
@@ -259,7 +291,7 @@ export const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMa
 
         <Divider sx={{ mb: 2 }} />
         
-        {/* Triggers Section */}
+        {/* Triggers Section - 传递 deviceMap 和 groupMap */}
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
             Triggers ({automation.triggerList?.length || 0})
@@ -272,7 +304,12 @@ export const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMa
           }}>
             {automation.triggerList?.length > 0 ? (
               automation.triggerList.map((trigger, idx) => (
-                <TriggerItem key={idx} trigger={trigger} />
+                <TriggerItem 
+                  key={idx} 
+                  trigger={trigger} 
+                  deviceMap={deviceMap} 
+                  groupMap={groupMap} 
+                />
               ))
             ) : (
               <Typography variant="body2" color="text.secondary" align="center">
@@ -282,7 +319,7 @@ export const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMa
           </Box>
         </Box>
         
-        {/* Actions Section */}
+        {/* Actions Section - 传递 deviceMap 和 groupMap */}
         <Box>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
             Actions ({automation.actionList?.length || 0})
@@ -295,7 +332,12 @@ export const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMa
           }}>
             {automation.actionList?.length > 0 ? (
               automation.actionList.map((action, idx) => (
-                <ActionItem key={idx} action={action} />
+                <ActionItem 
+                  key={idx} 
+                  action={action} 
+                  deviceMap={deviceMap} 
+                  groupMap={groupMap} 
+                />
               ))
             ) : (
               <Typography variant="body2" color="text.secondary" align="center">

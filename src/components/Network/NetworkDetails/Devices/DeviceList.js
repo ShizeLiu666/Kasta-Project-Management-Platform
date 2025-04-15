@@ -88,6 +88,21 @@ const DeviceList = ({ networkId }) => {
         }
       }
 
+      // 特殊处理 FOUR_OUTPUT (单独处理时)
+      if (productType === 'FOUR_OUTPUT') {
+        try {
+          const FourOutputComponent = require('./Tables/FOUR_OUTPUT/FOUR_OUTPUT').default;
+          return (
+            <Box key={productType} sx={{ mb: 3 }}>
+              <FourOutputComponent devices={devicesToRender} networkId={networkId} />
+            </Box>
+          );
+        } catch (err) {
+          console.error('Failed to load FOUR_OUTPUT component:', err);
+          return null;
+        }
+      }
+
       // 特殊处理 FIVE_BUTTON
       if (productType === 'FIVE_BUTTON') {
         const DeviceComponent = require('./Tables/FIVE_BUTTON/FIVE_BUTTON').default;
