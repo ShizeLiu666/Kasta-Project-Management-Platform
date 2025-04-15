@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -10,29 +10,10 @@ import {
   TableRow,
   Paper,
   Chip,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListSubheader,
-  Badge,
-  Collapse,
-  Button
+  Tooltip
 } from '@mui/material';
 import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
-import CloseIcon from '@mui/icons-material/Close';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import AlarmIcon from '@mui/icons-material/Alarm';
-import WorkIcon from '@mui/icons-material/Work';
-import SensorsIcon from '@mui/icons-material/Sensors';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AutomationRules from './AutomationRules';
 
 // 添加工具函数
@@ -94,204 +75,8 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
   );
 };
 
-// 简化自动化对话框
-const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMap }) => {
-  if (!automation) return null;
-
-  // 格式化时间显示
-  const formatTime = (hour, minute) => {
-    return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-  };
-
-  // 格式化星期显示
-  const formatWeekdays = (weekdays) => {
-    if (!weekdays) return 'None';
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return weekdays.split('').map((enabled, idx) => 
-      enabled === '1' ? days[idx] : null
-    ).filter(Boolean).join(', ');
-  };
-
-  const getTargetName = (item) => {
-    if (!item) return 'Unknown';
-    
-    switch (item.targetType) {
-      case 0: // Device
-        return deviceMap[String(item.targetId)] || `Unknown Device`;
-      case 1: // Group
-        return groupMap[item.targetId] || `Unknown Group`;
-      case 2: // Scene
-        return `Scene ${item.targetId}`;
-      default:
-        return `Unknown`;
-    }
-  };
-
-  return (
-    <Dialog 
-      open={open} 
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-    >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        bgcolor: '#f5f5f5',
-        borderBottom: '1px solid #e0e0e0'
-      }}>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {automation.name || `Case ${automation.caseIdx}`}
-          </Typography>
-          <Chip 
-            label={automation.state ? "Active" : "Inactive"} 
-            color={automation.state ? "success" : "default"}
-            size="small"
-            sx={{ ml: 1 }}
-          />
-        </Box>
-        <IconButton onClick={onClose} size="small">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-      
-      <DialogContent sx={{ pt: 2, pb: 3 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            Basic Information
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 2, mb: 2 }}>
-            <Box>
-              <Typography variant="caption" color="text.secondary">Rule Logic</Typography>
-              <Typography variant="body2">
-                {automation.logicOr ? "OR Logic" : "AND Logic"}
-              </Typography>
-            </Box>
-            
-            <Box>
-              <Typography variant="caption" color="text.secondary">Time Schedule</Typography>
-              <Typography variant="body2">
-                {automation.periodEnable ? (
-                  `${formatTime(automation.startHour, automation.startMinute)} - ${formatTime(automation.stopHour, automation.stopMinute)}`
-                ) : (
-                  "No time restriction"
-                )}
-              </Typography>
-            </Box>
-            
-            <Box>
-              <Typography variant="caption" color="text.secondary">Active Days</Typography>
-              <Typography variant="body2">
-                {formatWeekdays(automation.weekdays)}
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        <Divider sx={{ mb: 2 }} />
-        
-        {/* Triggers Section */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            Triggers ({automation.triggers?.length || 0})
-          </Typography>
-          
-          <Box sx={{ 
-            border: '1px solid #e0e0e0',
-            borderRadius: 1,
-            mb: 2
-          }}>
-            {automation.triggers?.length > 0 ? (
-              <List dense disablePadding>
-                {automation.triggers.map((trigger, idx) => (
-                  <ListItem 
-                    key={idx}
-                    divider={idx < automation.triggers.length - 1}
-                    sx={{ 
-                      py: 1,
-                      bgcolor: idx % 2 === 0 ? '#f9f9f9' : 'white'
-                    }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {`${trigger.conditionNum}. ${trigger.elementName || 'Condition'}`}
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography variant="caption" color="text.secondary">
-                          {`Type: ${trigger.activeType === 0 ? 'High level' : 'Low level'}`}
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Box sx={{ p: 2, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  No triggers defined
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </Box>
-        
-        {/* Actions Section */}
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            Actions ({automation.actions?.length || 0})
-          </Typography>
-          
-          <Box sx={{ 
-            border: '1px solid #e0e0e0',
-            borderRadius: 1
-          }}>
-            {automation.actions?.length > 0 ? (
-              <List dense disablePadding>
-                {automation.actions.map((action, idx) => (
-                  <ListItem 
-                    key={idx}
-                    divider={idx < automation.actions.length - 1}
-                    sx={{ 
-                      py: 1,
-                      bgcolor: idx % 2 === 0 ? '#f9f9f9' : 'white'
-                    }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {getTargetName(action)}
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography variant="caption" color="text.secondary">
-                          Duration: {action.duration} {action.durationType === 0 ? 'seconds' : 'minutes'}
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Box sx={{ p: 2, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  No actions defined
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </Box>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 const SIX_INPUT = ({ devices, networkId }) => {
-  const [selectedAutomation, setSelectedAutomation] = useState(null);
-  const [automationDialogOpen, setAutomationDialogOpen] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState(null);
   
   // 使用 options 获取数据
   const { data: allDevices = [] } = useNetworkDevices(networkId, {
@@ -589,14 +374,14 @@ const SIX_INPUT = ({ devices, networkId }) => {
 
     return processedDevices.map(device => {
       const specificAttributes = device.specificAttributes || {};
-      let automation = specificAttributes.automation || [];
+      let automts = specificAttributes.automts || [];
       
-      if (typeof automation === 'string') {
+      if (typeof automts === 'string') {
         try {
-          automation = JSON.parse(automation);
+          automts = JSON.parse(automts);
         } catch (e) {
-          console.error('Failed to parse automation string:', e);
-          automation = [];
+          console.error('Failed to parse automts string:', e);
+          automts = [];
         }
       }
 
@@ -604,21 +389,23 @@ const SIX_INPUT = ({ devices, networkId }) => {
         ...device,
         specificAttributes: {
           ...specificAttributes,
-          automation
+          automts
         }
       };
     });
   }, [processedDevices]);
 
-  const handleOpenAutomationDialog = (automation) => {
-    setSelectedAutomation(automation);
-    setAutomationDialogOpen(true);
+  // 当用户点击设备行时选择设备
+  const handleSelectDevice = (device) => {
+    setSelectedDevice(device);
   };
 
-  const handleCloseAutomationDialog = () => {
-    setAutomationDialogOpen(false);
-    setSelectedAutomation(null);
-  };
+  useEffect(() => {
+    // 初始化时选择第一个设备
+    if (processedDevicesWithAutomation?.length > 0 && !selectedDevice) {
+      setSelectedDevice(processedDevicesWithAutomation[0]);
+    }
+  }, [processedDevicesWithAutomation, selectedDevice]);
 
   if (!processedDevicesWithAutomation || processedDevicesWithAutomation.length === 0) return null;
 
@@ -638,152 +425,172 @@ const SIX_INPUT = ({ devices, networkId }) => {
         </Typography>
       </Box>
 
-      <TableContainer
-        component={Paper}
-        elevation={0}
-        variant="outlined"
-        sx={{
-          borderRadius: 2,
-          overflow: 'hidden',
-          borderColor: 'rgba(224, 224, 224, 0.7)'
-        }}
-      >
-        <Table size="medium" sx={{ tableLayout: 'fixed' }}>
-          <TableHead>
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-              <TableCell
-                width="15%"
-                sx={{
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Device
-              </TableCell>
-              <TableCell
-                colSpan={6}
-                align="center"
-                width="60%"
-                sx={{
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Input Terminals
-              </TableCell>
-              <TableCell
-                width="25%"
-                align="center"
-                sx={{
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Automation Rules
-              </TableCell>
-            </TableRow>
-
-            <TableRow>
-              <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-              {[1, 2, 3, 4, 5, 6].map(terminalIndex => {
-                const hasTerminal = anyDeviceHasTerminal(terminalIndex);
-                return (
+      {/* 使用类似于 FIVE_INPUT.js 的表格布局 */}
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        {/* 左侧表格 - 占据 75% 宽度 */}
+        <Box sx={{ width: '75%' }}>
+          <TableContainer
+            component={Paper}
+            elevation={0}
+            variant="outlined"
+            sx={{
+              borderRadius: 2,
+              overflow: 'hidden',
+              borderColor: 'rgba(224, 224, 224, 0.7)'
+            }}
+          >
+            <Table size="medium" sx={{ tableLayout: 'fixed' }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                   <TableCell
-                    key={terminalIndex}
-                    align="center"
+                    width="20%"
                     sx={{
-                      padding: '8px',
-                      borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 500,
+                      padding: '12px 16px'
                     }}
                   >
-                    <Chip
-                      label={`Input ${terminalIndex}`}
-                      size="small"
-                      sx={{
-                        bgcolor: hasTerminal ? '#fbcd0b' : '#9e9e9e',
-                        color: '#ffffff',
-                        fontWeight: 500,
-                        padding: '0 2px'
-                      }}
-                    />
+                    Device
                   </TableCell>
-                );
-              })}
-              <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-            </TableRow>
-          </TableHead>
+                  <TableCell
+                    colSpan={6}
+                    align="center"
+                    width="80%"
+                    sx={{
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 500,
+                      padding: '12px 16px'
+                    }}
+                  >
+                    Input Terminals
+                  </TableCell>
+                </TableRow>
 
-          <TableBody>
-            {processedDevicesWithAutomation.map((device, deviceIndex) => (
-              <TableRow
-                key={device.deviceId}
-                sx={{ bgcolor: 'white' }}
-              >
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{
-                    padding: '16px',
-                    borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      {device.name}
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                <TableRow>
+                  <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
+                  {[1, 2, 3, 4, 5, 6].map(terminalIndex => {
+                    const hasTerminal = anyDeviceHasTerminal(terminalIndex);
+                    return (
+                      <TableCell
+                        key={terminalIndex}
+                        align="center"
+                        sx={{
+                          padding: '8px',
+                          borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
+                        }}
                       >
-                        - {device.deviceId}
-                      </Typography>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {device.appearanceShortname}
-                    </Typography>
-                  </Box>
-                </TableCell>
+                        <Chip
+                          label={`Input ${terminalIndex}`}
+                          size="small"
+                          sx={{
+                            bgcolor: hasTerminal ? '#fbcd0b' : '#9e9e9e',
+                            color: '#ffffff',
+                            fontWeight: 500,
+                            padding: '0 2px'
+                          }}
+                        />
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </TableHead>
 
-                {[1, 2, 3, 4, 5, 6].map(terminalIndex => {
-                  const terminal = getTerminalInfo(device, terminalIndex);
-                  return (
+              <TableBody>
+                {processedDevicesWithAutomation.map((device, deviceIndex) => (
+                  <TableRow
+                    key={device.deviceId}
+                    sx={{ 
+                      bgcolor: 'white',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleSelectDevice(device)}
+                  >
                     <TableCell
-                      key={terminalIndex}
-                      align="center"
+                      component="th"
+                      scope="row"
                       sx={{
-                        padding: '8px',
-                        width: `${60 / 6}%`,
-                        height: '260px',
+                        padding: '16px',
                         borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                       }}
                     >
-                      {renderTerminalInfo(terminal)}
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {device.name}
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                          >
+                            - {device.deviceId}
+                          </Typography>
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {device.appearanceShortname}
+                        </Typography>
+                      </Box>
                     </TableCell>
-                  );
-                })}
 
-                {/* Automation Rules Cell - 使用新组件 */}
-                <TableCell
-                  align="center"
-                  sx={{
-                    padding: '8px',
-                    borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                  }}
-                >
-                  <AutomationRules 
-                    device={device} 
-                    deviceMap={deviceMap} 
-                    groupMap={groupMap} 
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                    {[1, 2, 3, 4, 5, 6].map(terminalIndex => {
+                      const terminal = getTerminalInfo(device, terminalIndex);
+                      return (
+                        <TableCell
+                          key={terminalIndex}
+                          align="center"
+                          sx={{
+                            padding: '8px',
+                            width: `${80 / 6}%`,
+                            height: '200px',
+                            borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                          }}
+                        >
+                          {renderTerminalInfo(terminal)}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        {/* 右侧自动化规则 - 占据 25% 宽度 */}
+        <Box sx={{ width: '25%' }}>
+          {selectedDevice && (
+            <Paper
+              elevation={0}
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                overflow: 'hidden',
+                borderColor: 'rgba(224, 224, 224, 0.7)',
+                bgcolor: '#ffffff',
+                height: '369px', // 固定高度与表格匹配
+              }}
+            >
+              <Box sx={{
+                bgcolor: '#f5f5f5',
+                p: 1.5,
+                borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                  Automation Rules
+                </Typography>
+              </Box>
+              <Box sx={{ height: 'calc(369px - 52px)' }}> {/* 减去标题的高度 */}
+                <AutomationRules
+                  device={selectedDevice}
+                  deviceMap={deviceMap}
+                  groupMap={groupMap}
+                />
+              </Box>
+            </Paper>
+          )}
+        </Box>
+      </Box>
     </Box>
   );
 };

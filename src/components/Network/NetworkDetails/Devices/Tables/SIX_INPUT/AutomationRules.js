@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -7,7 +7,8 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
-  Divider
+  Divider,
+  Paper
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -36,17 +37,16 @@ const ACTION_POWER_TYPES = {
 // 自动化卡片组件
 export const AutomationCard = ({ device, onOpenDialog }) => {
   const automation = device.specificAttributes?.automts || [];
+  const scrollContainerRef = useRef(null);
   
+  // 如果没有自动化规则，显示简单的提示消息
   if (!automation.length) {
     return (
       <Box sx={{ 
-        padding: '12px',
-        borderRadius: 1.5,
-        bgcolor: '#f8f9fa',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        height: '260px',
-        width: '100%',
+        padding: '16px',
+        height: '100%',
         display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center'
       }}>
@@ -63,71 +63,108 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
 
   return (
     <Box sx={{ 
-      padding: '12px',
-      borderRadius: 1.5,
-      bgcolor: '#f8f9fa',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-      height: '260px',
       width: '100%',
+      height: '100%',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'hidden'
     }}>
-      <Typography
-        variant="subtitle2"
-        sx={{
-          color: '#2c3e50',
-          fontWeight: 600,
-          borderBottom: '1px solid #edf2f7',
-          pb: 1,
-          mb: 1
+      <Box 
+        ref={scrollContainerRef}
+        sx={{ 
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          flex: 1,
+          height: '100%',
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: '#f1f1f1',
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#c1c1c1',
+            borderRadius: '10px',
+            '&:hover': {
+              backgroundColor: '#a0a0a0',
+            },
+          }
         }}
       >
-        Automation Rules ({automation.length})
-      </Typography>
-      
-      <Box sx={{ 
-        overflowY: 'auto', 
-        flex: 1,
-        pr: 1
-      }}>
-        {automation.map((rule, index) => (
-          <Box
-            key={index}
-            onClick={() => onOpenDialog(rule)}
-            sx={{ 
-              p: 1,
-              mb: 1,
-              border: '1px solid #e2e8f0',
-              borderRadius: 1,
-              cursor: 'pointer',
-              '&:hover': { 
-                bgcolor: '#f1f5f9'
-              }
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-                {rule.name || `Case ${rule.caseIdx}`}
+        <Box sx={{ p: 1 }}>
+          {automation.map((rule, index) => (
+            <Box
+              key={index}
+              onClick={() => onOpenDialog(rule)}
+              sx={{ 
+                p: 1.5,
+                borderBottom: index < automation.length - 1 ? '1px solid #e0e0e0' : 'none',
+                cursor: 'pointer',
+                '&:hover': { bgcolor: '#f5f5f5' }
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                  {rule.name || `Case ${rule.caseIdx}`}
+                </Typography>
                 <Chip 
                   label={rule.state ? "Active" : "Inactive"} 
                   size="small" 
                   color={rule.state ? "success" : "default"}
-                  sx={{ height: 20, ml: 1, '& .MuiChip-label': { px: 1, fontSize: '0.6rem' } }}
+                  sx={{ height: 20, '& .MuiChip-label': { px: 1, fontSize: '0.6rem' } }}
                 />
+              </Box>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 0.5 }}>
+                {rule.triggerList?.length || 0} trigger(s), {rule.actionList?.length || 0} action(s)
               </Typography>
+              
+              {rule.periodEnable === 1 && (
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                  Schedule: {`${String(rule.startHour).padStart(2, '0')}:${String(rule.startMinute).padStart(2, '0')} - ${String(rule.stopHour).padStart(2, '0')}:${String(rule.stopMinute).padStart(2, '0')}`}
+                </Typography>
+              )}
+
+              {/* 添加触发器和动作的简要信息 */}
+              {rule.triggerList && rule.triggerList.length > 0 && (
+                <Box sx={{ mt: 1, pt: 0.5, borderTop: '1px dashed #e0e0e0' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#2c3e50', fontSize: '0.75rem' }}>
+                    Triggers:
+                  </Typography>
+                  {rule.triggerList.slice(0, 2).map((trigger, idx) => (
+                    <Typography key={idx} variant="caption" component="div" color="text.secondary" sx={{ mt: 0.3 }}>
+                      • {trigger.elementName || `Trigger ${trigger.conditionNum}`} ({TRIGGER_ACTIVE_TYPES[trigger.activeType]})
+                    </Typography>
+                  ))}
+                  {rule.triggerList.length > 2 && (
+                    <Typography variant="caption" color="text.secondary">
+                      ...and {rule.triggerList.length - 2} more
+                    </Typography>
+                  )}
+                </Box>
+              )}
+
+              {rule.actionList && rule.actionList.length > 0 && (
+                <Box sx={{ mt: 0.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: '#2c3e50', fontSize: '0.75rem' }}>
+                    Actions:
+                  </Typography>
+                  {rule.actionList.slice(0, 2).map((action, idx) => (
+                    <Typography key={idx} variant="caption" component="div" color="text.secondary" sx={{ mt: 0.3 }}>
+                      • {action.elementName || `Action ${action.conditionNum}`} ({action.duration} {action.durationType === 0 ? 'sec' : 'min'})
+                    </Typography>
+                  ))}
+                  {rule.actionList.length > 2 && (
+                    <Typography variant="caption" color="text.secondary">
+                      ...and {rule.actionList.length - 2} more
+                    </Typography>
+                  )}
+                </Box>
+              )}
             </Box>
-            
-            <Typography variant="caption" color="text.secondary">
-              {rule.triggerList?.length || 0} trigger(s), {rule.actionList?.length || 0} action(s)
-            </Typography>
-            
-            {rule.periodEnable === 1 && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                {`${String(rule.startHour).padStart(2, '0')}:${String(rule.startMinute).padStart(2, '0')} - ${String(rule.stopHour).padStart(2, '0')}:${String(rule.stopMinute).padStart(2, '0')}`}
-              </Typography>
-            )}
-          </Box>
-        ))}
+          ))}
+        </Box>
       </Box>
     </Box>
   );
@@ -175,7 +212,8 @@ export const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMa
         justifyContent: 'space-between',
         alignItems: 'center',
         bgcolor: '#f5f5f5',
-        borderBottom: '1px solid #e0e0e0'
+        borderBottom: '1px solid #e0e0e0',
+        py: 1.5
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -287,7 +325,7 @@ const AutomationRules = ({ device, deviceMap, groupMap }) => {
   };
 
   return (
-    <>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <AutomationCard 
         device={device} 
         onOpenDialog={handleOpenAutomationDialog}
@@ -299,7 +337,7 @@ const AutomationRules = ({ device, deviceMap, groupMap }) => {
         deviceMap={deviceMap}
         groupMap={groupMap}
       />
-    </>
+    </Box>
   );
 };
 
