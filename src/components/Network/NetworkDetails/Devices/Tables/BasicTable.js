@@ -77,7 +77,6 @@ const BasicTable = ({
             >
                 {/* 3. 可折叠的标题区域 */}
                 <Box 
-                    onClick={() => setExpanded(!expanded)}
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -85,7 +84,6 @@ const BasicTable = ({
                         padding: '12px 16px',
                         backgroundColor: headerBgColor,
                         borderBottom: expanded ? `1px solid ${borderColor}` : 'none',
-                        cursor: 'pointer',
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -125,10 +123,7 @@ const BasicTable = ({
                         />
                         <IconButton 
                             size="small"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setExpanded(!expanded);
-                            }}
+                            onClick={() => setExpanded(!expanded)}
                         >
                             {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         </IconButton>

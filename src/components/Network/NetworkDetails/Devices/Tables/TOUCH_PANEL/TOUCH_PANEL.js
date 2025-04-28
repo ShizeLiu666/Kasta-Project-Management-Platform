@@ -369,7 +369,6 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
       >
         {/* 标题区域 - 与 BasicTable 一致的可点击标题栏 */}
         <Box 
-          onClick={() => setExpanded(!expanded)}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -377,7 +376,6 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
             padding: '12px 16px',
             backgroundColor: '#f8f9fa',
             borderBottom: expanded ? '1px solid #dee2e6' : 'none',
-            cursor: 'pointer',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -410,10 +408,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
             />
             <IconButton 
               size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
+              onClick={() => setExpanded(!expanded)}
             >
               {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>

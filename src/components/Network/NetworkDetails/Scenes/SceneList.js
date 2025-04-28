@@ -163,7 +163,6 @@ const SceneItem = ({ scene, networkId }) => {
       >
         {/* 标题区域 */}
         <Box 
-          onClick={() => setExpanded(!expanded)}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -171,7 +170,6 @@ const SceneItem = ({ scene, networkId }) => {
             padding: '12px 16px',
             backgroundColor: '#f8f9fa',
             borderBottom: expanded ? '1px solid rgba(224, 224, 224, 0.7)' : 'none',
-            cursor: 'pointer',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -212,10 +210,7 @@ const SceneItem = ({ scene, networkId }) => {
             </Stack>
             <IconButton 
               size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
+              onClick={() => setExpanded(!expanded)}
             >
               {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>

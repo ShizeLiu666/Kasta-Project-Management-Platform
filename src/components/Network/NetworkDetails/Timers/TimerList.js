@@ -1,6 +1,28 @@
-import React from 'react';
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import { useNetworkTimers } from '../useNetworkQueries';
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper, 
+  Chip,
+  Collapse,
+  IconButton,
+  Switch
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { useNetworkTimers, useNetworkDevices, useNetworkGroups } from '../useNetworkQueries';
+
+// 导入自定义图标
+import deviceIcon from '../../../../assets/icons/NetworkOverview/Device.png';
+import groupIcon from '../../../../assets/icons/NetworkOverview/Group.png';
 
 // 辅助函数
 const formatTime = (hour, min, second) => {
@@ -19,6 +41,14 @@ const formatAction = (action) => {
   }
 };
 
+const getActionColor = (action) => {
+  switch (action) {
+    case 0: return '#f44336'; // 红色表示关闭
+    case 1: return '#4caf50'; // 绿色表示开启
+    default: return '#9e9e9e'; // 灰色表示未知
+  }
+};
+
 const formatEntityType = (type) => {
   switch (type) {
     case 0: return 'Device';
@@ -27,40 +57,42 @@ const formatEntityType = (type) => {
   }
 };
 
-// 抽取成单独的组件以优化性能
-const TimerItem = ({ timer }) => (
-  <TableRow
-    key={timer.timerId}
-    sx={{
-      '&:hover': { backgroundColor: '#f8f9fa' }
-    }}
-  >
-    <TableCell>
-      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-        {timer.name || 'Unnamed Timer'}
-      </Typography>
-    </TableCell>
-    <TableCell>
-      <Typography variant="body2" sx={{ color: '#95a5a6' }}>
-        {formatTime(timer.hour, timer.minute, timer.second)}
-      </Typography>
-    </TableCell>
-    <TableCell>{formatAction(timer.action)}</TableCell>
-    <TableCell>{formatEntityType(timer.entityType)}</TableCell>
-    <TableCell>
-      <Typography variant="body2" sx={{ color: '#95a5a6' }}>
-        {timer.timerId || 'N/A'}
-      </Typography>
-    </TableCell>
-  </TableRow>
-);
-
 const TimerList = ({ networkId }) => {
+  const [expanded, setExpanded] = useState(true);
+  
   const { 
     data: timers = [], 
     isLoading, 
     error,
   } = useNetworkTimers(networkId);
+  
+  const { data: devices = [] } = useNetworkDevices(networkId);
+  const { data: groups = [] } = useNetworkGroups(networkId);
+  
+  // 创建设备和组的映射
+  const deviceMap = React.useMemo(() => {
+    return devices.reduce((acc, device) => {
+      acc[device.deviceId] = device.name;
+      return acc;
+    }, {});
+  }, [devices]);
+  
+  const groupMap = React.useMemo(() => {
+    return groups.reduce((acc, group) => {
+      acc[group.groupId] = group.name;
+      return acc;
+    }, {});
+  }, [groups]);
+  
+  // 根据entityType和ID获取目标名称
+  const getTargetName = (timer) => {
+    if (timer.entityType === 0 && timer.deviceId) {
+      return deviceMap[timer.deviceId] || `Device ${timer.deviceId}`;
+    } else if (timer.entityType === 1 && timer.groupId) {
+      return groupMap[timer.groupId] || `Group ${timer.groupId}`;
+    }
+    return '-';
+  };
 
   if (isLoading) {
     return (
@@ -101,33 +133,171 @@ const TimerList = ({ networkId }) => {
   }
 
   return (
-    <Box>
-      <TableContainer
-        component={Paper}
+    <Box sx={{ mb: 4 }}>
+      <Paper 
+        elevation={0}
+        variant="outlined" 
         sx={{
-          boxShadow: 'none',
-          border: '1px solid #dee2e6',
-          borderRadius: '8px',
-          width: '100%'
+          borderRadius: 2,
+          overflow: 'hidden',
+          borderColor: 'rgba(224, 224, 224, 0.7)'
         }}
       >
+        {/* 标题区域 - 一致的可点击标题栏 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <AccessTimeIcon sx={{ color: '#fbcd0b', mr: 1.5 }} />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
+              Timers
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${timers.length} ${timers.length === 1 ? 'Timer' : 'Timers'}`}
+              size="small"
+        sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* 可折叠的表格内容 */}
+        <Collapse in={expanded}>
+          <TableContainer component={Box}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Timer Name</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Time</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Action</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Entity Type</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Timer ID</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Timer Name</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Target</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {timers.map((timer) => (
-              <TimerItem key={timer.timerId} timer={timer} />
-            ))}
+                {timers.map((timer) => {
+                  const targetName = getTargetName(timer);
+                  const actionColor = getActionColor(timer.action);
+                  
+                  return (
+                    <TableRow
+                      key={timer.timerId}
+                      sx={{
+                        '&:hover': { backgroundColor: '#f8f9fa' }
+                      }}
+                    >
+                      {/* 名称列 */}
+                      <TableCell>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {timer.name || 'Unnamed Timer'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block' }}>
+                          ID: {timer.timerId || 'N/A'}
+                        </Typography>
+                      </TableCell>
+                      
+                      {/* 时间列 */}
+                      <TableCell>
+                        <Chip 
+                          icon={<AccessTimeIcon />}
+                          label={formatTime(timer.hour, timer.min, timer.second)}
+                          size="small"
+                          sx={{ 
+                            backgroundColor: '#edf2f7', 
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { color: '#718096' }
+                          }}
+                        />
+                      </TableCell>
+                      
+                      {/* 动作列 */}
+                      <TableCell>
+                        <Chip 
+                          icon={<PowerSettingsNewIcon />}
+                          label={formatAction(timer.action)}
+                          size="small"
+                          sx={{ 
+                            backgroundColor: `${actionColor}20`, // 使用透明度
+                            color: actionColor,
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { color: actionColor }
+                          }}
+                        />
+                      </TableCell>
+                      
+                      {/* 目标列 - 使用自定义图标 */}
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <img 
+                            src={timer.entityType === 0 ? deviceIcon : groupIcon}
+                            alt={timer.entityType === 0 ? "Device" : "Group"}
+                            style={{ 
+                              width: 20, 
+                              height: 20, 
+                              marginRight: 8,
+                              objectFit: 'contain'
+                            }}
+                          />
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {targetName}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block' }}>
+                              {formatEntityType(timer.entityType)}
+                              {timer.channel !== undefined && timer.channel !== null && timer.channel !== -1 && (
+                                ` • Channel ${timer.channel}`
+                              )}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      
+                      {/* 状态列 */}
+                      <TableCell>
+                        <Switch 
+                          size="small" 
+                          checked={true} // 这里应该使用timer的实际状态，这里假设都是激活的
+                          disabled={false} // 如果没有权限可以设置为disabled
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
           </TableBody>
         </Table>
       </TableContainer>
+        </Collapse>
+      </Paper>
     </Box>
   );
 };

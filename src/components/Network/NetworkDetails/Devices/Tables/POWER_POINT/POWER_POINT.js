@@ -101,7 +101,6 @@ const POWER_POINT = ({ devices }) => {
       >
         {/* 标题区域 - 与 BasicTable 一致 */}
         <Box 
-          onClick={() => setExpanded(!expanded)}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -109,7 +108,6 @@ const POWER_POINT = ({ devices }) => {
             padding: '12px 16px',
             backgroundColor: '#f8f9fa',
             borderBottom: expanded ? '1px solid #dee2e6' : 'none',
-            cursor: 'pointer',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -142,10 +140,7 @@ const POWER_POINT = ({ devices }) => {
             />
             <IconButton 
               size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
+              onClick={() => setExpanded(!expanded)}
             >
               {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>

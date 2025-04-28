@@ -30,7 +30,6 @@ const GroupItem = ({ group, networkId }) => {
       >
         {/* 组标题和展开/折叠按钮 */}
         <Box 
-          onClick={() => setExpanded(!expanded)}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -38,7 +37,6 @@ const GroupItem = ({ group, networkId }) => {
             padding: '12px 16px',
             backgroundColor: '#f8f9fa',
             borderBottom: expanded ? '1px solid rgba(224, 224, 224, 0.7)' : 'none',
-            cursor: 'pointer',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -67,10 +65,7 @@ const GroupItem = ({ group, networkId }) => {
             />
             <IconButton 
               size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
+              onClick={() => setExpanded(!expanded)}
             >
               {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>

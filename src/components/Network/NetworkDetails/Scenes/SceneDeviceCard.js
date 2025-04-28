@@ -131,7 +131,7 @@ const SceneDeviceCard = ({ device }) => {
           mb: 0.5
         }}
       >
-        <TruncatedText text={device.name} maxLength={15} />
+        <TruncatedText text={device.name} maxLength={16} />
       </Typography>
       
       {/* 设备ID */}

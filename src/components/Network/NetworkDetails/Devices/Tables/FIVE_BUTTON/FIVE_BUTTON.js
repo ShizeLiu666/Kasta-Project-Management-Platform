@@ -320,7 +320,6 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
       >
         {/* 标题区域 - 与 BasicTable 一致 */}
         <Box 
-          onClick={() => setExpanded(!expanded)}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -328,7 +327,6 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
             padding: '12px 16px',
             backgroundColor: '#f8f9fa',
             borderBottom: expanded ? '1px solid #dee2e6' : 'none',
-            cursor: 'pointer',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -361,10 +359,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
             />
             <IconButton 
               size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
+              onClick={() => setExpanded(!expanded)}
             >
               {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
