@@ -1,24 +1,13 @@
-import React from 'react';
-import { Box, Typography, Chip, Stack } from '@mui/material';
-import { useNetworkScenes, useSceneDevices } from '../useNetworkQueries';
-import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
-import CCT_DOWNLIGHT from '../Devices/Tables/CCT_DOWNLIGHT/CCT_DOWNLIGHT';
-import DIMMER from '../Devices/Tables/DIMMER/DIMMER';
-import FAN from '../Devices/Tables/FAN/FAN';
-import POWER_POINT from '../Devices/Tables/POWER_POINT/POWER_POINT';
-import RGB_CW from '../Devices/Tables/RGB_CW/RGB_CW';
-import SOCKET_RELAY from '../Devices/Tables/SOCKET_RELAY/SOCKET_RELAY';
-import THERMOSTAT from '../Devices/Tables/THERMOSTAT/THERMOSTAT';
-
-const DEVICE_COMPONENTS = {
-  CCT_DOWNLIGHT,
-  DIMMER,
-  FAN,
-  POWER_POINT,
-  RGB_CW,
-  SOCKET_RELAY,
-  THERMOSTAT
-};
+import React, { useState } from 'react';
+import { 
+  Box, Typography, Chip, Grid, Stack, Paper, 
+  Collapse, IconButton
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { useNetworkScenes, useSceneDevices, useNetworkGroups } from '../useNetworkQueries';
+import SceneDeviceCard from './SceneDeviceCard';
+import SceneGroupCard from './SceneGroupCard';
 
 const SceneList = ({ networkId }) => {
   const { 
@@ -75,159 +64,228 @@ const SceneList = ({ networkId }) => {
 };
 
 const SceneItem = ({ scene, networkId }) => {
-  const { 
-    data: sceneItems = [],
-    isLoading,
-  } = useSceneDevices(networkId, scene.sceneId);
-
-  console.log('Scene Items Raw:', sceneItems);
-  console.log('NetworkId:', networkId);
-  console.log('SceneId:', scene.sceneId);
-
-  const itemStats = sceneItems.reduce((acc, item) => {
-    if (item.entityType === 0) {
-      acc.devices.push(item);
-    } else {
-      acc.groups.push(item);
-    }
-    return acc;
-  }, { devices: [], groups: [] });
-
-  console.log('Item Stats:', itemStats);
-
-  const devicesByProductType = itemStats.devices.reduce((acc, item) => {
-    console.log('Processing device item:', item);
-    console.log('Device Info:', item.deviceInfo);
-    
-    if (item.deviceInfo) {
-      const productType = PRODUCT_TYPE_MAP[item.deviceInfo.productType];
-      console.log('Product Type Mapping:', {
-        original: item.deviceInfo.productType,
-        mapped: productType
-      });
-      
-      if (productType) {
-        if (!acc[productType]) {
-          acc[productType] = [];
+  const [expanded, setExpanded] = useState(true);
+  
+  // 获取场景项目和网络中的所有组
+  const { data: sceneItems = [], isLoading: isLoadingSceneItems } = useSceneDevices(networkId, scene.sceneId);
+  const { data: allGroups = [], isLoading: isLoadingGroups } = useNetworkGroups(networkId);
+  
+  // 创建组映射，用于根据组ID查找组名
+  const groupsMap = React.useMemo(() => {
+    return allGroups.reduce((acc, group) => {
+      acc[group.groupId] = group;
+      return acc;
+    }, {});
+  }, [allGroups]);
+  
+  // 将场景项目分为设备和组
+  const itemStats = React.useMemo(() => {
+    return sceneItems.reduce((acc, item) => {
+      if (item.entityType === 0) {
+        // 设备
+        const deviceInfo = {
+          ...item,
+          productType: item.productType,
+          deviceId: item.deviceId,
+          name: item.deviceId, // 如果API没有返回name，我们暂时用deviceId代替
+          specificAttributes: item.attributes || {}
+        };
+        acc.devices.push(deviceInfo);
+      } else if (item.entityType === 1) {
+        // 组 - 使用groupsMap查找完整组信息
+        if (groupsMap[item.groupId]) {
+          const groupInfo = {
+            ...groupsMap[item.groupId],
+            attributes: item.attributes || {}
+          };
+          acc.groups.push(groupInfo);
+        } else {
+          // 如果在groupsMap中找不到，至少提供基本信息
+          const basicGroupInfo = {
+            groupId: item.groupId,
+            name: `Group ${item.groupId}`, // 临时名称
+            attributes: item.attributes || {}
+          };
+          acc.groups.push(basicGroupInfo);
         }
-        acc[productType].push({
-          ...item.deviceInfo,
-          specificAttributes: item.attributes
-        });
       }
-    }
-    return acc;
-  }, {});
+      return acc;
+    }, { devices: [], groups: [] });
+  }, [sceneItems, groupsMap]);
 
-  console.log('Devices By Product Type:', devicesByProductType);
+  const isLoading = isLoadingSceneItems || isLoadingGroups;
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <Typography>Loading scene devices...</Typography>
-      </Box>
-    );
-  }
-
-  if (!sceneItems || sceneItems.length === 0) {
-    return (
-      <Box sx={{ p: 2 }}>
-        <Typography color="text.secondary">
-          No devices in this scene
-        </Typography>
-      </Box>
-    );
-  }
-
-  const renderDeviceTable = (productType, devices) => {
-    try {
-      const deviceType = devices[0].deviceType;
-      const DeviceComponent = DEVICE_COMPONENTS[deviceType];
-      
-      if (!DeviceComponent) {
-        console.warn(`No component found for device type: ${deviceType}`);
-        return null;
-      }
-
-      return (
-        <Box key={`${productType}-${deviceType}`} sx={{ mb: 3 }}>
-          <DeviceComponent devices={devices} />
-        </Box>
-      );
-    } catch (error) {
-      console.error(`Failed to load component for ${productType}`, error);
-      return null;
-    }
-  };
-
-  return (
-    <Box key={scene.sceneId} sx={{ mb: 4 }}>
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-        mb: 2
-      }}>
-        <Typography
-          variant="h6"
+      <Box sx={{ mb: 4 }}>
+        <Paper 
+          elevation={0}
+          variant="outlined"
           sx={{
-            fontWeight: 500,
-            color: '#fbcd0b',
+            borderRadius: 2,
+            overflow: 'hidden',
+            borderColor: 'rgba(224, 224, 224, 0.7)'
           }}
         >
-          {scene.name}
-          <Typography
-            component="span"
-            variant="body2"
-            sx={{
-              color: '#95a5a6',
-              ml: 1,
-              fontWeight: 400
-            }}
-          >
-            - {scene.sceneId}
-          </Typography>
-        </Typography>
-
-        <Stack direction="row" spacing={1}>
-          {itemStats.devices.length > 0 && (
-            <Chip 
-              label={`Devices (${itemStats.devices.length})`}
-              size="small"
-              sx={{ 
-                backgroundColor: '#e1f5fe',
-                color: '#0288d1'
-              }}
-            />
-          )}
-          {itemStats.groups.length > 0 && (
-            <Chip 
-              label={`Groups (${itemStats.groups.length})`}
-              size="small"
-              sx={{ 
-                backgroundColor: '#f1f8e9',
-                color: '#558b2f'
-              }}
-            />
-          )}
-        </Stack>
-
-        {Object.entries(devicesByProductType)
-          .sort(([typeA], [typeB]) => typeA.localeCompare(typeB))
-          .map(([productType, devices]) => (
-            <React.Fragment key={productType}>
-              {renderDeviceTable(productType, devices)}
-            </React.Fragment>
-          ))}
-
-        {itemStats.groups.length > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" sx={{ mb: 1, color: '#558b2f' }}>
-              Groups
+          <Box sx={{
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+          }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {scene.name}
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ color: '#95a5a6', ml: 1, fontWeight: 400 }}
+              >
+                - {scene.sceneId}
+              </Typography>
             </Typography>
           </Box>
-        )}
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Typography>Loading scene details...</Typography>
+          </Box>
+        </Paper>
       </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ mb: 4 }}>
+      <Paper 
+        elevation={0}
+        variant="outlined"
+        sx={{
+          borderRadius: 2,
+          overflow: 'hidden',
+          borderColor: 'rgba(224, 224, 224, 0.7)'
+        }}
+      >
+        {/* 标题区域 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid rgba(224, 224, 224, 0.7)' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {scene.name}
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ color: '#95a5a6', ml: 1, fontWeight: 400 }}
+              >
+                - {scene.sceneId}
+              </Typography>
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Stack direction="row" spacing={1} sx={{ mr: 1 }}>
+              {itemStats.devices.length > 0 && (
+                <Chip 
+                  label={`Devices (${itemStats.devices.length})`}
+                  size="small"
+                  sx={{ 
+                    backgroundColor: 'rgba(251, 205, 11, 0.1)',
+                    color: '#fbcd0b'
+                  }}
+                />
+              )}
+              {itemStats.groups.length > 0 && (
+                <Chip 
+                  label={`Groups (${itemStats.groups.length})`}
+                  size="small"
+                  sx={{ 
+                    backgroundColor: 'rgba(0, 150, 136, 0.1)',
+                    color: '#009688'
+                  }}
+                />
+              )}
+            </Stack>
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
+        
+        {/* 可折叠内容区域 */}
+        <Collapse in={expanded}>
+          <Box sx={{ p: 2 }}>
+            {/* 如果没有设备或组，显示空消息 */}
+            {!itemStats.devices.length && !itemStats.groups.length ? (
+              <Typography align="center" py={2} color="text.secondary">
+                No devices or groups in this scene
+              </Typography>
+            ) : (
+              <Box>
+                {/* 设备区域 */}
+                {itemStats.devices.length > 0 && (
+                  <Box sx={{ mb: itemStats.groups.length > 0 ? 3 : 0 }}>
+                    <Typography 
+                      variant="subtitle2" 
+                      sx={{ 
+                        mb: 2, 
+                        fontWeight: 600,
+                        color: '#fbcd0b',
+                        pl: 1,
+                        borderLeft: '3px solid #fbcd0b'
+                      }}
+                    >
+                      Devices
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {itemStats.devices.map((device) => (
+                        <Grid item key={device.deviceId} xs={12} sm={6} md={3} lg={2}>
+                          <SceneDeviceCard device={device} />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                )}
+                
+                {/* 组区域 */}
+                {itemStats.groups.length > 0 && (
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      sx={{ 
+                        mb: 2, 
+                        fontWeight: 600,
+                        color: '#009688',
+                        pl: 1,
+                        borderLeft: '3px solid #009688'
+                      }}
+                    >
+                      Groups
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {itemStats.groups.map((group) => (
+                        <Grid item key={group.groupId} xs={12} sm={6} md={3} lg={2}>
+                          <SceneGroupCard group={group} />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Box>
+        </Collapse>
+      </Paper>
     </Box>
   );
 };

@@ -1,32 +1,5 @@
 import React from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
-import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
-
-// 工具函数 - 从产品类型获取设备类型
-const getDeviceTypeFromProductType = (productType) => {
-  const entry = Object.entries(PRODUCT_TYPE_MAP).find(([key, value]) => key === productType);
-  return entry ? entry[1] : null;
-};
-
-// 获取设备图标
-const getDeviceIcon = (productType) => {
-  try {
-    const deviceType = getDeviceTypeFromProductType(productType);
-    if (!deviceType) return null;
-    return require(`../../../../assets/icons/DeviceType/${deviceType}.png`);
-  } catch (error) {
-    return require(`../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
-  }
-};
-
-// 格式化显示文本
-const formatDisplayText = (text) => {
-  if (!text) return '';
-  return text
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-};
 
 // 截断文本组件
 const TruncatedText = ({ text, maxLength = 20 }) => {
@@ -63,13 +36,11 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
   );
 };
 
-const SceneDeviceCard = ({ device }) => {
-  // 获取设备属性
-  const productType = device.productType || device.product_type || device.type;
-  const deviceType = getDeviceTypeFromProductType(productType);
-  const iconSrc = getDeviceIcon(productType);
-  const deviceId = device.deviceId || device.did || device.id;
-
+const SceneGroupCard = ({ group }) => {
+  // 获取组图标
+  const iconSrc = require('../../../../assets/icons/NetworkOverview/Group.png');
+  const groupId = group.groupId || group.id;
+  
   return (
     <Box 
       sx={{ 
@@ -77,11 +48,11 @@ const SceneDeviceCard = ({ device }) => {
         display: 'flex', 
         flexDirection: 'column',
         padding: 2,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'rgba(0, 150, 136, 0.05)', // 更新为 #009688 的浅色背景
         borderRadius: 2,
       }}
     >
-      {/* 设备图标 */}
+      {/* 组图标 */}
       <Box 
         sx={{ 
           width: 40, 
@@ -95,7 +66,7 @@ const SceneDeviceCard = ({ device }) => {
       >
         <img 
           src={iconSrc}
-          alt={deviceType || 'Device'}
+          alt="Group"
           style={{ 
             maxWidth: '100%', 
             maxHeight: '100%',
@@ -104,13 +75,13 @@ const SceneDeviceCard = ({ device }) => {
         />
       </Box>
       
-      {/* 设备类型 */}
+      {/* 组类型标签 */}
       <Typography
         variant="caption"
         component="div"
         align="center"
         sx={{
-          color: '#666',
+          color: '#009688', // 更新为 #009688
           fontWeight: 500,
           letterSpacing: '0.2px',
           textTransform: 'uppercase',
@@ -118,10 +89,10 @@ const SceneDeviceCard = ({ device }) => {
           mb: 1
         }}
       >
-        {formatDisplayText(deviceType) || '未知设备'}
+        Group
       </Typography>
       
-      {/* 设备名称 */}
+      {/* 组名称 */}
       <Typography
         variant="body2"
         align="center"
@@ -131,10 +102,10 @@ const SceneDeviceCard = ({ device }) => {
           mb: 0.5
         }}
       >
-        <TruncatedText text={device.name} maxLength={15} />
+        <TruncatedText text={group.name} maxLength={15} />
       </Typography>
       
-      {/* 设备ID */}
+      {/* 组ID */}
       <Typography
         variant="caption"
         align="center"
@@ -143,12 +114,10 @@ const SceneDeviceCard = ({ device }) => {
           fontSize: '0.7rem'
         }}
       >
-        <TruncatedText text={deviceId} maxLength={16} />
+        <TruncatedText text={groupId} maxLength={16} />
       </Typography>
-
-      {/* 已移除属性信息部分 */}
     </Box>
   );
 };
 
-export default SceneDeviceCard;
+export default SceneGroupCard;

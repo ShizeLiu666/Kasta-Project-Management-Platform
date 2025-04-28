@@ -63,7 +63,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
   );
 };
 
-const SceneDeviceCard = ({ device }) => {
+const GroupDeviceCard = ({ device }) => {
   // 获取设备属性
   const productType = device.productType || device.product_type || device.type;
   const deviceType = getDeviceTypeFromProductType(productType);
@@ -145,10 +145,8 @@ const SceneDeviceCard = ({ device }) => {
       >
         <TruncatedText text={deviceId} maxLength={16} />
       </Typography>
-
-      {/* 已移除属性信息部分 */}
     </Box>
   );
 };
 
-export default SceneDeviceCard;
+export default GroupDeviceCard; 
