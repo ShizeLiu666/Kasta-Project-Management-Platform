@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography,
@@ -8,8 +8,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper
+  Paper,
+  Collapse,
+  IconButton,
+  Chip
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import t3DimmerIcon from '../../../../../../assets/icons/DeviceType/T3_DIMMER.png';
 
 const DimmerStatus = ({ label, value, type }) => {
@@ -81,14 +86,187 @@ const getDimmerIcon = (buttonCount) => {
   }
 };
 
-const T3_DIMMER = ({ devices }) => {
-  if (!devices || devices.length === 0) return null;
+// 创建单个调光器类型的组件
+const DimmerTypeGroup = ({ deviceType, devices }) => {
+  const [expanded, setExpanded] = useState(true);
+  const buttonCount = getButtonCount(deviceType);
 
   // 获取按键数量
-  const getButtonCount = (deviceType) => {
+  function getButtonCount(deviceType) {
     const match = deviceType.match(/KT(\d)RSB_DIMMER/);
     return match && match[1] ? parseInt(match[1]) : 3;
-  };
+  }
+
+  return (
+    <Box sx={{ mb: 4 }}>
+      <Paper 
+        elevation={0}
+        variant="outlined"
+        sx={{
+          borderRadius: 2,
+          overflow: 'hidden',
+          borderColor: 'rgba(224, 224, 224, 0.7)'
+        }}
+      >
+        {/* 标题区域 - 与 BasicTable 一致 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={getDimmerIcon(buttonCount)}
+              alt={`${buttonCount}-Button T3 Dimmer`}
+              style={{ width: 30, height: 30, marginRight: 12 }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#fbcd0b',
+              }}
+            >
+              {`${buttonCount}-Button T3 Dimmer`}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* 可折叠的表格内容 */}
+        <Collapse in={expanded}>
+          <TableContainer 
+            component={Box} 
+            sx={{ 
+              width: '100%',
+              '& .MuiTable-root': {
+                tableLayout: 'fixed',
+                width: '100%'
+              }
+            }}
+          >
+            <Table size="medium">
+              <TableHead>
+                <TableRow>
+                  <TableCell 
+                    width="25%" 
+                    sx={{ 
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
+                    }}
+                  >
+                    Device
+                  </TableCell>
+                  {Array.from({ length: buttonCount }, (_, i) => (
+                    <TableCell 
+                      key={i}
+                      width={`${75 / buttonCount}%`}
+                      align="center"
+                      sx={{ 
+                        borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                        fontWeight: 'bold',
+                        padding: '12px 16px'
+                      }}
+                    >
+                      {`Channel ${i + 1}`}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {devices.map((device, deviceIndex) => {
+                  const channels = Array.from({ length: buttonCount }, (_, i) => ({
+                    power: device.specificAttributes[`power${['First', 'Second', 'Third'][i]}`],
+                    level: device.specificAttributes[`level${['First', 'Second', 'Third'][i]}`],
+                    delay: device.specificAttributes[`delay${['First', 'Second', 'Third'][i]}`]
+                  }));
+
+                  return (
+                    <TableRow
+                      key={device.deviceId}
+                      sx={{ bgcolor: 'white' }}
+                    >
+                      <TableCell 
+                        component="th" 
+                        scope="row" 
+                        sx={{ 
+                          padding: '16px',
+                          borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            {device.name}
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                            >
+                              - {device.deviceId}
+                            </Typography>
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {device.appearanceShortname}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+
+                      {channels.map((channel, index) => (
+                        <TableCell 
+                          key={index}
+                          align="center"
+                          sx={{
+                            padding: '16px',
+                            borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                          }}
+                        >
+                          <DimmerChannel data={channel} />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Collapse>
+      </Paper>
+    </Box>
+  );
+};
+
+const T3_DIMMER = ({ devices }) => {
+  if (!devices || devices.length === 0) return null;
 
   // 按设备类型分组
   const devicesByType = devices.reduce((acc, device) => {
@@ -100,126 +278,15 @@ const T3_DIMMER = ({ devices }) => {
   }, {});
 
   return (
-    <>
-      {Object.entries(devicesByType).map(([deviceType, typeDevices]) => {
-        const buttonCount = getButtonCount(deviceType);
-        
-        return (
-          <Box key={deviceType} sx={{ mb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <img
-                src={getDimmerIcon(buttonCount)}
-                alt={`${buttonCount}-Button T3 Dimmer`}
-                style={{ width: 30, height: 30, marginRight: 12 }}
-              />
-              <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
-                {`${buttonCount}-Button T3 Dimmer`}
-              </Typography>
-              <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-                ({typeDevices.length} {typeDevices.length === 1 ? 'device' : 'devices'})
-              </Typography>
-            </Box>
-
-            <TableContainer 
-              component={Paper} 
-              elevation={0}
-              variant="outlined"
-              sx={{ 
-                borderRadius: 2,
-                overflow: 'hidden',
-                borderColor: 'rgba(224, 224, 224, 0.7)'
-              }}
-            >
-              <Table size="medium">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                    <TableCell 
-                      width="25%" 
-                      sx={{ 
-                        borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                        fontWeight: 500,
-                        padding: '12px 16px'
-                      }}
-                    >
-                      Device
-                    </TableCell>
-                    {Array.from({ length: buttonCount }, (_, i) => (
-                      <TableCell 
-                        key={i}
-                        width={`${75 / buttonCount}%`}
-                        align="center"
-                        sx={{ 
-                          borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                          fontWeight: 500,
-                          padding: '12px 16px'
-                        }}
-                      >
-                        {`Channel ${i + 1}`}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {typeDevices.map((device, deviceIndex) => {
-                    const channels = Array.from({ length: buttonCount }, (_, i) => ({
-                      power: device.specificAttributes[`power${['First', 'Second', 'Third'][i]}`],
-                      level: device.specificAttributes[`level${['First', 'Second', 'Third'][i]}`],
-                      delay: device.specificAttributes[`delay${['First', 'Second', 'Third'][i]}`]
-                    }));
-
-                    return (
-                      <TableRow
-                        key={device.deviceId}
-                        sx={{ bgcolor: 'white' }}
-                      >
-                        <TableCell 
-                          component="th" 
-                          scope="row" 
-                          sx={{ 
-                            padding: '16px',
-                            borderBottom: deviceIndex === typeDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                          }}
-                        >
-                          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                              {device.name}
-                              <Typography
-                                component="span"
-                                variant="body2"
-                                sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
-                              >
-                                - {device.deviceId}
-                              </Typography>
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {device.appearanceShortname}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-
-                        {channels.map((channel, index) => (
-                          <TableCell 
-                            key={index}
-                            align="center"
-                            sx={{
-                              padding: '16px',
-                              borderBottom: deviceIndex === typeDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                            }}
-                          >
-                            <DimmerChannel data={channel} />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        );
-      })}
-    </>
+    <Box>
+      {Object.entries(devicesByType).map(([deviceType, typeDevices]) => (
+        <DimmerTypeGroup 
+          key={deviceType} 
+          deviceType={deviceType} 
+          devices={typeDevices} 
+        />
+      ))}
+    </Box>
   );
 };
 

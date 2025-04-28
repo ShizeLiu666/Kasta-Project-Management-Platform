@@ -469,10 +469,12 @@ const NetworkComponent = () => {
                           setFilteredNetworks(filtered);
                         }}
                       />
-                      <RefreshButton
-                        onClick={handleRefresh}
-                        isLoading={isLoading}
-                      />
+                      <div style={{ marginLeft: '16px' }}>
+                        <RefreshButton
+                          onClick={handleRefresh}
+                          isLoading={isLoading}
+                        />
+                      </div>
                     </div>
                   </div>
 

@@ -14,28 +14,22 @@ const navigation = [
     allowedUserTypes: [99999, 1, 0],
   },
   {
-    title: "Project",
-    href: "/admin/project",
-    icon: 'bi-folder2-open',
-    allowedUserTypes: [99999, 1],
-  },
-  {
-    title: "Profile",
-    href: "/admin/profile",
-    icon: 'bi-person-circle',
-    allowedUserTypes: [99999, 1, 0],
-  },
-  {
     title: "Network",
     href: "/admin/network",
     icon: 'bi-house-door',
     allowedUserTypes: [99999, 1, 0],
   },
   {
+    title: "Project",
+    href: "/admin/project",
+    icon: 'bi-folder2-open',
+    allowedUserTypes: [99999, 1],
+  },
+  {
     title: "AuthCode",
     href: "/admin/auth-code-management",
     icon: 'bi-key',
-    allowedUserTypes: [99999],
+    superUserOnly: true,
   },
   {
     title: "Log",
@@ -43,11 +37,12 @@ const navigation = [
     icon: 'bi-clock-history',
     superUserOnly: true,
   },
-  // {
-  //   title: "Testing",
-  //   href: "/admin/testing",
-  //   icon: 'bi-file-earmark-excel-fill',
-  // },
+  {
+    title: "Profile",
+    href: "/admin/profile",
+    icon: 'bi-person-circle',
+    allowedUserTypes: [99999, 1, 0],
+  },
 ];
 
 const Sidebar = ({ userType, toggleSidebar, isCollapsed }) => {

@@ -418,7 +418,7 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
           alt="4-Output Device"
           style={{ width: 30, height: 30, marginRight: 12 }}
         />
-        <Typography variant="h6" sx={{ fontWeight: 500 }}>
+        <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
           4-Output Device
         </Typography>
         <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>

@@ -18,7 +18,7 @@ const CustomSearchBar = ({
   iconColor = "#6c757d",
   onFilter,
   debounceTime = 300,
-  showBorder = true
+  showBorder = true,
 }) => {
   const handleSearchChange = (e) => {
     const value = e.target.value;

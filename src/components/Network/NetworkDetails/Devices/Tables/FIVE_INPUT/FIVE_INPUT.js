@@ -10,8 +10,12 @@ import {
   TableRow,
   Paper,
   Chip,
-  Tooltip
+  Tooltip,
+  Collapse,
+  IconButton
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
@@ -73,6 +77,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 const FIVE_INPUT = ({ devices, networkId }) => {
+  const [expanded, setExpanded] = useState(true);
   const [processedDevices, setProcessedDevices] = useState([]);
 
   // 获取所有设备和组的数据
@@ -329,144 +334,201 @@ const FIVE_INPUT = ({ devices, networkId }) => {
       
       return (
     <Box sx={{ mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <img
-          src={require('../../../../../../assets/icons/DeviceType/FIVE_INPUT.png')}
-          alt="5-Input Device"
-          style={{ width: 30, height: 30, marginRight: 12 }}
-        />
-        <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
-          5-Input Device
-        </Typography>
-        <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-          ({processedDevices.length} {processedDevices.length === 1 ? 'device' : 'devices'})
-        </Typography>
-      </Box>
-
-      <TableContainer
-        component={Paper}
+      <Paper 
         elevation={0}
-          variant="outlined"
+        variant="outlined"
         sx={{
           borderRadius: 2,
           overflow: 'hidden',
           borderColor: 'rgba(224, 224, 224, 0.7)'
         }}
       >
-        <Table size="medium" sx={{ tableLayout: 'fixed' }}>
-          <TableHead>
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-              <TableCell
-                width="25%"
-                sx={{
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Device
-              </TableCell>
-              <TableCell
-                colSpan={5}
-                align="center"
+        {/* 标题区域 - 与 BasicTable 一致 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
           sx={{
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Input Bindings
-              </TableCell>
-            </TableRow>
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={require('../../../../../../assets/icons/DeviceType/FIVE_INPUT.png')}
+              alt="5-Input Device"
+              style={{ width: 30, height: 30, marginRight: 12 }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#fbcd0b',
+              }}
+            >
+              5-Input Device
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${processedDevices.length} ${processedDevices.length === 1 ? 'device' : 'devices'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
 
-            <TableRow>
-              <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-              {[1, 2, 3, 4, 5].map(inputIndex => {
-                const hasBinding = anyDeviceHasInputBinding(inputIndex);
-
-  return (
-                  <TableCell
-                    key={inputIndex}
-                    align="center"
-                    sx={{
-                      padding: '8px',
-                      borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
+        {/* 可折叠的表格内容 */}
+        <Collapse in={expanded}>
+          <TableContainer 
+            component={Box} 
+            sx={{ 
+              width: '100%',
+              '& .MuiTable-root': {
+                tableLayout: 'fixed',
+                width: '100%'
+              }
+            }}
+          >
+            <Table size="medium">
+              <TableHead>
+                {/* 表头第一行 */}
+                <TableRow>
+                  <TableCell 
+                    width="25%" 
+                    sx={{ 
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
                     }}
                   >
-                    <Chip
-                      label={`Input ${inputIndex}`}
-                      size="small"
-                      sx={{
-                        bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
-                        color: '#ffffff',
-                        fontWeight: 500,
-                        padding: '0 2px'
-                      }}
-                    />
+                    Device
                   </TableCell>
-                );
-              })}
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {processedDevices.map((device, deviceIndex) => (
-              <TableRow
-                key={device.deviceId}
-                sx={{
-                  bgcolor: 'white',
-                }}
-              >
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{
-                    padding: '16px',
-                    borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      {device.name}
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                  <TableCell 
+                    colSpan={5} 
+                    align="center"
+                    sx={{ 
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
+                    }}
+                  >
+                    Input Bindings
+                  </TableCell>
+                </TableRow>
+                
+                {/* 表头第二行 - 输入标签 */}
+                <TableRow>
+                  <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
+                  {[1, 2, 3, 4, 5].map(inputIndex => {
+                    const hasBinding = anyDeviceHasInputBinding(inputIndex);
+                    
+                    return (
+                      <TableCell 
+                        key={inputIndex} 
+                        align="center" 
+                        sx={{ 
+                          padding: '8px',
+                          borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
+                        }}
                       >
-                        - {device.deviceId}
-                      </Typography>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {device.appearanceShortname}
-                    </Typography>
-                  </Box>
-                </TableCell>
-
-                {[1, 2, 3, 4, 5].map(inputIndex => {
-                  const binding = getInputBinding(device, inputIndex);
-
-                  return (
-                    <TableCell
-                      key={inputIndex}
-                      align="center"
-                      sx={{
-                        padding: '8px',
-                        width: `${75 / 5}%`,
-                        height: '160px',
+                      <Chip 
+                        label={`Input ${inputIndex}`} 
+                        size="small" 
+                        sx={{ 
+                          bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
+                          color: '#ffffff',
+                          fontWeight: 500,
+                          padding: '0 2px'
+                        }}
+                      />
+                    </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </TableHead>
+              
+              <TableBody>
+                {/* 保持原有的表格内容逻辑 */}
+                {processedDevices.map((device, deviceIndex) => (
+                  <TableRow
+                    key={device.deviceId}
+                    sx={{ 
+                      bgcolor: 'white',
+                    }}
+                  >
+                    {/* 设备名称列 */}
+                    <TableCell 
+                      component="th" 
+                      scope="row" 
+                      sx={{ 
+                        padding: '16px',
                         borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                       }}
                     >
-                      {renderInputBinding(binding)}
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {device.name}
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                          >
+                            - {device.deviceId}
+                          </Typography>
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {device.appearanceShortname}
+                        </Typography>
+                      </Box>
                     </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                    
+                    {/* 输入绑定单元格 */}
+                    {[1, 2, 3, 4, 5].map(inputIndex => {
+                      const binding = getInputBinding(device, inputIndex);
+                      
+                      return (
+                        <TableCell 
+                          key={inputIndex} 
+                          align="center"
+                          sx={{
+                            padding: '8px',
+                            width: `${75 / 5}%`,
+                            height: '160px',
+                            borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                          }}
+                        >
+                          {renderInputBinding(binding)}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Collapse>
+      </Paper>
     </Box>
   );
 };
 
-export default FIVE_INPUT; 
+export default React.memo(FIVE_INPUT); 

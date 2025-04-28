@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography,
@@ -10,8 +10,12 @@ import {
   TableRow,
   Paper,
   Chip,
-  Tooltip
+  Tooltip,
+  Collapse,
+  IconButton
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
@@ -74,6 +78,8 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 const FIVE_BUTTON = ({ devices, networkId }) => {
+  const [expanded, setExpanded] = useState(true);
+  
   // 获取所有设备和组的数据，添加 options
   const { data: allDevices = [] } = useNetworkDevices(networkId, {
     enabled: !!networkId,
@@ -303,146 +309,199 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <img
-          src={require('../../../../../../assets/icons/DeviceType/FIVE_BUTTON.png')}
-          alt="5-Button Remote"
-          style={{ width: 30, height: 30, marginRight: 12 }}
-        />
-        <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
-          5-Button Remote
-        </Typography>
-        <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-          ({processedDevices.length} {processedDevices.length === 1 ? 'device' : 'devices'})
-        </Typography>
-      </Box>
-      
-      <TableContainer 
-        component={Paper} 
+      <Paper 
         elevation={0}
-        variant="outlined" 
-        sx={{ 
+        variant="outlined"
+        sx={{
           borderRadius: 2,
           overflow: 'hidden',
           borderColor: 'rgba(224, 224, 224, 0.7)'
         }}
       >
-        <Table size="medium" sx={{ tableLayout: 'fixed' }}>
-          <TableHead>
-            {/* 表头第一行 */}
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-              <TableCell 
-                width="25%" 
-                sx={{ 
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Device
-              </TableCell>
-              <TableCell 
-                colSpan={5} 
-                align="center"
-                sx={{ 
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Button Bindings
-              </TableCell>
-            </TableRow>
-            
-            {/* 表头第二行 - 按钮标签 */}
-            <TableRow>
-              <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-              {[1, 2, 3, 4, 5].map(buttonIndex => {
-                const hasBinding = anyDeviceHasButtonBinding(buttonIndex);
-                
-                return (
+        {/* 标题区域 - 与 BasicTable 一致 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={require('../../../../../../assets/icons/DeviceType/FIVE_BUTTON.png')}
+              alt="5-Button Remote"
+              style={{ width: 30, height: 30, marginRight: 12 }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#fbcd0b',
+              }}
+            >
+              5-Button Remote
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${processedDevices.length} ${processedDevices.length === 1 ? 'device' : 'devices'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* 可折叠的表格内容 */}
+        <Collapse in={expanded}>
+          <TableContainer 
+            component={Box} 
+            sx={{ 
+              width: '100%',
+              '& .MuiTable-root': {
+                tableLayout: 'fixed',
+                width: '100%'
+              }
+            }}
+          >
+            <Table size="medium">
+              <TableHead>
+                {/* 表头第一行 */}
+                <TableRow>
                   <TableCell 
-                    key={buttonIndex} 
-                    align="center" 
+                    width="25%" 
                     sx={{ 
-                      padding: '8px',
-                      borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
                     }}
                   >
-                  <Chip 
-                    label={`Button ${buttonIndex}`} 
-                    size="small" 
+                    Device
+                  </TableCell>
+                  <TableCell 
+                    colSpan={5} 
+                    align="center"
                     sx={{ 
-                        bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
-                      color: '#ffffff',
-                        fontWeight: 500,
-                        padding: '0 2px'
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
                     }}
-                  />
-                </TableCell>
-                );
-              })}
-            </TableRow>
-          </TableHead>
-          
-          <TableBody>
-            {processedDevices.map((device, deviceIndex) => (
-              <TableRow
-                key={device.deviceId}
-                sx={{ 
-                  bgcolor: 'white',
-                }}
-              >
-                {/* 设备名称列 */}
-                <TableCell 
-                  component="th" 
-                  scope="row" 
-                  sx={{ 
-                    padding: '16px',
-                    borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      {device.name}
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
-                      >
-                        - {device.deviceId}
-                      </Typography>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {device.appearanceShortname}
-                    </Typography>
-                  </Box>
-                </TableCell>
+                  >
+                    Button Bindings
+                  </TableCell>
+                </TableRow>
                 
-                {/* 按钮绑定单元格 */}
-                {[1, 2, 3, 4, 5].map(buttonIndex => {
-                  const binding = getButtonBinding(device, buttonIndex);
-                  
-                  return (
+                {/* 表头第二行 - 按钮标签 */}
+                <TableRow>
+                  <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
+                  {[1, 2, 3, 4, 5].map(buttonIndex => {
+                    const hasBinding = anyDeviceHasButtonBinding(buttonIndex);
+                    
+                    return (
+                      <TableCell 
+                        key={buttonIndex} 
+                        align="center" 
+                        sx={{ 
+                          padding: '8px',
+                          borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
+                        }}
+                      >
+                      <Chip 
+                        label={`Button ${buttonIndex}`} 
+                        size="small" 
+                        sx={{ 
+                          bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
+                          color: '#ffffff',
+                          fontWeight: 500,
+                          padding: '0 2px'
+                        }}
+                      />
+                    </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </TableHead>
+              
+              <TableBody>
+                {/* 保持现有的表格行和单元格结构 */}
+                {processedDevices.map((device, deviceIndex) => (
+                  <TableRow
+                    key={device.deviceId}
+                    sx={{ 
+                      bgcolor: 'white',
+                    }}
+                  >
+                    {/* 设备名称列 */}
                     <TableCell 
-                      key={buttonIndex} 
-                      align="center"
-                      sx={{
-                        padding: '8px',
-                        width: `${75 / 5}%`, // 5个按钮平均分配75%的宽度
-                        height: '160px',
+                      component="th" 
+                      scope="row" 
+                      sx={{ 
+                        padding: '16px',
                         borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                       }}
                     >
-                      {renderButtonBinding(binding)}
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {device.name}
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                          >
+                            - {device.deviceId}
+                          </Typography>
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {device.appearanceShortname}
+                        </Typography>
+                      </Box>
                     </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                    
+                    {/* 按钮绑定单元格 */}
+                    {[1, 2, 3, 4, 5].map(buttonIndex => {
+                      const binding = getButtonBinding(device, buttonIndex);
+                      
+                      return (
+                        <TableCell 
+                          key={buttonIndex} 
+                          align="center"
+                          sx={{
+                            padding: '8px',
+                            width: `${75 / 5}%`, // 5个按钮平均分配75%的宽度
+                            height: '160px',
+                            borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                          }}
+                        >
+                          {renderButtonBinding(binding)}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Collapse>
+      </Paper>
     </Box>
   );
 };

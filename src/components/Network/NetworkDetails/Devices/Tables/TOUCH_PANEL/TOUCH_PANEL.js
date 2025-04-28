@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography,
@@ -10,8 +10,12 @@ import {
   TableRow,
   Paper,
   Chip,
-  Tooltip
+  Tooltip,
+  Collapse,
+  IconButton
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
@@ -135,7 +139,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
         }
       }}
     >
-      <span  // 改用 span 而不是 Typography
+      <span
         style={{
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -149,29 +153,34 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
   );
 };
 
-const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
-  const { horizontal: horizontalDevices, vertical: verticalDevices } = groupedDevices;
+// 创建单个面板组组件
+const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap, allDevices }) => {
+  const [expanded, setExpanded] = useState(true);
   
-  // 获取所有设备和组的数据
-  const { data: allDevices = [] } = useNetworkDevices(networkId);
-  const { data: allGroups = [] } = useNetworkGroups(networkId);
+  // 获取图标路径
+  const getIconPath = (count, orientation) => {
+    try {
+      return require(`../../../../../../assets/icons/DeviceType/TOUCH_PANEL_${count}_${orientation}.png`);
+    } catch (error) {
+      return null;
+    }
+  };
 
-  // 创建设备和组的映射 - 修改为使用 did
-  const deviceMap = React.useMemo(() => {
-    return allDevices.reduce((acc, device) => {
-      acc[device.did] = device.name;
-      return acc;
-    }, {});
-  }, [allDevices]);
+  // 检查是否有任何设备绑定了特定按钮
+  const anyDeviceHasButtonBinding = (devices, buttonIndex) => {
+    return devices.some(device => {
+      const remoteBind = device.specificAttributes?.remoteBind || [];
+      return remoteBind.some(b => parseInt(b.hole) === buttonIndex);
+    });
+  };
 
-  const groupMap = React.useMemo(() => {
-    return allGroups.reduce((acc, group) => {
-      acc[group.groupId] = group.name;
-      return acc;
-    }, {});
-  }, [allGroups]);
+  // 获取按钮绑定信息
+  const getButtonBinding = (device, buttonIndex) => {
+    const remoteBind = device.specificAttributes?.remoteBind || [];
+    return remoteBind.find(binding => parseInt(binding.hole) === buttonIndex) || null;
+  };
 
-  // 获取绑定目标的名称 - 修改 Device 类型的处理
+  // 获取绑定目标的名称
   const getBindingName = (binding) => {
     if (!binding) return '';
     
@@ -187,7 +196,7 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
     }
   };
 
-  // 修改 renderButtonBinding 函数
+  // 渲染按钮绑定
   const renderButtonBinding = (binding) => {
     if (!binding) {
       return (
@@ -219,7 +228,7 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
     const boundDevice = allDevices.find(device => device.did === binding.bindId);
     const deviceType = boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : null;
       
-      return (
+    return (
       <Box sx={{ 
         padding: '12px',
         borderRadius: 1.5,
@@ -253,7 +262,6 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
               width: '100%', 
               textAlign: 'center',
             }}>
-              {/* Product Type - 小号字体，灰色 */}
               <Typography
                 variant="caption"
                 component="div"
@@ -275,7 +283,6 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
           width: '100%',
           textAlign: 'center'
         }}>
-          {/* Device/Group Name - 较大字体，深色，加粗 */}
           <Typography
             variant="body2"
             component="div"
@@ -297,7 +304,6 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
             textAlign: 'center',
             width: '100%'
           }}>
-            {/* Channel Label - 小号字体，浅灰色 */}
             <Typography 
               variant="caption" 
               sx={{
@@ -308,7 +314,6 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
             >
               Channel
             </Typography>
-            {/* Channel Value - 中等字体，正常粗细 */}
             <Typography 
               variant="body2"
               sx={{
@@ -326,7 +331,6 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
             textAlign: 'center',
             width: '100%'
           }}>
-            {/* Status Label - 小号字体，浅灰色 */}
             <Typography 
               variant="caption" 
               sx={{
@@ -337,7 +341,6 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
             >
               Status
             </Typography>
-            {/* Status Value - 中等字体，正常粗细 */}
             <Typography 
               variant="body2"
               sx={{
@@ -352,6 +355,217 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
       </Box>
     );
   };
+
+  return (
+    <Box sx={{ mb: 4 }}>
+      <Paper 
+        elevation={0}
+        variant="outlined" 
+        sx={{ 
+          borderRadius: 2,
+          overflow: 'hidden',
+          borderColor: 'rgba(224, 224, 224, 0.7)'
+        }}
+      >
+        {/* 标题区域 - 与 BasicTable 一致的可点击标题栏 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={getIconPath(buttonCount, orientation === 'horizontal' ? 'h' : 'v')}
+              alt={`${buttonCount}-Button Panel`}
+              style={{ width: 30, height: 30, marginRight: 12 }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#fbcd0b',
+              }}
+            >
+              {`${buttonCount}-Button Touch Panel (${orientation === 'horizontal' ? 'Horizontal' : 'Vertical'})`}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* 可折叠的表格内容 */}
+        <Collapse in={expanded}>
+          <TableContainer component={Box}>
+            <Table size="medium">
+              <TableHead>
+                {/* 表头第一行 */}
+                <TableRow>
+                  <TableCell 
+                    width="25%" 
+                    sx={{ 
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
+                    }}
+                  >
+                    Device
+                  </TableCell>
+                  <TableCell 
+                    colSpan={buttonCount} 
+                    align="center"
+                    sx={{ 
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
+                    }}
+                  >
+                    Button Bindings
+                  </TableCell>
+                </TableRow>
+                
+                {/* 表头第二行 - 按钮标签 */}
+                <TableRow>
+                  <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
+                  {Array.from({ length: buttonCount }, (_, index) => {
+                    const buttonIndex = index + 1;
+                    const hasBinding = anyDeviceHasButtonBinding(devices, buttonIndex);
+                    
+                    return (
+                      <TableCell 
+                        key={`header-button-${buttonIndex}`} 
+                        align="center" 
+                        sx={{ 
+                          padding: '8px',
+                          borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
+                        }}
+                      >
+                        <Chip 
+                          label={`Button ${buttonIndex}`} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
+                            color: '#ffffff',
+                            fontWeight: 500,
+                            padding: '0 2px'
+                          }}
+                        />
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </TableHead>
+              
+              <TableBody>
+                {devices.map((device, deviceIndex) => (
+                  <TableRow
+                    key={`device-row-${device.deviceId}`}
+                    sx={{ bgcolor: 'white' }}
+                  >
+                    {/* 设备名称列 */}
+                    <TableCell 
+                      component="th" 
+                      scope="row" 
+                      sx={{ 
+                        padding: '16px',
+                        borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {device.name}
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                          >
+                            - {device.deviceId}
+                          </Typography>
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {device.appearanceShortname}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    
+                    {/* 按钮绑定单元格 */}
+                    {Array.from({ length: buttonCount }, (_, index) => {
+                      const buttonIndex = index + 1;
+                      const binding = getButtonBinding(device, buttonIndex);
+                      
+                      return (
+                        <TableCell 
+                          key={`${device.deviceId}-button-${buttonIndex}`}
+                          align="center"
+                          sx={{
+                            padding: '8px',
+                            width: `${75 / buttonCount}%`,
+                            height: '140px',
+                            borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                          }}
+                        >
+                          {renderButtonBinding(binding)}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Collapse>
+      </Paper>
+    </Box>
+  );
+};
+
+const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
+  const { horizontal: horizontalDevices, vertical: verticalDevices } = groupedDevices;
+  
+  // 获取所有设备和组的数据
+  const { data: allDevices = [] } = useNetworkDevices(networkId);
+  const { data: allGroups = [] } = useNetworkGroups(networkId);
+
+  // 创建设备和组的映射 - 修改为使用 did
+  const deviceMap = React.useMemo(() => {
+    return allDevices.reduce((acc, device) => {
+      acc[device.did] = device.name;
+      return acc;
+    }, {});
+  }, [allDevices]);
+
+  const groupMap = React.useMemo(() => {
+    return allGroups.reduce((acc, group) => {
+      acc[group.groupId] = group.name;
+      return acc;
+    }, {});
+  }, [allGroups]);
 
   if (!horizontalDevices?.length && !verticalDevices?.length) return null;
   
@@ -370,197 +584,34 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
   const horizontalGrouped = groupByButtonCount(horizontalDevices || []);
   const verticalGrouped = groupByButtonCount(verticalDevices || []);
 
-  // 获取图标路径
-  const getIconPath = (count, orientation) => {
-    try {
-      return require(`../../../../../../assets/icons/DeviceType/TOUCH_PANEL_${count}_${orientation}.png`);
-    } catch (error) {
-      return null;
-    }
-  };
-
-  // 检查是否有任何设备绑定了特定按钮
-  const anyDeviceHasButtonBinding = (devices, buttonIndex) => {
-    return devices.some(device => {
-      const remoteBind = device.specificAttributes?.remoteBind || [];
-      return remoteBind.some(b => parseInt(b.hole) === buttonIndex);
-    });
-  };
-
-  // 获取按钮绑定信息
-  const getButtonBinding = (device, buttonIndex) => {
-    const remoteBind = device.specificAttributes?.remoteBind || [];
-    return remoteBind.find(binding => parseInt(binding.hole) === buttonIndex) || null;
-  };
-
-  // 渲染一组面板 - 确保所有map操作都有key
-  const renderPanelGroup = (buttonCount, devices, orientation) => {
   return (
-      <Box key={`${orientation}-${buttonCount}`} sx={{ mb: 4 }}>
-        {/* 标题行 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <img
-            src={getIconPath(buttonCount, orientation === 'horizontal' ? 'h' : 'v')}
-            alt={`${buttonCount}-Button Panel`}
-            style={{ width: 30, height: 30, marginRight: 12 }}
-          />
-          <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
-            {`${buttonCount}-Button Touch Panel (${orientation === 'horizontal' ? 'Horizontal' : 'Vertical'})`}
-          </Typography>
-          <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-            ({devices.length} {devices.length === 1 ? 'device' : 'devices'})
-          </Typography>
-        </Box>
-        
-        {/* 表格 */}
-        <TableContainer 
-          component={Paper} 
-          elevation={0}
-          variant="outlined" 
-          sx={{ 
-            borderRadius: 2,
-            overflow: 'hidden',
-            borderColor: 'rgba(224, 224, 224, 0.7)'
-          }}
-        >
-          <Table size="medium">
-            <TableHead>
-              {/* 表头第一行 */}
-              <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                <TableCell 
-                  width="25%" 
-                  sx={{ 
-                    borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                    fontWeight: 500,
-                    padding: '12px 16px'
-                  }}
-                >
-                  Device
-                </TableCell>
-                <TableCell 
-                  colSpan={buttonCount} 
-                  align="center"
-                  sx={{ 
-                    borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                    fontWeight: 500,
-                    padding: '12px 16px'
-                  }}
-                >
-                  Button Bindings
-                </TableCell>
-              </TableRow>
-              
-              {/* 表头第二行 - 按钮标签 */}
-              <TableRow>
-                <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-                {Array.from({ length: buttonCount }, (_, index) => {
-                  const buttonIndex = index + 1;
-                  const hasBinding = anyDeviceHasButtonBinding(devices, buttonIndex);
-                  
-                  return (
-                    <TableCell 
-                      key={`header-button-${buttonIndex}`} 
-                      align="center" 
-                      sx={{ 
-                        padding: '8px',
-                        borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
-                      }}
-                    >
-                      <Chip 
-                        label={`Button ${buttonIndex}`} 
-                        size="small" 
-                        sx={{ 
-                          bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
-                          color: '#ffffff',
-                          fontWeight: 500,
-                          padding: '0 2px'
-                        }}
-                      />
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            </TableHead>
-            
-            <TableBody>
-              {devices.map((device, deviceIndex) => (
-                <TableRow
-                  key={`device-row-${device.deviceId}`}
-                  sx={{ 
-                    bgcolor: 'white', // 统一设置为白色，移除斑马纹
-                  }}
-                >
-                  {/* 设备名称列 */}
-                  <TableCell 
-                    component="th" 
-                    scope="row" 
-                    sx={{ 
-                      padding: '16px',
-                      borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {device.name}
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
-                        >
-                          - {device.deviceId}
-                        </Typography>
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {device.appearanceShortname}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  
-                  {/* 按钮绑定单元格 */}
-                  {Array.from({ length: buttonCount }, (_, index) => {
-                    const buttonIndex = index + 1;
-                    const binding = getButtonBinding(device, buttonIndex);
-                    
-                    return (
-                      <TableCell 
-                        key={`${device.deviceId}-button-${buttonIndex}`}
-                        align="center"
-                        sx={{
-                          padding: '8px',
-                          width: `${75 / buttonCount}%`, // 确保所有按钮单元格宽度相等
-                          height: '140px', // 固定表格单元格高度
-                          borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
-                        }}
-                      >
-                        {renderButtonBinding(binding)}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-    );
-  };
-
-  return (
-    <>
+    <Box>
       {/* 渲染水平面板 */}
       {Object.entries(horizontalGrouped).map(([buttonCount, devices]) => (
-        <React.Fragment key={`horizontal-group-${buttonCount}`}>
-          {renderPanelGroup(parseInt(buttonCount), devices, 'horizontal')}
-        </React.Fragment>
+        <PanelTypeGroup 
+          key={`horizontal-group-${buttonCount}`}
+          buttonCount={parseInt(buttonCount)}
+          devices={devices}
+          orientation="horizontal"
+          deviceMap={deviceMap}
+          groupMap={groupMap}
+          allDevices={allDevices}
+        />
       ))}
       
       {/* 渲染垂直面板 */}
       {Object.entries(verticalGrouped).map(([buttonCount, devices]) => (
-        <React.Fragment key={`vertical-group-${buttonCount}`}>
-          {renderPanelGroup(parseInt(buttonCount), devices, 'vertical')}
-        </React.Fragment>
+        <PanelTypeGroup 
+          key={`vertical-group-${buttonCount}`}
+          buttonCount={parseInt(buttonCount)}
+          devices={devices}
+          orientation="vertical"
+          deviceMap={deviceMap}
+          groupMap={groupMap}
+          allDevices={allDevices}
+        />
       ))}
-    </>
+    </Box>
   );
 };
 

@@ -1,5 +1,5 @@
 // src/components/Network/NetworkDetails/Devices/Tables/PPT/PPT.js
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography,
@@ -10,7 +10,12 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Collapse,
+  IconButton,
+  Chip
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PowerPointIcon from '../../../../../../assets/icons/DeviceType/POWER_POINT.png';
 
 const PowerPointStatus = ({ label, value, type }) => {
@@ -79,147 +84,201 @@ const PowerPointChannel = ({ data }) => {
 };
 
 const POWER_POINT = ({ devices }) => {
+  const [expanded, setExpanded] = useState(true);
+  
   if (!devices || devices.length === 0) return null;
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <img
-          src={PowerPointIcon}
-          alt="Power Point"
-          style={{ width: 30, height: 30, marginRight: 12 }}
-        />
-        <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
-          Power Point
-        </Typography>
-        <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-          ({devices.length} {devices.length === 1 ? 'device' : 'devices'})
-        </Typography>
-      </Box>
-
-      <TableContainer 
-        component={Paper} 
+      <Paper 
         elevation={0}
         variant="outlined"
-        sx={{ 
+        sx={{
           borderRadius: 2,
           overflow: 'hidden',
           borderColor: 'rgba(224, 224, 224, 0.7)'
         }}
       >
-        <Table size="medium">
-          <TableHead>
-            <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-              <TableCell 
-                width="25%" 
-                sx={{ 
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Device
-              </TableCell>
-              <TableCell 
-                width="37.5%" 
-                align="center"
-                sx={{ 
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Left Channel
-              </TableCell>
-              <TableCell 
-                width="37.5%" 
-                align="center"
-                sx={{ 
-                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                  fontWeight: 500,
-                  padding: '12px 16px'
-                }}
-              >
-                Right Channel
-              </TableCell>
-            </TableRow>
-          </TableHead>
+        {/* 标题区域 - 与 BasicTable 一致 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={PowerPointIcon}
+              alt="Power Point"
+              style={{ width: 30, height: 30, marginRight: 12 }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#fbcd0b',
+              }}
+            >
+              Power Point
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
 
-          <TableBody>
-            {devices.map((device, deviceIndex) => {
-              const { specificAttributes } = device;
-              
-              const leftChannel = {
-                name: specificAttributes.leftName,
-                power: specificAttributes.leftPower,
-                lock: specificAttributes.leftLock,
-                delay: specificAttributes.leftDelay,
-                backLight: specificAttributes.leftBackLight
-              };
-
-              const rightChannel = {
-                name: specificAttributes.rightName,
-                power: specificAttributes.rightPower,
-                lock: specificAttributes.rightLock,
-                delay: specificAttributes.rightDelay,
-                backLight: specificAttributes.rightBackLight
-              };
-
-              return (
-                <TableRow
-                  key={device.deviceId}
-                  sx={{ bgcolor: 'white' }}
-                >
+        {/* 可折叠的表格内容 */}
+        <Collapse in={expanded}>
+          <TableContainer 
+            component={Box} 
+            sx={{ 
+              width: '100%',
+              '& .MuiTable-root': {
+                tableLayout: 'fixed',
+                width: '100%'
+              }
+            }}
+          >
+            <Table size="medium">
+              <TableHead>
+                <TableRow>
                   <TableCell 
-                    component="th" 
-                    scope="row" 
+                    width="25%" 
                     sx={{ 
-                      padding: '16px',
-                      borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
                     }}
                   >
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {device.name}
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
-                        >
-                          - {device.deviceId}
-                        </Typography>
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {device.appearanceShortname}
-                      </Typography>
-                    </Box>
+                    Device
                   </TableCell>
-
                   <TableCell 
+                    width="37.5%" 
                     align="center"
-                    sx={{
-                      padding: '16px',
-                      borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                    sx={{ 
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
                     }}
                   >
-                    <PowerPointChannel data={leftChannel} />
+                    Left Channel
                   </TableCell>
-
                   <TableCell 
+                    width="37.5%" 
                     align="center"
-                    sx={{
-                      padding: '16px',
-                      borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                    sx={{ 
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      fontWeight: 'bold',
+                      padding: '12px 16px'
                     }}
                   >
-                    <PowerPointChannel data={rightChannel} />
+                    Right Channel
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              </TableHead>
+
+              <TableBody>
+                {devices.map((device, deviceIndex) => {
+                  const { specificAttributes } = device;
+                  
+                  const leftChannel = {
+                    name: specificAttributes.leftName,
+                    power: specificAttributes.leftPower,
+                    lock: specificAttributes.leftLock,
+                    delay: specificAttributes.leftDelay,
+                    backLight: specificAttributes.leftBackLight
+                  };
+
+                  const rightChannel = {
+                    name: specificAttributes.rightName,
+                    power: specificAttributes.rightPower,
+                    lock: specificAttributes.rightLock,
+                    delay: specificAttributes.rightDelay,
+                    backLight: specificAttributes.rightBackLight
+                  };
+
+                  return (
+                    <TableRow
+                      key={device.deviceId}
+                      sx={{ bgcolor: 'white' }}
+                    >
+                      <TableCell 
+                        component="th" 
+                        scope="row" 
+                        sx={{ 
+                          padding: '16px',
+                          borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            {device.name}
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                            >
+                              - {device.deviceId}
+                            </Typography>
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {device.appearanceShortname}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+
+                      <TableCell 
+                        align="center"
+                        sx={{
+                          padding: '16px',
+                          borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                        }}
+                      >
+                        <PowerPointChannel data={leftChannel} />
+                      </TableCell>
+
+                      <TableCell 
+                        align="center"
+                        sx={{
+                          padding: '16px',
+                          borderBottom: deviceIndex === devices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                        }}
+                      >
+                        <PowerPointChannel data={rightChannel} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Collapse>
+      </Paper>
     </Box>
   );
 };

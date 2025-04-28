@@ -1,5 +1,5 @@
 // src/components/Network/NetworkDetails/Devices/Tables/BasicTable.js
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Table,
     TableBody,
@@ -9,8 +9,13 @@ import {
     TableRow,
     Paper,
     Box,
-    Typography
+    Typography,
+    Collapse,
+    IconButton,
+    Chip
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 // 辅助函数：安全地将任何值转换为可渲染的字符串
 const safeRender = (value) => {
@@ -35,8 +40,14 @@ const BasicTable = ({
     nameColumnWidth = '30%',  // 名称列宽度
     headerBgColor = '#f8f9fa',
     borderColor = '#dee2e6',
-    titleColor = '#fbcd0b'
+    titleColor = '#fbcd0b',
+    
+    // 新增配置
+    defaultExpanded = true,   // 默认是否展开
 }) => {
+    // 添加展开/折叠状态
+    const [expanded, setExpanded] = useState(defaultExpanded);
+    
     // 1. 计算其他列的默认宽度
     const remainingWidth = (100 - parseInt(nameColumnWidth)) / (columns.length - 1);
 
@@ -54,186 +65,206 @@ const BasicTable = ({
     ];
 
     return (
-        <Box>
-            {/* 3. 标题区域 */}
-            <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                mb: 2,
-                pl: 0
-            }}>
-                {icon && (
-                    <img
-                        src={icon}
-                        alt={title}
-                        style={{
-                            width: 30,
-                            height: 30,
-                            objectFit: 'contain'
-                        }}
-                    />
-                )}
-                <Typography
-                    variant="h6"
-                    sx={{
-                        fontWeight: 500,
-                        color: titleColor,
-                        mb: 0.5,
-                        ml: 0.5
-                    }}
-                >
-                    {title}
-                </Typography>
-                <Typography
-                    variant="body2"
-                    sx={{
-                        ml: 0.5,
-                        color: 'text.secondary'
-                    }}
-                >
-                    ({devices.length} {devices.length === 1 ? 'device' : 'devices'})
-                </Typography>
-            </Box>
-
-            {/* 4. 表格区域 */}
-            <TableContainer
-                component={Paper}
+        <Box sx={{ mb: 4 }}>
+            <Paper 
+                elevation={0}
+                variant="outlined"
                 sx={{
-                    boxShadow: 'none',
-                    border: `1px solid ${borderColor}`,
-                    borderRadius: '8px',
-                    width: '100%',
-                    '& .MuiTable-root': {
-                        tableLayout: 'fixed',
-                        width: '100%'
-                    }
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    borderColor: 'rgba(224, 224, 224, 0.7)'
                 }}
             >
-                <Table>
-                    {/* 5. 表头 */}
-                    <TableHead>
-                        <TableRow>
-                            {processedColumns.map(column => (
-                                <TableCell
-                                    key={column.id}
-                                    sx={{
-                                        width: column.width,
-                                        fontWeight: 'bold',
-                                        whiteSpace: 'nowrap',
-                                        backgroundColor: headerBgColor
-                                    }}
-                                >
-                                    {column.label}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-
-                    {/* 6. 表格主体 */}
-                    <TableBody>
-                        {devices.map((device) => (
-                            <TableRow
-                                key={device.deviceId}
-                                sx={{
-                                    '&:last-child td, &:last-child th': { border: 0 },
-                                    '&:hover': { backgroundColor: headerBgColor }
+                {/* 3. 可折叠的标题区域 */}
+                <Box 
+                    onClick={() => setExpanded(!expanded)}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '12px 16px',
+                        backgroundColor: headerBgColor,
+                        borderBottom: expanded ? `1px solid ${borderColor}` : 'none',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {icon && (
+                            <img
+                                src={icon}
+                                alt={title}
+                                style={{
+                                    width: 30,
+                                    height: 30,
+                                    objectFit: 'contain',
+                                    marginRight: 12
                                 }}
-                            >
-                                {processedColumns.map(column => {
-                                    if (column.id === 'name') {
-                                        return (
-                                            <TableCell key={column.id} sx={{ width: column.width }}>
-                                                <Box sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    overflow: 'hidden',
-                                                    maxWidth: '100%'
-                                                }}>
-                                                    <Box sx={{ minWidth: 0, flex: 1 }}>
-                                                        <Typography
-                                                            variant="subtitle2"
-                                                            sx={{
-                                                                fontWeight: 600,
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap'
-                                                            }}
-                                                        >
-                                                            {device.name}
-                                                            <Typography
-                                                                component="span"
-                                                                variant="body2"
-                                                                sx={{
-                                                                    color: '#95a5a6',
-                                                                    ml: 0.5,
-                                                                    fontWeight: 400
-                                                                }}
-                                                            >
-                                                                - {device.deviceId}
-                                                            </Typography>
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
-                                                            sx={{
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap'
-                                                            }}
-                                                        >
-                                                            {device.appearanceShortname}
-                                                        </Typography>
-                                                    </Box>
-                                                </Box>
-                                            </TableCell>
-                                        );
-                                    }
+                            />
+                        )}
+                        <Typography
+                            variant="subtitle1"
+                            sx={{
+                                fontWeight: 600,
+                                color: titleColor,
+                            }}
+                        >
+                            {title}
+                        </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Chip
+                            label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
+                            size="small"
+                            sx={{
+                                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                                color: '#fbcd0b',
+                                fontWeight: 500,
+                                mr: 1
+                            }}
+                        />
+                        <IconButton 
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setExpanded(!expanded);
+                            }}
+                        >
+                            {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </IconButton>
+                    </Box>
+                </Box>
 
-                                    // 处理其他列
-                                    let cellContent;
-                                    
-                                    if (column.format) {
-                                        // 使用format函数，确保返回的是可渲染的内容
-                                        try {
-                                            // 获取属性值
-                                            const attrValue = device.specificAttributes && device.specificAttributes[column.id];
-                                            
-                                            // 根据formatWithDevice选项决定传递什么参数给format函数
-                                            const formattedContent = formatWithDevice 
-                                                ? column.format(attrValue, device) // 传递属性值和整个设备对象
-                                                : column.format(attrValue);        // 只传递属性值
-                                            
-                                            // 检查format函数返回的是否是React元素
-                                            cellContent = React.isValidElement(formattedContent) 
-                                                ? formattedContent 
-                                                : safeRender(formattedContent);
-                                        } catch (error) {
-                                            console.error(`Error formatting column ${column.id}:`, error);
-                                            cellContent = 'Error';
-                                        }
-                                    } else {
-                                        // 直接访问specificAttributes
-                                        const value = device.specificAttributes && device.specificAttributes[column.id];
-                                        cellContent = safeRender(value);
-                                    }
-
-                                    return (
-                                        <TableCell key={column.id} align="left">
-                                            <Box sx={{ 
-                                                typography: 'body2',  // 保持排版样式不变
-                                                fontSize: '0.875rem'   // 相当于 body2 的大小
-                                            }}>
-                                                {cellContent}
-                                            </Box>
+                {/* 4. 可折叠的表格区域 */}
+                <Collapse in={expanded}>
+                    <TableContainer
+                        component={Box}
+                        sx={{
+                            width: '100%',
+                            '& .MuiTable-root': {
+                                tableLayout: 'fixed',
+                                width: '100%'
+                            }
+                        }}
+                    >
+                        <Table>
+                            {/* 5. 表头 */}
+                            <TableHead>
+                                <TableRow>
+                                    {processedColumns.map(column => (
+                                        <TableCell
+                                            key={column.id}
+                                            sx={{
+                                                width: column.width,
+                                                fontWeight: 'bold',
+                                                whiteSpace: 'nowrap',
+                                                // backgroundColor: headerBgColor
+                                            }}
+                                        >
+                                            {column.label}
                                         </TableCell>
-                                    );
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+
+                            {/* 6. 表格主体 */}
+                            <TableBody>
+                                {devices.map((device) => (
+                                    <TableRow
+                                        key={device.deviceId}
+                                        sx={{
+                                            '&:last-child td, &:last-child th': { border: 0 },
+                                        }}
+                                    >
+                                        {processedColumns.map(column => {
+                                            if (column.id === 'name') {
+                                                return (
+                                                    <TableCell key={column.id} sx={{ width: column.width }}>
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            overflow: 'hidden',
+                                                            maxWidth: '100%'
+                                                        }}>
+                                                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                                                                <Typography
+                                                                    variant="subtitle2"
+                                                                    sx={{
+                                                                        fontWeight: 600,
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                        whiteSpace: 'nowrap'
+                                                                    }}
+                                                                >
+                                                                    {device.name}
+                                                                    <Typography
+                                                                        component="span"
+                                                                        variant="body2"
+                                                                        sx={{
+                                                                            color: '#95a5a6',
+                                                                            ml: 0.5,
+                                                                            fontWeight: 400
+                                                                        }}
+                                                                    >
+                                                                        - {device.deviceId}
+                                                                    </Typography>
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    color="text.secondary"
+                                                                    sx={{
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                        whiteSpace: 'nowrap'
+                                                                    }}
+                                                                >
+                                                                    {device.appearanceShortname}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    </TableCell>
+                                                );
+                                            }
+
+                                            // 处理其他列
+                                            let cellContent;
+                                            
+                                            if (column.format) {
+                                                try {
+                                                    const attrValue = device.specificAttributes && device.specificAttributes[column.id];
+                                                    const formattedContent = formatWithDevice 
+                                                        ? column.format(attrValue, device)
+                                                        : column.format(attrValue);
+                                                    cellContent = React.isValidElement(formattedContent) 
+                                                        ? formattedContent 
+                                                        : safeRender(formattedContent);
+                                                } catch (error) {
+                                                    console.error(`Error formatting column ${column.id}:`, error);
+                                                    cellContent = 'Error';
+                                                }
+                                            } else {
+                                                const value = device.specificAttributes && device.specificAttributes[column.id];
+                                                cellContent = safeRender(value);
+                                            }
+
+                                            return (
+                                                <TableCell key={column.id} align="left">
+                                                    <Box sx={{ 
+                                                        typography: 'body2',
+                                                        fontSize: '0.875rem'
+                                                    }}>
+                                                        {cellContent}
+                                                    </Box>
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Collapse>
+            </Paper>
         </Box>
     );
 };
