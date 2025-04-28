@@ -222,9 +222,11 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
     };
 
     return (
-        <Card className="h-100">
+        <Card className="profile-card shadow-sm h-100">
             <CardBody>
-                <CardTitle tag="h4" className="mb-4">User Profile Settings</CardTitle>
+                <CardTitle tag="h4" className="mb-4 pb-2 border-bottom" style={{ borderColor: 'rgba(251, 205, 11, 0.3) !important' }}>
+                    User Profile Settings
+                </CardTitle>
                 {alert.open && (
                     <Alert
                         severity={alert.severity}
@@ -234,6 +236,8 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                             left: "50%",
                             transform: "translateX(-50%)",
                             zIndex: 9999,
+                            width: "90%",
+                            maxWidth: "500px"
                         }}
                     >
                         {alert.message}
@@ -241,53 +245,70 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                 )}
                 <Form onSubmit={handleUpdateProfile}>
                     <Row>
-                        <Col md={6}>
+                        <Col xs={12} md={6} className="mb-3 mb-md-0">
                             <FormGroup>
-                                <Label for="username">Username</Label>
+                                <Label for="username" className="profile-info-label">Username</Label>
                                 <Input
                                     type="text"
                                     id="username"
                                     value={username}
                                     readOnly
-                                    style={readOnlyStyle}
+                                    style={{
+                                        ...readOnlyStyle,
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(0, 0, 0, 0.1)'
+                                    }}
                                     autoComplete="username"
                                 />
                             </FormGroup>
                         </Col>
-                        <Col md={6}>
+                        <Col xs={12} md={6}>
                             <FormGroup>
-                                <Label for="nickname">Nickname</Label>
+                                <Label for="nickname" className="profile-info-label">Nickname</Label>
                                 <Input
                                     type="text"
                                     id="nickname"
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
                                     autoComplete="nickname"
+                                    style={{
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(0, 0, 0, 0.1)'
+                                    }}
                                 />
                             </FormGroup>
                         </Col>
                     </Row>
-                    <FormGroup>
-                        <Label for="email">Email</Label>
-                        <Row>
-                            <Col md={10}>
+                    <FormGroup className="mb-3">
+                        <Label for="email" className="profile-info-label">Email</Label>
+                        <Row className="g-2">
+                            <Col xs={8} sm={9} md={10}>
                                 <Input
                                     type="email"
                                     id="email"
                                     value={email}
                                     readOnly
-                                    style={readOnlyStyle}
+                                    style={{
+                                        ...readOnlyStyle,
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(0, 0, 0, 0.1)'
+                                    }}
                                     autoComplete="email"
                                 />
                             </Col>
-                            <Col md={2}>
+                            <Col xs={4} sm={3} md={2}>
                                 <CustomButton
                                     onClick={handleSendVerificationCode}
                                     disabled={!canRequestAgain || loading}
                                     style={{
                                         width: "100%",
-                                        fontSize: "14px",
-                                        height: "37px",
+                                        fontSize: "0.75rem",
+                                        height: "38px",
+                                        padding: "0 0.5rem",
+                                        borderRadius: "6px",
+                                        backgroundColor: !canRequestAgain || loading ? "#6c757d" : "#fbcd0b",
+                                        border: "none",
+                                        color: "#fff"
                                     }}
                                 >
                                     {loading ? (
@@ -302,7 +323,7 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                         </Row>
                     </FormGroup>
                     <FormGroup>
-                        <Label for="verificationCode">Verification Code</Label>
+                        <Label for="verificationCode" className="profile-info-label">Verification Code</Label>
                         <Input
                             type="text"
                             id="verificationCode"
@@ -310,36 +331,52 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                             onChange={(e) => setVerificationCode(e.target.value)}
                             maxLength="6"
                             placeholder="Enter 6-digit code"
+                            style={{
+                                borderRadius: '6px',
+                                border: '1px solid rgba(0, 0, 0, 0.1)'
+                            }}
                         />
                     </FormGroup>
                     <FormGroup>
-                        <Label for="password">New Password</Label>
+                        <Label for="password" className="profile-info-label">New Password</Label>
                         <Input
                             type="password"
                             id="password"
                             value={password}
                             onChange={handlePasswordChange}
                             autoComplete="new-password"
+                            style={{
+                                borderRadius: '6px',
+                                border: '1px solid rgba(0, 0, 0, 0.1)'
+                            }}
                         />
                         {passwordError && <p style={errorMessageStyle}>{passwordError}</p>}
                     </FormGroup>
                     <FormGroup>
-                        <Label for="confirmPassword">Confirm New Password</Label>
+                        <Label for="confirmPassword" className="profile-info-label">Confirm New Password</Label>
                         <Input
                             type="password"
                             id="confirmPassword"
                             value={confirmPassword}
                             onChange={handleConfirmPasswordChange}
                             autoComplete="new-password"
+                            style={{
+                                borderRadius: '6px',
+                                border: '1px solid rgba(0, 0, 0, 0.1)'
+                            }}
                         />
                         {confirmPasswordError && <p style={errorMessageStyle}>{confirmPasswordError}</p>}
                     </FormGroup>
-                    <div className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4 pt-2" style={{ borderColor: 'rgba(251, 205, 11, 0.3) !important' }}>
                         <CustomButton
                             onClick={handleDeleteAccount}
                             color="#dc3545"
                             style={{
                                 fontWeight: "bold",
+                                width: "100%",
+                                maxWidth: "200px",
+                                borderRadius: "6px",
+                                color: "#fff"
                             }}
                         >
                             Delete Account
@@ -355,6 +392,12 @@ const ProfileSettings = ({ userDetails: initialUserDetails }) => {
                                     disabled={!isFormValid()}
                                     style={{
                                         fontWeight: "bold",
+                                        width: "100%",
+                                        maxWidth: "200px",
+                                        borderRadius: "6px",
+                                        backgroundColor: !isFormValid() ? "#6c757d" : "#fbcd0b",
+                                        border: "none",
+                                        color: "#fff"
                                     }}
                                 >
                                     Update Profile

@@ -99,7 +99,7 @@ const Profile = () => {
   }
 
   return (
-    <div>
+    <div className="profile-container">
       <CustomAlert
         isOpen={alert.isOpen}
         onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
@@ -108,14 +108,14 @@ const Profile = () => {
         autoHideDuration={alert.duration}
       />
       <Row className="h-100">
-        <Col xs="12" md="12" lg="3" className="h-150">
+        <Col xs="12" md="12" lg="3" className="mb-4 mb-lg-0">
           <ProfileInfo 
             userDetails={userDetails} 
             projectCount={projectCount} 
             onEditAvatar={handleEditAvatar}
           />
         </Col>
-        <Col xs="12" md="12" lg="9" className="h-150">
+        <Col xs="12" md="12" lg="9">
           <ProfileSettings 
             userDetails={userDetails} 
             autocomplete="new-password"

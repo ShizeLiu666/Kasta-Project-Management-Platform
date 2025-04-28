@@ -3,13 +3,15 @@ import {
   Card,
   CardBody,
   CardTitle,
-  CardSubtitle,
-  Row,
-  Col,
+  // 移除未使用的导入
+  // CardSubtitle,
+  // Row,
+  // Col,
 } from 'reactstrap';
-import { Edit } from '@mui/icons-material'; // 导入编辑图标
+import { Edit } from '@mui/icons-material';
+import FolderIcon from '@mui/icons-material/Folder';
 import defaultAvatar from '../../assets/images/users/normal_user.jpg';
-import './ProfileInfo.css'; // 确保创建这个 CSS 文件
+import './ProfileInfo.css';
 
 const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvatar }) => {
   const [userDetails, setUserDetails] = useState(initialUserDetails);
@@ -39,10 +41,19 @@ const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvat
     document.getElementById('avatarInput').click();
   };
 
+  const getUserTypeLabel = () => {
+    switch(userDetails.userType) {
+      case 0: return 'Normal User';
+      case 1: return 'Project User';
+      case 99999: return 'Super User';
+      default: return 'Unknown';
+    }
+  };
+
   return (
-    <Card className="h-100">
+    <Card className="profile-card shadow-sm">
       <CardBody className="d-flex flex-column">
-        <div className="text-center mt-4 avatar-container">
+        <div className="text-center mt-2 mt-md-4 avatar-container">
           <div className="avatar-wrapper">
             <img 
               src={userDetails.headPic || defaultAvatar} 
@@ -63,32 +74,36 @@ const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvat
               accept="image/*"
             />
           </div>
-          <CardTitle tag="h4" className="mt-2 mb-0">
+          <CardTitle tag="h4" className="mt-3 mb-0">
             {userDetails.username}
           </CardTitle>
-          <CardSubtitle className="text-muted" style={{marginTop: '3px'}}>
-            {userDetails.userType === 0 ? 'Normal User' : 
-             userDetails.userType === 1 ? 'Project User' : 
-             userDetails.userType === 99999 ? 'Super User' : 'Unknown'}
-          </CardSubtitle>
+          <span className="user-type-badge">
+            {getUserTypeLabel()}
+          </span>
         </div>
-        <Row className="text-center justify-content-md-center mt-2">
-          <Col xs="4">
-            <a href="/admin/projects" className="text-dark fw-bold text-decoration-none">
-              <i className="bi-folder2-open"></i>
-              <span className="font-medium ms-2">{projectCount}</span>
-            </a>
-          </Col>
-        </Row>
-        <div className="mt-4">
-          <CardSubtitle className="text-muted fs-5">Nickname</CardSubtitle>
-          <CardTitle tag="h5">{userDetails.nickName}</CardTitle>
-
-          <CardSubtitle className="text-muted fs-5 mt-3">Email address</CardSubtitle>
-          <CardTitle tag="h5">{userDetails.email}</CardTitle>
-
-          <CardSubtitle className="text-muted fs-5 mt-3">Country Code</CardSubtitle>
-          <CardTitle tag="h5">{userDetails.countryCode}</CardTitle>
+        
+        <div className="project-count-wrapper mt-3">
+          <a href="/admin/projects" className="text-decoration-none d-flex align-items-center">
+            <FolderIcon className="project-count-icon" />
+            <span className="font-medium text-dark">{projectCount} Projects</span>
+          </a>
+        </div>
+        
+        <div className="user-info-section mt-4">
+          <div className="profile-info-item">
+            <span className="profile-info-label">Nickname</span>
+            <span className="profile-info-value">{userDetails.nickName || 'Not Set'}</span>
+          </div>
+          
+          <div className="profile-info-item">
+            <span className="profile-info-label">Email</span>
+            <span className="profile-info-value text-break">{userDetails.email}</span>
+          </div>
+          
+          <div className="profile-info-item">
+            <span className="profile-info-label">Country Code</span>
+            <span className="profile-info-value">{userDetails.countryCode || 'Not Set'}</span>
+          </div>
         </div>
       </CardBody>
     </Card>
