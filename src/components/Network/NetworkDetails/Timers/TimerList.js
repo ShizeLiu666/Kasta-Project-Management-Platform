@@ -49,14 +49,6 @@ const getActionColor = (action) => {
   }
 };
 
-const formatEntityType = (type) => {
-  switch (type) {
-    case 0: return 'Device';
-    case 1: return 'Group';
-    default: return '-';
-  }
-};
-
 const TimerList = ({ networkId }) => {
   const [expanded, setExpanded] = useState(true);
   
@@ -157,7 +149,6 @@ const TimerList = ({ networkId }) => {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <AccessTimeIcon sx={{ color: '#fbcd0b', mr: 1.5 }} />
             <Typography
               variant="subtitle1"
               sx={{
@@ -273,9 +264,8 @@ const TimerList = ({ networkId }) => {
                               {targetName}
                             </Typography>
                             <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block' }}>
-                              {formatEntityType(timer.entityType)}
                               {timer.channel !== undefined && timer.channel !== null && timer.channel !== -1 && (
-                                ` • Channel ${timer.channel}`
+                                `Channel ${timer.channel}`
                               )}
                             </Typography>
                           </Box>
