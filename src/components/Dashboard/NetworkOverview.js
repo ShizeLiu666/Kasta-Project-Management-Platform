@@ -36,7 +36,8 @@ const NetworkOverview = () => {
             timerCount: response.data.data.timerCount || 0,
             scheduleCount: response.data.data.scheduleCount || 0,
             memberCount: response.data.data.memberCount || 0,
-            networkId: response.data.data.networkId
+            networkId: response.data.data.networkId,
+            networkName: response.data.data.networkName
           });
         } else {
           // 如果没有 primary network，尝试获取所有网络并设置第一个为 primary
@@ -172,7 +173,7 @@ const NetworkOverview = () => {
             fontSize: '0.7rem'
           }}
         >
-          Current Network: {networkStats.networkId}
+          Current Network: {networkStats.networkName || 'Unnamed Network'}
         </Typography>
       )}
 
