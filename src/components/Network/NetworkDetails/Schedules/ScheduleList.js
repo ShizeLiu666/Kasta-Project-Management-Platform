@@ -1,24 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Box, Typography } from '@mui/material';
 import { 
-  Box, 
-  Typography, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper,
-  Chip,
-  Collapse,
-  IconButton,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CircleIcon from '@mui/icons-material/Circle';
-import { useNetworkSchedules } from '../useNetworkQueries';
+  useNetworkSchedules, 
+  useScheduleItemsBatch,
+  useDevicesMap,
+  useGroupsMap,
+  useScenesMap 
+} from '../useNetworkQueries';
+import ScheduleCard from './ScheduleCard';
 
 // 导入所有图标
 import deviceIcon from '../../../../assets/icons/NetworkOverview/Device.png';
@@ -68,13 +57,52 @@ const getTargetTypeInfo = (entityType) => {
 };
 
 const ScheduleList = ({ networkId }) => {
-  const [expanded, setExpanded] = useState(true);
-  
+  // 获取基本的 schedules 列表
   const { 
     data: schedules = [], 
-    isLoading, 
-    error 
+    isLoading: isLoadingSchedules, 
+    error: schedulesError 
   } = useNetworkSchedules(networkId);
+
+  // 获取所有 scheduleIds
+  const scheduleIds = schedules.map(schedule => schedule.scheduleId);
+
+  // 批量获取所有 schedule items
+  const { 
+    data: itemsMap = {}, 
+    isLoading: isLoadingItems 
+  } = useScheduleItemsBatch(networkId, scheduleIds);
+
+  // 获取映射
+  const devicesMap = useDevicesMap(networkId);
+  const groupsMap = useGroupsMap(networkId);
+  const scenesMap = useScenesMap(networkId);
+
+  // 获取目标名称的函数
+  const getTargetName = (item) => {
+    if (item.deviceId) {
+      return devicesMap[item.deviceId]?.name || 'Unknown Device';
+    }
+    if (item.groupId) {
+      return groupsMap[item.groupId]?.name || 'Unknown Group';
+    }
+    if (item.sceneId) {
+      return scenesMap[item.sceneId]?.name || 'Unknown Scene';
+    }
+    return 'Unknown Target';
+  };
+
+  // 检查所有查询是否完成
+  const isLoading = isLoadingSchedules || isLoadingItems;
+  const error = schedulesError;
+
+  // 合并 schedules 和它们的详细信息
+  const enrichedSchedules = React.useMemo(() => {
+    return schedules.map(schedule => ({
+      ...schedule,
+      items: itemsMap[schedule.scheduleId] || []
+    }));
+  }, [schedules, itemsMap]);
 
   if (isLoading) {
     return (
@@ -92,21 +120,19 @@ const ScheduleList = ({ networkId }) => {
     );
   }
 
-  if (!schedules.length) {
+  if (!enrichedSchedules.length) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '200px',
-          color: '#666',
-          backgroundColor: '#fafbfc',
-          borderRadius: '12px',
-          border: '1px dashed #dee2e6'
-        }}
-      >
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '200px',
+        color: '#666',
+        backgroundColor: '#fafbfc',
+        borderRadius: '12px',
+        border: '1px dashed #dee2e6'
+      }}>
         <Typography variant="body1" color="text.secondary">
           No schedules found in this network
         </Typography>
@@ -116,175 +142,16 @@ const ScheduleList = ({ networkId }) => {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Paper 
-        elevation={0}
-        variant="outlined" 
-        sx={{
-          borderRadius: 2,
-          overflow: 'hidden',
-          borderColor: 'rgba(224, 224, 224, 0.7)'
-        }}
-      >
-        {/* 标题区域 */}
-        <Box 
-          onClick={() => setExpanded(!expanded)}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '12px 16px',
-            backgroundColor: '#f8f9fa',
-            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Schedules
-            </Typography>
-          </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Chip
-              label={`${schedules.length} ${schedules.length === 1 ? 'Schedule' : 'Schedules'}`}
-              size="small"
-        sx={{
-                bgcolor: 'rgba(251, 205, 11, 0.1)',
-                color: '#fbcd0b',
-                fontWeight: 500,
-                mr: 1
-              }}
-            />
-            <IconButton 
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
-            >
-              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            </IconButton>
-          </Box>
-        </Box>
-
-        {/* 可折叠的表格内容 */}
-        <Collapse in={expanded}>
-          <TableContainer component={Box}>
-        <Table>
-          <TableHead>
-            <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Target Type</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Date Range</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Execution Time</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-                {schedules.map((schedule) => {
-                  const statusColor = getStatusColor(schedule.enabled);
-                  
-                  return (
-                    <TableRow
-                      key={schedule.scheduleId}
-                      sx={{
-                        '&:hover': { backgroundColor: '#f8f9fa' }
-                      }}
-                    >
-                      {/* 名称列 - 简化显示 */}
-                      <TableCell>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {schedule.name || 'Unnamed Schedule'}
-                        </Typography>
-                      </TableCell>
-
-                      {/* 目标类型列 */}
-                      <TableCell>
-                        <Chip 
-                          icon={
-                            <img 
-                              src={getTargetTypeInfo(schedule.entityType).icon}
-                              alt={getTargetTypeInfo(schedule.entityType).label}
-                              style={{ 
-                                width: 20, 
-                                height: 20,
-                                objectFit: 'contain'
-                              }}
-                            />
-                          }
-                          label={getTargetTypeInfo(schedule.entityType).label}
-                          size="small"
-                          sx={{ 
-                            backgroundColor: '#edf2f7',
-                            color: '#718096',
-                            fontWeight: 500,
-                            '& .MuiChip-icon': { 
-                              color: '#718096',
-                              marginLeft: '4px'
-                            }
-                          }}
-                        />
-                      </TableCell>
-
-                      {/* 日期范围列 */}
-                      <TableCell>
-                        <Chip 
-                          icon={<CalendarMonthIcon />}
-                          label={schedule.startYear && schedule.endYear ? 
-                            `${schedule.startYear} → ${schedule.endYear}` : 
-                            'No date range'
-                          }
-                          size="small"
-                          sx={{ 
-                            backgroundColor: '#edf2f7',
-                            color: '#718096',
-                            fontWeight: 500,
-                            '& .MuiChip-icon': { color: '#718096' }
-                          }}
-                        />
-                      </TableCell>
-
-                      {/* 执行时间列 */}
-                      <TableCell>
-                        <Chip 
-                          icon={<AccessTimeIcon />}
-                          label={`${schedule.executionTime || '--:--:--'} · ${formatWeekdays(schedule.weekdays)}`}
-                          size="small"
-                          sx={{ 
-                            backgroundColor: '#edf2f7',
-                            color: '#718096',
-                            fontWeight: 500,
-                            '& .MuiChip-icon': { color: '#718096' }
-                          }}
-                        />
-                      </TableCell>
-
-                      {/* 状态列 */}
-                      <TableCell>
-                        <Chip 
-                          icon={<CircleIcon sx={{ fontSize: '0.8rem' }} />}
-                          label={schedule.enabled === 1 ? 'Enabled' : 'Disabled'}
-                          size="small"
-                          sx={{ 
-                            backgroundColor: `${statusColor}20`,
-                            color: statusColor,
-                            fontWeight: 500,
-                            '& .MuiChip-icon': { 
-                              color: statusColor,
-                              marginLeft: '4px',
-                              marginRight: '-4px'
-                            }
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-        </Collapse>
-      </Paper>
+      {enrichedSchedules.map((schedule) => (
+        <ScheduleCard
+          key={schedule.scheduleId}
+          schedule={schedule}
+          getTargetName={getTargetName}
+          getTargetTypeInfo={getTargetTypeInfo}
+          formatWeekdays={formatWeekdays}
+          getStatusColor={getStatusColor}
+        />
+      ))}
     </Box>
   );
 };

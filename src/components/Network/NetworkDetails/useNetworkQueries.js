@@ -310,3 +310,41 @@ export const useNetworkSchedules = (networkId) => {
     enabled: !!networkId
   });
 };
+
+// 修改 useScheduleItems 为批量获取
+export const useScheduleItemsBatch = (networkId, scheduleIds = []) => {
+  return useQuery({
+    queryKey: ['schedule-items-batch', networkId, scheduleIds],
+    queryFn: async () => {
+      if (!scheduleIds.length) return {};
+      
+      const token = getToken();
+      if (!token) throw new Error("No token found");
+
+      // 并行请求所有 schedule items
+      const promises = scheduleIds.map(scheduleId => 
+        axiosInstance.post('/schedule/get/items', {
+          scheduleId,
+          networkId
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      );
+
+      const responses = await Promise.all(promises);
+      
+      // 将结果转换为 map
+      return responses.reduce((acc, response, index) => {
+        if (response.data.success) {
+          acc[scheduleIds[index]] = response.data.data;
+        } else {
+          acc[scheduleIds[index]] = [];
+        }
+        return acc;
+      }, {});
+    },
+    staleTime: 30000,
+    cacheTime: 5 * 60 * 1000,
+    enabled: !!networkId && scheduleIds.length > 0
+  });
+};
