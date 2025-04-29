@@ -16,49 +16,116 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import FlareIcon from '@mui/icons-material/Flare';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PowerPointIcon from '../../../../../../assets/icons/DeviceType/POWER_POINT.png';
 
 const PowerPointStatus = ({ label, value, type }) => {
-  let displayValue = '-';
-
   switch (type) {
     case 'power':
-    case 'led':
-      displayValue = value === 1 ? 'On' : 'Off';
-      break;
-    case 'lock':
-      displayValue = value === 1 ? 'Locked' : 'Unlocked';
-      break;
-    case 'delay':
-      displayValue = `${value || 0}min`;
-      break;
-    case 'name':
-      displayValue = value || '-';
-      break;
-    default:
-      displayValue = value || '-';
-  }
+      const isPowerOn = value === 1;
+      const powerColor = value === undefined ? '#9e9e9e' : (isPowerOn ? '#4caf50' : '#f44336');
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Chip 
+            icon={<PowerSettingsNewIcon />}
+            label={value === undefined ? '-' : (isPowerOn ? 'ON' : 'OFF')}
+            size="small"
+            sx={{ 
+              backgroundColor: `${powerColor}20`,
+              color: powerColor,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: powerColor }
+            }}
+          />
+        </Box>
+      );
 
-  return (
-    <Box sx={{ textAlign: 'center', mb: 1 }}>
-      <Typography 
-        variant="caption" 
-        sx={{
-          color: '#95a5a6',
-          display: 'block',
-          fontSize: '0.7rem'
-        }}
-      >
-        {label}
-      </Typography>
-      <Typography 
-        variant="body2"
-        sx={{ fontWeight: 500 }}
-      >
-        {displayValue}
-      </Typography>
-    </Box>
-  );
+    case 'lock':
+      const isLocked = value === 1;
+      const lockColor = value === undefined ? '#9e9e9e' : (isLocked ? '#f44336' : '#4caf50');
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Chip 
+            icon={isLocked ? <LockOutlinedIcon /> : <LockOpenIcon />}
+            label={value === undefined ? '-' : (isLocked ? 'Locked' : 'Unlocked')}
+            size="small"
+            sx={{ 
+              backgroundColor: `${lockColor}20`,
+              color: lockColor,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: lockColor }
+            }}
+          />
+        </Box>
+      );
+
+    case 'led':
+      const isLedOn = value === 1;
+      const ledColor = value === undefined ? '#9e9e9e' : (isLedOn ? '#4caf50' : '#f44336');
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Chip 
+            icon={<FlareIcon />}
+            label={value === undefined ? '-' : (isLedOn ? 'ON' : 'OFF')}
+            size="small"
+            sx={{ 
+              backgroundColor: `${ledColor}20`,
+              color: ledColor,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: ledColor }
+            }}
+          />
+        </Box>
+      );
+
+    case 'delay':
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Chip 
+            icon={<AccessTimeIcon />}
+            label={value === undefined ? '-' : `${value} min`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#edf2f7',
+              color: '#718096',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#718096' }
+            }}
+          />
+        </Box>
+      );
+
+    case 'name':
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {value || '-'}
+          </Typography>
+        </Box>
+      );
+
+    default:
+      return null;
+  }
 };
 
 const PowerPointChannel = ({ data }) => {
@@ -76,9 +143,9 @@ const PowerPointChannel = ({ data }) => {
     }}>
       <PowerPointStatus label="Name" value={data.name} type="name" />
       <PowerPointStatus label="Power" value={data.power} type="power" />
+      <PowerPointStatus label="LED Status" value={data.backLight} type="led" />
       <PowerPointStatus label="Lock Status" value={data.lock} type="lock" />
       <PowerPointStatus label="Delay Time" value={data.delay} type="delay" />
-      <PowerPointStatus label="LED Status" value={data.backLight} type="led" />
     </Box>
   );
 };

@@ -1,8 +1,14 @@
 // src/components/Network/NetworkDetails/Devices/Tables/RGB_CW/RGB_CW.js
 import React from 'react';
+import { Box, Chip } from '@mui/material';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import BrightnessLowIcon from '@mui/icons-material/BrightnessLow';
+import ThermostatIcon from '@mui/icons-material/Thermostat';
+import SpeedIcon from '@mui/icons-material/Speed';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BasicTable from '../BasicTable';
 import rgbcwIcon from '../../../../../../assets/icons/DeviceType/RGB_CW.png';
-import { Box, Typography } from '@mui/material';
 
 const RGB_CWType = ({ devices }) => {
   const columns = [
@@ -10,17 +16,42 @@ const RGB_CWType = ({ devices }) => {
       id: 'power',
       label: 'Power',
       format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
+        const isOn = value === 1;
+        const color = value === undefined ? '#9e9e9e' : (isOn ? '#4caf50' : '#f44336');
+        return (
+          <Chip 
+            icon={<PowerSettingsNewIcon />}
+            label={value === undefined ? '-' : (isOn ? 'ON' : 'OFF')}
+            size="small"
+            sx={{ 
+              backgroundColor: `${color}20`,
+              color: color,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: color }
+            }}
+          />
+        );
       }
     },
-    { 
-      id: 'level', 
-      label: 'level',
+    {
+      id: 'level',
+      label: 'Level',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return `${Math.round((value / 255) * 100)}%`;
+        const percentage = Math.round((value / 255) * 100);
+        return (
+          <Chip 
+            icon={<BrightnessLowIcon />}
+            label={`${percentage}%`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#fbcd0b20',
+              color: '#fbcd0b',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#fbcd0b' }
+            }}
+          />
+        );
       }
     },
     { 
@@ -28,7 +59,40 @@ const RGB_CWType = ({ devices }) => {
       label: 'Color Temp',
       format: (value) => {
         if (value === undefined || value === null) return '-';
-        return value.toString();
+        return (
+          <Chip 
+            icon={<ThermostatIcon />}
+            label={`${value}K`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#ff980020',
+              color: '#ff9800',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#ff9800' }
+            }}
+          />
+        );
+      }
+    },
+    {
+      id: 'isRgb',
+      label: 'Mode',
+      format: (value) => {
+        const isRgb = value === 1;
+        const label = value === undefined ? '-' : (isRgb ? 'RGB' : 'Color Temperature');
+        return (
+          <Chip 
+            icon={<SettingsIcon />}
+            label={label}
+            size="small"
+            sx={{ 
+              backgroundColor: '#1976d120',
+              color: '#1976d1',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#1976d1' }
+            }}
+          />
+        );
       }
     },
     { 
@@ -45,21 +109,36 @@ const RGB_CWType = ({ devices }) => {
         
         return (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography component="span" sx={{ color: '#e74c3c', fontWeight: 'bold' }}>
-            {red}
-            </Typography>
-            <Typography component="span">
-              ,
-            </Typography>
-            <Typography component="span" sx={{ color: '#2ecc71', fontWeight: 'bold' }}>
-            {green}
-            </Typography>
-            <Typography component="span">
-              ,
-            </Typography>
-            <Typography component="span" sx={{ color: '#3498db', fontWeight: 'bold' }}>
-            {blue}
-            </Typography>
+            <Chip 
+              label={red}
+              size="small"
+              sx={{ 
+                backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                color: '#f44336',
+                fontWeight: 500,
+                minWidth: '45px'
+              }}
+            />
+            <Chip 
+              label={green}
+              size="small"
+              sx={{ 
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                color: '#4caf50',
+                fontWeight: 500,
+                minWidth: '45px'
+              }}
+            />
+            <Chip 
+              label={blue}
+              size="small"
+              sx={{ 
+                backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                color: '#2196f3',
+                fontWeight: 500,
+                minWidth: '45px'
+              }}
+            />
           </Box>
         );
       }
@@ -68,32 +147,61 @@ const RGB_CWType = ({ devices }) => {
       id: 'blinkSpeed', 
       label: 'Blink Speed',
       format: (value) => {
+        let label;
         switch (Number(value)) {
-          case -1: return 'None';
-          case 0: return 'Slow';
-          case 1: return 'Medium';
-          case 2: return 'Fast';
-          default: return '-';
+          case -1: label = 'None'; break;
+          case 0: label = 'Slow'; break;
+          case 1: label = 'Medium'; break;
+          case 2: label = 'Fast'; break;
+          default: label = '-';
         }
+        return (
+          <Chip 
+            icon={<SpeedIcon />}
+            label={label}
+            size="small"
+            sx={{ 
+              backgroundColor: '#9c27b020',
+              color: '#9c27b0',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#9c27b0' }
+            }}
+          />
+        );
       }
     },
     { 
       id: 'delay', 
       label: 'Delay',
       format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return `${value} min`;
-      }
-    },
-    { 
-      id: 'isRgb', 
-      label: 'Mode',
-      format: (value) => {
-        switch (Number(value)) {
-          case 0: return 'Color Temperature';
-          case 1: return 'RGB';
-          default: return '-';
+        if (value === undefined || value === null) {
+          return (
+            <Chip 
+              icon={<AccessTimeIcon />}
+              label="-"
+              size="small"
+              sx={{ 
+                backgroundColor: '#edf2f7',
+                color: '#718096',
+                fontWeight: 500,
+                '& .MuiChip-icon': { color: '#718096' }
+              }}
+            />
+          );
         }
+        return (
+          <Chip 
+            icon={<AccessTimeIcon />}
+            label={`${value} min`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#edf2f7',
+              color: '#718096',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#718096' }
+            }}
+          />
+        );
       }
     }
   ];
@@ -105,7 +213,8 @@ const RGB_CWType = ({ devices }) => {
       devices={devices}
       columns={columns}
       formatWithDevice={true}
-      nameColumnWidth="20%"  // 其他6列平均分配80%
+      nameColumnWidth="20%"
+      enhancedDisplay={false}
     />
   );
 };

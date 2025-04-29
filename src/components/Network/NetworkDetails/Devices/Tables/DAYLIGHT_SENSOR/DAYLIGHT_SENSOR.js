@@ -1,4 +1,6 @@
 import React from 'react';
+import { Chip } from '@mui/material';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import BasicTable from '../BasicTable';
 import daylightSensorIcon from '../../../../../../assets/icons/DeviceType/DAYLIGHT_SENSOR.png';
 import { DEVICE_CONFIGS } from '../../DeviceConfigs';
@@ -8,7 +10,25 @@ const DAYLIGHT_SENSORType = ({ devices }) => {
     {
       id: 'power',
       label: 'Power',
-      format: (value) => DEVICE_CONFIGS.DAYLIGHT_SENSOR.helpers.getPowerStateText(value)
+      format: (value) => {
+        const isOn = value === 1;
+        const label = value === undefined ? '-' : (isOn ? 'ON' : 'OFF');
+        const color = value === undefined ? '#9e9e9e' : (isOn ? '#4caf50' : '#f44336');
+        
+        return (
+          <Chip 
+            icon={<PowerSettingsNewIcon />}
+            label={label}
+            size="small"
+            sx={{ 
+              backgroundColor: `${color}20`,
+              color: color,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: color }
+            }}
+          />
+        );
+      }
     },
     {
       id: 'sensorBindID',
@@ -23,7 +43,8 @@ const DAYLIGHT_SENSORType = ({ devices }) => {
       icon={daylightSensorIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="40%"  // 由于只有2列，给名称列分配较多空间
+      nameColumnWidth="40%"
+      enhancedDisplay={false}
     />
   );
 };

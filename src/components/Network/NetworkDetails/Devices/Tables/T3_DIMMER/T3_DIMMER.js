@@ -16,44 +16,79 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import t3DimmerIcon from '../../../../../../assets/icons/DeviceType/T3_DIMMER.png';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import BrightnessLowIcon from '@mui/icons-material/BrightnessLow';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const DimmerStatus = ({ label, value, type }) => {
-  let displayValue = '-';
-
   switch (type) {
     case 'power':
-      displayValue = value === 1 ? 'On' : 'Off';
-      break;
-    case 'brightness':
-      displayValue = `${value}%`;
-      break;
-    case 'delay':
-      displayValue = `${value || 0}min`;
-      break;
-    default:
-      displayValue = value || '-';
-  }
+      const isOn = value === 1;
+      const color = value === undefined ? '#9e9e9e' : (isOn ? '#4caf50' : '#f44336');
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Chip 
+            icon={<PowerSettingsNewIcon />}
+            label={value === undefined ? '-' : (isOn ? 'ON' : 'OFF')}
+            size="small"
+            sx={{ 
+              backgroundColor: `${color}20`,
+              color: color,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: color }
+            }}
+          />
+        </Box>
+      );
 
-  return (
-    <Box sx={{ textAlign: 'center', mb: 1 }}>
-      <Typography 
-        variant="caption" 
-        sx={{
-          color: '#95a5a6',
-          display: 'block',
-          fontSize: '0.7rem'
-        }}
-      >
-        {label}
-      </Typography>
-      <Typography 
-        variant="body2"
-        sx={{ fontWeight: 500 }}
-      >
-        {displayValue}
-      </Typography>
-    </Box>
-  );
+    case 'brightness':
+      if (value === undefined || value === null) return '-';
+      const percentage = Math.round((value / 255) * 100);
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Chip 
+            icon={<BrightnessLowIcon />}
+            label={`${percentage}%`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#fbcd0b20',
+              color: '#fbcd0b',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#fbcd0b' }
+            }}
+          />
+        </Box>
+      );
+
+    case 'delay':
+      return (
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block', mb: 0.5 }}>
+            {label}
+          </Typography>
+          <Chip 
+            icon={<AccessTimeIcon />}
+            label={value === undefined ? '-' : `${value} min`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#edf2f7',
+              color: '#718096',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#718096' }
+            }}
+          />
+        </Box>
+      );
+
+    default:
+      return null;
+  }
 };
 
 const DimmerChannel = ({ data }) => {

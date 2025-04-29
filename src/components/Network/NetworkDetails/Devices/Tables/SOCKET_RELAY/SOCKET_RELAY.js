@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Typography,
   Tooltip,
-  Pagination
+  Pagination,
+  Chip
 } from '@mui/material';
 import { 
   Modal,
@@ -14,6 +15,9 @@ import socketRelayIcon from '../../../../../../assets/icons/DeviceType/SOCKET_RE
 import { DEVICE_CONFIGS } from '../../DeviceConfigs';
 import CustomButton from '../../../../../CustomComponents/CustomButton';
 import DownloadIcon from '@mui/icons-material/Download';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BrightnessLowIcon from '@mui/icons-material/BrightnessLow';
 
 // 自定义错误日志模态框组件 - 不包含标题栏，只有关闭按钮
 const SimpleErrorModal = ({ isOpen, toggle, children }) => {
@@ -260,17 +264,78 @@ const SOCKET_RELAYType = ({ devices }) => {
     {
       id: 'power',
       label: 'Power',
-      format: (value) => DEVICE_CONFIGS.SOCKET_RELAY.helpers.getPowerStateText(value)
+      format: (value) => {
+        const isOn = value === 1;
+        const color = value === undefined ? '#9e9e9e' : (isOn ? '#4caf50' : '#f44336');
+        return (
+          <Chip 
+            icon={<PowerSettingsNewIcon />}
+            label={value === undefined ? '-' : (isOn ? 'ON' : 'OFF')}
+            size="small"
+            sx={{ 
+              backgroundColor: `${color}20`,
+              color: color,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: color }
+            }}
+          />
+        );
+      }
+    },
+    {
+      id: 'pValue',
+      label: 'Level',
+      format: (value) => {
+        if (value === undefined || value === null) return '-';
+        const percentage = Math.round((value / 255) * 100);
+        return (
+          <Chip 
+            icon={<BrightnessLowIcon />}
+            label={`${percentage}%`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#fbcd0b20',
+              color: '#fbcd0b',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#fbcd0b' }
+            }}
+          />
+        );
+      }
     },
     {
       id: 'delay',
       label: 'Delay',
-      format: (value) => DEVICE_CONFIGS.SOCKET_RELAY.helpers.getDelayMinutes(value)
-    },
-    {
-      id: 'pValue',
-      label: 'Power Value',
-      format: (value) => value ?? '-'
+      format: (value) => {
+        if (value === undefined || value === null) {
+          return (
+            <Chip 
+              icon={<AccessTimeIcon />}
+              label="-"
+              size="small"
+              sx={{ 
+                backgroundColor: '#edf2f7',
+                color: '#718096',
+                fontWeight: 500,
+                '& .MuiChip-icon': { color: '#718096' }
+              }}
+            />
+          );
+        }
+        return (
+          <Chip 
+            icon={<AccessTimeIcon />}
+            label={`${value} min`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#edf2f7',
+              color: '#718096',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#718096' }
+            }}
+          />
+        );
+      }
     },
     {
       id: 'socketErrors',
@@ -319,6 +384,7 @@ const SOCKET_RELAYType = ({ devices }) => {
         devices={devices}
         columns={columns}
         nameColumnWidth="20%"
+        enhancedDisplay={false}
       />
 
       <ErrorLogModal

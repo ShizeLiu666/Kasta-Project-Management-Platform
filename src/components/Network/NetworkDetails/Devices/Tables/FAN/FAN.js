@@ -1,5 +1,11 @@
 // src/components/Network/NetworkDetails/Devices/Tables/FAN/FAN.js
 import React from 'react';
+import { Chip } from '@mui/material';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import BasicTable from '../BasicTable';
 import fanIcon from '../../../../../../assets/icons/DeviceType/FAN.png';
 
@@ -9,48 +15,132 @@ const FanType = ({ devices }) => {
       id: 'isHaveFanLight',
       label: 'Has Light',
       format: (value) => {
-        if (value === 1) return 'Yes';
-        if (value === 0) return 'No';
-        return '-';
+        const hasLight = value === 1;
+        const label = value === undefined ? '-' : (hasLight ? 'Yes' : 'No');
+        const color = value === undefined ? '#9e9e9e' : (hasLight ? '#4caf50' : '#f44336');
+        
+        return (
+          <Chip 
+            icon={<LightbulbIcon />}
+            label={label}
+            size="small"
+            sx={{ 
+              backgroundColor: `${color}20`,
+              color: color,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: color }
+            }}
+          />
+        );
       }
     },
     {
       id: 'fanLightState',
       label: 'Light Status',
       format: (value) => {
-        if (value === 1) return 'On';
-        if (value === 0) return 'Off';
-        return '-';
-      }
-    },
-    {
-      id: 'fanState',
-      label: 'Fan Status',
-      format: (value) => {
-        switch (Number(value)) {
-          case 0: return 'Close';
-          case 1: return 'Low';
-          case 2: return 'Medium';
-          case 3: return 'High';
-          default: return '-';
-        }
+        const isOn = value === 1;
+        const label = value === undefined ? '-' : (isOn ? 'ON' : 'OFF');
+        const color = value === undefined ? '#9e9e9e' : (isOn ? '#4caf50' : '#f44336');
+        
+        return (
+          <Chip 
+            icon={<PowerSettingsNewIcon />}
+            label={label}
+            size="small"
+            sx={{ 
+              backgroundColor: `${color}20`,
+              color: color,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: color }
+            }}
+          />
+        );
       }
     },
     {
       id: 'isConfigFanLight',
       label: 'Light Configured',
       format: (value) => {
-        if (value === 1) return 'Yes';
-        if (value === 0) return 'No';
-        return '-';
+        const isConfigured = value === 1;
+        const label = value === undefined ? '-' : (isConfigured ? 'Yes' : 'No');
+        const color = value === undefined ? '#9e9e9e' : (isConfigured ? '#4caf50' : '#f44336');
+        
+        return (
+          <Chip 
+            icon={<CheckCircleIcon />}
+            label={label}
+            size="small"
+            sx={{ 
+              backgroundColor: `${color}20`,
+              color: color,
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: color }
+            }}
+          />
+        );
+      }
+    },
+    {
+      id: 'fanState',
+      label: 'Fan Status',
+      format: (value) => {
+        let label;
+        switch (Number(value)) {
+          case 0: label = 'Close'; break;
+          case 1: label = 'Low'; break;
+          case 2: label = 'Medium'; break;
+          case 3: label = 'High'; break;
+          default: label = '-';
+        }
+        
+        return (
+          <Chip 
+            icon={<SettingsIcon />}
+            label={label}
+            size="small"
+            sx={{ 
+              backgroundColor: '#1976d120',
+              color: '#1976d1',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#1976d1' }
+            }}
+          />
+        );
       }
     },
     {
       id: 'delay',
       label: 'Delay',
       format: (value) => {
-        if (value === undefined || value === null) return '-';
-        return `${value} min`;
+        if (value === undefined || value === null) {
+          return (
+            <Chip 
+              icon={<AccessTimeIcon />}
+              label="-"
+              size="small"
+              sx={{ 
+                backgroundColor: '#edf2f7',
+                color: '#718096',
+                fontWeight: 500,
+                '& .MuiChip-icon': { color: '#718096' }
+              }}
+            />
+          );
+        }
+        
+        return (
+          <Chip 
+            icon={<AccessTimeIcon />}
+            label={`${value} min`}
+            size="small"
+            sx={{ 
+              backgroundColor: '#edf2f7',
+              color: '#718096',
+              fontWeight: 500,
+              '& .MuiChip-icon': { color: '#718096' }
+            }}
+          />
+        );
       }
     }
   ];
@@ -61,7 +151,8 @@ const FanType = ({ devices }) => {
       icon={fanIcon}
       devices={devices}
       columns={columns}
-      nameColumnWidth="25%"  // 由于有5列，给名称列分配较少空间
+      nameColumnWidth="25%"
+      enhancedDisplay={false}
     />
   );
 };

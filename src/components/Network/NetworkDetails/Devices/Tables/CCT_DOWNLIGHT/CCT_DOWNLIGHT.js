@@ -42,7 +42,7 @@ const CCT_DOWNLIGHTType = ({ devices }) => {
     },
     {
       id: 'level',
-      label: 'Brightness',
+      label: 'level',
       format: (value) => {
         if (value === undefined || value === null) return '-';
         const percentage = Math.round((value / 255) * 100);
