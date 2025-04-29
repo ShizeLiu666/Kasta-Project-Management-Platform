@@ -64,11 +64,11 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 const SceneDeviceCard = ({ device }) => {
-  // 获取设备属性
-  const productType = device.productType || device.product_type || device.type;
+  // 使用 deviceInfo 中的信息
+  const productType = device.deviceInfo?.productType || device.productType;
   const deviceType = getDeviceTypeFromProductType(productType);
   const iconSrc = getDeviceIcon(productType);
-  const deviceId = device.deviceId || device.did || device.id;
+  const deviceName = device.deviceInfo?.name; // 使用完整设备信息中的名称
 
   return (
     <Box 
@@ -118,7 +118,7 @@ const SceneDeviceCard = ({ device }) => {
           mb: 1
         }}
       >
-        {formatDisplayText(deviceType) || '未知设备'}
+        {formatDisplayText(deviceType) || 'Unknown Device'}
       </Typography>
       
       {/* 设备名称 */}
@@ -127,26 +127,11 @@ const SceneDeviceCard = ({ device }) => {
         align="center"
         sx={{
           fontWeight: 600,
-          color: '#2c3e50',
-          mb: 0.5
+          color: '#2c3e50'
         }}
       >
-        <TruncatedText text={device.name} maxLength={16} />
+        <TruncatedText text={deviceName} maxLength={15} />
       </Typography>
-      
-      {/* 设备ID */}
-      <Typography
-        variant="caption"
-        align="center"
-        sx={{
-          color: '#95a5a6',
-          fontSize: '0.7rem'
-        }}
-      >
-        <TruncatedText text={deviceId} maxLength={16} />
-      </Typography>
-
-      {/* 已移除属性信息部分 */}
     </Box>
   );
 };

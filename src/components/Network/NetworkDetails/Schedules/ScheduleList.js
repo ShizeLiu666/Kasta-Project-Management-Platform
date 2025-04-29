@@ -1,71 +1,52 @@
-import React from 'react';
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper,
+  Chip,
+  Collapse,
+  IconButton,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CircleIcon from '@mui/icons-material/Circle';
 import { useNetworkSchedules } from '../useNetworkQueries';
 
-// 添加一个辅助函数来格式化日期和时间
-const formatDateTime = (date) => {
-  if (!date) return '-';
-  return new Date(date).toLocaleString();
-};
+// 导入自定义图标
+import deviceIcon from '../../../../assets/icons/NetworkOverview/Device.png';
+import groupIcon from '../../../../assets/icons/NetworkOverview/Group.png';
 
-// 添加一个辅助函数来格式化星期
+// 修改星期格式化函数
 const formatWeekdays = (weekdays) => {
   if (!weekdays) return '-';
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  return weekdays.split(',').map(day => days[parseInt(day)]).join(', ');
+  return weekdays
+    .split('')
+    .map((enabled, index) => enabled === '1' ? days[index] : null)
+    .filter(day => day !== null)
+    .join(', ');
 };
 
-// 抽取成单独的组件以优化性能
-const ScheduleItem = ({ schedule }) => (
-  <TableRow
-    key={schedule.scheduleId}
-    sx={{
-      '&:hover': { backgroundColor: '#f8f9fa' }
-    }}
-  >
-    <TableCell>
-      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-        {schedule.name}
-      </Typography>
-    </TableCell>
-    <TableCell>
-      <Typography variant="body2" sx={{ color: '#95a5a6' }}>
-        {schedule.scheduleId}
-      </Typography>
-    </TableCell>
-    <TableCell>
-      <Typography variant="body2">
-        {schedule.scheduleType === 0 ? 'Device' : 'Group'}
-      </Typography>
-    </TableCell>
-    <TableCell>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        <Typography variant="body2" sx={{ color: '#666' }}>
-          Start: {formatDateTime(schedule.startDate)}
-        </Typography>
-        <Typography variant="body2" sx={{ color: '#666' }}>
-          End: {formatDateTime(schedule.endDate)}
-        </Typography>
-      </Box>
-    </TableCell>
-    <TableCell>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        <Typography variant="body2" sx={{ color: '#666' }}>
-          Time: {schedule.executionTime || '-'}
-        </Typography>
-        <Typography variant="body2" sx={{ color: '#666' }}>
-          Days: {formatWeekdays(schedule.weekdays)}
-        </Typography>
-      </Box>
-    </TableCell>
-  </TableRow>
-);
+// 获取状态颜色
+const getStatusColor = (enabled) => {
+  return enabled === 1 ? '#4caf50' : '#95a5a6';
+};
 
 const ScheduleList = ({ networkId }) => {
+  const [expanded, setExpanded] = useState(true);
+  
   const { 
     data: schedules = [], 
     isLoading, 
-    error,
+    error 
   } = useNetworkSchedules(networkId);
 
   if (isLoading) {
@@ -107,33 +88,176 @@ const ScheduleList = ({ networkId }) => {
   }
 
   return (
-    <Box>
-      <TableContainer
-        component={Paper}
+    <Box sx={{ mb: 4 }}>
+      <Paper 
+        elevation={0}
+        variant="outlined" 
         sx={{
-          boxShadow: 'none',
-          border: '1px solid #dee2e6',
-          borderRadius: '8px',
-          width: '100%'
+          borderRadius: 2,
+          overflow: 'hidden',
+          borderColor: 'rgba(224, 224, 224, 0.7)'
         }}
       >
+        {/* 标题区域 */}
+        <Box 
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid #dee2e6' : 'none',
+            cursor: 'pointer',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Schedules
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${schedules.length} ${schedules.length === 1 ? 'Schedule' : 'Schedules'}`}
+              size="small"
+        sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            <IconButton 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* 可折叠的表格内容 */}
+        <Collapse in={expanded}>
+          <TableContainer component={Box}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Type</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Date Range</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8f9fa' }}>Execution</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Target Type</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Date Range</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Execution Time</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {schedules.map((schedule) => (
-              <ScheduleItem key={schedule.scheduleId} schedule={schedule} />
-            ))}
+                {schedules.map((schedule) => {
+                  const statusColor = getStatusColor(schedule.enabled);
+                  
+                  return (
+                    <TableRow
+                      key={schedule.scheduleId}
+                      sx={{
+                        '&:hover': { backgroundColor: '#f8f9fa' }
+                      }}
+                    >
+                      {/* 名称列 - 简化显示 */}
+                      <TableCell>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {schedule.name || 'Unnamed Schedule'}
+                        </Typography>
+                      </TableCell>
+
+                      {/* 目标类型列 */}
+                      <TableCell>
+                        <Chip 
+                          icon={
+                            <img 
+                              src={schedule.scheduleType === 0 ? deviceIcon : groupIcon}
+                              alt={schedule.scheduleType === 0 ? "Device" : "Group"}
+                              style={{ 
+                                width: 20, 
+                                height: 20,
+                                objectFit: 'contain'
+                              }}
+                            />
+                          }
+                          label={schedule.scheduleType === 0 ? 'Device' : 'Group'}
+                          size="small"
+                          sx={{ 
+                            backgroundColor: '#edf2f7',
+                            color: '#718096',
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { 
+                              color: '#718096',
+                              marginLeft: '4px'
+                            }
+                          }}
+                        />
+                      </TableCell>
+
+                      {/* 日期范围列 */}
+                      <TableCell>
+                        <Chip 
+                          icon={<CalendarMonthIcon />}
+                          label={schedule.startYear && schedule.endYear ? 
+                            `${schedule.startYear} → ${schedule.endYear}` : 
+                            'No date range'
+                          }
+                          size="small"
+                          sx={{ 
+                            backgroundColor: '#edf2f7',
+                            color: '#718096',
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { color: '#718096' }
+                          }}
+                        />
+                      </TableCell>
+
+                      {/* 执行时间列 */}
+                      <TableCell>
+                        <Chip 
+                          icon={<AccessTimeIcon />}
+                          label={`${schedule.executionTime || '--:--:--'} · ${formatWeekdays(schedule.weekdays)}`}
+                          size="small"
+                          sx={{ 
+                            backgroundColor: '#edf2f7',
+                            color: '#718096',
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { color: '#718096' }
+                          }}
+                        />
+                      </TableCell>
+
+                      {/* 状态列 */}
+                      <TableCell>
+                        <Chip 
+                          icon={<CircleIcon sx={{ fontSize: '0.8rem' }} />}
+                          label={schedule.enabled === 1 ? 'Enabled' : 'Disabled'}
+                          size="small"
+                          sx={{ 
+                            backgroundColor: `${statusColor}20`,
+                            color: statusColor,
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { 
+                              color: statusColor,
+                              marginLeft: '4px',
+                              marginRight: '-4px'
+                            }
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
           </TableBody>
         </Table>
       </TableContainer>
+        </Collapse>
+      </Paper>
     </Box>
   );
 };

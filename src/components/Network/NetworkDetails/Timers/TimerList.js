@@ -12,12 +12,12 @@ import {
   Chip,
   Collapse,
   IconButton,
-  Switch
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CircleIcon from '@mui/icons-material/Circle';
 import { useNetworkTimers, useNetworkDevices, useNetworkGroups } from '../useNetworkQueries';
 
 // 导入自定义图标
@@ -47,6 +47,10 @@ const getActionColor = (action) => {
     case 1: return '#4caf50'; // 绿色表示开启
     default: return '#9e9e9e'; // 灰色表示未知
   }
+};
+
+const getStatusColor = (enabled) => {
+  return enabled ? '#4caf50' : '#95a5a6';
 };
 
 const TimerList = ({ networkId }) => {
@@ -185,20 +189,21 @@ const TimerList = ({ networkId }) => {
         {/* 可折叠的表格内容 */}
         <Collapse in={expanded}>
           <TableContainer component={Box}>
-        <Table>
-          <TableHead>
-            <TableRow>
+            <Table>
+              <TableHead>
+                <TableRow>
                   <TableCell sx={{ fontWeight: 'bold' }}>Timer Name</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Target</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {timers.map((timer) => {
                   const targetName = getTargetName(timer);
                   const actionColor = getActionColor(timer.action);
+                  const statusColor = getStatusColor(timer.enabled);
                   
                   return (
                     <TableRow
@@ -231,22 +236,7 @@ const TimerList = ({ networkId }) => {
                         />
                       </TableCell>
                       
-                      {/* 动作列 */}
-                      <TableCell>
-                        <Chip 
-                          icon={<PowerSettingsNewIcon />}
-                          label={formatAction(timer.action)}
-                          size="small"
-                          sx={{ 
-                            backgroundColor: `${actionColor}20`, // 使用透明度
-                            color: actionColor,
-                            fontWeight: 500,
-                            '& .MuiChip-icon': { color: actionColor }
-                          }}
-                        />
-                      </TableCell>
-                      
-                      {/* 目标列 - 使用自定义图标 */}
+                      {/* 目标列 - 现在在 Action 列之前 */}
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <img 
@@ -272,20 +262,45 @@ const TimerList = ({ networkId }) => {
                         </Box>
                       </TableCell>
                       
+                      {/* 动作列 - 现在在 Target 列之后 */}
+                      <TableCell>
+                        <Chip 
+                          icon={<PowerSettingsNewIcon />}
+                          label={formatAction(timer.action)}
+                          size="small"
+                          sx={{ 
+                            backgroundColor: `${actionColor}20`,
+                            color: actionColor,
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { color: actionColor }
+                          }}
+                        />
+                      </TableCell>
+                      
                       {/* 状态列 */}
                       <TableCell>
-                        <Switch 
-                          size="small" 
-                          checked={true} // 这里应该使用timer的实际状态，这里假设都是激活的
-                          disabled={false} // 如果没有权限可以设置为disabled
+                        <Chip 
+                          icon={<CircleIcon sx={{ fontSize: '0.8rem' }} />}
+                          label={timer.enabled ? 'Enabled' : 'Disabled'}
+                          size="small"
+                          sx={{ 
+                            backgroundColor: `${statusColor}20`,
+                            color: statusColor,
+                            fontWeight: 500,
+                            '& .MuiChip-icon': { 
+                              color: statusColor,
+                              marginLeft: '4px',
+                              marginRight: '-4px'
+                            }
+                          }}
                         />
                       </TableCell>
                     </TableRow>
                   );
                 })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Collapse>
       </Paper>
     </Box>
