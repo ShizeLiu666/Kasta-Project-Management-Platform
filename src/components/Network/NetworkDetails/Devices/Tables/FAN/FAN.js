@@ -5,7 +5,8 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LightbulbIcon from '@mui/icons-material/Lightbulb';
+// import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import LightbulbIcon from '@mui/icons-material/Flare';
 import BasicTable from '../BasicTable';
 import fanIcon from '../../../../../../assets/icons/DeviceType/FAN.png';
 

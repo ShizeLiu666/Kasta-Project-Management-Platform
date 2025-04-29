@@ -12,7 +12,7 @@ import {
   Chip,
   Tooltip
 } from '@mui/material';
-import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 import VirtualDryContacts from './VirtualDryContacts';
 import AutomationRules from '../SIX_INPUT/AutomationRules';
@@ -90,6 +90,11 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
     staleTime: 30000,
     cacheTime: 60000
   });
+  const { data: allScenes = [] } = useNetworkScenes(networkId, {
+    enabled: !!networkId,
+    staleTime: 30000,
+    cacheTime: 60000
+  });
 
   // 创建设备和组的映射
   const deviceMap = useMemo(() => {
@@ -107,6 +112,14 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
       return acc;
     }, {});
   }, [allGroups]);
+
+  const sceneMap = useMemo(() => {
+    if (!allScenes?.length) return {};
+    return allScenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = scene.name;
+      return acc;
+    }, {});
+  }, [allScenes]);
 
   // 预处理设备数据
   const processedDevices = useMemo(() => {
@@ -178,11 +191,11 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
       case 1: // Group
         return groupMap[binding.bindId] || `Unknown Group`;
       case 2: // Scene
-        return `Scene ${binding.bindId}`;
+        return sceneMap[binding.bindId] || `Unknown Scene`;
       default:
         return `Unknown`;
     }
-  }, [deviceMap, groupMap]);
+  }, [deviceMap, groupMap, sceneMap]);
 
   // 获取端子信息和绑定信息（类似于 SIX_INPUT.js）
   const getTerminalInfo = React.useCallback((device, terminalIndex) => {
@@ -233,11 +246,36 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
       );
     }
 
-    const boundDevice = binding ? allDevices.find(device => 
-      String(device.did) === String(binding.bindId)
-    ) : null;
-    
-    const deviceType = boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : null;
+    // 获取绑定类型的图标和名称
+    const getBindingTypeInfo = () => {
+      switch (binding?.bindType) {
+        case 0: // Device
+          const boundDevice = allDevices.find(device => 
+            String(device.did) === String(binding.bindId)
+          );
+          return {
+            icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
+            typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
+          };
+        case 1: // Group
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
+            typeName: 'GROUP'
+          };
+        case 2: // Scene
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
+            typeName: 'SCENE'
+          };
+        default:
+          return {
+            icon: null,
+            typeName: null
+          };
+      }
+    };
+
+    const bindingTypeInfo = binding ? getBindingTypeInfo() : null;
 
     return (
       <Box sx={{ 
@@ -294,9 +332,9 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
         </Box>
 
         {/* Binding Information */}
-        {binding && (
+        {binding && bindingTypeInfo && (
           <>
-            {binding.bindType === 0 && boundDevice && deviceType && (
+            {bindingTypeInfo.icon && (
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: 'column',
@@ -305,8 +343,8 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
                 mt: 1
               }}>
                 <img
-                  src={getDeviceIcon(boundDevice.productType)}
-                  alt="Device Icon"
+                  src={bindingTypeInfo.icon}
+                  alt="Binding Icon"
                   style={{ width: 24, height: 24 }}
                 />
                 <Typography
@@ -321,7 +359,7 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
                     mt: 0.5
                   }}
                 >
-                  {formatDisplayText(deviceType)}
+                  {formatDisplayText(bindingTypeInfo.typeName)}
                 </Typography>
               </Box>
             )}

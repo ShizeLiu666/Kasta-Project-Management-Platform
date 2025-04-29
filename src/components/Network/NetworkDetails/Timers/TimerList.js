@@ -18,11 +18,12 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CircleIcon from '@mui/icons-material/Circle';
-import { useNetworkTimers, useNetworkDevices, useNetworkGroups } from '../useNetworkQueries';
+import { useNetworkTimers, useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../useNetworkQueries';
 
 // 导入自定义图标
 import deviceIcon from '../../../../assets/icons/NetworkOverview/Device.png';
 import groupIcon from '../../../../assets/icons/NetworkOverview/Group.png';
+import sceneIcon from '../../../../assets/icons/NetworkOverview/Scene.png';
 
 // 辅助函数
 const formatTime = (hour, min, second) => {
@@ -64,6 +65,7 @@ const TimerList = ({ networkId }) => {
   
   const { data: devices = [] } = useNetworkDevices(networkId);
   const { data: groups = [] } = useNetworkGroups(networkId);
+  const { data: scenes = [] } = useNetworkScenes(networkId);
   
   // 创建设备和组的映射
   const deviceMap = React.useMemo(() => {
@@ -80,14 +82,45 @@ const TimerList = ({ networkId }) => {
     }, {});
   }, [groups]);
   
+  const sceneMap = React.useMemo(() => {
+    return scenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = scene.name;
+      return acc;
+    }, {});
+  }, [scenes]);
+  
+  // 获取目标图标
+  const getTargetIcon = (entityType) => {
+    switch (entityType) {
+      case 0: return deviceIcon;
+      case 1: return groupIcon;
+      case 2: return sceneIcon;
+      default: return deviceIcon;
+    }
+  };
+
+  // 获取目标类型名称
+  const getTargetTypeName = (entityType) => {
+    switch (entityType) {
+      case 0: return "Device";
+      case 1: return "Group";
+      case 2: return "Scene";
+      default: return "Unknown";
+    }
+  };
+
   // 根据entityType和ID获取目标名称
   const getTargetName = (timer) => {
-    if (timer.entityType === 0 && timer.deviceId) {
-      return deviceMap[timer.deviceId] || `Device ${timer.deviceId}`;
-    } else if (timer.entityType === 1 && timer.groupId) {
-      return groupMap[timer.groupId] || `Group ${timer.groupId}`;
+    switch (timer.entityType) {
+      case 0: // Device
+        return deviceMap[timer.deviceId] || `Device ${timer.deviceId}`;
+      case 1: // Group
+        return groupMap[timer.groupId] || `Group ${timer.groupId}`;
+      case 2: // Scene
+        return sceneMap[timer.sceneId] || `Scene ${timer.sceneId}`;
+      default:
+        return '-';
     }
-    return '-';
   };
 
   if (isLoading) {
@@ -240,8 +273,8 @@ const TimerList = ({ networkId }) => {
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <img 
-                            src={timer.entityType === 0 ? deviceIcon : groupIcon}
-                            alt={timer.entityType === 0 ? "Device" : "Group"}
+                            src={getTargetIcon(timer.entityType)}
+                            alt={getTargetTypeName(timer.entityType)}
                             style={{ 
                               width: 20, 
                               height: 20, 

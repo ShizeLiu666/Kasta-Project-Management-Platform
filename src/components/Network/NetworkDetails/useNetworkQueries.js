@@ -93,55 +93,70 @@ export const useNetworkGroups = (networkId) => {
   });
 };
 
-// 特殊的查询（带额外参数的）
-// ** Group Devices **
-export const useGroupDevices = (networkId, groupId) => {
-    return useQuery({
-      queryKey: ['group-devices', networkId, groupId],
-      queryFn: async () => {
-        const token = getToken();
-        if (!token) throw new Error("No token found");
+// 创建设备、组和场景的映射 hooks
+export const useDevicesMap = (networkId) => {
+  const { data: devices = [] } = useNetworkDevices(networkId);
   
-        const response = await axiosInstance.post('/groups/devices', {
-          groupId,
-          networkId
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-  
-        if (!response.data.success) {
-          throw new Error(response.data.errorMsg || 'Failed to fetch group devices');
-        }
-  
-        return response.data.data;
-      },
-      staleTime: 30000,
-      cacheTime: 5 * 60 * 1000,
-      enabled: !!groupId
-    });
-  };
-
-// ** Scene List **
-export const useNetworkScenes = (networkId) => {
-  return useQuery({
-    queryKey: ['network-scenes', networkId],
-    queryFn: () => fetchPaginatedData('/scene/list', networkId),
-    staleTime: 30000,
-    cacheTime: 5 * 60 * 1000,
-    enabled: !!networkId
-  });
-};
-
-// ** Scene Devices **
-export const useSceneDevices = (networkId, sceneId) => {
-  // 获取网络中的所有设备作为查找表
-  const { data: networkDevices = [] } = useNetworkDevices(networkId);
-  const devicesMap = React.useMemo(() => {
-    return networkDevices.reduce((acc, device) => {
-      acc[device.deviceId] = device;
+  return React.useMemo(() => {
+    return devices.reduce((acc, device) => {
+      acc[device.deviceId] = {
+        name: device.name,
+        type: device.type,
+        productType: device.productType,
+        // 可以添加其他需要的设备信息
+      };
       return acc;
     }, {});
-  }, [networkDevices]);
+  }, [devices]);
+};
+
+export const useGroupsMap = (networkId) => {
+  const { data: groups = [] } = useNetworkGroups(networkId);
+  
+  return React.useMemo(() => {
+    return groups.reduce((acc, group) => {
+      acc[group.groupId] = {
+        name: group.name,
+        devices: group.devices || [],
+        // 可以添加其他需要的组信息
+      };
+      return acc;
+    }, {});
+  }, [groups]);
+};
+
+export const useScenesMap = (networkId) => {
+  const { data: scenes = [] } = useNetworkScenes(networkId);
+  
+  return React.useMemo(() => {
+    return scenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = {
+        name: scene.name,
+        devices: scene.devices || [],
+        // 可以添加其他需要的场景信息
+      };
+      return acc;
+    }, {});
+  }, [scenes]);
+};
+
+// 创建一个组合 hook，同时获取所有映射
+export const useEntityMaps = (networkId) => {
+  const devicesMap = useDevicesMap(networkId);
+  const groupsMap = useGroupsMap(networkId);
+  const scenesMap = useScenesMap(networkId);
+
+  return {
+    devicesMap,
+    groupsMap,
+    scenesMap
+  };
+};
+
+// 修改现有的 hooks 以使用映射
+export const useSceneDevices = (networkId, sceneId) => {
+  // 获取设备映射
+  const devicesMap = useDevicesMap(networkId);
 
   // 获取场景设备
   const sceneDevicesQuery = useQuery({
@@ -161,7 +176,7 @@ export const useSceneDevices = (networkId, sceneId) => {
         throw new Error(response.data.errorMsg || 'Failed to fetch scene devices');
       }
 
-      // 合并设备信息和场景状态
+      // 使用设备映射来丰富数据
       return response.data.data.map(sceneDevice => ({
         ...sceneDevice,
         deviceInfo: devicesMap[sceneDevice.deviceId] || null,
@@ -173,6 +188,50 @@ export const useSceneDevices = (networkId, sceneId) => {
   });
 
   return sceneDevicesQuery;
+};
+
+// 修改组设备查询以使用映射
+export const useGroupDevices = (networkId, groupId) => {
+  const devicesMap = useDevicesMap(networkId);
+
+  return useQuery({
+    queryKey: ['group-devices', networkId, groupId],
+    queryFn: async () => {
+      const token = getToken();
+      if (!token) throw new Error("No token found");
+
+      const response = await axiosInstance.post('/groups/devices', {
+        groupId,
+        networkId
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.errorMsg || 'Failed to fetch group devices');
+      }
+
+      // 使用设备映射来丰富数据
+      return response.data.data.map(device => ({
+        ...device,
+        deviceInfo: devicesMap[device.deviceId] || null,
+      }));
+    },
+    staleTime: 30000,
+    cacheTime: 5 * 60 * 1000,
+    enabled: !!groupId && !!networkId
+  });
+};
+
+// ** Scene List **
+export const useNetworkScenes = (networkId) => {
+  return useQuery({
+    queryKey: ['network-scenes', networkId],
+    queryFn: () => fetchPaginatedData('/scene/list', networkId),
+    staleTime: 30000,
+    cacheTime: 5 * 60 * 1000,
+    enabled: !!networkId
+  });
 };
 
 // ** Room List **

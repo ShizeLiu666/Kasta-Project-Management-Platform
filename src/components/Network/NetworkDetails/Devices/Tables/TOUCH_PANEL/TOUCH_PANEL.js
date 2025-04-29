@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
 // 解析设备类型信息
@@ -154,7 +154,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 // 创建单个面板组组件
-const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap, allDevices }) => {
+const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap, sceneMap, allDevices }) => {
   const [expanded, setExpanded] = useState(true);
   
   // 获取图标路径
@@ -180,7 +180,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
     return remoteBind.find(binding => parseInt(binding.hole) === buttonIndex) || null;
   };
 
-  // 获取绑定目标的名称
+  // 更新获取绑定目标的名称
   const getBindingName = (binding) => {
     if (!binding) return '';
     
@@ -190,13 +190,13 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
       case 1: // Group
         return groupMap[binding.bindId] || `Unknown Group`;
       case 2: // Scene
-        return `Scene ${binding.bindId}`;
+        return sceneMap[binding.bindId] || `Unknown Scene`;
       default:
         return `Unknown`;
     }
   };
 
-  // 渲染按钮绑定
+  // 更新渲染按钮绑定
   const renderButtonBinding = (binding) => {
     if (!binding) {
       return (
@@ -225,8 +225,34 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
       );
     }
 
-    const boundDevice = allDevices.find(device => device.did === binding.bindId);
-    const deviceType = boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : null;
+    // 获取绑定类型的图标和名称
+    const getBindingTypeInfo = () => {
+      switch (binding.bindType) {
+        case 0: // Device
+          const boundDevice = allDevices.find(device => device.did === binding.bindId);
+          return {
+            icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
+            typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
+          };
+        case 1: // Group
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
+            typeName: 'GROUP'
+          };
+        case 2: // Scene
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
+            typeName: 'SCENE'
+          };
+        default:
+          return {
+            icon: null,
+            typeName: 'UNKNOWN'
+          };
+      }
+    };
+
+    const bindingTypeInfo = getBindingTypeInfo();
       
     return (
       <Box sx={{ 
@@ -242,7 +268,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        {binding.bindType === 0 && boundDevice && deviceType && (
+        {bindingTypeInfo.icon && (
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'column',
@@ -250,8 +276,8 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
             width: '100%'
           }}>
             <img
-              src={getDeviceIcon(boundDevice.productType)}
-              alt="Device Icon"
+              src={bindingTypeInfo.icon}
+              alt="Binding Icon"
               style={{ 
                 width: 28,
                 height: 28,
@@ -273,7 +299,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
                   fontSize: '0.7rem'
                 }}
               >
-                {formatDisplayText(deviceType)}
+                {formatDisplayText(bindingTypeInfo.typeName)}
               </Typography>
             </Box>
           </Box>
@@ -298,60 +324,6 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
             />
           </Typography>
         </Box>
-        
-        {binding.bindChannel !== null && (
-          <Box sx={{ 
-            textAlign: 'center',
-            width: '100%'
-          }}>
-            <Typography 
-              variant="caption" 
-              sx={{
-                color: '#95a5a6',
-                display: 'block',
-                fontSize: '0.7rem'
-              }}
-            >
-              Channel
-            </Typography>
-            <Typography 
-              variant="body2"
-              sx={{
-                color: '#34495e',
-                fontWeight: 500
-              }}
-            >
-              {binding.bindChannel ? 'Right' : 'Left'}
-            </Typography>
-          </Box>
-        )}
-        
-        {binding.enable !== null && (
-          <Box sx={{ 
-            textAlign: 'center',
-            width: '100%'
-          }}>
-            <Typography 
-              variant="caption" 
-              sx={{
-                color: '#95a5a6',
-                display: 'block',
-                fontSize: '0.7rem'
-              }}
-            >
-              Status
-            </Typography>
-            <Typography 
-              variant="body2"
-              sx={{
-                color: '#34495e',
-                fontWeight: 500
-              }}
-            >
-              {binding.enable ? 'Enabled' : 'Disabled'}
-            </Typography>
-          </Box>
-        )}
       </Box>
     );
   };
@@ -543,11 +515,12 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
 const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
   const { horizontal: horizontalDevices, vertical: verticalDevices } = groupedDevices;
   
-  // 获取所有设备和组的数据
+  // 添加 scenes 数据获取
   const { data: allDevices = [] } = useNetworkDevices(networkId);
   const { data: allGroups = [] } = useNetworkGroups(networkId);
+  const { data: allScenes = [] } = useNetworkScenes(networkId);
 
-  // 创建设备和组的映射 - 修改为使用 did
+  // 更新映射关系，添加 scenes
   const deviceMap = React.useMemo(() => {
     return allDevices.reduce((acc, device) => {
       acc[device.did] = device.name;
@@ -561,6 +534,13 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
       return acc;
     }, {});
   }, [allGroups]);
+
+  const sceneMap = React.useMemo(() => {
+    return allScenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = scene.name;
+      return acc;
+    }, {});
+  }, [allScenes]);
 
   if (!horizontalDevices?.length && !verticalDevices?.length) return null;
   
@@ -590,6 +570,7 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
           orientation="horizontal"
           deviceMap={deviceMap}
           groupMap={groupMap}
+          sceneMap={sceneMap}
           allDevices={allDevices}
         />
       ))}
@@ -603,6 +584,7 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
           orientation="vertical"
           deviceMap={deviceMap}
           groupMap={groupMap}
+          sceneMap={sceneMap}
           allDevices={allDevices}
         />
       ))}

@@ -12,7 +12,7 @@ import {
   Chip,
   Tooltip
 } from '@mui/material';
-import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 import AutomationRules from './AutomationRules';
 
@@ -89,6 +89,11 @@ const SIX_INPUT = ({ devices, networkId }) => {
     staleTime: 30000,
     cacheTime: 60000
   });
+  const { data: allScenes = [] } = useNetworkScenes(networkId, {
+    enabled: !!networkId,
+    staleTime: 30000,
+    cacheTime: 60000
+  });
 
   // 创建设备和组的映射
   const deviceMap = useMemo(() => {
@@ -106,6 +111,15 @@ const SIX_INPUT = ({ devices, networkId }) => {
       return acc;
     }, {});
   }, [allGroups]);
+
+  // 添加 sceneMap
+  const sceneMap = useMemo(() => {
+    if (!allScenes?.length) return {};
+    return allScenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = scene.name;
+      return acc;
+    }, {});
+  }, [allScenes]);
 
   // 预处理设备数据 - 使用 useMemo 替代 useState + useEffect
   const processedDevices = useMemo(() => {
@@ -155,11 +169,11 @@ const SIX_INPUT = ({ devices, networkId }) => {
       case 1: // Group
         return groupMap[binding.bindId] || `Unknown Group`;
       case 2: // Scene
-        return `Scene ${binding.bindId}`;
+        return sceneMap[binding.bindId] || `Unknown Scene`;
       default:
         return `Unknown`;
     }
-  }, [deviceMap, groupMap]);
+  }, [deviceMap, groupMap, sceneMap]);
 
   // 获取端子信息和绑定信息
   const getTerminalInfo = React.useCallback((device, terminalIndex) => {
@@ -585,6 +599,7 @@ const SIX_INPUT = ({ devices, networkId }) => {
                   device={selectedDevice}
                   deviceMap={deviceMap}
                   groupMap={groupMap}
+                  sceneMap={sceneMap}
                 />
               </Box>
             </Paper>

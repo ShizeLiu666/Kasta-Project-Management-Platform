@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
 // 工具函数复用
@@ -83,6 +83,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
   // 获取所有设备和组的数据
   const { data: allDevices = [] } = useNetworkDevices(networkId);
   const { data: allGroups = [] } = useNetworkGroups(networkId);
+  const { data: allScenes = [] } = useNetworkScenes(networkId);
 
   // 创建设备和组的映射
   const deviceMap = React.useMemo(() => {
@@ -99,6 +100,13 @@ const FIVE_INPUT = ({ devices, networkId }) => {
     }, {});
   }, [allGroups]);
 
+  const sceneMap = React.useMemo(() => {
+    return allScenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = scene.name;
+      return acc;
+    }, {});
+  }, [allScenes]);
+
   // 获取绑定目标的名称
   const getBindingName = (binding) => {
     if (!binding) return '';
@@ -109,7 +117,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
       case 1: // Group
         return groupMap[binding.bindId] || `Unknown Group`;
       case 2: // Scene
-        return `Scene ${binding.bindId}`;
+        return sceneMap[binding.bindId] || `Unknown Scene`;
       default:
         return `Unknown`;
     }
@@ -170,16 +178,45 @@ const FIVE_INPUT = ({ devices, networkId }) => {
             sx={{ opacity: 0.7, fontStyle: 'italic' }}
           >
             No Binding
-                        </Typography>
+          </Typography>
         </Box>
       );
     }
 
-    const boundDevice = allDevices.find(device => 
-      String(device.did) === String(binding.bindId)
-    );
-    const deviceType = boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : null;
-    
+    // 根据绑定类型获取图标
+    const getBindingIcon = () => {
+      switch (binding.bindType) {
+        case 0: // Device
+          const boundDevice = allDevices.find(device => 
+            String(device.did) === String(binding.bindId)
+          );
+          return boundDevice ? getDeviceIcon(boundDevice.productType) : null;
+        case 1: // Group
+          return require('../../../../../../assets/icons/NetworkOverview/Group.png');
+        case 2: // Scene
+          return require('../../../../../../assets/icons/NetworkOverview/Scene.png');
+        default:
+          return null;
+      }
+    };
+
+    // 获取绑定类型显示名称
+    const getBindingTypeName = () => {
+      switch (binding.bindType) {
+        case 0:
+          const boundDevice = allDevices.find(device => 
+            String(device.did) === String(binding.bindId)
+          );
+          return boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE';
+        case 1:
+          return 'GROUP';
+        case 2:
+          return 'SCENE';
+        default:
+          return 'UNKNOWN';
+      }
+    };
+
     return (
       <Box sx={{ 
         padding: '12px',
@@ -190,40 +227,38 @@ const FIVE_INPUT = ({ devices, networkId }) => {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: '8px', // 增加间距
+        gap: '8px',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        {/* Device Icon 和 Type */}
-        {binding.bindType === 0 && boundDevice && deviceType && (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
-            mb: 0.5
-          }}>
-            <img
-              src={getDeviceIcon(boundDevice.productType)}
-              alt="Device Icon"
-              style={{ width: 24, height: 24 }} // 稍微减小图标尺寸
-            />
-            <Typography
-              variant="caption"
-              component="div"
-              sx={{
-                color: '#666',
-                fontWeight: 500,
-                letterSpacing: '0.2px',
-                textTransform: 'uppercase',
-                fontSize: '0.7rem',
-                mt: 0.5
-              }}
-            >
-              {formatDisplayText(deviceType)}
-                          </Typography>
-          </Box>
-        )}
+        {/* Icon 和 Type */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          mb: 0.5
+        }}>
+          <img
+            src={getBindingIcon()}
+            alt="Binding Icon"
+            style={{ width: 24, height: 24 }}
+          />
+          <Typography
+            variant="caption"
+            component="div"
+            sx={{
+              color: '#666',
+              fontWeight: 500,
+              letterSpacing: '0.2px',
+              textTransform: 'uppercase',
+              fontSize: '0.7rem',
+              mt: 0.5
+            }}
+          >
+            {formatDisplayText(getBindingTypeName())}
+          </Typography>
+        </Box>
         
         {/* Device/Group Name */}
         <Box sx={{ width: '100%', textAlign: 'center' }}>
@@ -256,7 +291,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
             }}
           >
             Input Type
-                        </Typography>
+          </Typography>
           <Typography 
             variant="body2"
             sx={{ 
@@ -265,7 +300,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
             }}
           >
             {binding.inputType === 0 ? 'Toggle' : 'Momentary'}
-                        </Typography>
+          </Typography>
         </Box>
 
         {/* Timer Section - 始终显示 */}
@@ -284,7 +319,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
             }}
           >
             Timer
-                        </Typography>
+          </Typography>
           <Typography 
             variant="body2"
             sx={{ 
@@ -307,8 +342,8 @@ const FIVE_INPUT = ({ devices, networkId }) => {
                       }}
                     >
                       ({binding.state === 1 ? 'On' : 'Off'})
-                        </Typography>
-                      </>
+                    </Typography>
+                  </>
                 ) : (
                   'Disabled'
                 )}

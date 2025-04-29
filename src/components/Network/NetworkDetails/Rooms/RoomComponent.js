@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, List, ListItem, ListItemText, Paper } from '@mui/material';
-import exampleRoomImage from '../../../../assets/images/Rooms/example.jpg';
 
 /**
  * 房间组件，显示房间信息、设备列表和房间平面图
@@ -10,15 +9,16 @@ import exampleRoomImage from '../../../../assets/images/Rooms/example.jpg';
 const RoomComponent = ({ room, devices }) => {
   // 跟踪当前悬浮的设备ID
   const [hoveredDevice, setHoveredDevice] = React.useState(null);
-  // 图片引用，用于获取图片加载状态
-  const imageRef = React.useRef(null);
 
-  // 图片加载完成后的处理函数
-  const handleImageLoad = () => {
-    if (imageRef.current) {
-      // 如果后续需要使用图片尺寸，可以在这里处理
-      // 现在使用百分比定位，所以暂时不需要具体尺寸
-    }
+  // 创建一个空的背景区域样式
+  const emptyBackgroundStyle = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f8f9fa', // 浅灰色背景
+    border: '2px dashed #dee2e6', // 虚线边框
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   };
 
   return (
@@ -137,16 +137,16 @@ const RoomComponent = ({ room, devices }) => {
         </List>
       </Paper>
 
-      {/* 右侧房间图片区域 */}
+      {/* 右侧房间图片/标记区域 */}
       <Paper
         elevation={0}
         sx={{
-          flex: 1, // 占用剩余空间
+          flex: 1,
           height: '100%',
           border: '1px solid #dee2e6',
           borderRadius: '8px',
           overflow: 'hidden',
-          position: 'relative' // 用于定位设备标记点
+          position: 'relative'
         }}
       >
         {/* 图片容器 */}
@@ -155,50 +155,58 @@ const RoomComponent = ({ room, devices }) => {
             width: '100%',
             height: '100%',
             position: 'relative',
-            '& img': { // 图片样式
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover', // 保持比例填充
-              objectPosition: 'center',
-              transition: 'filter 0.3s ease' // 亮度变化过渡效果
-            }
           }}
         >
-          {/* 房间图片 */}
-          <img 
-            ref={imageRef}
-            src={room?.bgUrl || exampleRoomImage} // 优先使用房间背景图，否则使用示例图片
-            alt={room?.name || "Room Layout"}
-            onLoad={handleImageLoad}
-            onError={(e) => {
-              e.target.src = exampleRoomImage; // 图片加载失败时使用示例图片
-              e.target.onerror = null; // 防止无限循环
-            }}
-            style={{
-              // 当有设备被悬浮时降低图片亮度
-              filter: hoveredDevice ? 'brightness(0.8)' : 'brightness(1)'
-            }}
-          />
+          {room?.bgUrl ? (
+            <img 
+              src={room.bgUrl}
+              alt={room.name || "Room Layout"}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.onerror = null;
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                filter: hoveredDevice ? 'brightness(0.8)' : 'brightness(1)',
+                transition: 'filter 0.3s ease'
+              }}
+            />
+          ) : (
+            <Box sx={emptyBackgroundStyle}>
+              <Typography 
+                variant="body1" 
+                color="text.secondary"
+                sx={{ 
+                  textAlign: 'center',
+                  opacity: hoveredDevice ? 0.5 : 1,
+                  transition: 'opacity 0.3s ease'
+                }}
+              >
+                No Room Image
+              </Typography>
+            </Box>
+          )}
           
-          {/* 设备位置标记点 */}
+          {/* 设备位置标记点 - 保持在最上层 */}
           {devices?.map((device) => (
             <Box
               key={device.deviceId}
               sx={{
                 position: 'absolute',
-                // 使用百分比定位，确保位置准确
                 left: `${(device.x / 100) * 100}%`,
                 top: `${(device.y / 100) * 100}%`,
                 width: '50px',
                 height: '50px',
-                backgroundColor: '#fbcd0b', // 黄色标记点
-                // 根据悬浮状态改变透明度
+                backgroundColor: '#fbcd0b',
                 opacity: hoveredDevice === device.deviceId ? 0.8 : 0.5,
-                borderRadius: '50%', // 圆形标记点
-                transform: 'translate(-50%, -50%)', // 居中定位
-                transition: 'opacity 0.2s ease', // 透明度变化过渡效果
+                borderRadius: '50%',
+                transform: 'translate(-50%, -50%)',
+                transition: 'opacity 0.2s ease',
                 cursor: 'pointer',
-                zIndex: 1,
+                zIndex: 2, // 确保标记点始终在最上层
                 '&:hover': {
                   opacity: 1.0
                 }

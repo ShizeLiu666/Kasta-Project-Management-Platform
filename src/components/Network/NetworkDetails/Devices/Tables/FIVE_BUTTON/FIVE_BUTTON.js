@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useNetworkDevices, useNetworkGroups } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
 const getDeviceTypeFromProductType = (productType) => {
@@ -91,6 +91,11 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
     staleTime: 30000,
     cacheTime: 60000
   });
+  const { data: allScenes = [] } = useNetworkScenes(networkId, {
+    enabled: !!networkId,
+    staleTime: 30000,
+    cacheTime: 60000
+  });
 
   // 预处理设备数据 - 使用 useMemo 替代 useState + useEffect
   const processedDevices = React.useMemo(() => {
@@ -134,6 +139,14 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
     }, {});
   }, [allGroups]);
 
+  const sceneMap = React.useMemo(() => {
+    if (!allScenes?.length) return {};
+    return allScenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = scene.name;
+      return acc;
+    }, {});
+  }, [allScenes]);
+
   // 获取绑定目标的名称
   const getBindingName = React.useCallback((binding) => {
     if (!binding) return '';
@@ -144,11 +157,11 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
       case 1: // Group
         return groupMap[binding.bindId] || `Unknown Group`;
       case 2: // Scene
-        return `Scene ${binding.bindId}`;
+        return sceneMap[binding.bindId] || `Unknown Scene`;
       default:
         return `Unknown`;
     }
-  }, [deviceMap, groupMap]); // 依赖 deviceMap 和 groupMap
+  }, [deviceMap, groupMap, sceneMap]);
 
   // 获取按钮绑定信息
   const getButtonBinding = (device, buttonIndex) => {
@@ -185,18 +198,37 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
       );
     }
     
-    // 添加调试日志
-    // console.log('Binding:', binding);
-    // console.log('All Devices:', allDevices);
-    // console.log('Device Map:', deviceMap);
+    // 获取绑定类型的图标和名称
+    const getBindingTypeInfo = () => {
+      switch (binding.bindType) {
+        case 0: // Device
+          const boundDevice = allDevices.find(device => 
+            device.did === binding.bindId || 
+            Number(device.did) === Number(binding.bindId)
+          );
+          return {
+            icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
+            typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
+          };
+        case 1: // Group
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
+            typeName: 'GROUP'
+          };
+        case 2: // Scene
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
+            typeName: 'SCENE'
+          };
+        default:
+          return {
+            icon: null,
+            typeName: 'UNKNOWN'
+          };
+      }
+    };
 
-    // 修改设备查找逻辑
-    const boundDevice = allDevices.find(device => 
-      device.did === binding.bindId || 
-      Number(device.did) === Number(binding.bindId)
-    );
-
-    const deviceType = boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : null;
+    const bindingTypeInfo = getBindingTypeInfo();
     
     return (
       <Box sx={{ 
@@ -212,7 +244,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        {binding.bindType === 0 && boundDevice && deviceType && (
+        {bindingTypeInfo.icon && (
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'column',
@@ -220,8 +252,8 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
             width: '100%'
           }}>
             <img
-              src={getDeviceIcon(boundDevice.productType)}
-              alt="Device Icon"
+              src={bindingTypeInfo.icon}
+              alt="Binding Icon"
               style={{ 
                 width: 28,
                 height: 28,
@@ -243,7 +275,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
                   fontSize: '0.7rem'
                 }}
               >
-                {formatDisplayText(deviceType)}
+                {formatDisplayText(bindingTypeInfo.typeName)}
               </Typography>
             </Box>
           </Box>

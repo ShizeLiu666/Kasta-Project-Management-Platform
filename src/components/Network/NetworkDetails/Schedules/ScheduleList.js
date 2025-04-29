@@ -20,9 +20,10 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CircleIcon from '@mui/icons-material/Circle';
 import { useNetworkSchedules } from '../useNetworkQueries';
 
-// 导入自定义图标
+// 导入所有图标
 import deviceIcon from '../../../../assets/icons/NetworkOverview/Device.png';
 import groupIcon from '../../../../assets/icons/NetworkOverview/Group.png';
+import sceneIcon from '../../../../assets/icons/NetworkOverview/Scene.png';
 
 // 修改星期格式化函数
 const formatWeekdays = (weekdays) => {
@@ -38,6 +39,32 @@ const formatWeekdays = (weekdays) => {
 // 获取状态颜色
 const getStatusColor = (enabled) => {
   return enabled === 1 ? '#4caf50' : '#95a5a6';
+};
+
+// 添加获取目标类型图标和名称的函数
+const getTargetTypeInfo = (entityType) => {
+  switch (entityType) {
+    case 0:
+      return {
+        icon: deviceIcon,
+        label: 'Device'
+      };
+    case 1:
+      return {
+        icon: groupIcon,
+        label: 'Group'
+      };
+    case 2:
+      return {
+        icon: sceneIcon,
+        label: 'Scene'
+      };
+    default:
+      return {
+        icon: deviceIcon,
+        label: 'Unknown'
+      };
+  }
 };
 
 const ScheduleList = ({ networkId }) => {
@@ -176,8 +203,8 @@ const ScheduleList = ({ networkId }) => {
                         <Chip 
                           icon={
                             <img 
-                              src={schedule.scheduleType === 0 ? deviceIcon : groupIcon}
-                              alt={schedule.scheduleType === 0 ? "Device" : "Group"}
+                              src={getTargetTypeInfo(schedule.entityType).icon}
+                              alt={getTargetTypeInfo(schedule.entityType).label}
                               style={{ 
                                 width: 20, 
                                 height: 20,
@@ -185,7 +212,7 @@ const ScheduleList = ({ networkId }) => {
                               }}
                             />
                           }
-                          label={schedule.scheduleType === 0 ? 'Device' : 'Group'}
+                          label={getTargetTypeInfo(schedule.entityType).label}
                           size="small"
                           sx={{ 
                             backgroundColor: '#edf2f7',
