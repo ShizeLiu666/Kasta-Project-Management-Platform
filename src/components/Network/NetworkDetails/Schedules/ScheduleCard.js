@@ -12,6 +12,7 @@ import {
   Chip,
   Collapse,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -41,7 +42,6 @@ const ScheduleCard = ({
       }}
     >
       <Box 
-        onClick={() => setExpanded(!expanded)}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -49,15 +49,32 @@ const ScheduleCard = ({
           padding: '12px 16px',
           backgroundColor: '#f8f9fa',
           borderBottom: expanded ? '1px solid #dee2e6' : 'none',
-          cursor: 'pointer',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {schedule.name || 'Unnamed Schedule'}
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#95a5a6' }}>
-            ID: {schedule.scheduleId}
+            <Tooltip title={`Schedule ID: ${schedule.scheduleId || ''} | SID: ${schedule.sid || schedule.scheduleId || ''}`}>
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{
+                  color: '#95a5a6',
+                  ml: 1,
+                  fontWeight: 400,
+                  cursor: 'pointer',
+                  textDecoration: 'underline dotted',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 120,
+                  verticalAlign: 'middle',
+                  display: 'inline-block'
+                }}
+              >
+                {`- ${schedule.scheduleId} | ${schedule.sid || schedule.scheduleId}`}
+              </Typography>
+            </Tooltip>
           </Typography>
         </Box>
         
@@ -75,7 +92,6 @@ const ScheduleCard = ({
           <IconButton 
             size="small"
             onClick={(e) => {
-              e.stopPropagation();
               setExpanded(!expanded);
             }}
           >

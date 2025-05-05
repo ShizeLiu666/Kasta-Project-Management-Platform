@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Box, Typography, Chip, Grid, Stack, Paper, 
-  Collapse, IconButton
+  Collapse, IconButton, Tooltip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -133,13 +133,27 @@ const SceneItem = ({ scene, networkId }) => {
           }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {scene.name}
-              <Typography
-                component="span"
-                variant="body2"
-                sx={{ color: '#95a5a6', ml: 1, fontWeight: 400 }}
-              >
-                - {scene.sceneId}
-              </Typography>
+              <Tooltip title={`Scene ID: ${scene.sceneId || ''} | SID: ${scene.sid || scene.sceneId || ''}`}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  sx={{
+                    color: '#95a5a6',
+                    ml: 1,
+                    fontWeight: 400,
+                    cursor: 'pointer',
+                    textDecoration: 'underline dotted',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: 120,
+                    verticalAlign: 'middle',
+                    display: 'inline-block'
+                  }}
+                >
+                  {`- ${scene.sceneId} | ${scene.sid || scene.sceneId}`}
+                </Typography>
+              </Tooltip>
             </Typography>
           </Box>
           <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -175,13 +189,27 @@ const SceneItem = ({ scene, networkId }) => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {scene.name}
-              <Typography
-                component="span"
-                variant="body2"
-                sx={{ color: '#95a5a6', ml: 1, fontWeight: 400 }}
-              >
-                - {scene.sceneId}
-              </Typography>
+              <Tooltip title={`Scene ID: ${scene.sceneId || ''} | SID: ${scene.sid || scene.sceneId || ''}`}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  sx={{
+                    color: '#95a5a6',
+                    ml: 1,
+                    fontWeight: 400,
+                    cursor: 'pointer',
+                    textDecoration: 'underline dotted',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: 120,
+                    verticalAlign: 'middle',
+                    display: 'inline-block'
+                  }}
+                >
+                  {`- ${scene.sceneId} | ${scene.sid || scene.sceneId}`}
+                </Typography>
+              </Tooltip>
             </Typography>
           </Box>
           

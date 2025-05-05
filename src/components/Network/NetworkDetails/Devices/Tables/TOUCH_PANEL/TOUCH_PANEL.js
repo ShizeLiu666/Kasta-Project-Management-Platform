@@ -467,13 +467,27 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
                       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {device.name}
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
-                          >
-                            - {device.deviceId}
-                          </Typography>
+                          <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              sx={{
+                                color: '#95a5a6',
+                                ml: 0.5,
+                                fontWeight: 400,
+                                cursor: 'pointer',
+                                textDecoration: 'underline dotted',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: 120,
+                                verticalAlign: 'middle',
+                                display: 'inline-block'
+                              }}
+                            >
+                              {`- ${device.deviceId} | ${device.did}`}
+                            </Typography>
+                          </Tooltip>
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           {device.appearanceShortname}

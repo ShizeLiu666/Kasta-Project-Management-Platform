@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Typography, List, ListItem, ListItemText, Paper } from '@mui/material';
+import React, { useState, useRef, useEffect } from 'react';
+import { Box, Typography, List, ListItem, ListItemText, Paper, Tooltip } from '@mui/material';
 
 /**
  * 房间组件，显示房间信息、设备列表和房间平面图
@@ -8,7 +8,11 @@ import { Box, Typography, List, ListItem, ListItemText, Paper } from '@mui/mater
  */
 const RoomComponent = ({ room, devices }) => {
   // 跟踪当前悬浮的设备ID
-  const [hoveredDevice, setHoveredDevice] = React.useState(null);
+  const [hoveredDevice, setHoveredDevice] = useState(null);
+  // 添加图片实际显示区域的状态
+  const [imageRect, setImageRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
+  // 添加对图片元素的引用
+  const imageRef = useRef(null);
 
   // 创建一个空的背景区域样式
   const emptyBackgroundStyle = {
@@ -19,6 +23,85 @@ const RoomComponent = ({ room, devices }) => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  };
+
+  // 计算图片实际显示区域和尺寸
+  const updateImageRect = () => {
+    if (imageRef.current) {
+      const img = imageRef.current;
+      const container = img.parentElement;
+      
+      // 获取容器尺寸
+      const containerWidth = container.offsetWidth;
+      const containerHeight = container.offsetHeight;
+      
+      // 获取图片真实尺寸
+      const imgWidth = img.naturalWidth;
+      const imgHeight = img.naturalHeight;
+      
+      // 计算图片的实际显示尺寸
+      let displayWidth, displayHeight;
+      
+      if (imgWidth / imgHeight > containerWidth / containerHeight) {
+        // 图片比例更宽，将受到宽度限制
+        displayWidth = containerWidth;
+        displayHeight = (imgHeight / imgWidth) * containerWidth;
+      } else {
+        // 图片比例更高，将受到高度限制
+        displayHeight = containerHeight;
+        displayWidth = (imgWidth / imgHeight) * containerHeight;
+      }
+      
+      // 计算图片在容器中的位置（居中）
+      const top = (containerHeight - displayHeight) / 2;
+      const left = (containerWidth - displayWidth) / 2;
+      
+      setImageRect({
+        top,
+        left,
+        width: displayWidth,
+        height: displayHeight
+      });
+    }
+  };
+
+  // 图片加载完成后更新图片尺寸信息
+  useEffect(() => {
+    if (room?.bgUrl) {
+      const handleResize = () => {
+        updateImageRect();
+      };
+      
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [room?.bgUrl]);
+
+  // 计算设备在图片实际显示区域上的位置 - 更灵活的偏移方案
+  const calculateDevicePosition = (device) => {
+    // 基本偏移量
+    let offsetX = 55;
+    let offsetY = 30;
+    
+    // 可以根据设备类型调整偏移量
+    // if (device.deviceType === 'SOME_TYPE') {
+    //   offsetX = 20;
+    //   offsetY = 10;
+    // }
+    
+    if (!room?.bgUrl) {
+      return {
+        left: `calc(${device.x}% + ${offsetX}px)`,
+        top: `calc(${device.y}% + ${offsetY}px)`
+      };
+    }
+
+    return {
+      left: `${imageRect.left + (device.x / 100) * imageRect.width + offsetX}px`,
+      top: `${imageRect.top + (device.y / 100) * imageRect.height + offsetY}px`
+    };
   };
 
   return (
@@ -54,19 +137,29 @@ const RoomComponent = ({ room, devices }) => {
           }}
         >
           {/* 房间名称和ID */}
-          <Typography variant="h6" sx={{ color: '#fbcd0b' }}>
-            {room?.name || 'Room Name'} {/* 如果没有房间名称则显示默认值 */}
-            <Typography
-              component="span"
-              variant="body2"
-              sx={{
-                color: '#95a5a6',
-                ml: 1, // margin-left: 8px
-                fontWeight: 400
-              }}
-            >
-              - {room?.roomId || 'ID'}
-            </Typography>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {room.name}
+            <Tooltip title={`Room ID: ${room.roomId || ''} | RID: ${room.rid || room.roomId || ''}`}>
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{
+                  color: '#95a5a6',
+                  ml: 1,
+                  fontWeight: 400,
+                  cursor: 'pointer',
+                  textDecoration: 'underline dotted',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 120,
+                  verticalAlign: 'middle',
+                  display: 'inline-block'
+                }}
+              >
+                {`- ${room.roomId} | ${room.rid || room.roomId}`}
+              </Typography>
+            </Tooltip>
           </Typography>
           {/* 设备数量显示 */}
           <Typography variant="body2" color="text.secondary">
@@ -159,8 +252,10 @@ const RoomComponent = ({ room, devices }) => {
         >
           {room?.bgUrl ? (
             <img 
+              ref={imageRef} // 添加ref引用
               src={room.bgUrl}
               alt={room.name || "Room Layout"}
+              onLoad={updateImageRect} // 图片加载完成后更新尺寸信息
               onError={(e) => {
                 e.target.style.display = 'none';
                 e.target.onerror = null;
@@ -168,10 +263,11 @@ const RoomComponent = ({ room, devices }) => {
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 objectPosition: 'center',
                 filter: hoveredDevice ? 'brightness(0.8)' : 'brightness(1)',
-                transition: 'filter 0.3s ease'
+                transition: 'filter 0.3s ease',
+                backgroundColor: '#f8f9fa'
               }}
             />
           ) : (
@@ -190,31 +286,34 @@ const RoomComponent = ({ room, devices }) => {
             </Box>
           )}
           
-          {/* 设备位置标记点 - 保持在最上层 */}
-          {devices?.map((device) => (
-            <Box
-              key={device.deviceId}
-              sx={{
-                position: 'absolute',
-                left: `${(device.x / 100) * 100}%`,
-                top: `${(device.y / 100) * 100}%`,
-                width: '50px',
-                height: '50px',
-                backgroundColor: '#fbcd0b',
-                opacity: hoveredDevice === device.deviceId ? 0.8 : 0.5,
-                borderRadius: '50%',
-                transform: 'translate(-50%, -50%)',
-                transition: 'opacity 0.2s ease',
-                cursor: 'pointer',
-                zIndex: 2, // 确保标记点始终在最上层
-                '&:hover': {
-                  opacity: 1.0
-                }
-              }}
-              onMouseEnter={() => setHoveredDevice(device.deviceId)}
-              onMouseLeave={() => setHoveredDevice(null)}
-            />
-          ))}
+          {/* 设备位置标记点 - 现在使用计算出的位置 */}
+          {devices?.map((device) => {
+            const position = calculateDevicePosition(device);
+            return (
+              <Box
+                key={device.deviceId}
+                sx={{
+                  position: 'absolute',
+                  left: position.left,
+                  top: position.top,
+                  width: '60px', // 改回原来的大小
+                  height: '60px',
+                  backgroundColor: '#fbcd0b',
+                  opacity: hoveredDevice === device.deviceId ? 0.8 : 0.5,
+                  borderRadius: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  transition: 'opacity 0.2s ease',
+                  cursor: 'pointer',
+                  zIndex: 2,
+                  '&:hover': {
+                    opacity: 1.0
+                  }
+                }}
+                onMouseEnter={() => setHoveredDevice(device.deviceId)}
+                onMouseLeave={() => setHoveredDevice(null)}
+              />
+            );
+          })}
         </Box>
       </Paper>
     </Box>

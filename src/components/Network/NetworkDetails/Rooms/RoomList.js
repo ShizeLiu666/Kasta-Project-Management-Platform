@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, IconButton, Collapse, Paper, Chip } from '@mui/material';
+import { Box, Typography, IconButton, Collapse, Paper, Chip, Tooltip } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useNetworkRooms, useRoomDevices } from '../useNetworkQueries';
@@ -117,13 +117,11 @@ const RoomList = ({ networkId }) => {
           >
             {/* 楼层标题栏 */}
             <Box
-              onClick={() => toggleFloor(floor)}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 padding: '12px 16px',
                 backgroundColor: '#f8f9fa',
-                cursor: 'pointer',
                 borderBottom: expandedFloors[floor] ? '1px solid rgba(224, 224, 224, 0.7)' : 'none'
               }}
             >
@@ -153,7 +151,6 @@ const RoomList = ({ networkId }) => {
               <IconButton 
                 size="small"
                 onClick={(e) => {
-                  e.stopPropagation();
                   toggleFloor(floor);
                 }}
               >
@@ -178,7 +175,7 @@ const RoomList = ({ networkId }) => {
   );
 };
 
-// RoomItem 组件保持不变
+// RoomItem 组件需要修改
 const RoomItem = ({ room, networkId }) => {
   const {
     data: devices = [],
@@ -188,7 +185,30 @@ const RoomItem = ({ room, networkId }) => {
   if (isLoadingDevices) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography>Loading room devices...</Typography>
+        <Typography>
+          Loading room devices...
+          <Tooltip title={`Room ID: ${room.roomId || ''} | RID: ${room.rid || room.roomId || ''}`}>
+            <Typography
+              component="span"
+              variant="body2"
+              sx={{
+                color: '#95a5a6',
+                ml: 1,
+                fontWeight: 400,
+                cursor: 'pointer',
+                textDecoration: 'underline dotted',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: 120,
+                verticalAlign: 'middle',
+                display: 'inline-block'
+              }}
+            >
+              {`- ${room.roomId} | ${room.rid || room.roomId}`}
+            </Typography>
+          </Tooltip>
+        </Typography>
       </Box>
     );
   }

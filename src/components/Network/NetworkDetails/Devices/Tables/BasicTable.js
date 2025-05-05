@@ -12,7 +12,8 @@ import {
     Typography,
     Collapse,
     IconButton,
-    Chip
+    Chip,
+    Tooltip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -192,17 +193,27 @@ const BasicTable = ({
                                                                     }}
                                                                 >
                                                                     {device.name}
-                                                                    <Typography
-                                                                        component="span"
-                                                                        variant="body2"
-                                                                        sx={{
-                                                                            color: '#95a5a6',
-                                                                            ml: 0.5,
-                                                                            fontWeight: 400
-                                                                        }}
-                                                                    >
-                                                                        - {device.deviceId}
-                                                                    </Typography>
+                                                                    <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
+                                                                        <Typography
+                                                                            component="span"
+                                                                            variant="body2"
+                                                                            sx={{
+                                                                                color: '#95a5a6',
+                                                                                ml: 0.5,
+                                                                                fontWeight: 400,
+                                                                                cursor: 'pointer',
+                                                                                textDecoration: 'underline dotted',
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                whiteSpace: 'nowrap',
+                                                                                maxWidth: 120,
+                                                                                verticalAlign: 'middle',
+                                                                                display: 'inline-block'
+                                                                            }}
+                                                                        >
+                                                                            {`- ${device.deviceId} | ${device.did}`}
+                                                                        </Typography>
+                                                                    </Tooltip>
                                                                 </Typography>
                                                                 <Typography
                                                                     variant="body2"

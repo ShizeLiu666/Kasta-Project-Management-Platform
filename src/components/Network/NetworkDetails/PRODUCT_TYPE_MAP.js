@@ -64,6 +64,9 @@ export const PRODUCT_TYPE_MAP = {
     
     // ToDO 22. SIX_INPUT_FOUR_OUTPUT (六进四出) - 动态 icon 根据参数 ~
     '5ozdgdrd': 'SIX_INPUT_FOUR_OUTPUT',
+    
+    // 23. SOCKET_DIMMER (插座调光器)
+    'bofkqirg': 'SOCKET_DIMMER',
 };
 
 // 在控制台中运行

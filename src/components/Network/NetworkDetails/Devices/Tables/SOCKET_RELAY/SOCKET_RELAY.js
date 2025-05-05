@@ -385,6 +385,7 @@ const SOCKET_RELAYType = ({ devices }) => {
         columns={columns}
         nameColumnWidth="20%"
         enhancedDisplay={false}
+        formatWithDevice={true}
       />
 
       <ErrorLogModal

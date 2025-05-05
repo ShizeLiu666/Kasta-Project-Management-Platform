@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Box, Typography, Paper, Grid, Collapse, IconButton, Chip
+  Box, Typography, Paper, Grid, Collapse, IconButton, Chip, Tooltip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -42,13 +42,27 @@ const GroupItem = ({ group, networkId }) => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {group.name}
-              <Typography
-                component="span"
-                variant="body2"
-                sx={{ color: '#95a5a6', ml: 1, fontWeight: 400 }}
-              >
-                - {group.groupId}
-              </Typography>
+              <Tooltip title={`Group ID: ${group.groupId || ''} | GID: ${group.gid || group.groupId || ''}`}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  sx={{
+                    color: '#95a5a6',
+                    ml: 1,
+                    fontWeight: 400,
+                    cursor: 'pointer',
+                    textDecoration: 'underline dotted',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: 120,
+                    verticalAlign: 'middle',
+                    display: 'inline-block'
+                  }}
+                >
+                  {`- ${group.groupId} | ${group.gid || group.groupId}`}
+                </Typography>
+              </Tooltip>
             </Typography>
           </Box>
           

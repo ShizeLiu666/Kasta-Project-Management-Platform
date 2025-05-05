@@ -12,6 +12,7 @@ import {
   Chip,
   Collapse,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -174,7 +175,6 @@ const TimerList = ({ networkId }) => {
       >
         {/* 标题区域 - 一致的可点击标题栏 */}
         <Box 
-          onClick={() => setExpanded(!expanded)}
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -182,7 +182,6 @@ const TimerList = ({ networkId }) => {
             padding: '12px 16px',
             backgroundColor: '#f8f9fa',
             borderBottom: expanded ? '1px solid #dee2e6' : 'none',
-            cursor: 'pointer',
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -200,7 +199,7 @@ const TimerList = ({ networkId }) => {
             <Chip
               label={`${timers.length} ${timers.length === 1 ? 'Timer' : 'Timers'}`}
               size="small"
-        sx={{
+              sx={{
                 bgcolor: 'rgba(251, 205, 11, 0.1)',
                 color: '#fbcd0b',
                 fontWeight: 500,
@@ -222,17 +221,17 @@ const TimerList = ({ networkId }) => {
         {/* 可折叠的表格内容 */}
         <Collapse in={expanded}>
           <TableContainer component={Box}>
-            <Table>
-              <TableHead>
-                <TableRow>
+        <Table>
+          <TableHead>
+            <TableRow>
                   <TableCell sx={{ fontWeight: 'bold' }}>Timer Name</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Target</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+            </TableRow>
+          </TableHead>
+          <TableBody>
                 {timers.map((timer) => {
                   const targetName = getTargetName(timer);
                   const actionColor = getActionColor(timer.action);
@@ -249,9 +248,27 @@ const TimerList = ({ networkId }) => {
                       <TableCell>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {timer.name || 'Unnamed Timer'}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#95a5a6', display: 'block' }}>
-                          ID: {timer.timerId || 'N/A'}
+                          <Tooltip title={`Timer ID: ${timer.timerId || ''} | TID: ${timer.tid || timer.timerId || ''}`}>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              sx={{
+                                color: '#95a5a6',
+                                ml: 0.5,
+                                fontWeight: 400,
+                                cursor: 'pointer',
+                                textDecoration: 'underline dotted',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: 120,
+                                verticalAlign: 'middle',
+                                display: 'inline-block'
+                              }}
+                            >
+                              {`- ${timer.timerId} | ${timer.tid || timer.timerId}`}
+                            </Typography>
+                          </Tooltip>
                         </Typography>
                       </TableCell>
                       
@@ -331,9 +348,9 @@ const TimerList = ({ networkId }) => {
                     </TableRow>
                   );
                 })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          </TableBody>
+        </Table>
+      </TableContainer>
         </Collapse>
       </Paper>
     </Box>
