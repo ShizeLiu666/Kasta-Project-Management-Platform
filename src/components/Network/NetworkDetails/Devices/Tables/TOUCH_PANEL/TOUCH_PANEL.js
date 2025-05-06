@@ -19,92 +19,40 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
-// 解析设备类型信息
-const parseDeviceType = (deviceType) => {
-  // 特殊面板处理
-  if (deviceType === 'CW_PANEL') return { buttonCount: 2, type: 'CCT Panel', hasBacklight: true };
-  if (deviceType === 'RGB_PANEL') return { buttonCount: 3, type: 'RGB Panel', hasBacklight: true };
-  if (deviceType === 'RGBCW_PANEL') return { buttonCount: 4, type: 'RGBCW Panel', hasBacklight: true };
-
-  // 提取按键数量和类型
-  let buttonCount = 0;
-  let type = '';
-  let hasBacklight = true;
-
-  // 标准面板 (BWS)
-  if (deviceType.includes('BWS')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    type = 'Standard Panel';
-  }
-  // T3 版本 (KT*RSB)
-  else if (deviceType.startsWith('KT') && deviceType.includes('RSB')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    if (deviceType.includes('_SWITCH')) {
-      type = 'T3 Switch Panel';
-    } else if (deviceType.includes('_DIMMER')) {
-      type = 'T3 Dimmer Panel';
-    } else {
-      type = 'T3 Panel';
-    }
-  }
-  // D8 版本 (KD*RSB)
-  else if (deviceType.startsWith('KD') && deviceType.includes('RSB')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    type = 'D8 Panel';
-  }
-  // Edgy 版本 (EDGY*RB)
-  else if (deviceType.startsWith('EDGY')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    type = 'Edgy Panel';
-  }
-  // Integral 版本 (INTEGRAL*RB)
-  else if (deviceType.startsWith('INTEGRAL')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    type = 'Integral Panel';
-  }
-  // Hesperus 版本 (HESPERUS*CSB)
-  else if (deviceType.startsWith('HESPERUS')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    type = 'Hesperus Panel';
-    hasBacklight = true;
-  }
-  // P 版本 (KD*RS)
-  else if (deviceType.startsWith('KD') && deviceType.endsWith('RS')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    type = 'P Panel';
-  }
-  // P 版本开关和调光器 (KD*TS_*)
-  else if (deviceType.startsWith('KD') && deviceType.includes('TS_')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    if (deviceType.includes('_SWITCH')) {
-      type = 'P Switch Panel';
-    } else if (deviceType.includes('_DIMMER')) {
-      type = 'P Dimmer Panel';
-    }
-  }
-  // Co base 版本 (HS*RSCB)
-  else if (deviceType.startsWith('HS') && deviceType.includes('RSCB')) {
-    buttonCount = parseInt(deviceType.match(/\d/)?.[0]) || 0;
-    type = 'Co Base Panel';
-  }
-
-  return { buttonCount, type, hasBacklight };
+// 产品类型到设备类型的映射
+const PRODUCT_TYPE_TO_DEVICE_TYPE = {
+  'skr8wl4o': 'HRSMB', // 注意这里故意不指定数字，让代码从deviceType提取
+  // 可以添加更多映射
 };
 
-// 首先添加一个反向映射函数
+// 反向映射函数
 const getDeviceTypeFromProductType = (productType) => {
+  // 先检查我们的自定义映射
+  if (PRODUCT_TYPE_TO_DEVICE_TYPE[productType]) {
+    return PRODUCT_TYPE_TO_DEVICE_TYPE[productType];
+  }
+  
+  // 然后检查全局映射
   const entry = Object.entries(PRODUCT_TYPE_MAP).find(([key, value]) => key === productType);
   return entry ? entry[1] : null;
 };
 
-// 获取设备图标的函数
+// 更新获取设备图标的函数
 const getDeviceIcon = (productType) => {
   try {
     const deviceType = getDeviceTypeFromProductType(productType);
     if (!deviceType) return null;
+    
+    // 不再尝试加载HRSMB特定图标
     return require(`../../../../../../assets/icons/DeviceType/${deviceType}.png`);
   } catch (error) {
-    return require(`../../../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
+    try {
+      // 直接回退到未知图标，不尝试加载TOUCH_PANEL.png
+      return require(`../../../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
+    } catch (fallbackError) {
+      // console.error("无法加载任何图标", fallbackError);
+      return null;
+    }
   }
 };
 
@@ -154,15 +102,23 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 // 创建单个面板组组件
-const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap, sceneMap, allDevices }) => {
+const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap, sceneMap, allDevices, allGroups, allScenes }) => {
   const [expanded, setExpanded] = useState(true);
   
-  // 获取图标路径
+  // 获取图标路径 - 修改为使用默认图标，避免路径错误
   const getIconPath = (count, orientation) => {
+    // 不管是否为HRSMB面板，都统一使用TOUCH_PANEL格式图标
     try {
-      return require(`../../../../../../assets/icons/DeviceType/TOUCH_PANEL_${count}_${orientation}.png`);
+      // 尝试使用按钮数量特定图标
+      return require(`../../../../../../assets/icons/DeviceType/TOUCH_PANEL_${count}_${orientation === 'horizontal' ? 'h' : 'v'}.png`);
     } catch (error) {
-      return null;
+      // 直接回退到未知图标
+      try {
+        return require(`../../../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
+      } catch (fallbackError) {
+        // console.error("无法加载图标:", fallbackError);
+        return null;
+      }
     }
   };
 
@@ -184,15 +140,25 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
   const getBindingName = (binding) => {
     if (!binding) return '';
     
+    // 可以添加日志方便调试
+    // console.log(`Finding name for: type=${binding.bindType}, id=${binding.bindId}`);
+    // console.log(`Available groups:`, allGroups.map(g => `id=${g.groupId}, gid=${g.gid}`));
+    
     switch (binding.bindType) {
-      case 0: // Device
+      case 1: // Device (修正为1)
         return deviceMap[binding.bindId] || `Unknown Device`;
-      case 1: // Group
-        return groupMap[binding.bindId] || `Unknown Group`;
-      case 2: // Scene
-        return sceneMap[binding.bindId] || `Unknown Scene`;
+      case 2: // Group (修正为2)
+        // 尝试查找组ID匹配，如果没有则通过直接查找allGroups
+        const group = allGroups.find(g => g.groupId === binding.bindId);
+        return group ? group.name : `Unknown Group`;
+      case 3: // Room (新增)
+        return `Room #${binding.bindId}`;
+      case 4: // Scene (修正为4)
+        // 尝试查找场景ID匹配，如果没有则通过直接查找allScenes
+        const scene = allScenes.find(s => s.sceneId === binding.bindId);
+        return scene ? scene.name : `Unknown Scene`;
       default:
-        return `Unknown`;
+        return `Unknown Type (${binding.bindType || 'undefined'})`;
     }
   };
 
@@ -228,18 +194,23 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
     // 获取绑定类型的图标和名称
     const getBindingTypeInfo = () => {
       switch (binding.bindType) {
-        case 0: // Device
+        case 1: // Device (修正为1)
           const boundDevice = allDevices.find(device => device.did === binding.bindId);
           return {
             icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
             typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
           };
-        case 1: // Group
+        case 2: // Group (修正为2)
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
             typeName: 'GROUP'
           };
-        case 2: // Scene
+        case 3: // Room (新增)
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'), // 使用Group图标或其他适当的图标
+            typeName: 'ROOM'
+          };
+        case 4: // Scene (修正为4)
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
             typeName: 'SCENE'
@@ -360,10 +331,13 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
               variant="subtitle1"
               sx={{
                 fontWeight: 600,
-                color: '#fbcd0b',
+                color: '#686868',
               }}
             >
-              {`${buttonCount}-Button Touch Panel (${orientation === 'horizontal' ? 'Horizontal' : 'Vertical'})`}
+              {/* 检查是否为HRSMB系列 */}
+              {devices.some(d => d.deviceType && d.deviceType.startsWith('HRSMB')) 
+                ? `HRSMB${buttonCount} Panel (${orientation === 'horizontal' ? 'Horizontal' : 'Vertical'})` 
+                : `${buttonCount}-Button Touch Panel (${orientation === 'horizontal' ? 'Horizontal' : 'Vertical'})`}
             </Typography>
           </Box>
           
@@ -372,8 +346,8 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
               label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
               size="small"
               sx={{
-                bgcolor: 'rgba(251, 205, 11, 0.1)',
-                color: '#fbcd0b',
+                bgcolor: 'rgba(100, 100, 100, 0.1)',
+                color: '#606060',
                 fontWeight: 500,
                 mr: 1
               }}
@@ -421,7 +395,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
                 <TableRow>
                   <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
                   {Array.from({ length: buttonCount }, (_, index) => {
-                    const buttonIndex = index + 1;
+                    const buttonIndex = index;  // 修改为从0开始，与hole值对应
                     const hasBinding = anyDeviceHasButtonBinding(devices, buttonIndex);
                     
                     return (
@@ -485,19 +459,19 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
                                 display: 'inline-block'
                               }}
                             >
-                              {`- ${device.deviceId} | ${device.did}`}
+                              {`- ${device.deviceId.substring(0, 8)}...`}
                             </Typography>
                           </Tooltip>
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {device.appearanceShortname}
+                          {device.deviceType} - {device.appearanceShortname}
                         </Typography>
                       </Box>
                     </TableCell>
                     
                     {/* 按钮绑定单元格 */}
                     {Array.from({ length: buttonCount }, (_, index) => {
-                      const buttonIndex = index + 1;
+                      const buttonIndex = index;  // 修改为从0开始，与hole值对应
                       const binding = getButtonBinding(device, buttonIndex);
                       
                       return (
@@ -527,7 +501,8 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
 };
 
 const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
-  const { horizontal: horizontalDevices, vertical: verticalDevices } = groupedDevices;
+  // 如果没有提供分组设备，尝试使用所有设备
+  let { horizontal: horizontalDevices = [], vertical: verticalDevices = [] } = groupedDevices || {};
   
   // 添加 scenes 数据获取
   const { data: allDevices = [] } = useNetworkDevices(networkId);
@@ -556,12 +531,83 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
     }, {});
   }, [allScenes]);
 
+  // 对各设备进行解析和分类
+  const enhanceDeviceType = (device) => {
+    // 关键修改：正确提取按钮数量
+    let buttonCount = device.deviceType.match(/\d+/);
+    buttonCount = buttonCount ? parseInt(buttonCount[0]) : null;
+    
+    // 如果deviceType中没有数字，则从remoteBind判断
+    if (!buttonCount && device.specificAttributes && device.specificAttributes.remoteBind) {
+      buttonCount = device.specificAttributes.remoteBind.length;
+    }
+    
+    // 如果仍无法确定，使用默认值
+    buttonCount = buttonCount || 1;
+    
+    const type = device.deviceType;
+    
+    // 增强设备对象，添加解析后的信息用于分组
+    return {
+      ...device,
+      parsedButtonCount: buttonCount,
+      parsedType: type
+    };
+  };
+
+  // 确保所有设备都经过增强
+  horizontalDevices = horizontalDevices.map(enhanceDeviceType);
+  verticalDevices = verticalDevices.map(enhanceDeviceType);
+
+  // 如果没有传入分组设备，尝试筛选并自动分组
+  if (horizontalDevices.length === 0 && verticalDevices.length === 0 && allDevices.length > 0) {
+    // console.log("尝试从所有设备中找出触控面板...");
+    
+    // 尝试从所有设备中找出触控面板
+    const touchPanels = allDevices.filter(device => {
+      // HRSMB系列或其他特殊处理
+      if (device.deviceType?.startsWith('HRSMB') || 
+          PRODUCT_TYPE_TO_DEVICE_TYPE[device.productType] || 
+          device.deviceType?.includes('PANEL')) {
+        return true;
+      }
+      
+      // 检查是否有remoteBind属性，这通常表明它是触控面板
+      const hasBindings = Array.isArray(device.specificAttributes?.remoteBind) && 
+                        device.specificAttributes.remoteBind.length > 0;
+      
+      return hasBindings;
+    }).map(enhanceDeviceType);
+    
+    // console.log(`找到 ${touchPanels.length} 个触控面板设备`);
+    
+    // 根据isHorizontal属性分组
+    horizontalDevices = touchPanels.filter(device => {
+      const isHorizontal = device.specificAttributes?.isHorizontal;
+      return isHorizontal === null || isHorizontal === 0 || isHorizontal === undefined;
+    });
+    
+    verticalDevices = touchPanels.filter(device => 
+      device.specificAttributes?.isHorizontal === 1
+    );
+    
+    // console.log(`分组: ${horizontalDevices.length} 个水平设备, ${verticalDevices.length} 个垂直设备`);
+  }
+  
   if (!horizontalDevices?.length && !verticalDevices?.length) return null;
   
   // 按按键数量分组
   const groupByButtonCount = (devices) => {
+    // console.log("按按钮数量分组...");
+    // 打印一下各设备的按钮数量，便于调试
+    devices.forEach(device => {
+      // console.log(`设备 ${device.name}: deviceType=${device.deviceType}, parsedButtonCount=${device.parsedButtonCount}`);
+    });
+    
     return devices.reduce((acc, device) => {
-      const { buttonCount } = parseDeviceType(device.deviceType);
+      // 使用已解析的按钮数量
+      const buttonCount = device.parsedButtonCount || 1;
+      
       if (!acc[buttonCount]) {
         acc[buttonCount] = [];
       }
@@ -572,6 +618,8 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
 
   const horizontalGrouped = groupByButtonCount(horizontalDevices || []);
   const verticalGrouped = groupByButtonCount(verticalDevices || []);
+  
+  // console.log("分组结果:", Object.keys(horizontalGrouped), Object.keys(verticalGrouped));
 
   return (
     <Box>
@@ -586,6 +634,8 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
           groupMap={groupMap}
           sceneMap={sceneMap}
           allDevices={allDevices}
+          allGroups={allGroups}
+          allScenes={allScenes}
         />
       ))}
       
@@ -600,6 +650,8 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
           groupMap={groupMap}
           sceneMap={sceneMap}
           allDevices={allDevices}
+          allGroups={allGroups}
+          allScenes={allScenes}
         />
       ))}
     </Box>

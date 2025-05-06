@@ -2,6 +2,23 @@ import React from 'react';
 import BasicTable from '../BasicTable';
 import { Box, Typography } from '@mui/material';
 
+// 设备类型到按钮数量的映射表
+const DEVICE_TYPE_TO_BUTTONS = {
+  // HRSMB系列映射规则
+  'HRSMB6': 6,
+  'HRSMB4': 4,
+  'HRSMB3': 3,
+  'HRSMB2': 2,
+  'HRSMB1': 1,
+  // 其他类型可以继续添加
+};
+
+// 产品类型到按钮数量的映射表
+const PRODUCT_TYPE_TO_BUTTONS = {
+  'skr8wl4o': null,  // 对应 HRSMB 系列，按钮数量需要从设备类型中获取
+  // 其他产品类型映射可以继续添加
+};
+
 const BaseTouchPanel = ({ 
   devices, 
   title, 
@@ -13,10 +30,23 @@ const BaseTouchPanel = ({
   const renderButtonBinding = (binding) => {
     if (!binding) return <Typography variant="body2" color="text.secondary">No Binding</Typography>;
     
+    // 获取绑定类型名称
+    const getBindTypeName = (type) => {
+      switch (type) {
+        case 1: return 'Device';
+        case 2: return 'Group';
+        case 3: return 'Room';
+        case 4: return 'Scene';
+        default: return `Unknown Type (${type})`;
+      }
+    };
+    
     return (
       <Box sx={{ padding: 1, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#f9f9f9' }}>
         <Typography variant="caption" color="text.secondary" display="block">Device Type</Typography>
-        <Typography variant="body2" fontWeight="medium">{binding.bindType}</Typography>
+        <Typography variant="body2" fontWeight="medium">
+          {getBindTypeName(binding.bindType)} ({binding.bindType})
+        </Typography>
         
         <Typography variant="caption" color="text.secondary" display="block" mt={1}>Device ID</Typography>
         <Typography variant="body2" fontWeight="medium">{binding.bindId}</Typography>
@@ -39,7 +69,74 @@ const BaseTouchPanel = ({
     );
   };
 
+  // 获取设备的按钮数量
+  const getButtonCount = (device) => {
+    // 1. 首先检查设备类型是否在映射表中
+    if (device.deviceType && DEVICE_TYPE_TO_BUTTONS[device.deviceType]) {
+      return DEVICE_TYPE_TO_BUTTONS[device.deviceType];
+    }
+    
+    // 2. 尝试从HRSMB开头的设备类型中提取数字
+    if (device.deviceType && device.deviceType.startsWith('HRSMB')) {
+      const match = device.deviceType.match(/\d+/);
+      if (match) {
+        return parseInt(match[0]);
+      }
+    }
+    
+    // 3. 检查产品类型是否在映射表中
+    if (device.productType && PRODUCT_TYPE_TO_BUTTONS[device.productType]) {
+      return PRODUCT_TYPE_TO_BUTTONS[device.productType];
+    }
+    
+    // 4. 尝试从设备类型中提取数字
+    if (device.deviceType) {
+      const match = device.deviceType.match(/\d+/);
+      if (match) {
+        return parseInt(match[0]);
+      }
+    }
+    
+    // 5. 尝试从来自props的productType参数中解析（原有逻辑）
+    if (productType) {
+      const parts = productType.split('_');
+      if (parts.length > 2) {
+        return parseInt(parts[2]) || 1;
+      }
+    }
+    
+    // 6. 从绑定信息推断按钮数量
+    const bindings = device.specificAttributes?.remoteBind || [];
+    if (bindings.length > 0) {
+      const maxHole = Math.max(...bindings.map(b => parseInt(b.hole) || 0));
+      return maxHole + 1; // hole从0开始，所以+1得到按钮数量
+    }
+    
+    // 默认返回1
+    return 1;
+  };
+
   const baseColumns = [
+    {
+      id: 'deviceInfo',
+      label: 'Device Info',
+      format: (_, device) => {
+        const buttonCount = getButtonCount(device);
+        return (
+          <Box>
+            <Typography variant="body2" color="text.primary">
+              Device Type: {device.deviceType || 'Unknown'}
+            </Typography>
+            <Typography variant="body2" color="text.primary">
+              Product Type: {device.productType || 'Unknown'}
+            </Typography>
+            <Typography variant="body2" color="text.primary">
+              Buttons: {buttonCount}
+            </Typography>
+          </Box>
+        );
+      }
+    },
     {
       id: 'backlight',
       label: 'Backlight',
@@ -59,24 +156,27 @@ const BaseTouchPanel = ({
     {
       id: 'activeButton',
       label: 'Active Button',
-      format: (attrs) => {
+      format: (attrs, device) => {
         const idx = attrs?.activeButtonIdx || 0;
-        const maxButtons = parseInt(productType.split('_')[2]) || 1;
-        return idx > maxButtons ? '-' : `Button ${idx}`;
+        const maxButtons = getButtonCount(device);
+        return idx >= maxButtons ? '-' : `Button ${idx}`;
       }
     },
     {
       id: 'bindings',
       label: 'Bindings',
-      format: (attrs) => {
+      format: (attrs, device) => {
         const bindings = attrs?.remoteBind || [];
         if (!Array.isArray(bindings) || bindings.length === 0) {
           return <Typography variant="body2" color="text.secondary">No Bindings</Typography>;
         }
 
+        // 按照hole排序
+        const sortedBindings = [...bindings].sort((a, b) => a.hole - b.hole);
+
         return (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {bindings.map((binding, index) => (
+            {sortedBindings.map((binding, index) => (
               <Box 
                 key={index}
                 sx={{
@@ -97,6 +197,20 @@ const BaseTouchPanel = ({
     ...extraColumns
   ];
 
+  // 按钮数量分组设备
+  const groupDevicesByButtonCount = (devices) => {
+    return devices.reduce((acc, device) => {
+      const buttonCount = getButtonCount(device);
+      
+      if (!acc[buttonCount]) {
+        acc[buttonCount] = [];
+      }
+      
+      acc[buttonCount].push(device);
+      return acc;
+    }, {});
+  };
+
   // 根据 Orientation 分组设备
   const horizontalDevices = devices.filter(device => {
     const isHorizontal = device.specificAttributes?.isHorizontal;
@@ -104,37 +218,65 @@ const BaseTouchPanel = ({
   });
   const verticalDevices = devices.filter(device => device.specificAttributes?.isHorizontal === 1);
 
+  // 根据按钮数量再次分组
+  const horizontalGrouped = groupDevicesByButtonCount(horizontalDevices);
+  const verticalGrouped = groupDevicesByButtonCount(verticalDevices);
+
   // 获取图标路径
-  const getIconPath = (orientation) => {
+  const getIconPath = (device, orientation) => {
+    const buttonCount = getButtonCount(device);
+    
     try {
-      return require(`../../../../../../assets/icons/DeviceType/${productType}_${orientation === 'horizontal' ? 'h' : 'v'}.png`);
+      // 首先尝试加载HRSMB特定的设备图标
+      if (device.deviceType && device.deviceType.startsWith('HRSMB')) {
+        return require(`../../../../../../assets/icons/DeviceType/${device.deviceType}_${orientation === 'horizontal' ? 'h' : 'v'}.png`);
+      }
+      
+      // 尝试加载特定的设备图标
+      return require(`../../../../../../assets/icons/DeviceType/${device.deviceType}_${orientation === 'horizontal' ? 'h' : 'v'}.png`);
     } catch (error) {
-      console.warn(`Failed to load icon for ${productType}_${orientation === 'horizontal' ? 'h' : 'v'}.png`);
-      // 返回一个默认图标或者 null
-      return null;
+      try {
+        // 尝试加载通用面板图标
+        return require(`../../../../../../assets/icons/DeviceType/TOUCH_PANEL_${buttonCount}_${orientation === 'horizontal' ? 'h' : 'v'}.png`);
+      } catch (error2) {
+        // 直接回退到未知图标
+        try {
+          return require(`../../../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
+        } catch (fallbackError) {
+          console.warn(`Failed to load any icon for device: ${device.deviceType}`);
+          return null;
+        }
+      }
     }
   };
 
   return (
     <>
-      {horizontalDevices.length > 0 && (
+      {/* 渲染水平面板分组 */}
+      {Object.entries(horizontalGrouped).map(([buttonCount, deviceGroup]) => (
         <BasicTable
-          title={`${title} (Horizontal)`}
-          icon={getIconPath('horizontal')}
-          devices={horizontalDevices}
+          key={`horizontal-${buttonCount}`}
+          title={`${title} ${buttonCount}-Button (Horizontal)`}
+          icon={deviceGroup[0] ? getIconPath(deviceGroup[0], 'horizontal') : null}
+          devices={deviceGroup}
           columns={baseColumns}
           nameColumnWidth="25%"
+          formatWithDevice={true}
         />
-      )}
-      {verticalDevices.length > 0 && (
+      ))}
+      
+      {/* 渲染垂直面板分组 */}
+      {Object.entries(verticalGrouped).map(([buttonCount, deviceGroup]) => (
         <BasicTable
-          title={`${title} (Vertical)`}
-          icon={getIconPath('vertical')}
-          devices={verticalDevices}
+          key={`vertical-${buttonCount}`}
+          title={`${title} ${buttonCount}-Button (Vertical)`}
+          icon={deviceGroup[0] ? getIconPath(deviceGroup[0], 'vertical') : null}
+          devices={deviceGroup}
           columns={baseColumns}
           nameColumnWidth="25%"
+          formatWithDevice={true}
         />
-      )}
+      ))}
     </>
   );
 };

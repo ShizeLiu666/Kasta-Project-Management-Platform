@@ -18,9 +18,23 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import multivueIcon from '../../../../../../assets/icons/DeviceType/MULTIVUE.png';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
+import PageBindingsView from './PageBindingsView';
 
-// 属性分组配置
+// 属性分组配置 - 调整页面顺序，让Pages & Bindings在首位
 const ATTRIBUTE_GROUPS = {
+  pages: {
+    label: 'Pages & Bindings',
+    attributes: [
+      { key: 'memo', label: 'Memo', format: v => v || '-' },
+      { key: 'pageNames', label: 'Page Names', format: v => Array.isArray(v) ? v.map(p => p.pageName).join(', ') : '-' },
+      { 
+        key: 'multiVueBinds', 
+        label: 'Bindings', 
+        format: v => Array.isArray(v) ? `${v.length} binding(s)` : 'No bindings' 
+      }
+    ]
+  },
   display: {
     label: 'Display Settings',
     attributes: [
@@ -62,25 +76,43 @@ const ATTRIBUTE_GROUPS = {
       { key: 'fontVersion', label: 'Font Version', format: v => v || '-' },
       { key: 'iconVersion', label: 'Icon Version', format: v => v || '-' }
     ]
-  },
-  customization: {
-    label: 'Customization',
-    attributes: [
-      { key: 'memo', label: 'Memo', format: v => v || '-' },
-      { key: 'pageNames', label: 'Page Names', format: v => Array.isArray(v) ? v.join(', ') : '-' },
-      { 
-        key: 'multiVueBinds', 
-        label: 'Bindings', 
-        format: v => Array.isArray(v) ? `${v.length} binding(s)` : 'No bindings' 
-      }
-    ]
   }
 };
 
 const MULTIVUE = ({ devices }) => {
   const [expanded, setExpanded] = useState(true);
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(0); // 默认选中第一个标签（Pages & Bindings）
   const [selectedDevice, setSelectedDevice] = useState(devices[0]?.deviceId);
+  
+  // 获取网络ID以查询设备、组和场景数据
+  const networkId = devices[0]?.networkId;
+  
+  // 使用custom hooks获取设备、组和场景数据
+  const { data: allDevices = [] } = useNetworkDevices(networkId);
+  const { data: allGroups = [] } = useNetworkGroups(networkId);
+  const { data: allScenes = [] } = useNetworkScenes(networkId);
+
+  // 创建设备、组和场景名称映射
+  const deviceMap = React.useMemo(() => {
+    return allDevices.reduce((acc, device) => {
+      acc[device.did] = device.name;
+      return acc;
+    }, {});
+  }, [allDevices]);
+
+  const groupMap = React.useMemo(() => {
+    return allGroups.reduce((acc, group) => {
+      acc[group.groupId] = group.name;
+      return acc;
+    }, {});
+  }, [allGroups]);
+
+  const sceneMap = React.useMemo(() => {
+    return allScenes.reduce((acc, scene) => {
+      acc[scene.sceneId] = scene.name;
+      return acc;
+    }, {});
+  }, [allScenes]);
 
   const handleTabChange = (_, newValue) => {
     setSelectedTab(newValue);
@@ -92,6 +124,9 @@ const MULTIVUE = ({ devices }) => {
 
   const groupKeys = Object.keys(ATTRIBUTE_GROUPS);
   const currentDevice = devices.find(d => d.deviceId === selectedDevice);
+  
+  // 检查当前标签是否为"Pages & Bindings"
+  const isBindingsTab = groupKeys[selectedTab] === 'pages';
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -104,7 +139,7 @@ const MULTIVUE = ({ devices }) => {
           borderColor: 'rgba(224, 224, 224, 0.7)'
         }}
       >
-        {/* 标题区域 - 与 BasicTable 一致 */}
+        {/* 标题区域 */}
         <Box 
           sx={{
             display: 'flex',
@@ -137,8 +172,8 @@ const MULTIVUE = ({ devices }) => {
               label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
               size="small"
               sx={{
-                bgcolor: 'rgba(251, 205, 11, 0.1)',
-                color: '#fbcd0b',
+                bgcolor: 'rgba(100, 100, 100, 0.1)',
+                color: '#505050',
                 fontWeight: 500,
                 mr: 1
               }}
@@ -165,17 +200,17 @@ const MULTIVUE = ({ devices }) => {
                   variant={selectedDevice === device.deviceId ? "filled" : "outlined"}
                   sx={{
                     '&.MuiChip-filled': {
-                      backgroundColor: '#fbcd0b',
+                      backgroundColor: '#40535c',
                       color: '#FFF',
                       '&:hover': {
-                        backgroundColor: '#e3b800'
+                        backgroundColor: '#505050'
                       }
                     },
                     '&.MuiChip-outlined': {
-                      borderColor: '#fbcd0b',
-                      color: '#fbcd0b',
+                      borderColor: '#40535c',
+                      color: '#40535c',
                       '&:hover': {
-                        backgroundColor: 'rgba(251, 205, 11, 0.1)'
+                        backgroundColor: 'rgba(96, 96, 96, 0.1)'
                       }
                     }
                   }}
@@ -200,27 +235,27 @@ const MULTIVUE = ({ devices }) => {
                 scrollButtons="auto"
                 TabIndicatorProps={{
                   style: {
-                    backgroundColor: '#fbcd0b'
+                    backgroundColor: '#606060'
                   }
                 }}
                 sx={{
                   '& .MuiTab-root': {
                     color: 'rgba(0, 0, 0, 0.6)',
                     '&.Mui-selected': {
-                      color: '#fbcd0b'
+                      color: '#505050'
                     },
                     '&:hover': {
-                      color: '#fbcd0b',
+                      color: '#505050',
                       opacity: 0.7
                     },
-                    minHeight: 'auto',    // 减少标签高度
-                    padding: '12px 16px'   // 调整标签内边距
+                    minHeight: 'auto',
+                    padding: '12px 16px'
                   },
                   '& .MuiTouchRipple-root': {
                     display: 'none'
                   },
                   '& .MuiTabs-indicator': {
-                    height: '2px'         // 调整指示器高度
+                    height: '2px'
                   }
                 }}
               >
@@ -235,41 +270,70 @@ const MULTIVUE = ({ devices }) => {
               </Tabs>
             </Box>
 
-            {/* 属性表格 */}
+            {/* 内容区域 */}
             {currentDevice && (
-              <TableContainer 
-                component={Box} 
-                sx={{ 
-                  width: '100%',
-                  '& .MuiTable-root': {
-                    tableLayout: 'fixed',
-                    width: '100%'
-                  },
-                  border: '1px solid #dee2e6',
-                  borderRadius: 1
-                }}
-              >
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ width: '30%', fontWeight: 'bold' }}>Attribute</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Value</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {ATTRIBUTE_GROUPS[groupKeys[selectedTab]].attributes.map((attr) => (
-                      <TableRow key={attr.key}>
-                        <TableCell component="th" scope="row">
-                          {attr.label}
-                        </TableCell>
-                        <TableCell>
-                          {attr.format(currentDevice.specificAttributes[attr.key], currentDevice.specificAttributes)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <>
+                {/* 页面绑定视图 */}
+                {isBindingsTab && (
+                  <PageBindingsView 
+                    device={currentDevice}
+                    deviceMap={deviceMap}
+                    groupMap={groupMap}
+                    sceneMap={sceneMap}
+                    allDevices={allDevices}
+                  />
+                )}
+
+                {/* 常规属性表 */}
+                {!isBindingsTab && (
+                  <TableContainer 
+                    component={Box} 
+                    sx={{ 
+                      width: '100%',
+                      '& .MuiTable-root': {
+                        tableLayout: 'fixed',
+                        width: '100%'
+                      },
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      borderRadius: 1
+                    }}
+                  >
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell sx={{ width: '30%', fontWeight: 'bold', borderBottom: '1px solid rgba(0,0,0,0.1)' }}>Attribute</TableCell>
+                          <TableCell sx={{ fontWeight: 'bold', borderBottom: '1px solid rgba(0,0,0,0.1)' }}>Value</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {ATTRIBUTE_GROUPS[groupKeys[selectedTab]].attributes.map((attr, index) => (
+                          <TableRow 
+                            key={attr.key}
+                            sx={{ 
+                              bgcolor: index % 2 === 0 ? 'rgba(0,0,0,0.01)' : 'transparent',
+                              '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' }
+                            }}
+                          >
+                            <TableCell 
+                              component="th" 
+                              scope="row"
+                              sx={{ 
+                                borderBottom: 'none', 
+                                color: 'rgba(0,0,0,0.7)'
+                              }}
+                            >
+                              {attr.label}
+                            </TableCell>
+                            <TableCell sx={{ borderBottom: 'none' }}>
+                              {attr.format(currentDevice.specificAttributes[attr.key], currentDevice.specificAttributes)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </>
             )}
           </Box>
         </Collapse>

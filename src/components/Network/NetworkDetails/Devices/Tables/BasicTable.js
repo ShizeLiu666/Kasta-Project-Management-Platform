@@ -245,7 +245,7 @@ const BasicTable = ({
                                                         ? formattedContent 
                                                         : safeRender(formattedContent);
                                                 } catch (error) {
-                                                    console.error(`Error formatting column ${column.id}:`, error);
+                                                    // console.error(`Error formatting column ${column.id}:`, error);
                                                     cellContent = 'Error';
                                                 }
                                             } else {
