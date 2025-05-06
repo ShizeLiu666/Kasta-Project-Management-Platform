@@ -18,14 +18,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CircleIcon from '@mui/icons-material/Circle';
+// import CircleIcon from '@mui/icons-material/Circle';
 
 const ScheduleCard = ({ 
   schedule, 
   getTargetName, 
   getTargetTypeInfo, 
   formatWeekdays, 
-  getStatusColor 
+  // getStatusColor 
 }) => {
   const [expanded, setExpanded] = useState(true);
   const items = schedule.items || [];
@@ -108,7 +108,7 @@ const ScheduleCard = ({
                 <TableCell sx={{ fontWeight: 'bold' }}>Target</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Date Range</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Execution Time</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                {/* <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -193,7 +193,7 @@ const ScheduleCard = ({
                 </TableCell>
 
                 {/* 状态列 */}
-                <TableCell>
+                {/* <TableCell>
                   <Chip 
                     icon={<CircleIcon sx={{ fontSize: '0.8rem' }} />}
                     label={schedule.enabled === 1 ? 'Enabled' : 'Disabled'}
@@ -209,7 +209,7 @@ const ScheduleCard = ({
                       }
                     }}
                   />
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             </TableBody>
           </Table>

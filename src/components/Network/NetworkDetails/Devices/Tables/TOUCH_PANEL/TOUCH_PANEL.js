@@ -148,14 +148,14 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
       case 1: // Device (修正为1)
         return deviceMap[binding.bindId] || `Unknown Device`;
       case 2: // Group (修正为2)
-        // 尝试查找组ID匹配，如果没有则通过直接查找allGroups
-        const group = allGroups.find(g => g.groupId === binding.bindId);
+        // 使用gid作为匹配键
+        const group = allGroups.find(g => g.gid === binding.bindId);
         return group ? group.name : `Unknown Group`;
       case 3: // Room (新增)
         return `Room #${binding.bindId}`;
       case 4: // Scene (修正为4)
-        // 尝试查找场景ID匹配，如果没有则通过直接查找allScenes
-        const scene = allScenes.find(s => s.sceneId === binding.bindId);
+        // 使用sid作为匹配键
+        const scene = allScenes.find(s => s.sid === binding.bindId);
         return scene ? scene.name : `Unknown Scene`;
       default:
         return `Unknown Type (${binding.bindType || 'undefined'})`;
@@ -346,8 +346,8 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
               label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
               size="small"
               sx={{
-                bgcolor: 'rgba(100, 100, 100, 0.1)',
-                color: '#606060',
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
                 fontWeight: 500,
                 mr: 1
               }}
@@ -395,7 +395,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
                 <TableRow>
                   <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
                   {Array.from({ length: buttonCount }, (_, index) => {
-                    const buttonIndex = index;  // 修改为从0开始，与hole值对应
+                    const buttonIndex = index;  // hole值从0开始
                     const hasBinding = anyDeviceHasButtonBinding(devices, buttonIndex);
                     
                     return (
@@ -408,7 +408,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
                         }}
                       >
                         <Chip 
-                          label={`Button ${buttonIndex}`} 
+                          label={`Button ${buttonIndex + 1}`} 
                           size="small" 
                           sx={{ 
                             bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
@@ -471,7 +471,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
                     
                     {/* 按钮绑定单元格 */}
                     {Array.from({ length: buttonCount }, (_, index) => {
-                      const buttonIndex = index;  // 修改为从0开始，与hole值对应
+                      const buttonIndex = index;  // hole值从0开始
                       const binding = getButtonBinding(device, buttonIndex);
                       
                       return (

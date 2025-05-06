@@ -10,6 +10,7 @@ import {
   Tab
 } from '@mui/material';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
+import { useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 
 // 首先添加一个反向映射函数
 const getDeviceTypeFromProductType = (productType) => {
@@ -75,7 +76,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 // 单个设备绑定卡片组件
-const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, position }) => {
+const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, allGroups, allScenes, position }) => {
   if (!binding) {
     return (
       <Box sx={{ 
@@ -106,26 +107,26 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, posit
   // 获取绑定类型的图标和名称
   const getBindingTypeInfo = () => {
     switch (binding.bindType) {
-      case 0: // Device
+      case 1: // Device
         const boundDevice = allDevices.find(device => device.did === binding.bindId);
         return {
           icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
           typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
         };
-      case 1: // Group
+      case 2: // Group
         return {
           icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
           typeName: 'GROUP'
         };
-      case 2: // Scene
+      case 3: // Room
+        return {
+          icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'), // 使用Group图标或其他适当的图标
+          typeName: 'ROOM'
+        };
+      case 4: // Scene
         return {
           icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
           typeName: 'SCENE'
-        };
-      case 4: // 其他类型，这可能需要根据实际情况调整
-        return {
-          icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
-          typeName: 'OTHER'
         };
       default:
         return {
@@ -140,14 +141,18 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, posit
     if (!binding) return '';
     
     switch (binding.bindType) {
-      case 0: // Device
+      case 1: // Device
         return deviceMap[binding.bindId] || `Unknown Device`;
-      case 1: // Group
-        return groupMap[binding.bindId] || `Unknown Group`;
-      case 2: // Scene
-        return sceneMap[binding.bindId] || `Unknown Scene`;
-      case 4: // 其他类型
-        return `Bind #${binding.bindId}`;
+      case 2: // Group
+        // 使用gid作为匹配键
+        const group = allGroups?.find(g => g.gid === binding.bindId);
+        return group ? group.name : `Unknown Group`;
+      case 3: // Room
+        return `Room #${binding.bindId}`;
+      case 4: // Scene
+        // 使用sid作为匹配键
+        const scene = allScenes?.find(s => s.sid === binding.bindId);
+        return scene ? scene.name : `Unknown Scene`;
       default:
         return `Unknown`;
     }
@@ -170,7 +175,7 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, posit
       justifyContent: 'center',
       position: 'relative'
     }}>
-      <Box 
+      {/* <Box 
         sx={{
           position: 'absolute',
           top: 4,
@@ -181,7 +186,7 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, posit
         }}
       >
         {binding.bindChannel}
-      </Box>
+      </Box> */}
       
       {bindingTypeInfo.icon && (
         <Box sx={{ 
@@ -251,7 +256,9 @@ const PageBindingsTable = ({
   groupMap, 
   sceneMap, 
   allDevices,
-  visiblePages
+  visiblePages,
+  allGroups,
+  allScenes
 }) => {
   const bindings = device.specificAttributes.multiVueBinds || [];
   
@@ -374,6 +381,8 @@ const PageBindingsTable = ({
                     groupMap={groupMap}
                     sceneMap={sceneMap}
                     allDevices={allDevices}
+                    allGroups={allGroups}
+                    allScenes={allScenes}
                     position={rowIndex}
                   />
                 </Grid>
@@ -425,6 +434,13 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices })
     setCurrentTab(newValue);
   };
 
+  // 获取网络ID以查询组和场景数据
+  const networkId = device?.networkId;
+  
+  // 使用custom hooks获取组和场景数据
+  const { data: allGroups = [] } = useNetworkGroups(networkId);
+  const { data: allScenes = [] } = useNetworkScenes(networkId);
+
   return (
     <Box>
       {/* 如果有多个页面组，显示标签切换器 */}
@@ -437,7 +453,7 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices })
             scrollButtons="auto"
             TabIndicatorProps={{
               style: {
-                backgroundColor: 'rgba(0,0,0,0.4)'
+                backgroundColor: '#505050' // 改为灰色主题
               }
             }}
             sx={{
@@ -476,6 +492,8 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices })
           groupMap={groupMap}
           sceneMap={sceneMap}
           allDevices={allDevices}
+          allGroups={allGroups}
+          allScenes={allScenes}
           visiblePages={visiblePages}
         />
       )}

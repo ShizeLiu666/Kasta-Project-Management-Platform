@@ -68,7 +68,7 @@ const GroupDeviceCard = ({ device }) => {
   const productType = device.productType || device.product_type || device.type;
   const deviceType = getDeviceTypeFromProductType(productType);
   const iconSrc = getDeviceIcon(productType);
-  const deviceId = device.deviceId || device.did || device.id;
+  // const deviceId = device.deviceId || device.did || device.id;
 
   return (
     <Box 
@@ -135,7 +135,7 @@ const GroupDeviceCard = ({ device }) => {
       </Typography>
       
       {/* 设备ID */}
-      <Typography
+      {/* <Typography
         variant="caption"
         align="center"
         sx={{
@@ -144,7 +144,7 @@ const GroupDeviceCard = ({ device }) => {
         }}
       >
         <TruncatedText text={deviceId} maxLength={16} />
-      </Typography>
+      </Typography> */}
     </Box>
   );
 };

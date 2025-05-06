@@ -13,7 +13,8 @@ import {
   TableRow,
   Chip,
   Collapse,
-  IconButton
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -200,15 +201,15 @@ const MULTIVUE = ({ devices }) => {
                   variant={selectedDevice === device.deviceId ? "filled" : "outlined"}
                   sx={{
                     '&.MuiChip-filled': {
-                      backgroundColor: '#40535c',
+                      backgroundColor: '#505050',
                       color: '#FFF',
                       '&:hover': {
-                        backgroundColor: '#505050'
+                        backgroundColor: '#606060'
                       }
                     },
                     '&.MuiChip-outlined': {
-                      borderColor: '#40535c',
-                      color: '#40535c',
+                      borderColor: '#505050',
+                      color: '#505050',
                       '&:hover': {
                         backgroundColor: 'rgba(96, 96, 96, 0.1)'
                       }
@@ -217,6 +218,39 @@ const MULTIVUE = ({ devices }) => {
                 />
               ))}
             </Box>
+
+            {/* 当前设备详细信息 */}
+            {currentDevice && (
+              <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  {currentDevice.name}
+                  <Tooltip title={`Device ID: ${currentDevice.deviceId || ''} | DID: ${currentDevice.did || ''}`}>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      sx={{
+                        color: '#95a5a6',
+                        ml: 0.5,
+                        fontWeight: 400,
+                        cursor: 'pointer',
+                        textDecoration: 'underline dotted',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        maxWidth: 120,
+                        verticalAlign: 'middle',
+                        display: 'inline-block'
+                      }}
+                    >
+                      {`- ${currentDevice.deviceId.substring(0, 8)}... | ${currentDevice.did}`}
+                    </Typography>
+                  </Tooltip>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {currentDevice.appearanceShortname}
+                </Typography>
+              </Box>
+            )}
 
             {/* 分组标签页 */}
             <Box sx={{ 
@@ -281,6 +315,8 @@ const MULTIVUE = ({ devices }) => {
                     groupMap={groupMap}
                     sceneMap={sceneMap}
                     allDevices={allDevices}
+                    allGroups={allGroups}
+                    allScenes={allScenes}
                   />
                 )}
 

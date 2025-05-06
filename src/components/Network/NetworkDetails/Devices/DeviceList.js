@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useNetworkDevices } from '../useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
-import CustomButton from '../../../CustomComponents/CustomButton';
+// import CustomButton from '../../../CustomComponents/CustomButton';
 import AddDeviceModal from './AddDeviceModal';
 import UpdateDeviceModal from './UpdateDeviceModal';
 import DeleteDeviceModal from './DeleteDeviceModal';
@@ -182,7 +182,7 @@ const DeviceList = ({ networkId }) => {
 
   return (
     <>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+      {/* <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
         <CustomButton type="remove" onClick={() => setDeleteDeviceModalOpen(true)}>
           Delete Device
         </CustomButton>
@@ -192,7 +192,7 @@ const DeviceList = ({ networkId }) => {
         <CustomButton type="create" onClick={() => setAddDeviceModalOpen(true)}>
           Add Device
         </CustomButton>
-      </Box>
+      </Box> */}
 
       {sortedProductTypes.map(([productType, deviceList]) => (
         <React.Fragment key={`${productType}-${deviceList[0]?.deviceType || 'unknown'}`}>

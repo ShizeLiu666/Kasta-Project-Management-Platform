@@ -18,7 +18,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CircleIcon from '@mui/icons-material/Circle';
+// import CircleIcon from '@mui/icons-material/Circle';
 import { useNetworkTimers, useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../useNetworkQueries';
 
 // 导入自定义图标
@@ -51,9 +51,9 @@ const getActionColor = (action) => {
   }
 };
 
-const getStatusColor = (enabled) => {
-  return enabled ? '#4caf50' : '#95a5a6';
-};
+// const getStatusColor = (enabled) => {
+//   return enabled ? '#4caf50' : '#95a5a6';
+// };
 
 const TimerList = ({ networkId }) => {
   const [expanded, setExpanded] = useState(true);
@@ -228,14 +228,14 @@ const TimerList = ({ networkId }) => {
                   <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Target</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                  {/* <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
                 {timers.map((timer) => {
                   const targetName = getTargetName(timer);
                   const actionColor = getActionColor(timer.action);
-                  const statusColor = getStatusColor(timer.enabled);
+                  // const statusColor = getStatusColor(timer.enabled);
                   
                   return (
                     <TableRow
@@ -328,7 +328,7 @@ const TimerList = ({ networkId }) => {
                       </TableCell>
                       
                       {/* 状态列 */}
-                      <TableCell>
+                      {/* <TableCell>
                         <Chip 
                           icon={<CircleIcon sx={{ fontSize: '0.8rem' }} />}
                           label={timer.enabled ? 'Enabled' : 'Disabled'}
@@ -344,7 +344,7 @@ const TimerList = ({ networkId }) => {
                             }
                           }}
                         />
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   );
                 })}
