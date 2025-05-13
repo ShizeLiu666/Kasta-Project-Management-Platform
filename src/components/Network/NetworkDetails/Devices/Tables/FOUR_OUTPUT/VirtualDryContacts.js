@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -25,7 +25,7 @@ const PULSE_MODE_MAP = {
 // 干接点卡片组件
 export const ContactCard = ({ device, onOpenDialog }) => {
   const contacts = device.specificAttributes?.virtualDryContacts || [];
-  const scrollContainerRef = useRef(null);
+  // const scrollContainerRef = useRef(null);
   
   // 准备一个包含4个输出通道的数组
   const outputChannels = [1, 2, 3, 4].map(hole => {
