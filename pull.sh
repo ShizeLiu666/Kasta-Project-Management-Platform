@@ -1,23 +1,31 @@
 #!/bin/bash
-# /Kasta-Project-Management-Platform 下做以下操作更新代码
+set -e  # 一出错就终止脚本
 
-# 下拉最新版本
+# Step 1: 更新代码
+echo "📥 Pulling latest code from main..."
 git pull origin main
 
-# 安装依赖
+# Step 2: 安装生产依赖
+echo "📦 Installing production dependencies..."
 npm install --production --force
 
-# 生成静态文件
+# Step 3: 设置构建时 Node 内存限制
+echo "🛠️ Building project with increased memory limit..."
+export NODE_OPTIONS="--max_old_space_size=2048"
 npm run build
 
-# 删除旧的前端构建文件夹 (指向 /srv/react-app/build)
+# Step 4: 替换部署目录
+echo "🧹 Cleaning old build..."
 sudo rm -rf /srv/react-app/build
 
-# 将新构建的 'build' 文件夹移动到 /srv/react-app/
+echo "🚚 Deploying new build..."
 sudo mv /root/Kasta-Project-Management-Platform/build /srv/react-app/
 
-# 清除 Nginx 缓存 (如果有缓存路径)
+# Step 5: 清除 Nginx 缓存并重启
+echo "🧼 Clearing Nginx cache..."
 sudo rm -rf /data/nginx/cache/*
 
-# 重启 Nginx 服务，使新的构建文件生效
+echo "🔁 Restarting Nginx..."
 sudo systemctl restart nginx
+
+echo "✅ Deployment completed successfully!"
