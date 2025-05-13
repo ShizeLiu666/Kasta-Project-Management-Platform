@@ -7,7 +7,7 @@ git pull origin main
 
 # Step 2: 安装生产依赖
 echo "📦 Installing production dependencies..."
-npm install --production --force
+npm install --force
 
 # Step 3: 设置构建时 Node 内存限制
 echo "🛠️ Building project with increased memory limit..."
