@@ -37,15 +37,21 @@ const BaseTouchPanel = ({
         case 2: return 'Group';
         case 3: return 'Room';
         case 4: return 'Scene';
-        default: return `Unknown Type (${type})`;
+        default: return null;
       }
     };
+    
+    // 检查绑定类型是否有效
+    const bindTypeName = getBindTypeName(binding.bindType);
+    if (bindTypeName === null) {
+      return <Typography variant="body2" color="text.secondary">No Binding</Typography>;
+    }
     
     return (
       <Box sx={{ padding: 1, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#f9f9f9' }}>
         <Typography variant="caption" color="text.secondary" display="block">Device Type</Typography>
         <Typography variant="body2" fontWeight="medium">
-          {getBindTypeName(binding.bindType)} ({binding.bindType})
+          {bindTypeName} ({binding.bindType})
         </Typography>
         
         <Typography variant="caption" color="text.secondary" display="block" mt={1}>Device ID</Typography>
@@ -174,9 +180,27 @@ const BaseTouchPanel = ({
         // 按照hole排序
         const sortedBindings = [...bindings].sort((a, b) => a.hole - b.hole);
 
+        // 过滤掉无效绑定
+        const validBindings = sortedBindings.filter(binding => {
+          const bindTypeName = binding ? (function() {
+            switch (binding.bindType) {
+              case 1: return 'Device';
+              case 2: return 'Group';
+              case 3: return 'Room';
+              case 4: return 'Scene';
+              default: return null;
+            }
+          })() : null;
+          return bindTypeName !== null;
+        });
+
+        if (validBindings.length === 0) {
+          return <Typography variant="body2" color="text.secondary">No Valid Bindings</Typography>;
+        }
+
         return (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {sortedBindings.map((binding, index) => (
+            {validBindings.map((binding, index) => (
               <Box 
                 key={index}
                 sx={{

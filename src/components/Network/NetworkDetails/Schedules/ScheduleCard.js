@@ -13,6 +13,7 @@ import {
   Collapse,
   IconButton,
   Tooltip,
+  Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -28,7 +29,14 @@ const ScheduleCard = ({
   // getStatusColor 
 }) => {
   const [expanded, setExpanded] = useState(true);
+  const [showAllTargets, setShowAllTargets] = useState(false);
   const items = schedule.items || [];
+  const MAX_VISIBLE_TARGETS = 3;
+
+  // 计算是否显示展开按钮
+  const shouldShowExpandButton = items.length > MAX_VISIBLE_TARGETS;
+  // 计算要显示的目标数量
+  const visibleTargets = showAllTargets ? items : items.slice(0, MAX_VISIBLE_TARGETS);
 
   return (
     <Paper 
@@ -91,9 +99,7 @@ const ScheduleCard = ({
           />
           <IconButton 
             size="small"
-            onClick={(e) => {
-              setExpanded(!expanded);
-            }}
+            onClick={() => setExpanded(!expanded)}
           >
             {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
@@ -116,7 +122,7 @@ const ScheduleCard = ({
                 {/* 目标类型列 */}
                 <TableCell>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    {items.map((item, index) => (
+                    {visibleTargets.map((item, index) => (
                       <Box 
                         key={`${item.deviceId || item.groupId || item.sceneId}-${index}`}
                         sx={{ 
@@ -155,6 +161,23 @@ const ScheduleCard = ({
                           No targets
                         </Typography>
                       </Box>
+                    )}
+                    {shouldShowExpandButton && (
+                      <Button
+                        size="small"
+                        onClick={() => setShowAllTargets(!showAllTargets)}
+                        disableRipple
+                        sx={{
+                          mt: 0.5,
+                          color: '#666',
+                          textTransform: 'none',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                          }
+                        }}
+                      >
+                        {showAllTargets ? 'Show Less' : `+${items.length - MAX_VISIBLE_TARGETS} More`}
+                      </Button>
                     )}
                   </Box>
                 </TableCell>

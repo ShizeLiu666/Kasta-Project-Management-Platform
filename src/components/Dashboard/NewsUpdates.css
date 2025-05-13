@@ -1,0 +1,221 @@
+.news-updates-card {
+    height: 100%;
+    border: none;
+    border-radius: 10px;
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-card-body {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.news-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    position: relative;
+}
+
+/* 移除黄色下划线 */
+.news-title::after {
+    display: none;
+}
+
+.unread-badge {
+    font-size: 0.7rem;
+    background-color: #fbcd0b !important;
+    color: #333 !important;
+}
+
+.news-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+    padding-bottom: 10px;
+    margin-bottom: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #bbb #f1f1f1;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    position: relative;
+    max-height: calc(100% - 45px); /* 减去标题的高度 */
+}
+
+/* 移除渐变边缘效果，防止内容被遮挡 */
+.news-container::before,
+.news-container::after {
+    display: none;
+}
+
+.news-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.news-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.news-container::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 4px;
+}
+
+.news-container::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.news-item {
+    padding: 16px;
+    margin-bottom: 20px; /* 增加卡片之间的间距 */
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+    background-color: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word; /* 确保长文本换行 */
+}
+
+.news-item:last-child {
+    margin-bottom: 5px;
+}
+
+.news-item.unread {
+    background-color: rgba(251, 205, 11, 0.05);
+    border-left-color: #fbcd0b;
+}
+
+.news-item.read {
+    background-color: #f9f9f9;
+    border-left-color: #e0e0e0;
+}
+
+.news-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.news-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* 改为顶部对齐 */
+    margin-bottom: 8px; /* 增加标题和日期之间的间距 */
+    flex-wrap: wrap; /* 允许在小屏幕上换行 */
+}
+
+.badge-container {
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.category-badge {
+    white-space: nowrap;
+}
+
+.custom-badge {
+    /* 移除特定覆盖样式，允许原始颜色显示 */
+    display: none;
+}
+
+.news-item-title {
+    font-weight: 600;
+    color: #333;
+    transition: color 0.2s ease;
+    margin-right: 8px; /* 添加右边距 */
+    word-break: break-word; /* 确保标题换行 */
+    flex: 1; /* 允许标题占据大部分空间 */
+    min-width: 0; /* 防止flex项目溢出 */
+}
+
+/* .news-item:hover .news-item-title {
+    color: #fbcd0b;
+} */
+
+.news-date {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 8px; /* 增加日期和内容之间的间距 */
+}
+
+.news-content {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0;
+    line-height: 1.5; /* 增加行高，提高可读性 */
+    word-break: break-word; /* 确保内容换行 */
+    white-space: normal; /* 允许文本换行 */
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #fbcd0b;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    flex-shrink: 0; /* 防止点缩小 */
+}
+
+.unread-dot::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: rgba(251, 205, 11, 0.2);
+    border-radius: 50%;
+    top: -2px;
+    left: -2px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    70% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .news-container {
+        padding-right: 6px;
+    }
+    
+    .news-item {
+        padding: 14px;
+        margin-bottom: 16px; /* 保持响应式下的间距一致性 */
+    }
+    
+    .news-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .news-header > div:first-child {
+        margin-bottom: 4px;
+        width: 100%;
+    }
+}

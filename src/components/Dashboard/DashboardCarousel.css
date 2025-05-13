@@ -1,0 +1,52 @@
+.carousel-container {
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.carousel-container > div {
+    height: 100%;
+}
+
+.carousel-container .CarouselItem {
+    height: 100% !important;
+    width: 100%;
+}
+
+/* 导航按钮样式 */
+.carousel-container .MuiIconButton-root {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.carousel-container .MuiIconButton-root:hover {
+    opacity: 1;
+}
+
+.carousel-container .MuiIconButton-root.MuiIconButton-sizeMedium {
+    padding: 2px;
+    margin: 0 4px;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+    .carousel-container h3 {
+        font-size: 1.2rem !important;
+    }
+
+    .carousel-container p {
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-container h3 {
+        font-size: 1rem !important;
+    }
+
+    .carousel-container p {
+        font-size: 0.8rem !important;
+    }
+} 

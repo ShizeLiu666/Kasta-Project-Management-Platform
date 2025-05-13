@@ -88,7 +88,7 @@ const ProductOverview = () => {
     if (viewMode === 'all') {
       // 渲染所有 Kasta 设备类型
       return (
-        <Box sx={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
+        <Box sx={{ overflowY: 'auto', height: 'calc(100% - 10px)' }}>
           {Object.entries(categorizedDevices).map(([category, devices]) => (
             <Box key={category} sx={{ mb: 3 }}>
               <Typography

@@ -146,25 +146,54 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
     
     switch (binding.bindType) {
       case 1: // Device (修正为1)
-        return deviceMap[binding.bindId] || `Unknown Device`;
+        return deviceMap[binding.bindId] || null;
       case 2: // Group (修正为2)
         // 使用gid作为匹配键
         const group = allGroups.find(g => g.gid === binding.bindId);
-        return group ? group.name : `Unknown Group`;
+        return group ? group.name : null;
       case 3: // Room (新增)
         return `Room #${binding.bindId}`;
       case 4: // Scene (修正为4)
         // 使用sid作为匹配键
         const scene = allScenes.find(s => s.sid === binding.bindId);
-        return scene ? scene.name : `Unknown Scene`;
+        return scene ? scene.name : null;
       default:
-        return `Unknown Type (${binding.bindType || 'undefined'})`;
+        return null;
     }
   };
 
   // 更新渲染按钮绑定
   const renderButtonBinding = (binding) => {
     if (!binding) {
+      return (
+        <Box sx={{ 
+          padding: '12px',
+          borderRadius: 1.5,
+          bgcolor: '#f8f9fa',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          height: '120px',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ 
+              opacity: 0.7,
+              fontStyle: 'italic'
+            }}
+          >
+            No Binding
+          </Typography>
+        </Box>
+      );
+    }
+
+    // 检查绑定名称是否有效
+    const bindingName = getBindingName(binding);
+    if (bindingName === null) {
       return (
         <Box sx={{ 
           padding: '12px',

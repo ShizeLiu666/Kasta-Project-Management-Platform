@@ -1,8 +1,7 @@
 .dashboard-container {
-    min-height: calc(100vh - 100px); /* 减去头部导航的高度 */
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
+    padding: 15px;
+    /* min-height: 100vh; */
+    background-color: #f5f7f9;
 }
 
 .dashboard-row {
@@ -12,56 +11,141 @@
     gap: 20px;
 }
 
+/* 轮播图容器样式 */
 .carousel-container {
     height: 100%;
-    position: relative;
+    width: 100%;
+    border-radius: 10px;
     overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    position: relative;
 }
 
 .carousel-container > div {
-    height: 100%;
+    height: 100% !important;
+    width: 100% !important;
 }
 
-.carousel-container .CarouselItem {
+/* 确保轮播图内部元素充满容器 */
+.carousel-container .css-ohwg9z {
     height: 100% !important;
+    width: 100% !important;
+}
+
+.carousel-container .css-1f8sh1y {
+    height: 100% !important;
+}
+
+/* 轮播图新样式 */
+.carousel-slide {
+    position: relative;
     width: 100%;
+    height: 100%;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+/* 添加文字位置的变体 */
+.carousel-slide.text-bottom .carousel-caption {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.8));
+    padding: 30px 20px 25px;
+    text-align: center;
+}
+
+.carousel-slide.text-center .carousel-caption {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.5);
+    border-radius: 8px;
+    padding: 20px;
+    width: auto;
+    text-align: center;
+}
+
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.carousel-slide:hover .carousel-image {
+    transform: scale(1.03);
+}
+
+.carousel-caption {
+    position: absolute;
+    color: white;
+    z-index: 1;
+}
+
+.carousel-caption h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    letter-spacing: 0.5px;
+}
+
+.carousel-caption p {
+    margin: 8px 0 0;
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+    opacity: 0.9;
 }
 
 /* 轮播图区域样式 */
 .carousel-section {
     height: 380px;
     margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
-/* 自定义指示器样式 */
-.carousel-container .css-1m9128y {
-    position: absolute;
-    bottom: 16px !important;
-    top: auto !important;
-    z-index: 2;
+.carousel-section > [class*="col"] {
+    display: flex;
+    height: 380px;
 }
 
-.carousel-container .MuiIconButton-root.MuiIconButton-sizeMedium {
-    padding: 2px;
-    margin: 0 4px;
+/* 确保MUI轮播图内部元素正确显示 */
+.MuiCarousel-root {
+    width: 100% !important;
+    height: 100% !important;
 }
 
-.carousel-container .Mui-selected .MuiSvgIcon-root {
-    color: #fff;
+.MuiCarousel-root .MuiPaper-root {
+    height: 100% !important;
 }
 
 .info-section {
-    flex: 1;
-    min-height: 360px;
+    min-height: 400px;
 }
 
 .info-card {
     height: 100%;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* 新闻更新容器特殊样式 */
+.news-updates-container {
+    overflow: hidden;
+}
+
+/* 用户信息容器特殊样式 */
+.user-info-container {
     overflow: hidden;
 }
 
@@ -76,45 +160,94 @@
 
 /* 确保卡片内容区域也是 flex 布局 */
 .dashboard-content {
-    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* 轮播图指示器样式调整 */
+.carousel-container .css-1m9128y {
+    position: relative !important;
+    z-index: 10 !important;
+    margin-top: -40px !important;
+}
+
+/* 导航按钮样式调整 */
+.carousel-container .css-1abc02a,
+.carousel-container .css-hn784z {
+    z-index: 10 !important;
+}
+
+/* 轮播图导航按钮样式 */
+.carousel-container button.MuiIconButton-root {
+    margin: 0;
+    padding: 12px;
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.carousel-container button.MuiIconButton-root:hover {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    transform: scale(1.05);
+}
+
+/* 更新轮播图指示器样式 */
+.carousel-container .css-1m9128y button {
+    margin: 0 5px;
+}
+
+.carousel-container .css-1m9128y svg {
+    width: 14px;
+    height: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.carousel-container .css-1m9128y button.Mui-selected svg {
+    color: white;
 }
 
 /* 响应式调整 */
-@media (max-width: 768px) {
-    .dashboard-container {
-        min-height: calc(100vh - 80px);
-        padding: 12px;
-    }
-    
-    .dashboard-content {
-        gap: 12px;
-    }
-
+@media (max-width: 992px) {
     .carousel-section {
-        height: 280px;
-        margin-bottom: 12px;
-    }
-    
-    .info-section {
         min-height: auto;
     }
-
-    /* 调整轮播图导航按钮在移动端的大小和位置 */
-    .carousel-container .MuiIconButton-root {
-        padding: 8px !important;
-        margin: 0 4px !important;
+    
+    .carousel-section > [class*="col"] {
+        height: auto;
+        min-height: 300px;
     }
-
-    /* 调整轮播图文字在移动端的大小 */
-    .carousel-container h3 {
-        font-size: 1.2rem !important;
+    
+    .carousel-container, .info-card {
+        margin-bottom: 15px;
     }
+    
+    .carousel-slide {
+        height: 300px;
+    }
+}
 
-    .carousel-container p {
-        font-size: 0.9rem !important;
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 10px;
+    }
+    
+    .carousel-section > [class*="col"] {
+        min-height: 250px;
+    }
+    
+    .carousel-slide {
+        height: 250px;
+    }
+    
+    .carousel-caption h3 {
+        font-size: 1.25rem;
+    }
+    
+    .carousel-caption p {
+        font-size: 0.9rem;
     }
 }
 
@@ -124,21 +257,23 @@
         padding: 8px;
     }
 
-    .carousel-section {
+    .carousel-section > [class*="col"] {
+        min-height: 220px;
+    }
+    
+    .carousel-slide {
         height: 220px;
-        margin-bottom: 8px;
     }
 
     .dashboard-content {
         gap: 8px;
     }
 
-    /* 进一步调整轮播图文字大小 */
-    .carousel-container h3 {
-        font-size: 1rem !important;
+    .carousel-caption h3 {
+        font-size: 1rem;
     }
 
-    .carousel-container p {
-        font-size: 0.8rem !important;
+    .carousel-caption p {
+        font-size: 0.8rem;
     }
 } 

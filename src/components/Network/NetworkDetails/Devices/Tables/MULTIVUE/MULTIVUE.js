@@ -2,15 +2,7 @@ import React, { useState } from 'react';
 import {
   Box,
   Paper,
-  Tabs,
-  Tab,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Chip,
   Collapse,
   IconButton,
@@ -22,67 +14,8 @@ import multivueIcon from '../../../../../../assets/icons/DeviceType/MULTIVUE.png
 import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
 import PageBindingsView from './PageBindingsView';
 
-// 属性分组配置 - 调整页面顺序，让Pages & Bindings在首位
-const ATTRIBUTE_GROUPS = {
-  pages: {
-    label: 'Pages & Bindings',
-    attributes: [
-      { key: 'memo', label: 'Memo', format: v => v || '-' },
-      { key: 'pageNames', label: 'Page Names', format: v => Array.isArray(v) ? v.map(p => p.pageName).join(', ') : '-' },
-      { 
-        key: 'multiVueBinds', 
-        label: 'Bindings', 
-        format: v => Array.isArray(v) ? `${v.length} binding(s)` : 'No bindings' 
-      }
-    ]
-  },
-  display: {
-    label: 'Display Settings',
-    attributes: [
-      { key: 'scBrightness', label: 'Screen Brightness', format: v => `${v}%` },
-      { key: 'sleepTimer', label: 'Sleep Timer', format: v => v || 'Off' },
-      { key: 'scCloseTimer', label: 'Screen Close Timer', format: v => v || 'Off' },
-      { key: 'wakeUpMotion', label: 'Wake Up Motion', format: v => v ? 'On' : 'Off' },
-      { key: 'wakeupInterface', label: 'Wakeup Interface', format: v => v || '-' },
-      { key: 'boldFont', label: 'Bold Font', format: v => v ? 'On' : 'Off' }
-    ]
-  },
-  buttons: {
-    label: 'Button Settings',
-    attributes: [
-      { key: 'btnBrightness', label: 'Button Brightness', format: v => `${v}%` },
-      { key: 'btnColorId', label: 'Button Color ID', format: v => v || '-' },
-      { key: 'btnBeep', label: 'Button Beep', format: v => v ? 'On' : 'Off' },
-      { 
-        key: 'buttonColor', 
-        label: 'Button RGB Color', 
-        format: (_, attrs) => `RGB(${attrs.btnRed || 0}, ${attrs.btnGreen || 0}, ${attrs.btnBlue || 0})`
-      }
-    ]
-  },
-  formats: {
-    label: 'Format Settings',
-    attributes: [
-      { key: 'dateFormat', label: 'Date Format', format: v => v || '-' },
-      { key: 'dayFormat', label: 'Day Format', format: v => v || '-' },
-      { key: 'timeFormat', label: 'Time Format', format: v => v || '-' },
-      { key: 'tempFormat', label: 'Temperature Format', format: v => v || '-' },
-      { key: 'language', label: 'Language', format: v => v || '-' }
-    ]
-  },
-  system: {
-    label: 'System Settings',
-    attributes: [
-      { key: 'gestureSensitivity', label: 'Gesture Sensitivity', format: v => v || 'Normal' },
-      { key: 'fontVersion', label: 'Font Version', format: v => v || '-' },
-      { key: 'iconVersion', label: 'Icon Version', format: v => v || '-' }
-    ]
-  }
-};
-
 const MULTIVUE = ({ devices }) => {
   const [expanded, setExpanded] = useState(true);
-  const [selectedTab, setSelectedTab] = useState(0); // 默认选中第一个标签（Pages & Bindings）
   const [selectedDevice, setSelectedDevice] = useState(devices[0]?.deviceId);
   
   // 获取网络ID以查询设备、组和场景数据
@@ -96,38 +29,46 @@ const MULTIVUE = ({ devices }) => {
   // 创建设备、组和场景名称映射
   const deviceMap = React.useMemo(() => {
     return allDevices.reduce((acc, device) => {
-      acc[device.did] = device.name;
+      if (device && device.did && device.name) {
+        acc[device.did] = device.name;
+      }
       return acc;
     }, {});
   }, [allDevices]);
 
   const groupMap = React.useMemo(() => {
     return allGroups.reduce((acc, group) => {
-      acc[group.groupId] = group.name;
+      if (group && group.groupId && group.name) {
+        acc[group.groupId] = group.name;
+      }
+      if (group && group.gid && group.name) {
+        acc[group.gid] = group.name;
+      }
       return acc;
     }, {});
   }, [allGroups]);
 
   const sceneMap = React.useMemo(() => {
     return allScenes.reduce((acc, scene) => {
-      acc[scene.sceneId] = scene.name;
+      if (scene && scene.sceneId && scene.name) {
+        acc[scene.sceneId] = scene.name;
+      }
+      if (scene && scene.sid && scene.name) {
+        acc[scene.sid] = scene.name;
+      }
       return acc;
     }, {});
   }, [allScenes]);
-
-  const handleTabChange = (_, newValue) => {
-    setSelectedTab(newValue);
-  };
 
   const handleDeviceChange = (deviceId) => {
     setSelectedDevice(deviceId);
   };
 
-  const groupKeys = Object.keys(ATTRIBUTE_GROUPS);
   const currentDevice = devices.find(d => d.deviceId === selectedDevice);
   
-  // 检查当前标签是否为"Pages & Bindings"
-  const isBindingsTab = groupKeys[selectedTab] === 'pages';
+  // 获取当前设备的页面数量
+  const pageCount = currentDevice?.specificAttributes?.pageNames?.length || 0;
+  const MAX_PAGES = 5;
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -164,11 +105,20 @@ const MULTIVUE = ({ devices }) => {
                 color: '#fbcd0b',
               }}
             >
-              MultiVue Displays
+              MultiVue Pages & Bindings
             </Typography>
           </Box>
           
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Chip
+              label={`${pageCount} ${pageCount === 1 ? 'Page' : 'Pages'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+              }}
+            />
             <Chip
               label={`${devices.length} ${devices.length === 1 ? 'device' : 'devices'}`}
               size="small"
@@ -176,7 +126,6 @@ const MULTIVUE = ({ devices }) => {
                 bgcolor: 'rgba(100, 100, 100, 0.1)',
                 color: '#505050',
                 fontWeight: 500,
-                mr: 1
               }}
             />
             <IconButton 
@@ -252,124 +201,18 @@ const MULTIVUE = ({ devices }) => {
               </Box>
             )}
 
-            {/* 分组标签页 */}
-            <Box sx={{ 
-              width: '100%', 
-              mb: 2, 
-              '& .MuiTabs-root': {
-                minHeight: 'auto'
-              }
-            }}>
-              <Tabs
-                value={selectedTab}
-                onChange={handleTabChange}
-                indicatorColor="primary"
-                textColor="primary"
-                variant="scrollable"
-                scrollButtons="auto"
-                TabIndicatorProps={{
-                  style: {
-                    backgroundColor: '#606060'
-                  }
-                }}
-                sx={{
-                  '& .MuiTab-root': {
-                    color: 'rgba(0, 0, 0, 0.6)',
-                    '&.Mui-selected': {
-                      color: '#505050'
-                    },
-                    '&:hover': {
-                      color: '#505050',
-                      opacity: 0.7
-                    },
-                    minHeight: 'auto',
-                    padding: '12px 16px'
-                  },
-                  '& .MuiTouchRipple-root': {
-                    display: 'none'
-                  },
-                  '& .MuiTabs-indicator': {
-                    height: '2px'
-                  }
-                }}
-              >
-                {groupKeys.map((key, index) => (
-                  <Tab 
-                    key={key} 
-                    label={ATTRIBUTE_GROUPS[key].label} 
-                    id={`tab-${index}`}
-                    disableRipple
-                  />
-                ))}
-              </Tabs>
-            </Box>
-
-            {/* 内容区域 */}
+            {/* 页面绑定视图 */}
             {currentDevice && (
-              <>
-                {/* 页面绑定视图 */}
-                {isBindingsTab && (
-                  <PageBindingsView 
-                    device={currentDevice}
-                    deviceMap={deviceMap}
-                    groupMap={groupMap}
-                    sceneMap={sceneMap}
-                    allDevices={allDevices}
-                    allGroups={allGroups}
-                    allScenes={allScenes}
-                  />
-                )}
-
-                {/* 常规属性表 */}
-                {!isBindingsTab && (
-                  <TableContainer 
-                    component={Box} 
-                    sx={{ 
-                      width: '100%',
-                      '& .MuiTable-root': {
-                        tableLayout: 'fixed',
-                        width: '100%'
-                      },
-                      border: '1px solid rgba(0,0,0,0.05)',
-                      borderRadius: 1
-                    }}
-                  >
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ width: '30%', fontWeight: 'bold', borderBottom: '1px solid rgba(0,0,0,0.1)' }}>Attribute</TableCell>
-                          <TableCell sx={{ fontWeight: 'bold', borderBottom: '1px solid rgba(0,0,0,0.1)' }}>Value</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {ATTRIBUTE_GROUPS[groupKeys[selectedTab]].attributes.map((attr, index) => (
-                          <TableRow 
-                            key={attr.key}
-                            sx={{ 
-                              bgcolor: index % 2 === 0 ? 'rgba(0,0,0,0.01)' : 'transparent',
-                              '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' }
-                            }}
-                          >
-                            <TableCell 
-                              component="th" 
-                              scope="row"
-                              sx={{ 
-                                borderBottom: 'none', 
-                                color: 'rgba(0,0,0,0.7)'
-                              }}
-                            >
-                              {attr.label}
-                            </TableCell>
-                            <TableCell sx={{ borderBottom: 'none' }}>
-                              {attr.format(currentDevice.specificAttributes[attr.key], currentDevice.specificAttributes)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
-              </>
+              <PageBindingsView 
+                device={currentDevice}
+                deviceMap={deviceMap}
+                groupMap={groupMap}
+                sceneMap={sceneMap}
+                allDevices={allDevices}
+                allGroups={allGroups}
+                allScenes={allScenes}
+                maxPages={MAX_PAGES}
+              />
             )}
           </Box>
         </Collapse>

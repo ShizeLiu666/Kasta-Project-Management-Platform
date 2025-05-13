@@ -142,23 +142,52 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, allGr
     
     switch (binding.bindType) {
       case 1: // Device
-        return deviceMap[binding.bindId] || `Unknown Device`;
+        return deviceMap[binding.bindId] || null;
       case 2: // Group
         // 使用gid作为匹配键
         const group = allGroups?.find(g => g.gid === binding.bindId);
-        return group ? group.name : `Unknown Group`;
+        return group ? group.name : null;
       case 3: // Room
         return `Room #${binding.bindId}`;
       case 4: // Scene
         // 使用sid作为匹配键
         const scene = allScenes?.find(s => s.sid === binding.bindId);
-        return scene ? scene.name : `Unknown Scene`;
+        return scene ? scene.name : null;
       default:
-        return `Unknown`;
+        return null;
     }
   };
 
   const bindingTypeInfo = getBindingTypeInfo();
+  const bindingName = getBindingName();
+  
+  // 如果无法找到绑定名称，显示 No Binding
+  if (bindingName === null) {
+    return (
+      <Box sx={{ 
+        padding: '12px',
+        borderRadius: 1.5,
+        bgcolor: '#f8f9fa',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        height: '120px',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        <Typography 
+          variant="body2" 
+          color="text.secondary"
+          sx={{ 
+            opacity: 0.7,
+            fontStyle: 'italic'
+          }}
+        >
+          No Binding
+        </Typography>
+      </Box>
+    );
+  }
     
   return (
     <Box sx={{ 
@@ -239,7 +268,7 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, allGr
           }}
         >
           <TruncatedText 
-            text={getBindingName()} 
+            text={bindingName} 
             maxLength={20}
           />
         </Typography>
@@ -258,7 +287,8 @@ const PageBindingsTable = ({
   allDevices,
   visiblePages,
   allGroups,
-  allScenes
+  allScenes,
+  maxPages = 5 // 最大页数，默认为5
 }) => {
   const bindings = device.specificAttributes.multiVueBinds || [];
   
@@ -289,6 +319,15 @@ const PageBindingsTable = ({
     return page ? page.pageName : `Page ${pageIndex + 1}`;
   };
 
+  // 计算每个页面应占的宽度
+  const calculateColumnWidth = () => {
+    const pageCount = visiblePages.length;
+    // 确保列宽不会太窄
+    return Math.max(11 / maxPages, 11 / pageCount);
+  };
+
+  const columnWidth = calculateColumnWidth();
+
   return (
     <Paper 
       elevation={0} 
@@ -315,7 +354,7 @@ const PageBindingsTable = ({
             {visiblePages.map((pageIndex, index) => (
               <Grid 
                 item 
-                xs={11/visiblePages.length} 
+                xs={columnWidth} 
                 key={`header-${index}`}
                 sx={{ 
                   p: 1,
@@ -336,6 +375,16 @@ const PageBindingsTable = ({
                 />
               </Grid>
             ))}
+            {/* 添加空白列以保持一致的布局 */}
+            {visiblePages.length < maxPages && (
+              <Grid 
+                item 
+                xs={11 - (columnWidth * visiblePages.length)} 
+                sx={{ 
+                  borderBottom: '1px solid rgba(0,0,0,0.05)',
+                }}
+              />
+            )}
           </Grid>
         </Grid>
 
@@ -367,7 +416,7 @@ const PageBindingsTable = ({
               {rowBindings.map((binding, colIndex) => (
                 <Grid 
                   item 
-                  xs={11/visiblePages.length} 
+                  xs={columnWidth} 
                   key={`binding-${rowIndex}-${colIndex}`}
                   sx={{ 
                     p: 1,
@@ -387,6 +436,16 @@ const PageBindingsTable = ({
                   />
                 </Grid>
               ))}
+              {/* 添加空白单元格以保持一致的布局 */}
+              {visiblePages.length < maxPages && (
+                <Grid 
+                  item 
+                  xs={11 - (columnWidth * visiblePages.length)} 
+                  sx={{ 
+                    bgcolor: rowIndex % 2 === 0 ? 'rgba(0,0,0,0.01)' : 'transparent'
+                  }}
+                />
+              )}
             </Grid>
           </Grid>
         ))}
@@ -396,7 +455,7 @@ const PageBindingsTable = ({
 };
 
 // 将页面绑定视图作为主组件导出
-const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices }) => {
+const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices, allGroups, allScenes, maxPages = 5 }) => {
   // 使用 useMemo 包装 pageNames 以解决警告
   const pageNames = useMemo(() => device?.specificAttributes?.pageNames || [], [device]);
   
@@ -409,9 +468,9 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices })
     const groups = [];
     const allPageIndexes = pageNames.map(page => page.pageIndex);
     
-    // 按照每组3个页面进行分组
-    for (let i = 0; i < allPageIndexes.length; i += 3) {
-      groups.push(allPageIndexes.slice(i, i + 3));
+    // 按照每组最多maxPages个页面进行分组
+    for (let i = 0; i < allPageIndexes.length; i += maxPages) {
+      groups.push(allPageIndexes.slice(i, i + maxPages));
     }
     
     // 如果没有页面，创建空分组
@@ -420,7 +479,7 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices })
     }
     
     return groups;
-  }, [pageNames]);
+  }, [pageNames, maxPages]);
   
   // 切换页面组
   useEffect(() => {
@@ -437,9 +496,12 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices })
   // 获取网络ID以查询组和场景数据
   const networkId = device?.networkId;
   
-  // 使用custom hooks获取组和场景数据
-  const { data: allGroups = [] } = useNetworkGroups(networkId);
-  const { data: allScenes = [] } = useNetworkScenes(networkId);
+  // 使用之前传入的组和场景数据，如果没有则获取
+  const networksGroups = useNetworkGroups(networkId);
+  const networksScenes = useNetworkScenes(networkId);
+  
+  const finalGroups = allGroups || networksGroups.data || [];
+  const finalScenes = allScenes || networksScenes.data || [];
 
   return (
     <Box>
@@ -492,9 +554,10 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices })
           groupMap={groupMap}
           sceneMap={sceneMap}
           allDevices={allDevices}
-          allGroups={allGroups}
-          allScenes={allScenes}
+          allGroups={finalGroups}
+          allScenes={finalScenes}
           visiblePages={visiblePages}
+          maxPages={maxPages}
         />
       )}
     </Box>
