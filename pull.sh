@@ -5,7 +5,7 @@
 git pull origin main
 
 # 安装依赖
-npm install --force
+npm install --production --force
 
 # 生成静态文件
 npm run build
