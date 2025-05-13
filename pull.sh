@@ -7,6 +7,9 @@ git pull origin main
 # 安装依赖
 npm install --force
 
+# 增加 Node.js 内存限制，避免内存不足错误
+export NODE_OPTIONS=--max_old_space_size=512
+
 # 生成静态文件
 npm run build
 
