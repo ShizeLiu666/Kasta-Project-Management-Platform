@@ -83,164 +83,24 @@ const ProductOverview = () => {
     return acc;
   }, {});
 
-  // 渲染设备列表
-  const renderDeviceList = () => {
-    if (viewMode === 'all') {
-      // 渲染所有 Kasta 设备类型
-      return (
-        <Box sx={{ overflowY: 'auto', height: 'calc(100% - 10px)' }}>
-          {Object.entries(categorizedDevices).map(([category, devices]) => (
-            <Box key={category} sx={{ mb: 3 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  mb: 1,
-                  fontWeight: 600,
-                  color: '#2c3e50',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  fontSize: '0.75rem'
-                }}
-              >
-                {category}
-              </Typography>
-              <Grid container spacing={1}>
-                {devices.map((device) => (
-                  <Grid item xs={6} sm={4} md={6} lg={4} key={device.id}>
-                    <Card sx={{
-                      boxShadow: 'none',
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                      },
-                      borderWidth: '1px',
-                      borderStyle: 'solid',
-                      borderColor: '#dee2e6',
-                    }}>
-                      <CardContent sx={{ 
-                        py: 1,
-                        px: 1.5,
-                        '&:last-child': { pb: 1 }
-                      }}>
-                        <Box sx={{ 
-                          display: 'flex', 
-                          flexDirection: 'column',
-                          gap: 0.5 
-                        }}>
-                          <Chip
-                            label={device.typeCode}
-                            size="small"
-                            sx={{
-                              backgroundColor: '95a5a6',
-                              color: '#2c3e50',
-                              fontWeight: 500,
-                              fontSize: '0.7rem'
-                            }}
-                          />
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#666',
-                              fontSize: '0.7rem',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}
-                          >
-                            {device.description}
-                          </Typography>
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          ))}
-        </Box>
-      );
-    } else {
-      // 渲染项目支持的设备类型
-      return (
-        <Box sx={{ overflowY: 'auto', height: 'calc(100% - 60px)' }}>
-          {Object.entries(supportedDevices).map(([type, models]) => (
-            <Box key={type} sx={{ mb: 3 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  mb: 1,
-                  fontWeight: 600,
-                  color: '#2c3e50',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  fontSize: '0.75rem'
-                }}
-              >
-                {type}
-              </Typography>
-              <Grid container spacing={1}>
-                {models.map((model, index) => (
-                  <Grid item xs={6} sm={4} md={6} lg={4} key={index}>
-                    <Card sx={{
-                      boxShadow: 'none',
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                      },
-                      borderWidth: '1px',
-                      borderStyle: 'solid',
-                      borderColor: '#dee2e6',
-                    }}>
-                      <CardContent sx={{ 
-                        py: 1,
-                        px: 1.5,
-                        '&:last-child': { pb: 1 }
-                      }}>
-                        <Box sx={{ 
-                          display: 'flex', 
-                          flexDirection: 'column',
-                          gap: 0.5 
-                        }}>
-                          <Chip
-                            label={model}
-                            size="small"
-                            sx={{
-                              backgroundColor: '95a5a6',
-                              color: '#2c3e50',
-                              fontWeight: 500,
-                              fontSize: '0.7rem'
-                            }}
-                          />
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          ))}
-        </Box>
-      );
-    }
-  };
-
   return (
     <Box sx={{ 
-        p: 1.5,
-        height: '420px',
-        display: 'flex',
-        flexDirection: 'column'
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      p: 2
     }}>
       {/* 标题栏和搜索框组合 */}
-      <Box sx={{ mb: 1.5 }}>
+      <Box sx={{ 
+        mb: 2,
+        flexShrink: 0 // 防止头部被压缩
+      }}>
         <Box sx={{ 
           display: 'flex', 
-          flexDirection: { xs: 'column', sm: 'row' }, // 在小屏幕上垂直排列，大屏幕上水平排列
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between', 
-          alignItems: { xs: 'stretch', sm: 'center' }, // 在小屏幕上拉伸，大屏幕上居中
-          gap: 1, // 元素之间的间距
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: 1,
         }}>
           {/* 左侧：标题和切换按钮 */}
           <Box sx={{ 
@@ -248,13 +108,13 @@ const ProductOverview = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: 2,
-            minWidth: { sm: '50%' } // 在大屏幕上保持最小宽度
+            minWidth: { sm: '50%' }
           }}>
             <Typography variant="h6" sx={{ 
               fontWeight: 600, 
               color: '#2c3e50', 
               fontSize: '1rem',
-              whiteSpace: 'nowrap' // 防止标题换行
+              whiteSpace: 'nowrap'
             }}>
               {viewMode === 'all' ? 'All Kasta Device Types' : 'Project Supported Types'}
             </Typography>
@@ -310,7 +170,7 @@ const ProductOverview = () => {
           {/* 右侧：搜索框 */}
           <Box sx={{ 
             flexGrow: 1,
-            maxWidth: { sm: '200px' } // 在大屏幕上限制搜索框宽度
+            maxWidth: { sm: '200px' }
           }}>
             <CustomSearchBar
               searchTerm={searchTerm}
@@ -322,10 +182,24 @@ const ProductOverview = () => {
         </Box>
       </Box>
 
-      {/* 内容区域 */}
+      {/* 内容区域 - 可滚动 */}
       <Box sx={{ 
         flexGrow: 1,
-        overflow: 'auto'
+        overflow: 'auto',
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#f1f1f1',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#888',
+          borderRadius: '4px',
+          '&:hover': {
+            background: '#555',
+          },
+        },
       }}>
         {isLoading ? (
           <Grid container spacing={2}>
@@ -335,7 +209,81 @@ const ProductOverview = () => {
               </Grid>
             ))}
           </Grid>
-        ) : renderDeviceList()}
+        ) : (
+          <Box sx={{ pb: 2 }}>
+            {Object.entries(viewMode === 'all' ? categorizedDevices : supportedDevices).map(([category, devices]) => (
+              <Box key={category} sx={{ mb: 3 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 1,
+                    fontWeight: 600,
+                    color: '#2c3e50',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    fontSize: '0.75rem'
+                  }}
+                >
+                  {category}
+                </Typography>
+                <Grid container spacing={1}>
+                  {(viewMode === 'all' ? devices : devices).map((device, index) => (
+                    <Grid item xs={6} sm={4} md={6} lg={4} key={viewMode === 'all' ? device.id : index}>
+                      <Card sx={{
+                        boxShadow: 'none',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        },
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        borderColor: '#dee2e6',
+                      }}>
+                        <CardContent sx={{ 
+                          py: 1,
+                          px: 1.5,
+                          '&:last-child': { pb: 1 }
+                        }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            flexDirection: 'column',
+                            gap: 0.5 
+                          }}>
+                            <Chip
+                              label={viewMode === 'all' ? device.typeCode : device}
+                              size="small"
+                              sx={{
+                                backgroundColor: '95a5a6',
+                                color: '#2c3e50',
+                                fontWeight: 500,
+                                fontSize: '0.7rem'
+                              }}
+                            />
+                            {viewMode === 'all' && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: '#666',
+                                  fontSize: '0.7rem',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}
+                              >
+                                {device.description}
+                              </Typography>
+                            )}
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            ))}
+          </Box>
+        )}
       </Box>
     </Box>
   );

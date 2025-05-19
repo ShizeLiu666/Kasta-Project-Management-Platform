@@ -1,7 +1,7 @@
 .dashboard-container {
     padding: 15px;
-    /* min-height: 100vh; */
     background-color: #f5f7f9;
+    /* min-height: 100vh; */
 }
 
 .dashboard-row {
@@ -130,6 +130,7 @@
     min-height: 400px;
 }
 
+/* 通用卡片样式 */
 .info-card {
     height: 100%;
     width: 100%;
@@ -137,15 +138,44 @@
     overflow: hidden;
     background-color: #fff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* 新闻更新容器特殊样式 */
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 顶部区域样式 */
+.top-section {
+    margin-bottom: 20px;
+}
+
+/* 轮播图容器样式 */
+.carousel-wrapper {
+    height: 380px;
+}
+
+/* 新闻更新容器样式 */
 .news-updates-container {
+    height: 380px;
     overflow: hidden;
 }
 
-/* 用户信息容器特殊样式 */
+/* 用户信息容器样式 */
 .user-info-container {
+    height: 380px;
+    overflow: hidden;
+}
+
+/* 底部区域样式 */
+.bottom-section {
+    min-height: 400px;
+}
+
+/* 统一底部卡片高度 */
+.bottom-section .info-card {
+    height: 420px;
     overflow: hidden;
 }
 
@@ -209,23 +239,37 @@
     color: white;
 }
 
-/* 响应式调整 */
+/* 响应式布局调整 */
+@media (max-width: 1200px) {
+    .carousel-wrapper,
+    .news-updates-container,
+    .user-info-container {
+        height: 340px;
+    }
+    
+    .bottom-section .info-card {
+        height: 380px;
+    }
+}
+
 @media (max-width: 992px) {
-    .carousel-section {
-        min-height: auto;
+    .dashboard-container {
+        padding: 12px;
     }
-    
-    .carousel-section > [class*="col"] {
-        height: auto;
-        min-height: 300px;
-    }
-    
-    .carousel-container, .info-card {
+
+    .carousel-wrapper,
+    .news-updates-container,
+    .user-info-container {
+        height: 300px;
         margin-bottom: 15px;
     }
-    
-    .carousel-slide {
-        height: 300px;
+
+    .bottom-section {
+        min-height: 350px;
+    }
+
+    .bottom-section .info-card {
+        height: 340px;
     }
 }
 
@@ -233,47 +277,84 @@
     .dashboard-container {
         padding: 10px;
     }
-    
-    .carousel-section > [class*="col"] {
-        min-height: 250px;
+
+    .dashboard-content {
+        gap: 15px;
     }
-    
-    .carousel-slide {
-        height: 250px;
+
+    .carousel-wrapper,
+    .news-updates-container,
+    .user-info-container {
+        height: 280px;
     }
-    
-    .carousel-caption h3 {
-        font-size: 1.25rem;
+
+    .bottom-section {
+        min-height: 300px;
     }
-    
-    .carousel-caption p {
-        font-size: 0.9rem;
+
+    .bottom-section .info-card {
+        height: 320px;
     }
 }
 
-/* 小屏幕手机的特殊处理 */
-@media (max-width: 480px) {
+@media (max-width: 576px) {
     .dashboard-container {
         padding: 8px;
     }
 
-    .carousel-section > [class*="col"] {
-        min-height: 220px;
-    }
-    
-    .carousel-slide {
-        height: 220px;
-    }
-
     .dashboard-content {
-        gap: 8px;
+        gap: 10px;
     }
 
-    .carousel-caption h3 {
-        font-size: 1rem;
+    .carousel-wrapper,
+    .news-updates-container,
+    .user-info-container {
+        height: 250px;
     }
 
-    .carousel-caption p {
-        font-size: 0.8rem;
+    .bottom-section {
+        min-height: 250px;
     }
+
+    .bottom-section .info-card {
+        height: 300px;
+    }
+
+    .info-card {
+        border-radius: 8px;
+    }
+}
+
+/* 确保内容区域正确显示 */
+.info-card > * {
+    height: 100%;
+    width: 100%;
+}
+
+/* 优化间距 */
+.g-2 {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
+}
+
+.g-md-3 {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+}
+
+/* 确保轮播图内容正确显示 */
+.carousel-wrapper .carousel-container {
+    height: 100%;
+    width: 100%;
+}
+
+/* 优化卡片内容溢出处理 */
+.info-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-card > * {
+    flex: 1;
+    overflow: auto;
 } 

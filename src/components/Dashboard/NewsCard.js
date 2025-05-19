@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge } from 'reactstrap';
 import './NewsUpdates.css';
 
-const NewsCard = ({ news, onRead }) => {
+const NewsCard = ({ news }) => {
     const getCategoryBadge = (category) => {
         if (!category) return null;
         
@@ -21,10 +21,7 @@ const NewsCard = ({ news, onRead }) => {
     };
 
     return (
-        <div 
-            className={`news-item ${news.read ? 'read' : 'unread'}`}
-            onClick={() => onRead(news.id)}
-        >
+        <div className={`news-item ${news.read ? 'read' : 'unread'}`}>
             <div className="news-header">
                 <div className="d-flex align-items-center flex-grow-1">
                     {!news.read && <span className="unread-dot me-2"></span>}

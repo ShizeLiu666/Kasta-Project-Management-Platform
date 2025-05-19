@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CardTitle, Badge } from 'reactstrap';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import NewsCard from './NewsCard';
@@ -6,39 +6,33 @@ import './NewsUpdates.css';
 
 const NewsUpdates = () => {
     // 系统通知
-    const [newsItems, setNewsItems] = useState([
+    const newsItems = [
         {
             id: 1,
             title: 'User Registration Notice',
-            // date: '2023-10-25',
             content: 'This system currently only displays Network content for users registered on the Cloud platform',
-            // category: 'notification',
             read: false
         },
         {
             id: 2,
             title: 'Testing Phase Announcement',
-            // date: '2023-10-15',
             content: 'The current website is in testing phase. We apologize for any issues and appreciate your understanding',
-            // category: 'notification',
             read: false
         }
-    ]);
+    ];
 
-    const markAsRead = (id) => {
-        setNewsItems(newsItems.map(item => 
-            item.id === id ? { ...item, read: true } : item
-        ));
-    };
+    const unreadCount = newsItems.filter(item => !item.read).length;
 
     return (
         <div className="news-updates-card">
             <div className="news-card-body">
                 <CardTitle tag="h5" className="news-title">
-                    <NotificationsIcon style={{ fontSize: 20 }} className="me-2" />
+                    <div className="notification-icon-wrapper">
+                        <NotificationsIcon style={{ fontSize: 20 }} className="me-2" />
+                    </div>
                     Notifications
                     <Badge className="ms-2 unread-badge" pill>
-                        {newsItems.filter(item => !item.read).length}
+                        {unreadCount}
                     </Badge>
                 </CardTitle>
                 
@@ -47,7 +41,6 @@ const NewsUpdates = () => {
                         <NewsCard 
                             key={news.id}
                             news={news}
-                            onRead={markAsRead}
                         />
                     ))}
                 </div>

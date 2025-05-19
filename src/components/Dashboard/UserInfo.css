@@ -90,7 +90,7 @@
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 8px;
     padding: 8px;
-    margin: auto 0; /* 垂直居中 */
+    /* margin: auto 0; 垂直居中 */
     background: rgba(255, 255, 255, 0.8);
     border-radius: 8px;
     border: 1px solid rgba(251, 205, 11, 0.1);
@@ -125,7 +125,7 @@
 
 .user-details {
     flex: 0 0 auto; /* 固定高度，不伸缩 */
-    margin-top: auto; /* 推到底部 */
+    /* margin-top: auto; 推到底部 */
     display: flex;
     flex-direction: column;
     gap: 8px;

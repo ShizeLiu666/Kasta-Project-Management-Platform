@@ -149,7 +149,12 @@ const NetworkOverview = () => {
   );
 
   return (
-    <Box p={1.5}>
+    <Box sx={{ 
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        p: 1.5
+    }}>
       <Typography 
         variant="h6" 
         sx={{ 
@@ -177,142 +182,161 @@ const NetworkOverview = () => {
         </Typography>
       )}
 
-      <Grid container spacing={2} mt={0.5}>
-        {/* <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <img 
-                src={NetworkIcon} 
-                alt="Network" 
-                style={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block'
-                }} 
-              />
-            }
-            title="Total Networks"
-            value={mockNetworkStats.totalNetworks}
-            color="#3f51b5"
-          />
-        </Grid> */}
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={<GroupIconMUI fontSize="large" />}
-            title="Members"
-            value={networkStats.memberCount}
-            color="#ff9800"
-          />
+      <Box sx={{ 
+        flexGrow: 1,
+        overflow: 'auto',
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: '#f1f1f1',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: '#888',
+          borderRadius: '4px',
+          '&:hover': {
+            background: '#555',
+          },
+        },
+      }}>
+        <Grid container spacing={2} mt={0.5}>
+          {/* <Grid item xs={12} md={4}>
+            <StatCard
+              icon={
+                <img 
+                  src={NetworkIcon} 
+                  alt="Network" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    display: 'block'
+                  }} 
+                />
+              }
+              title="Total Networks"
+              value={mockNetworkStats.totalNetworks}
+              color="#3f51b5"
+            />
+          </Grid> */}
+          <Grid item xs={12} md={4}>
+            <StatCard
+              icon={<GroupIconMUI fontSize="large" />}
+              title="Members"
+              value={networkStats.memberCount}
+              color="#ff9800"
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <StatCard
+              icon={
+                <img 
+                  src={DeviceIcon} 
+                  alt="Device" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    display: 'block'
+                  }} 
+                />
+              }
+              title="Devices"
+              value={networkStats.deviceCount}
+              color="#fbcd0b"
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <StatCard
+              icon={
+                <img 
+                  src={GroupIcon} 
+                  alt="Group" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    display: 'block'
+                  }} 
+                />
+              }
+              title="Groups"
+              value={networkStats.groupCount}
+              color="#009688"
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <StatCard
+              icon={
+                <img 
+                  src={SceneIcon} 
+                  alt="Scene" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    display: 'block'
+                  }} 
+                />
+              }
+              title="Scenes"
+              value={networkStats.sceneCount}
+              color="#9C27B0"
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <StatCard
+              icon={
+                <img
+                  src={RoomIcon} 
+                  alt="Room" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    display: 'block'
+                  }} 
+                />
+              }
+              title="Rooms"
+              value={networkStats.roomCount}
+              color="#1976D2"
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <StatCard
+              icon={
+                <img
+                  src={TimerIcon} 
+                  alt="Timer" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    display: 'block'
+                  }} 
+                />
+              }
+              title="Timers"
+              value={networkStats.timerCount}
+              color="#E91E63"
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <StatCard
+              icon={
+                <img
+                  src={ScheduleIcon} 
+                  alt="Schedule" 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    display: 'block'
+                  }} 
+                />
+              }
+              title="Schedules"
+              value={networkStats.scheduleCount}
+              color="#FAEBD7"
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <img 
-                src={DeviceIcon} 
-                alt="Device" 
-                style={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block'
-                }} 
-              />
-            }
-            title="Devices"
-            value={networkStats.deviceCount}
-            color="#fbcd0b"
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <img 
-                src={GroupIcon} 
-                alt="Group" 
-                style={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block'
-                }} 
-              />
-            }
-            title="Groups"
-            value={networkStats.groupCount}
-            color="#009688"
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <img 
-                src={SceneIcon} 
-                alt="Scene" 
-                style={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block'
-                }} 
-              />
-            }
-            title="Scenes"
-            value={networkStats.sceneCount}
-            color="#9C27B0"
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <img
-                src={RoomIcon} 
-                alt="Room" 
-                style={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block'
-                }} 
-              />
-            }
-            title="Rooms"
-            value={networkStats.roomCount}
-            color="#1976D2"
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <img
-                src={TimerIcon} 
-                alt="Timer" 
-                style={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block'
-                }} 
-              />
-            }
-            title="Timers"
-            value={networkStats.timerCount}
-            color="#E91E63"
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard
-            icon={
-              <img
-                src={ScheduleIcon} 
-                alt="Schedule" 
-                style={{ 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'block'
-                }} 
-              />
-            }
-            title="Schedules"
-            value={networkStats.scheduleCount}
-            color="#FAEBD7"
-          />
-        </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 };
