@@ -192,27 +192,8 @@ const BasicTable = ({
                                                                         whiteSpace: 'nowrap'
                                                                     }}
                                                                 >
-                                                                    {device.name}
-                                                                    <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
-                                                                        <Typography
-                                                                            component="span"
-                                                                            variant="body2"
-                                                                            sx={{
-                                                                                color: '#95a5a6',
-                                                                                ml: 0.5,
-                                                                                fontWeight: 400,
-                                                                                cursor: 'pointer',
-                                                                                textDecoration: 'underline dotted',
-                                                                                overflow: 'hidden',
-                                                                                textOverflow: 'ellipsis',
-                                                                                whiteSpace: 'nowrap',
-                                                                                maxWidth: 120,
-                                                                                verticalAlign: 'middle',
-                                                                                display: 'inline-block'
-                                                                            }}
-                                                                        >
-                                                                            {`- ${device.deviceId} | ${device.did}`}
-                                                                        </Typography>
+                                                                    <Tooltip title={device.name}>
+                                                                        <span>{device.name}</span>
                                                                     </Tooltip>
                                                                 </Typography>
                                                                 <Typography
@@ -224,7 +205,23 @@ const BasicTable = ({
                                                                         whiteSpace: 'nowrap'
                                                                     }}
                                                                 >
-                                                                    {device.appearanceShortname}
+                                                                    <Tooltip title={device.appearanceShortname}>
+                                                                        <span>{device.appearanceShortname}</span>
+                                                                    </Tooltip>
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    color="text.secondary"
+                                                                    sx={{
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                        whiteSpace: 'nowrap',
+                                                                        color: '#95a5a6'
+                                                                    }}
+                                                                >
+                                                                    <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
+                                                                        <span>{`ID: ${device.deviceId} | DID: ${device.did}`}</span>
+                                                                    </Tooltip>
                                                                 </Typography>
                                                             </Box>
                                                         </Box>

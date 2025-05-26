@@ -299,32 +299,38 @@ const POWER_POINT = ({ devices }) => {
                         }}
                       >
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                            {device.name}
-                            <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
-                              <Typography
-                                component="span"
-                                variant="body2"
-                                sx={{
-                                  color: '#95a5a6',
-                                  ml: 0.5,
-                                  fontWeight: 400,
-                                  cursor: 'pointer',
-                                  textDecoration: 'underline dotted',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  maxWidth: 120,
-                                  verticalAlign: 'middle',
-                                  display: 'inline-block'
-                                }}
-                              >
-                                {`- ${device.deviceId} | ${device.did}`}
-                              </Typography>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            <Tooltip title={device.name}>
+                              <span>{device.name}</span>
                             </Tooltip>
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {device.appearanceShortname}
+                          <Typography variant="body2" color="text.secondary" sx={{ 
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            <Tooltip title={device.appearanceShortname}>
+                              <span>{device.appearanceShortname}</span>
+                            </Tooltip>
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              color: '#95a5a6'
+                            }}
+                          >
+                            <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
+                              <span>{`ID: ${device.deviceId} | DID: ${device.did}`}</span>
+                            </Tooltip>
                           </Typography>
                         </Box>
                       </TableCell>
