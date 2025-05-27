@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes, useNetworkRooms } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
 // 产品类型到设备类型的映射
@@ -102,7 +102,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 // 创建单个面板组组件
-const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap, sceneMap, allDevices, allGroups, allScenes }) => {
+const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap, sceneMap, roomMap, allDevices, allGroups, allScenes, allRooms }) => {
   const [expanded, setExpanded] = useState(true);
   
   // 获取图标路径 - 修改为使用默认图标，避免路径错误
@@ -136,24 +136,23 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
     return remoteBind.find(binding => parseInt(binding.hole) === buttonIndex) || null;
   };
 
-  // 更新获取绑定目标的名称
+  // 更新获取绑定目标的名称 - 添加房间支持
   const getBindingName = (binding) => {
     if (!binding) return '';
     
-    // 可以添加日志方便调试
-    // console.log(`Finding name for: type=${binding.bindType}, id=${binding.bindId}`);
-    // console.log(`Available groups:`, allGroups.map(g => `id=${g.groupId}, gid=${g.gid}`));
-    
     switch (binding.bindType) {
-      case 1: // Device (修正为1)
+      case 1: // Device
         return deviceMap[binding.bindId] || null;
-      case 2: // Group (修正为2)
+      case 2: // Group
         // 使用gid作为匹配键
         const group = allGroups.find(g => g.gid === binding.bindId);
         return group ? group.name : null;
-      case 3: // Room (新增)
-        return `Room #${binding.bindId}`;
-      case 4: // Scene (修正为4)
+      case 3: // Room
+        // 使用roomMap或者从allRooms中查找
+        return roomMap[binding.bindId] || 
+               allRooms?.find(r => r.roomId === binding.bindId || r.rid === binding.bindId)?.name || 
+               null;
+      case 4: // Scene
         // 使用sid作为匹配键
         const scene = allScenes.find(s => s.sid === binding.bindId);
         return scene ? scene.name : null;
@@ -162,7 +161,7 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
     }
   };
 
-  // 更新渲染按钮绑定
+  // 更新渲染按钮绑定 - 添加房间支持
   const renderButtonBinding = (binding) => {
     if (!binding) {
       return (
@@ -220,26 +219,26 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
       );
     }
 
-    // 获取绑定类型的图标和名称
+    // 获取绑定类型的图标和名称 - 添加房间支持
     const getBindingTypeInfo = () => {
       switch (binding.bindType) {
-        case 1: // Device (修正为1)
+        case 1: // Device
           const boundDevice = allDevices.find(device => device.did === binding.bindId);
           return {
             icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
             typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
           };
-        case 2: // Group (修正为2)
+        case 2: // Group
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
             typeName: 'GROUP'
           };
-        case 3: // Room (新增)
+        case 3: // Room
           return {
-            icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'), // 使用Group图标或其他适当的图标
+            icon: require('../../../../../../assets/icons/NetworkOverview/Room.png'),
             typeName: 'ROOM'
           };
-        case 4: // Scene (修正为4)
+        case 4: // Scene
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
             typeName: 'SCENE'
@@ -533,12 +532,13 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
   // 如果没有提供分组设备，尝试使用所有设备
   let { horizontal: horizontalDevices = [], vertical: verticalDevices = [] } = groupedDevices || {};
   
-  // 添加 scenes 数据获取
+  // 添加房间数据获取
   const { data: allDevices = [] } = useNetworkDevices(networkId);
   const { data: allGroups = [] } = useNetworkGroups(networkId);
   const { data: allScenes = [] } = useNetworkScenes(networkId);
+  const { data: allRooms = [] } = useNetworkRooms(networkId);
 
-  // 更新映射关系，添加 scenes
+  // 更新映射关系，添加房间
   const deviceMap = React.useMemo(() => {
     return allDevices.reduce((acc, device) => {
       acc[device.did] = device.name;
@@ -559,6 +559,18 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
       return acc;
     }, {});
   }, [allScenes]);
+
+  const roomMap = React.useMemo(() => {
+    return allRooms.reduce((acc, room) => {
+      if (room && room.roomId && room.name) {
+        acc[room.roomId] = room.name;
+      }
+      if (room && room.rid && room.name) {
+        acc[room.rid] = room.name;
+      }
+      return acc;
+    }, {});
+  }, [allRooms]);
 
   // 对各设备进行解析和分类
   const enhanceDeviceType = (device) => {
@@ -662,9 +674,11 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
           deviceMap={deviceMap}
           groupMap={groupMap}
           sceneMap={sceneMap}
+          roomMap={roomMap}
           allDevices={allDevices}
           allGroups={allGroups}
           allScenes={allScenes}
+          allRooms={allRooms}
         />
       ))}
       
@@ -678,9 +692,11 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
           deviceMap={deviceMap}
           groupMap={groupMap}
           sceneMap={sceneMap}
+          roomMap={roomMap}
           allDevices={allDevices}
           allGroups={allGroups}
           allScenes={allScenes}
+          allRooms={allRooms}
         />
       ))}
     </Box>

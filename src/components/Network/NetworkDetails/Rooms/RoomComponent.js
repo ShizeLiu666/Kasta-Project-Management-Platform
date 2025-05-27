@@ -220,8 +220,8 @@ const RoomComponent = ({ room, devices }) => {
                 secondary={
                   <Typography variant="body2" color="text.secondary">
                     {device.appearanceShortname}
-                    <br />
-                    Position: X:{device.x}, Y:{device.y}
+                    {/* <br />
+                    Position: X:{device.x}, Y:{device.y} */}
                   </Typography>
                 }
               />

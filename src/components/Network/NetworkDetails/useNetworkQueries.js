@@ -140,16 +140,60 @@ export const useScenesMap = (networkId) => {
   }, [scenes]);
 };
 
+// ** Room List **
+export const useNetworkRooms = (networkId) => {
+  return useQuery({
+    queryKey: ['network-rooms', networkId],
+    queryFn: async () => {
+      const token = getToken();
+      if (!token) throw new Error("No token found");
+
+      const response = await axiosInstance.post('/rooms/list', {
+        networkId,
+        page: 1,
+        size: 100  // 或者其他合适的大小
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.errorMsg || 'Failed to fetch rooms');
+      }
+
+      return response.data.data.content;  // 返回 content 数组
+    },
+    staleTime: 30000,
+    cacheTime: 5 * 60 * 1000,
+    enabled: !!networkId
+  });
+};
+
+export const useRoomsMap = (networkId) => {
+  const { data: rooms = [] } = useNetworkRooms(networkId);
+  
+  return React.useMemo(() => {
+    return rooms.reduce((acc, room) => {
+      acc[room.roomId] = {
+        name: room.name,
+        // 可以添加其他需要的房间信息
+      };
+      return acc;
+    }, {});
+  }, [rooms]);
+};
+
 // 创建一个组合 hook，同时获取所有映射
 export const useEntityMaps = (networkId) => {
   const devicesMap = useDevicesMap(networkId);
   const groupsMap = useGroupsMap(networkId);
   const scenesMap = useScenesMap(networkId);
+  const roomsMap = useRoomsMap(networkId);
 
   return {
     devicesMap,
     groupsMap,
-    scenesMap
+    scenesMap,
+    roomsMap
   };
 };
 
@@ -228,34 +272,6 @@ export const useNetworkScenes = (networkId) => {
   return useQuery({
     queryKey: ['network-scenes', networkId],
     queryFn: () => fetchPaginatedData('/scene/list', networkId),
-    staleTime: 30000,
-    cacheTime: 5 * 60 * 1000,
-    enabled: !!networkId
-  });
-};
-
-// ** Room List **
-export const useNetworkRooms = (networkId) => {
-  return useQuery({
-    queryKey: ['network-rooms', networkId],
-    queryFn: async () => {
-      const token = getToken();
-      if (!token) throw new Error("No token found");
-
-      const response = await axiosInstance.post('/rooms/list', {
-        networkId,
-        page: 1,
-        size: 100  // 或者其他合适的大小
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!response.data.success) {
-        throw new Error(response.data.errorMsg || 'Failed to fetch rooms');
-      }
-
-      return response.data.data.content;  // 返回 content 数组
-    },
     staleTime: 30000,
     cacheTime: 5 * 60 * 1000,
     enabled: !!networkId

@@ -76,7 +76,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 // 单个设备绑定卡片组件
-const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, allGroups, allScenes, position }) => {
+const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, roomMap, allDevices, allGroups, allScenes, allRooms, position }) => {
   if (!binding) {
     return (
       <Box sx={{ 
@@ -120,7 +120,7 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, allGr
         };
       case 3: // Room
         return {
-          icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'), // 使用Group图标或其他适当的图标
+          icon: require('../../../../../../assets/icons/NetworkOverview/Room.png'),
           typeName: 'ROOM'
         };
       case 4: // Scene
@@ -148,7 +148,10 @@ const BindingCard = ({ binding, deviceMap, groupMap, sceneMap, allDevices, allGr
         const group = allGroups?.find(g => g.gid === binding.bindId);
         return group ? group.name : null;
       case 3: // Room
-        return `Room #${binding.bindId}`;
+        // 使用roomMap或者从allRooms中查找
+        return roomMap[binding.bindId] || 
+               allRooms?.find(r => r.roomId === binding.bindId || r.rid === binding.bindId)?.name || 
+               null;
       case 4: // Scene
         // 使用sid作为匹配键
         const scene = allScenes?.find(s => s.sid === binding.bindId);
@@ -284,10 +287,12 @@ const PageBindingsTable = ({
   deviceMap, 
   groupMap, 
   sceneMap, 
+  roomMap,
   allDevices,
   visiblePages,
   allGroups,
   allScenes,
+  allRooms,
   maxPages = 5 // 最大页数，默认为5
 }) => {
   const bindings = device.specificAttributes.multiVueBinds || [];
@@ -429,9 +434,11 @@ const PageBindingsTable = ({
                     deviceMap={deviceMap}
                     groupMap={groupMap}
                     sceneMap={sceneMap}
+                    roomMap={roomMap}
                     allDevices={allDevices}
                     allGroups={allGroups}
                     allScenes={allScenes}
+                    allRooms={allRooms}
                     position={rowIndex}
                   />
                 </Grid>
@@ -455,7 +462,7 @@ const PageBindingsTable = ({
 };
 
 // 将页面绑定视图作为主组件导出
-const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices, allGroups, allScenes, maxPages = 5 }) => {
+const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, roomMap, allDevices, allGroups, allScenes, allRooms, maxPages = 5 }) => {
   // 使用 useMemo 包装 pageNames 以解决警告
   const pageNames = useMemo(() => device?.specificAttributes?.pageNames || [], [device]);
   
@@ -553,9 +560,11 @@ const PageBindingsView = ({ device, deviceMap, groupMap, sceneMap, allDevices, a
           deviceMap={deviceMap}
           groupMap={groupMap}
           sceneMap={sceneMap}
+          roomMap={roomMap}
           allDevices={allDevices}
           allGroups={finalGroups}
           allScenes={finalScenes}
+          allRooms={allRooms}
           visiblePages={visiblePages}
           maxPages={maxPages}
         />

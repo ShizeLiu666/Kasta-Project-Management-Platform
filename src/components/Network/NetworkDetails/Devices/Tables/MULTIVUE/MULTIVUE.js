@@ -11,22 +11,23 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import multivueIcon from '../../../../../../assets/icons/DeviceType/MULTIVUE.png';
-import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes, useNetworkRooms } from '../../../../NetworkDetails/useNetworkQueries';
 import PageBindingsView from './PageBindingsView';
 
 const MULTIVUE = ({ devices }) => {
   const [expanded, setExpanded] = useState(true);
   const [selectedDevice, setSelectedDevice] = useState(devices[0]?.deviceId);
   
-  // 获取网络ID以查询设备、组和场景数据
+  // 获取网络ID以查询设备、组、场景和房间数据
   const networkId = devices[0]?.networkId;
   
-  // 使用custom hooks获取设备、组和场景数据
+  // 使用custom hooks获取设备、组、场景和房间数据
   const { data: allDevices = [] } = useNetworkDevices(networkId);
   const { data: allGroups = [] } = useNetworkGroups(networkId);
   const { data: allScenes = [] } = useNetworkScenes(networkId);
+  const { data: allRooms = [] } = useNetworkRooms(networkId);
 
-  // 创建设备、组和场景名称映射
+  // 创建设备、组、场景和房间名称映射
   const deviceMap = React.useMemo(() => {
     return allDevices.reduce((acc, device) => {
       if (device && device.did && device.name) {
@@ -59,6 +60,18 @@ const MULTIVUE = ({ devices }) => {
       return acc;
     }, {});
   }, [allScenes]);
+
+  const roomMap = React.useMemo(() => {
+    return allRooms.reduce((acc, room) => {
+      if (room && room.roomId && room.name) {
+        acc[room.roomId] = room.name;
+      }
+      if (room && room.rid && room.name) {
+        acc[room.rid] = room.name;
+      }
+      return acc;
+    }, {});
+  }, [allRooms]);
 
   const handleDeviceChange = (deviceId) => {
     setSelectedDevice(deviceId);
@@ -208,9 +221,11 @@ const MULTIVUE = ({ devices }) => {
                 deviceMap={deviceMap}
                 groupMap={groupMap}
                 sceneMap={sceneMap}
+                roomMap={roomMap}
                 allDevices={allDevices}
                 allGroups={allGroups}
                 allScenes={allScenes}
+                allRooms={allRooms}
                 maxPages={MAX_PAGES}
               />
             )}

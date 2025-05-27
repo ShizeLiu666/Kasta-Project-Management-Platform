@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes, useNetworkRooms } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
 const getDeviceTypeFromProductType = (productType) => {
@@ -80,7 +80,7 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 const FIVE_BUTTON = ({ devices, networkId }) => {
   const [expanded, setExpanded] = useState(true);
   
-  // 获取所有设备和组的数据，添加 options
+  // 获取所有设备、组、场景和房间的数据
   const { data: allDevices = [] } = useNetworkDevices(networkId, {
     enabled: !!networkId,
     staleTime: 30000,
@@ -96,8 +96,13 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
     staleTime: 30000,
     cacheTime: 60000
   });
+  const { data: allRooms = [] } = useNetworkRooms(networkId, {
+    enabled: !!networkId,
+    staleTime: 30000,
+    cacheTime: 60000
+  });
 
-  // 预处理设备数据 - 使用 useMemo 替代 useState + useEffect
+  // 预处理设备数据
   const processedDevices = React.useMemo(() => {
     if (!devices?.length) return [];
     
@@ -120,9 +125,9 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
         }
       };
     });
-  }, [devices]); // 只依赖 devices
+  }, [devices]);
 
-  // 创建设备和组的映射
+  // 创建设备和房间的映射
   const deviceMap = React.useMemo(() => {
     if (!allDevices?.length) return {};
     return allDevices.reduce((acc, device) => {
@@ -131,43 +136,54 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
     }, {});
   }, [allDevices]);
 
-  const groupMap = React.useMemo(() => {
-    if (!allGroups?.length) return {};
-    return allGroups.reduce((acc, group) => {
-      acc[group.groupId] = group.name;
+  const roomMap = React.useMemo(() => {
+    if (!allRooms?.length) return {};
+    return allRooms.reduce((acc, room) => {
+      if (room && room.roomId && room.name) {
+        acc[room.roomId] = room.name;
+      }
+      if (room && room.rid && room.name) {
+        acc[room.rid] = room.name;
+      }
       return acc;
     }, {});
-  }, [allGroups]);
+  }, [allRooms]);
 
-  const sceneMap = React.useMemo(() => {
-    if (!allScenes?.length) return {};
-    return allScenes.reduce((acc, scene) => {
-      acc[scene.sceneId] = scene.name;
-      return acc;
-    }, {});
-  }, [allScenes]);
+  // 检查是否有任何设备绑定了特定按钮
+  const anyDeviceHasButtonBinding = (devices, buttonIndex) => {
+    return devices.some(device => {
+      const remoteBind = device.specificAttributes?.remoteBind || [];
+      return remoteBind.some(b => parseInt(b.hole) === buttonIndex);
+    });
+  };
+
+  // 获取按钮绑定信息
+  const getButtonBinding = (device, buttonIndex) => {
+    const remoteBind = device.specificAttributes?.remoteBind || [];
+    return remoteBind.find(binding => parseInt(binding.hole) === buttonIndex) || null;
+  };
 
   // 获取绑定目标的名称
   const getBindingName = React.useCallback((binding) => {
     if (!binding) return '';
     
     switch (binding.bindType) {
-      case 0: // Device
-        return deviceMap[binding.bindId] || `Unknown Device`;
-      case 1: // Group
-        return groupMap[binding.bindId] || `Unknown Group`;
-      case 2: // Scene
-        return sceneMap[binding.bindId] || `Unknown Scene`;
+      case 1: // Device
+        return deviceMap[binding.bindId] || null;
+      case 2: // Group
+        const group = allGroups.find(g => g.gid === binding.bindId);
+        return group ? group.name : null;
+      case 3: // Room
+        return roomMap[binding.bindId] || 
+               allRooms?.find(r => r.roomId === binding.bindId || r.rid === binding.bindId)?.name || 
+               null;
+      case 4: // Scene
+        const scene = allScenes.find(s => s.sid === binding.bindId);
+        return scene ? scene.name : null;
       default:
-        return `Unknown`;
+        return null;
     }
-  }, [deviceMap, groupMap, sceneMap]);
-
-  // 获取按钮绑定信息
-  const getButtonBinding = (device, buttonIndex) => {
-    const remoteBind = device.specificAttributes?.remoteBind || [];
-    return remoteBind.find(binding => Number(binding.hole) === buttonIndex) || null;
-  };
+  }, [deviceMap, allGroups, roomMap, allRooms, allScenes]);
 
   // 渲染按钮绑定信息
   const renderButtonBinding = (binding) => {
@@ -178,7 +194,36 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
           borderRadius: 1.5,
           bgcolor: '#f8f9fa',
           boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          height: '160px',
+          height: '120px',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ 
+              opacity: 0.7,
+              fontStyle: 'italic'
+            }}
+          >
+            No Binding
+          </Typography>
+        </Box>
+      );
+    }
+
+    // 检查绑定名称是否有效
+    const bindingName = getBindingName(binding);
+    if (bindingName === null) {
+      return (
+        <Box sx={{ 
+          padding: '12px',
+          borderRadius: 1.5,
+          bgcolor: '#f8f9fa',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          height: '120px',
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
@@ -201,7 +246,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
     // 获取绑定类型的图标和名称
     const getBindingTypeInfo = () => {
       switch (binding.bindType) {
-        case 0: // Device
+        case 1: // Device
           const boundDevice = allDevices.find(device => 
             device.did === binding.bindId || 
             Number(device.did) === Number(binding.bindId)
@@ -210,12 +255,17 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
             icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
             typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
           };
-        case 1: // Group
+        case 2: // Group
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
             typeName: 'GROUP'
           };
-        case 2: // Scene
+        case 3: // Room
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Room.png'),
+            typeName: 'ROOM'
+          };
+        case 4: // Scene
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
             typeName: 'SCENE'
@@ -236,7 +286,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
         borderRadius: 1.5,
         bgcolor: '#f8f9fa',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        height: '160px',
+        height: '120px',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -300,43 +350,8 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
             />
           </Typography>
         </Box>
-        
-        {binding.bindChannel !== null && (
-          <Box sx={{ 
-            textAlign: 'center',
-            width: '100%'
-          }}>
-            <Typography 
-              variant="caption" 
-              sx={{
-                color: '#95a5a6',
-                display: 'block',
-                fontSize: '0.7rem'
-              }}
-            >
-              Channel
-            </Typography>
-            <Typography 
-              variant="body2"
-              sx={{
-                color: '#34495e',
-                fontWeight: 500
-              }}
-            >
-              {binding.bindChannel ? 'Right' : 'Left'}
-            </Typography>
-          </Box>
-        )}
       </Box>
     );
-  };
-
-  // 检查是否有任何设备绑定了特定按钮
-  const anyDeviceHasButtonBinding = (buttonIndex) => {
-    return processedDevices.some(device => {
-      const remoteBind = device.specificAttributes?.remoteBind || [];
-      return remoteBind.some(b => Number(b.hole) === buttonIndex);
-    });
   };
 
   return (
@@ -350,7 +365,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
           borderColor: 'rgba(224, 224, 224, 0.7)'
         }}
       >
-        {/* 标题区域 - 与 BasicTable 一致 */}
+        {/* 标题区域 - 与 TOUCH_PANEL 一致 */}
         <Box 
           sx={{
             display: 'flex',
@@ -371,7 +386,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
               variant="subtitle1"
               sx={{
                 fontWeight: 600,
-                color: '#fbcd0b',
+                color: '#686868',
               }}
             >
               5-Button Remote
@@ -440,8 +455,8 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
                 {/* 表头第二行 - 按钮标签 */}
                 <TableRow>
                   <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-                  {[1, 2, 3, 4, 5].map(buttonIndex => {
-                    const hasBinding = anyDeviceHasButtonBinding(buttonIndex);
+                  {[0, 1, 2, 3, 4].map(buttonIndex => {
+                    const hasBinding = anyDeviceHasButtonBinding(processedDevices, buttonIndex);
                     
                     return (
                       <TableCell 
@@ -453,7 +468,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
                         }}
                       >
                       <Chip 
-                        label={`Button ${buttonIndex}`} 
+                        label={`Button ${buttonIndex + 1}`} 
                         size="small" 
                         sx={{ 
                           bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
@@ -469,7 +484,6 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
               </TableHead>
               
               <TableBody>
-                {/* 保持现有的表格行和单元格结构 */}
                 {processedDevices.map((device, deviceIndex) => (
                   <TableRow
                     key={device.deviceId}
@@ -489,22 +503,36 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
                       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {device.name}
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
-                          >
-                            - {device.deviceId}
-                          </Typography>
+                          <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              sx={{
+                                color: '#95a5a6',
+                                ml: 0.5,
+                                fontWeight: 400,
+                                cursor: 'pointer',
+                                textDecoration: 'underline dotted',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: 120,
+                                verticalAlign: 'middle',
+                                display: 'inline-block'
+                              }}
+                            >
+                              {`- ${device.deviceId.substring(0, 8)}...`}
+                            </Typography>
+                          </Tooltip>
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {device.appearanceShortname}
+                          {device.deviceType} - {device.appearanceShortname}
                         </Typography>
                       </Box>
                     </TableCell>
                     
                     {/* 按钮绑定单元格 */}
-                    {[1, 2, 3, 4, 5].map(buttonIndex => {
+                    {[0, 1, 2, 3, 4].map(buttonIndex => {
                       const binding = getButtonBinding(device, buttonIndex);
                       
                       return (
@@ -514,7 +542,7 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
                           sx={{
                             padding: '8px',
                             width: `${75 / 5}%`, // 5个按钮平均分配75%的宽度
-                            height: '160px',
+                            height: '140px',
                             borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                           }}
                         >
