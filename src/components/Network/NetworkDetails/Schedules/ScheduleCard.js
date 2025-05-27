@@ -13,7 +13,6 @@ import {
   Collapse,
   IconButton,
   Tooltip,
-  Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -23,20 +22,21 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 const ScheduleCard = ({ 
   schedule, 
-  getTargetName, 
-  getTargetTypeInfo, 
+  getDeviceName,
+  getDeviceTypeInfo,
   formatWeekdays, 
   // getStatusColor 
 }) => {
   const [expanded, setExpanded] = useState(true);
-  const [showAllTargets, setShowAllTargets] = useState(false);
-  const items = schedule.items || [];
-  const MAX_VISIBLE_TARGETS = 3;
-
+  const [showAllDevices, setShowAllDevices] = useState(false);
+  
+  const { items = [], bindingTypeInfo, deviceCount } = schedule;
+  const MAX_VISIBLE_DEVICES = 5;
+  
   // 计算是否显示展开按钮
-  const shouldShowExpandButton = items.length > MAX_VISIBLE_TARGETS;
-  // 计算要显示的目标数量
-  const visibleTargets = showAllTargets ? items : items.slice(0, MAX_VISIBLE_TARGETS);
+  const shouldShowExpandButton = items.length > MAX_VISIBLE_DEVICES;
+  // 计算要显示的设备数量
+  const visibleDevices = showAllDevices ? items : items.slice(0, MAX_VISIBLE_DEVICES);
 
   return (
     <Paper 
@@ -86,17 +86,46 @@ const ScheduleCard = ({
           </Typography>
         </Box>
         
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* 显示绑定类型 */}
+          <Tooltip title={bindingTypeInfo.description}>
+            <Chip
+              icon={
+                <img 
+                  src={bindingTypeInfo.icon}
+                  alt={bindingTypeInfo.label}
+                  style={{ 
+                    width: 16, 
+                    height: 16,
+                    objectFit: 'contain'
+                  }}
+                />
+              }
+              label={bindingTypeInfo.label}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(44, 90, 160, 0.1)',
+                color: '#2c5aa0',
+                fontWeight: 500,
+                '& .MuiChip-icon': {
+                  marginLeft: '4px',
+                  marginRight: '-4px'
+                }
+              }}
+            />
+          </Tooltip>
+          
+          {/* 显示设备数量 */}
           <Chip
-            label={`${items.length} ${items.length === 1 ? 'Target' : 'Targets'}`}
+            label={`${deviceCount} ${deviceCount === 1 ? 'Device' : 'Devices'}`}
             size="small"
             sx={{
               bgcolor: 'rgba(251, 205, 11, 0.1)',
               color: '#fbcd0b',
               fontWeight: 500,
-              mr: 1
             }}
           />
+          
           <IconButton 
             size="small"
             onClick={() => setExpanded(!expanded)}
@@ -111,73 +140,92 @@ const ScheduleCard = ({
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 'bold' }}>Target</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Target Devices</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Date Range</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Execution Time</TableCell>
-                {/* <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
               <TableRow>
-                {/* 目标类型列 */}
+                {/* 目标设备列 */}
                 <TableCell>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    {visibleTargets.map((item, index) => (
+                    {visibleDevices.map((item, index) => (
                       <Box 
-                        key={`${item.deviceId || item.groupId || item.sceneId}-${index}`}
+                        key={`${item.deviceId}-${index}`}
                         sx={{ 
                           display: 'flex', 
-                          alignItems: 'center'
+                          alignItems: 'center',
+                          py: 0.25
                         }}
                       >
                         <img 
-                          src={getTargetTypeInfo(item.entityType).icon}
-                          alt={getTargetTypeInfo(item.entityType).label}
+                          src={getDeviceTypeInfo().icon}
+                          alt="Device"
                           style={{ 
-                            width: 20, 
-                            height: 20, 
+                            width: 18, 
+                            height: 18, 
                             marginRight: 8,
                             objectFit: 'contain'
                           }}
                         />
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {getTargetName(item)}
+                          {getDeviceName(item.deviceId)}
+                        </Typography>
+                        <Typography variant="caption" sx={{ ml: 1, color: '#666' }}>
+                          ({item.deviceType})
                         </Typography>
                       </Box>
                     ))}
-                    {items.length === 0 && (
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <img 
-                          src={getTargetTypeInfo(schedule.entityType).icon}
-                          alt={getTargetTypeInfo(schedule.entityType).label}
-                          style={{ 
-                            width: 20, 
-                            height: 20, 
-                            marginRight: 8,
-                            objectFit: 'contain'
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ color: '#95a5a6' }}>
-                          No targets
-                        </Typography>
-                      </Box>
-                    )}
+                    
+                    {/* 展开/收起按钮 */}
                     {shouldShowExpandButton && (
-                      <Button
-                        size="small"
-                        onClick={() => setShowAllTargets(!showAllTargets)}
-                        disableRipple
-                        sx={{
+                      <Box 
+                        sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          cursor: 'pointer',
                           mt: 0.5,
-                          color: '#666',
-                          textTransform: 'none',
+                          py: 0.25,
                           '&:hover': {
                             backgroundColor: 'rgba(0, 0, 0, 0.04)'
                           }
                         }}
+                        onClick={() => setShowAllDevices(!showAllDevices)}
                       >
-                        {showAllTargets ? 'Show Less' : `+${items.length - MAX_VISIBLE_TARGETS} More`}
-                      </Button>
+                        <IconButton size="small" sx={{ p: 0, mr: 1 }}>
+                          {showAllDevices ? 
+                            <ExpandLessIcon fontSize="small" /> : 
+                            <ExpandMoreIcon fontSize="small" />
+                          }
+                        </IconButton>
+                        <Typography variant="body2" sx={{ color: '#666' }}>
+                          {showAllDevices ? 
+                            'Show Less' : 
+                            `Show ${items.length - MAX_VISIBLE_DEVICES} More Devices`
+                          }
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {/* 无设备时的显示 */}
+                    {items.length === 0 && (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <img 
+                          src={getDeviceTypeInfo().icon}
+                          alt="Device"
+                          style={{ 
+                            width: 18, 
+                            height: 18, 
+                            marginRight: 8,
+                            objectFit: 'contain',
+                            opacity: 0.5
+                          }}
+                        />
+                        <Typography variant="body2" sx={{ color: '#95a5a6' }}>
+                          No target devices
+                        </Typography>
+                      </Box>
                     )}
                   </Box>
                 </TableCell>
@@ -214,25 +262,6 @@ const ScheduleCard = ({
                     }}
                   />
                 </TableCell>
-
-                {/* 状态列 */}
-                {/* <TableCell>
-                  <Chip 
-                    icon={<CircleIcon sx={{ fontSize: '0.8rem' }} />}
-                    label={schedule.enabled === 1 ? 'Enabled' : 'Disabled'}
-                    size="small"
-                    sx={{ 
-                      backgroundColor: `${getStatusColor(schedule.enabled)}20`,
-                      color: getStatusColor(schedule.enabled),
-                      fontWeight: 500,
-                      '& .MuiChip-icon': { 
-                        color: getStatusColor(schedule.enabled),
-                        marginLeft: '4px',
-                        marginRight: '-4px'
-                      }
-                    }}
-                  />
-                </TableCell> */}
               </TableRow>
             </TableBody>
           </Table>

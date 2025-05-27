@@ -4,8 +4,8 @@ import {
   useNetworkSchedules, 
   useScheduleItemsBatch,
   useDevicesMap,
-  useGroupsMap,
-  useScenesMap 
+  // useGroupsMap,  // 暂时不需要
+  // useScenesMap   // 暂时不需要
 } from '../useNetworkQueries';
 import ScheduleCard from './ScheduleCard';
 
@@ -30,30 +30,42 @@ const getStatusColor = (enabled) => {
   return enabled === 1 ? '#4caf50' : '#95a5a6';
 };
 
-// 添加获取目标类型图标和名称的函数
-const getTargetTypeInfo = (entityType) => {
+// 修改：获取 Schedule 绑定类型的图标和名称（基于 schedule.entityType）
+const getScheduleBindingTypeInfo = (entityType) => {
   switch (entityType) {
-    case 0:
-      return {
-        icon: deviceIcon,
-        label: 'Device'
-      };
-    case 1:
+    case 0: // Group 绑定
       return {
         icon: groupIcon,
-        label: 'Group'
+        label: 'Group Binding',
+        description: 'This schedule is bound to groups'
       };
-    case 2:
+    case 1: // Device 绑定
+      return {
+        icon: deviceIcon,
+        label: 'Device Binding',
+        description: 'This schedule is bound to devices'
+      };
+    case 2: // Scene 绑定
       return {
         icon: sceneIcon,
-        label: 'Scene'
+        label: 'Scene Binding',
+        description: 'This schedule is bound to scenes'
       };
     default:
       return {
         icon: deviceIcon,
-        label: 'Unknown'
+        label: 'Unknown Binding',
+        description: 'Unknown binding type'
       };
   }
+};
+
+// 获取设备类型图标（用于 items 中的设备）
+const getDeviceTypeInfo = () => {
+  return {
+    icon: deviceIcon,
+    label: 'Device'
+  };
 };
 
 const ScheduleList = ({ networkId }) => {
@@ -75,21 +87,12 @@ const ScheduleList = ({ networkId }) => {
 
   // 获取映射
   const devicesMap = useDevicesMap(networkId);
-  const groupsMap = useGroupsMap(networkId);
-  const scenesMap = useScenesMap(networkId);
+  // const groupsMap = useGroupsMap(networkId);  // 暂时不需要
+  // const scenesMap = useScenesMap(networkId);  // 暂时不需要
 
-  // 获取目标名称的函数
-  const getTargetName = (item) => {
-    if (item.deviceId) {
-      return devicesMap[item.deviceId]?.name || 'Unknown Device';
-    }
-    if (item.groupId) {
-      return groupsMap[item.groupId]?.name || 'Unknown Group';
-    }
-    if (item.sceneId) {
-      return scenesMap[item.sceneId]?.name || 'Unknown Scene';
-    }
-    return 'Unknown Target';
+  // 获取设备名称的函数
+  const getDeviceName = (deviceId) => {
+    return devicesMap[deviceId]?.name || 'Unknown Device';
   };
 
   // 检查所有查询是否完成
@@ -98,10 +101,16 @@ const ScheduleList = ({ networkId }) => {
 
   // 合并 schedules 和它们的详细信息
   const enrichedSchedules = React.useMemo(() => {
-    return schedules.map(schedule => ({
-      ...schedule,
-      items: itemsMap[schedule.scheduleId] || []
-    }));
+    return schedules.map(schedule => {
+      const items = itemsMap[schedule.scheduleId] || [];
+      
+      return {
+        ...schedule,
+        items,
+        bindingTypeInfo: getScheduleBindingTypeInfo(schedule.entityType),
+        deviceCount: items.length
+      };
+    });
   }, [schedules, itemsMap]);
 
   if (isLoading) {
@@ -146,8 +155,8 @@ const ScheduleList = ({ networkId }) => {
         <ScheduleCard
           key={schedule.scheduleId}
           schedule={schedule}
-          getTargetName={getTargetName}
-          getTargetTypeInfo={getTargetTypeInfo}
+          getDeviceName={getDeviceName}
+          getDeviceTypeInfo={getDeviceTypeInfo}
           formatWeekdays={formatWeekdays}
           getStatusColor={getStatusColor}
         />
