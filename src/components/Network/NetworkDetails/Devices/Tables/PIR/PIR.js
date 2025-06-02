@@ -186,7 +186,7 @@ const PIR = ({ devices, networkId }) => {
     }
   }, [deviceMap, allGroups, roomMap, allRooms, allScenes]);
 
-  // 渲染通道绑定信息
+  // 渲染通道绑定信息 - 重新设计为类似 SIX_INPUT 的格式
   const renderChannelBinding = (binding) => {
     if (!binding) {
       return (
@@ -195,7 +195,7 @@ const PIR = ({ devices, networkId }) => {
           borderRadius: 1.5,
           bgcolor: '#f8f9fa',
           boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          height: '120px',
+          height: '220px',
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
@@ -204,7 +204,7 @@ const PIR = ({ devices, networkId }) => {
           <Typography 
             variant="body2" 
             color="text.secondary"
-            sx={{ 
+          sx={{
               opacity: 0.7,
               fontStyle: 'italic'
             }}
@@ -224,7 +224,7 @@ const PIR = ({ devices, networkId }) => {
           borderRadius: 1.5,
           bgcolor: '#f8f9fa',
           boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          height: '120px',
+          height: '220px',
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
@@ -287,14 +287,30 @@ const PIR = ({ devices, networkId }) => {
         borderRadius: 1.5,
         bgcolor: '#f8f9fa',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        height: '120px',
+        height: '220px',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: '4px',
+        gap: '8px',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
+        {/* Binding Target Name */}
+        <Box sx={{ width: '100%', textAlign: 'center' }}>
+          <Typography
+            variant="body2"
+            component="div"
+            sx={{
+              color: '#2c3e50',
+              fontWeight: 600,
+              fontSize: '0.875rem'
+            }}
+          >
+            <TruncatedText text={getBindingName(binding)} maxLength={20} />
+          </Typography>
+        </Box>
+
+        {/* Binding Type with Icon */}
         {bindingTypeInfo.icon && (
           <Box sx={{ 
             display: 'flex', 
@@ -331,35 +347,88 @@ const PIR = ({ devices, networkId }) => {
             </Box>
           </Box>
         )}
-        
+
+        {/* Signal Type */}
         <Box sx={{ 
+          textAlign: 'center', 
           width: '100%',
-          textAlign: 'center'
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px'
         }}>
-          <Typography
-            variant="body2"
-            component="div"
+          <Typography 
+            variant="caption" 
             sx={{
-              color: '#2c3e50',
-              fontWeight: 600,
-              fontSize: '0.875rem'
+              color: '#95a5a6',
+              fontSize: '0.7rem'
             }}
           >
-            <TruncatedText 
-              text={getBindingName(binding)} 
-              maxLength={20}
-            />
+            Signal Type
+          </Typography>
+          <Typography 
+            variant="body2"
+            sx={{ fontWeight: 500 }}
+          >
+            {binding.inputType === null ? 'null' : binding.inputType === 0 ? 'Toggle' : 'Momentary'}
+          </Typography>
+        </Box>
+
+        {/* Timer Information */}
+        <Box sx={{ 
+          textAlign: 'center', 
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px'
+        }}>
+          <Typography 
+            variant="caption" 
+            sx={{
+              color: '#95a5a6',
+              fontSize: '0.7rem'
+            }}
+          >
+            Timer
+          </Typography>
+          <Typography 
+            variant="body2"
+            sx={{ 
+              fontWeight: 500,
+              color: binding.hasTimer === 1 ? '#2c3e50' : '#666'
+            }}
+          >
+            {binding.hasTimer === 1 ? (
+              binding.enable === 1 ? (
+                <>
+                  {`${String(binding.hour).padStart(2, '0')}:${String(binding.min).padStart(2, '0')}`}
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: '0.75rem',
+                      color: '#95a5a6',
+                      ml: 0.5
+                    }}
+                  >
+                    ({binding.state === 1 ? 'On' : 'Off'})
+                  </Typography>
+                </>
+              ) : (
+                'Disabled'
+              )
+            ) : (
+              'None'
+            )}
           </Typography>
         </Box>
       </Box>
     );
   };
-      
-      return (
+
+  return (
     <Box sx={{ mb: 4 }}>
       <Paper 
         elevation={0}
-          variant="outlined"
+        variant="outlined"
         sx={{
           borderRadius: 2,
           overflow: 'hidden',
@@ -406,7 +475,7 @@ const PIR = ({ devices, networkId }) => {
               }}
             />
             <IconButton 
-          size="small"
+              size="small"
               onClick={() => setExpanded(!expanded)}
             >
               {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -418,7 +487,7 @@ const PIR = ({ devices, networkId }) => {
         <Collapse in={expanded}>
           <TableContainer 
             component={Box} 
-          sx={{
+            sx={{
               width: '100%',
               '& .MuiTable-root': {
                 tableLayout: 'fixed',
@@ -456,10 +525,10 @@ const PIR = ({ devices, networkId }) => {
                 {/* 表头第二行 - 通道标签 */}
                 <TableRow>
                   <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-                  {[1, 2].map(channelIndex => {
+                  {[0, 1].map(channelIndex => {
                     const hasBinding = anyDeviceHasChannelBinding(processedDevices, channelIndex);
 
-  return (
+                    return (
                       <TableCell 
                         key={channelIndex} 
                         align="center" 
@@ -468,17 +537,17 @@ const PIR = ({ devices, networkId }) => {
                           borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
                         }}
                       >
-                      <Chip 
-                        label={`Channel ${channelIndex}`} 
-                        size="small" 
-                        sx={{ 
-                          bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
-                          color: '#ffffff',
-                          fontWeight: 500,
-                          padding: '0 2px'
-                        }}
-                      />
-                    </TableCell>
+                        <Chip 
+                          label={`Channel ${channelIndex + 1}`} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
+                            color: '#ffffff',
+                            fontWeight: 500,
+                            padding: '0 2px'
+                          }}
+                        />
+                      </TableCell>
                     );
                   })}
                 </TableRow>
@@ -533,7 +602,7 @@ const PIR = ({ devices, networkId }) => {
                     </TableCell>
                     
                     {/* 通道绑定单元格 */}
-                    {[1, 2].map(channelIndex => {
+                    {[0, 1].map(channelIndex => {
                       const binding = getChannelBinding(device, channelIndex);
                       
                       return (
@@ -543,7 +612,7 @@ const PIR = ({ devices, networkId }) => {
                           sx={{
                             padding: '8px',
                             width: `${75 / 2}%`, // 2个通道平均分配75%的宽度
-                            height: '140px',
+                            height: '240px',
                             borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                           }}
                         >

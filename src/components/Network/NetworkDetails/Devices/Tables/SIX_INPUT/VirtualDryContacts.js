@@ -25,10 +25,9 @@ const PULSE_MODE_MAP = {
 // 干接点卡片组件
 export const ContactCard = ({ device, onOpenDialog }) => {
   const contacts = device.specificAttributes?.virtualDryContacts || [];
-  // const scrollContainerRef = useRef(null);
   
-  // 准备一个包含4个输出通道的数组
-  const outputChannels = [0, 1, 2, 3].map(hole => {
+  // 准备一个包含6个输入通道的数组
+  const inputChannels = [0, 1, 2, 3, 4, 5].map(hole => {
     const contact = contacts.find(c => Number(c.hole) === hole);
     return {
       hole,
@@ -67,15 +66,15 @@ export const ContactCard = ({ device, onOpenDialog }) => {
       p: 1,
       overflow: 'hidden'
     }}>
-      {/* 使用网格布局显示4个输出通道 */}
+      {/* 使用更紧凑的网格布局显示6个输入通道 */}
       <Grid container spacing={0.5} sx={{ height: '100%' }}>
-        {outputChannels.map(({ hole, contact }) => (
+        {inputChannels.map(({ hole, contact }) => (
           <Grid item xs={12} key={hole}>
             <Paper
               elevation={0}
               sx={{ 
                 p: 1,
-                height: '68px',
+                height: '45px',
                 border: '1px solid #e0e0e0',
                 borderRadius: 1,
                 cursor: contact ? 'pointer' : 'default',
@@ -88,14 +87,14 @@ export const ContactCard = ({ device, onOpenDialog }) => {
               onClick={() => contact && onOpenDialog(contact)}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
-                  Output {hole + 1}
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.7rem', lineHeight: 1.2 }}>
+                  Input {hole + 1}
                 </Typography>
                 {contact && (
                   <Typography 
                     variant="body2" 
                     sx={{ 
-                      fontSize: '0.75rem', 
+                      fontSize: '0.65rem', 
                       color: '#4b5563', 
                       fontWeight: 400,
                       lineHeight: 1.1,
@@ -107,11 +106,6 @@ export const ContactCard = ({ device, onOpenDialog }) => {
                     {contact.virtualName || 'Unnamed Contact'}
                   </Typography>
                 )}
-                {contact && (
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
-                    {PULSE_MODE_MAP[contact.pulseMode] || 'Unknown Mode'}
-                  </Typography>
-                )}
               </Box>
               
               {contact ? (
@@ -120,13 +114,13 @@ export const ContactCard = ({ device, onOpenDialog }) => {
                   size="small" 
                   color={contact.onOff ? "success" : "error"}
                   sx={{ 
-                    height: 18, 
-                    minWidth: 35,
-                    '& .MuiChip-label': { px: 0.5, fontSize: '0.6rem' } 
+                    height: 16, 
+                    minWidth: 30,
+                    '& .MuiChip-label': { px: 0.5, fontSize: '0.5rem' } 
                   }}
                 />
               ) : (
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic' }}>
+                <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'text.secondary', fontStyle: 'italic' }}>
                   None
                 </Typography>
               )}
@@ -158,7 +152,7 @@ export const ContactDialog = ({ open, onClose, contact }) => {
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {contact.virtualName || `Output ${contact.hole + 1}`}
+            {contact.virtualName || `Input ${contact.hole + 1}`}
           </Typography>
           <Chip 
             label={contact.onOff ? "ON" : "OFF"} 
@@ -175,9 +169,9 @@ export const ContactDialog = ({ open, onClose, contact }) => {
       <DialogContent sx={{ pt: 2, pb: 3 }}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
           <Grid item xs={6}>
-            <Typography variant="caption" color="text.secondary">Output Position</Typography>
+            <Typography variant="caption" color="text.secondary">Input Position</Typography>
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Output {contact.hole + 1}
+              Input {contact.hole + 1}
             </Typography>
           </Grid>
           

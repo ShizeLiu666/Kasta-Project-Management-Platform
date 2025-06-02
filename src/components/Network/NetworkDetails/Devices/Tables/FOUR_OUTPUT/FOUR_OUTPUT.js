@@ -10,12 +10,18 @@ import {
   TableRow,
   Paper,
   Chip,
-  Tooltip
+  Tooltip,
+  IconButton,
+  Collapse
 } from '@mui/material';
-import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes, useNetworkRooms } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 import VirtualDryContacts from './VirtualDryContacts';
-import AutomationRules from '../SIX_INPUT/AutomationRules';
+import AutomationRules from './AutomationRules';
 
 // 添加工具函数
 const getDeviceTypeFromProductType = (productType) => {
@@ -78,6 +84,8 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 
 const FOUR_OUTPUT = ({ devices, networkId }) => {
   const [selectedDevice, setSelectedDevice] = useState(null);
+  const [showDetailedView, setShowDetailedView] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   
   // 使用 options 获取数据
   const { data: allDevices = [] } = useNetworkDevices(networkId, {
@@ -95,6 +103,11 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
     staleTime: 30000,
     cacheTime: 60000
   });
+  const { data: allRooms = [] } = useNetworkRooms(networkId, {
+    enabled: !!networkId,
+    staleTime: 30000,
+    cacheTime: 60000
+  });
 
   // 创建设备和组的映射
   const deviceMap = useMemo(() => {
@@ -108,7 +121,7 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
   const groupMap = useMemo(() => {
     if (!allGroups?.length) return {};
     return allGroups.reduce((acc, group) => {
-      acc[group.groupId] = group.name;
+      acc[group.gid] = group.name;
       return acc;
     }, {});
   }, [allGroups]);
@@ -116,10 +129,18 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
   const sceneMap = useMemo(() => {
     if (!allScenes?.length) return {};
     return allScenes.reduce((acc, scene) => {
-      acc[scene.sceneId] = scene.name;
+      acc[scene.sid] = scene.name;
       return acc;
     }, {});
   }, [allScenes]);
+
+  const roomMap = useMemo(() => {
+    if (!allRooms?.length) return {};
+    return allRooms.reduce((acc, room) => {
+      acc[room.rid] = room.name;
+      return acc;
+    }, {});
+  }, [allRooms]);
 
   // 预处理设备数据
   const processedDevices = useMemo(() => {
@@ -187,15 +208,19 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
     
     switch (binding.bindType) {
       case 0: // Device
-        return deviceMap[String(binding.bindId)] || `Unknown Device`;
-      case 1: // Group
-        return groupMap[binding.bindId] || `Unknown Group`;
-      case 2: // Scene
-        return sceneMap[binding.bindId] || `Unknown Scene`;
+        return deviceMap[String(binding.bindId)] || `Unknown Device (${binding.bindId})`;
+      case 1: // 未知类型，可能未使用
+        return `Unknown Type 1 (${binding.bindId})`;
+      case 2: // Group
+        return groupMap[binding.bindId] || `Unknown Group (${binding.bindId})`;
+      case 3: // Room
+        return roomMap[binding.bindId] || `Unknown Room (${binding.bindId})`;
+      case 4: // Scene
+        return sceneMap[binding.bindId] || `Unknown Scene (${binding.bindId})`;
       default:
-        return `Unknown`;
+        return `Unknown (${binding.bindId})`;
     }
-  }, [deviceMap, groupMap, sceneMap]);
+  }, [deviceMap, groupMap, sceneMap, roomMap]);
 
   // 获取端子信息和绑定信息（类似于 SIX_INPUT.js）
   const getTerminalInfo = React.useCallback((device, terminalIndex) => {
@@ -257,12 +282,22 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
             icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
             typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
           };
-        case 1: // Group
+        case 1: // 未知类型
+          return {
+            icon: null,
+            typeName: 'UNKNOWN'
+          };
+        case 2: // Group
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Group.png'),
             typeName: 'GROUP'
           };
-        case 2: // Scene
+        case 3: // Room
+          return {
+            icon: require('../../../../../../assets/icons/NetworkOverview/Room.png'),
+            typeName: 'ROOM'
+          };
+        case 4: // Scene
           return {
             icon: require('../../../../../../assets/icons/NetworkOverview/Scene.png'),
             typeName: 'SCENE'
@@ -433,6 +468,11 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
     );
   }, [allDevices, getBindingName]);
 
+  // 切换视图的处理函数
+  const handleToggleView = () => {
+    setShowDetailedView(!showDetailedView);
+  };
+
   // 当用户点击设备行时选择设备
   const handleSelectDevice = (device) => {
     setSelectedDevice(device);
@@ -449,38 +489,101 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
 
   return (
     <Box sx={{ mb: 4 }}>
-      {/* 标题部分 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <img
-          src={require('../../../../../../assets/icons/DeviceType/FOUR_OUTPUT.png')}
-          alt="4-Output Device"
-          style={{ width: 30, height: 30, marginRight: 12 }}
-        />
-        <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
-          4-Output Device
-        </Typography>
-        <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-          ({processedDevices.length} {processedDevices.length === 1 ? 'device' : 'devices'})
-        </Typography>
-      </Box>
-
-      {/* 三栏并排布局：Output Terminals | Virtual Dry Contacts | Automation Rules */}
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        {/* 1. 左侧表格 - Output Terminals */}
-        <Box sx={{ width: '50%', height: '369px', overflow: 'hidden' }}>
-          <TableContainer
-            component={Paper}
+      <Paper 
             elevation={0}
             variant="outlined"
             sx={{
               borderRadius: 2,
               overflow: 'hidden',
-              borderColor: 'rgba(224, 224, 224, 0.7)',
-              height: '369px',
-              maxHeight: '369px'
-            }}
-          >
-            <Table size="medium" sx={{ tableLayout: 'fixed' }}>
+          borderColor: 'rgba(224, 224, 224, 0.7)'
+        }}
+      >
+        {/* 可折叠的标题区域 */}
+        <Box 
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid rgba(224, 224, 224, 0.7)' : 'none',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={require('../../../../../../assets/icons/DeviceType/FOUR_OUTPUT.png')}
+              alt="4-Output Device"
+              style={{
+                width: 30,
+                height: 30,
+                objectFit: 'contain',
+                marginRight: 12
+              }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#fbcd0b',
+              }}
+            >
+              4-Output Device
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${processedDevices.length} ${processedDevices.length === 1 ? 'device' : 'devices'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            
+            {/* 切换按钮 */}
+            <Tooltip title={showDetailedView ? "Show Output Terminals" : "Show Details"}>
+              <IconButton 
+                onClick={handleToggleView}
+                disableRipple
+                size="small"
+                sx={{ 
+                  bgcolor: '#fbcd0b20',
+                  color: '#fbcd0b',
+                  '&:hover': { bgcolor: '#fbcd0b30' },
+                  mr: 1
+                }}
+              >
+                {showDetailedView ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              </IconButton>
+            </Tooltip>
+            
+            <IconButton 
+              size="small"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* 可折叠的内容区域 */}
+        <Collapse in={expanded}>
+          {!showDetailedView ? (
+            // 第一个视图：只显示 Output Terminals
+            <TableContainer
+              component={Box}
+              sx={{
+                width: '100%',
+                '& .MuiTable-root': {
+                  tableLayout: 'fixed',
+                  width: '100%'
+                }
+              }}
+            >
+              <Table size="medium">
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                   <TableCell
@@ -509,7 +612,7 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
 
                 <TableRow>
                   <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-                  {[1, 2, 3, 4].map(terminalIndex => {
+                    {[0, 1, 2, 3].map(terminalIndex => {
                     const hasTerminal = anyDeviceHasTerminal(terminalIndex);
                     return (
                       <TableCell
@@ -521,7 +624,7 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
                         }}
                       >
                         <Chip
-                          label={`Output ${terminalIndex}`}
+                            label={`Output ${terminalIndex + 1}`}
                           size="small"
                           sx={{
                             bgcolor: hasTerminal ? '#fbcd0b' : '#9e9e9e',
@@ -543,7 +646,8 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
                     sx={{ 
                       bgcolor: 'white',
                       cursor: 'pointer',
-                      height: '276.5px'
+                        height: '276.5px',
+                        '&:last-child td': { border: 0 }
                     }}
                     onClick={() => handleSelectDevice(device)}
                   >
@@ -573,7 +677,7 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
                       </Box>
                     </TableCell>
 
-                    {[1, 2, 3, 4].map(terminalIndex => {
+                      {[0, 1, 2, 3].map(terminalIndex => {
                       const terminal = getTerminalInfo(device, terminalIndex);
                       return (
                         <TableCell
@@ -597,10 +701,11 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
               </TableBody>
             </Table>
           </TableContainer>
-        </Box>
-
-        {/* 2. 中间区域 - Virtual Dry Contacts */}
-        <Box sx={{ width: '25%', height: '369px', overflow: 'hidden' }}>
+          ) : (
+            // 第二个视图：显示 Virtual Dry Contacts 和 Automation Rules
+            <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
+              {/* 左侧区域 - Virtual Dry Contacts */}
+              <Box sx={{ width: '50%' }}>
           {selectedDevice && (
             <Paper
               elevation={0}
@@ -639,8 +744,8 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
           )}
         </Box>
 
-        {/* 3. 右侧区域 - Automation Rules */}
-        <Box sx={{ width: '25%', height: '369px', overflow: 'hidden' }}>
+              {/* 右侧区域 - Automation Rules */}
+              <Box sx={{ width: '50%' }}>
           {selectedDevice && (
             <Paper
               elevation={0}
@@ -675,12 +780,17 @@ const FOUR_OUTPUT = ({ devices, networkId }) => {
                   device={selectedDevice}
                   deviceMap={deviceMap}
                   groupMap={groupMap}
+                        sceneMap={sceneMap}
+                        roomMap={roomMap}
                 />
               </Box>
             </Paper>
           )}
         </Box>
       </Box>
+          )}
+        </Collapse>
+      </Paper>
     </Box>
   );
 };

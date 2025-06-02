@@ -98,7 +98,7 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
               onClick={() => onOpenDialog(rule)}
               sx={{ 
                 p: 1,
-                height: '45px', // 与 VirtualDryContacts 的每个项目保持相同高度
+                height: '68px', // 与 FOUR_OUTPUT VirtualDryContacts 的每个项目保持相同高度
                 mb: 0.5, // 与 VirtualDryContacts 的 spacing 保持一致
                 border: '1px solid #e0e0e0',
                 borderRadius: 1,
@@ -113,14 +113,14 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.7rem', lineHeight: 1.2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
                   {rule.name || `Case ${rule.caseIdx}`}
                 </Typography>
                 <Typography 
                   variant="body2" 
                   color="text.secondary" 
                   sx={{ 
-                    fontSize: '0.65rem', 
+                    fontSize: '0.75rem', 
                     lineHeight: 1.1,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -136,9 +136,9 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
                 size="small" 
                 color={rule.state ? "success" : "default"}
                 sx={{ 
-                  height: 16, 
-                  minWidth: 30,
-                  '& .MuiChip-label': { px: 0.5, fontSize: '0.5rem' } 
+                  height: 18, 
+                  minWidth: 35,
+                  '& .MuiChip-label': { px: 0.5, fontSize: '0.6rem' } 
                 }}
               />
             </Box>
@@ -337,7 +337,7 @@ export const AutomationDialog = ({ open, onClose, automation, deviceMap, groupMa
 };
 
 // 自动化规则管理器组件
-const AutomationRules = ({ device, deviceMap, groupMap, sceneMap, roomMap }) => {
+const AutomationRules = ({ device, deviceMap, groupMap, roomMap }) => {
   const [selectedAutomation, setSelectedAutomation] = useState(null);
   const [automationDialogOpen, setAutomationDialogOpen] = useState(false);
 

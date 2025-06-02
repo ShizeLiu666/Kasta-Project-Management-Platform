@@ -26,7 +26,16 @@ const PRODUCT_TYPE_TO_DEVICE_TYPE = {
 };
 
 // 反向映射函数
-const getDeviceTypeFromProductType = (productType) => {
+const getDeviceTypeFromProductType = (productType, deviceType) => {
+  // 特殊处理：相同 productType 但不同 deviceType 的情况
+  if (productType === '5ozdgdrd') {
+    if (deviceType === 'INPUT6') {
+      return 'SIX_INPUT';
+    } else if (deviceType === 'OUTPUT4') {
+      return 'FOUR_OUTPUT';
+    }
+  }
+  
   // 先检查我们的自定义映射
   if (PRODUCT_TYPE_TO_DEVICE_TYPE[productType]) {
     return PRODUCT_TYPE_TO_DEVICE_TYPE[productType];
@@ -38,13 +47,13 @@ const getDeviceTypeFromProductType = (productType) => {
 };
 
 // 更新获取设备图标的函数
-const getDeviceIcon = (productType) => {
+const getDeviceIcon = (productType, deviceType) => {
   try {
-    const deviceType = getDeviceTypeFromProductType(productType);
-    if (!deviceType) return null;
+    const deviceTypeStr = getDeviceTypeFromProductType(productType, deviceType);
+    if (!deviceTypeStr) return null;
     
     // 不再尝试加载HRSMB特定图标
-    return require(`../../../../../../assets/icons/DeviceType/${deviceType}.png`);
+    return require(`../../../../../../assets/icons/DeviceType/${deviceTypeStr}.png`);
   } catch (error) {
     try {
       // 直接回退到未知图标，不尝试加载TOUCH_PANEL.png
@@ -148,10 +157,9 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
         const group = allGroups.find(g => g.gid === binding.bindId);
         return group ? group.name : null;
       case 3: // Room
-        // 使用roomMap或者从allRooms中查找
-        return roomMap[binding.bindId] || 
-               allRooms?.find(r => r.roomId === binding.bindId || r.rid === binding.bindId)?.name || 
-               null;
+        // 使用rid作为匹配键
+        const room = allRooms.find(r => r.rid === binding.bindId);
+        return room ? room.name : null;
       case 4: // Scene
         // 使用sid作为匹配键
         const scene = allScenes.find(s => s.sid === binding.bindId);
@@ -225,8 +233,8 @@ const PanelTypeGroup = ({ buttonCount, devices, orientation, deviceMap, groupMap
         case 1: // Device
           const boundDevice = allDevices.find(device => device.did === binding.bindId);
           return {
-            icon: boundDevice ? getDeviceIcon(boundDevice.productType) : null,
-            typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE'
+            icon: boundDevice ? getDeviceIcon(boundDevice.productType, boundDevice.deviceType) : null,
+            typeName: boundDevice ? getDeviceTypeFromProductType(boundDevice.productType, boundDevice.deviceType) : 'DEVICE'
           };
         case 2: // Group
           return {
@@ -548,23 +556,20 @@ const TOUCH_PANEL = ({ groupedDevices, networkId }) => {
 
   const groupMap = React.useMemo(() => {
     return allGroups.reduce((acc, group) => {
-      acc[group.groupId] = group.name;
+      acc[group.gid] = group.name;
       return acc;
     }, {});
   }, [allGroups]);
 
   const sceneMap = React.useMemo(() => {
     return allScenes.reduce((acc, scene) => {
-      acc[scene.sceneId] = scene.name;
+      acc[scene.sid] = scene.name;
       return acc;
     }, {});
   }, [allScenes]);
 
   const roomMap = React.useMemo(() => {
     return allRooms.reduce((acc, room) => {
-      if (room && room.roomId && room.name) {
-        acc[room.roomId] = room.name;
-      }
       if (room && room.rid && room.name) {
         acc[room.rid] = room.name;
       }

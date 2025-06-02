@@ -10,10 +10,17 @@ import {
   TableRow,
   Paper,
   Chip,
-  Tooltip
+  Tooltip,
+  IconButton,
+  Collapse
 } from '@mui/material';
-import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes, useNetworkRooms } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
+import VirtualDryContacts from './VirtualDryContacts';
 import AutomationRules from './AutomationRules';
 
 // 添加工具函数
@@ -77,6 +84,8 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 
 const SIX_INPUT = ({ devices, networkId }) => {
   const [selectedDevice, setSelectedDevice] = useState(null);
+  const [showDetailedView, setShowDetailedView] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   
   // 使用 options 获取数据
   const { data: allDevices = [] } = useNetworkDevices(networkId, {
@@ -94,6 +103,11 @@ const SIX_INPUT = ({ devices, networkId }) => {
     staleTime: 30000,
     cacheTime: 60000
   });
+  const { data: allRooms = [] } = useNetworkRooms(networkId, {
+    enabled: !!networkId,
+    staleTime: 30000,
+    cacheTime: 60000
+  });
 
   // 创建设备和组的映射
   const deviceMap = useMemo(() => {
@@ -107,7 +121,7 @@ const SIX_INPUT = ({ devices, networkId }) => {
   const groupMap = useMemo(() => {
     if (!allGroups?.length) return {};
     return allGroups.reduce((acc, group) => {
-      acc[group.groupId] = group.name;
+      acc[group.gid] = group.name;
       return acc;
     }, {});
   }, [allGroups]);
@@ -116,10 +130,19 @@ const SIX_INPUT = ({ devices, networkId }) => {
   const sceneMap = useMemo(() => {
     if (!allScenes?.length) return {};
     return allScenes.reduce((acc, scene) => {
-      acc[scene.sceneId] = scene.name;
+      acc[scene.sid] = scene.name;
       return acc;
     }, {});
   }, [allScenes]);
+
+  // 添加 roomMap
+  const roomMap = useMemo(() => {
+    if (!allRooms?.length) return {};
+    return allRooms.reduce((acc, room) => {
+      acc[room.rid] = room.name;
+      return acc;
+    }, {});
+  }, [allRooms]);
 
   // 预处理设备数据 - 使用 useMemo 替代 useState + useEffect
   const processedDevices = useMemo(() => {
@@ -129,6 +152,7 @@ const SIX_INPUT = ({ devices, networkId }) => {
       const specificAttributes = device.specificAttributes || {};
       let signals = specificAttributes.signals || [];
       let remoteBind = specificAttributes.remoteBind || [];
+      let virtualDryContacts = specificAttributes.virtualDryContacts || [];
       
       if (typeof signals === 'string') {
         try {
@@ -148,12 +172,22 @@ const SIX_INPUT = ({ devices, networkId }) => {
         }
       }
 
+      if (typeof virtualDryContacts === 'string') {
+        try {
+          virtualDryContacts = JSON.parse(virtualDryContacts);
+        } catch (e) {
+          console.error('Failed to parse virtualDryContacts string:', e);
+          virtualDryContacts = [];
+        }
+      }
+
       return {
         ...device,
         specificAttributes: {
           ...specificAttributes,
           signals,
-          remoteBind
+          remoteBind,
+          virtualDryContacts
         }
       };
     });
@@ -165,15 +199,23 @@ const SIX_INPUT = ({ devices, networkId }) => {
     
     switch (binding.bindType) {
       case 0: // Device
-        return deviceMap[String(binding.bindId)] || `Unknown Device`;
-      case 1: // Group
-        return groupMap[binding.bindId] || `Unknown Group`;
-      case 2: // Scene
-        return sceneMap[binding.bindId] || `Unknown Scene`;
+        const deviceName = deviceMap[String(binding.bindId)];
+        return deviceName || `Unknown Device (${binding.bindId})`;
+      case 1: // 未知类型，可能未使用
+        return `Unknown Type 1 (${binding.bindId})`;
+      case 2: // Group
+        const groupName = groupMap[binding.bindId];
+        return groupName || `Unknown Group (${binding.bindId})`;
+      case 3: // Room
+        const roomName = roomMap[binding.bindId];
+        return roomName || `Unknown Room (${binding.bindId})`;
+      case 4: // Scene
+        const sceneName = sceneMap[binding.bindId];
+        return sceneName || `Unknown Scene (${binding.bindId})`;
       default:
-        return `Unknown`;
+        return `Unknown (${binding.bindId})`;
     }
-  }, [deviceMap, groupMap, sceneMap]);
+  }, [deviceMap, groupMap, sceneMap, roomMap]);
 
   // 获取端子信息和绑定信息
   const getTerminalInfo = React.useCallback((device, terminalIndex) => {
@@ -313,6 +355,42 @@ const SIX_INPUT = ({ devices, networkId }) => {
               </Box>
             )}
 
+            {(binding.bindType === 2 || binding.bindType === 3 || binding.bindType === 4) && (
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+                mt: 1
+              }}>
+                <img
+                  src={
+                    binding.bindType === 2 
+                      ? require('../../../../../../assets/icons/NetworkOverview/Group.png')
+                      : binding.bindType === 3
+                      ? require('../../../../../../assets/icons/NetworkOverview/Room.png')
+                      : require('../../../../../../assets/icons/NetworkOverview/Scene.png')
+                  }
+                  alt={`${binding.bindType === 2 ? 'Group' : binding.bindType === 3 ? 'Room' : 'Scene'} Icon`}
+                  style={{ width: 24, height: 24 }}
+                />
+                <Typography
+                  variant="caption"
+                  component="div"
+                  sx={{
+                    color: '#666',
+                    fontWeight: 500,
+                    letterSpacing: '0.2px',
+                    textTransform: 'uppercase',
+                    fontSize: '0.7rem',
+                    mt: 0.5
+                  }}
+                >
+                  {binding.bindType === 2 ? 'GROUP' : binding.bindType === 3 ? 'ROOM' : 'SCENE'}
+                </Typography>
+              </Box>
+            )}
+
             <Box sx={{ width: '100%', textAlign: 'center', mt: 1 }}>
               <Typography
                 variant="body2"
@@ -409,6 +487,11 @@ const SIX_INPUT = ({ devices, networkId }) => {
     });
   }, [processedDevices]);
 
+  // 切换视图的处理函数
+  const handleToggleView = () => {
+    setShowDetailedView(!showDetailedView);
+  };
+
   // 当用户点击设备行时选择设备
   const handleSelectDevice = (device) => {
     setSelectedDevice(device);
@@ -425,187 +508,294 @@ const SIX_INPUT = ({ devices, networkId }) => {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <img
-          src={require('../../../../../../assets/icons/DeviceType/SIX_INPUT.png')}
-          alt="6-Input Device"
-          style={{ width: 30, height: 30, marginRight: 12 }}
-        />
-        <Typography variant="h6" sx={{ fontWeight: 500, color: '#fbcd0b' }}>
-          6-Input Device
-        </Typography>
-        <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-          ({processedDevicesWithAutomation.length} {processedDevicesWithAutomation.length === 1 ? 'device' : 'devices'})
-        </Typography>
-      </Box>
+      <Paper 
+        elevation={0}
+        variant="outlined"
+        sx={{
+          borderRadius: 2,
+          overflow: 'hidden',
+          borderColor: 'rgba(224, 224, 224, 0.7)'
+        }}
+      >
+        {/* 可折叠的标题区域 */}
+        <Box 
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8f9fa',
+            borderBottom: expanded ? '1px solid rgba(224, 224, 224, 0.7)' : 'none',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={require('../../../../../../assets/icons/DeviceType/SIX_INPUT.png')}
+              alt="6-Input Device"
+              style={{
+                width: 30,
+                height: 30,
+                objectFit: 'contain',
+                marginRight: 12
+              }}
+            />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#fbcd0b',
+              }}
+            >
+              6-Input Device
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip
+              label={`${processedDevicesWithAutomation.length} ${processedDevicesWithAutomation.length === 1 ? 'device' : 'devices'}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(251, 205, 11, 0.1)',
+                color: '#fbcd0b',
+                fontWeight: 500,
+                mr: 1
+              }}
+            />
+            
+            {/* 切换按钮 */}
+            <Tooltip title={showDetailedView ? "Show Input Terminals" : "Show Details"}>
+              <IconButton 
+                onClick={handleToggleView}
+                disableRipple
+                size="small"
+                sx={{ 
+                  bgcolor: '#fbcd0b20',
+                  color: '#fbcd0b',
+                  '&:hover': { bgcolor: '#fbcd0b30' },
+                  mr: 1
+                }}
+              >
+                {showDetailedView ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              </IconButton>
+            </Tooltip>
+            
+            <IconButton 
+              size="small"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+        </Box>
 
-      {/* 使用类似于 FIVE_INPUT.js 的表格布局 */}
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        {/* 左侧表格 - 占据 75% 宽度 */}
-        <Box sx={{ width: '75%' }}>
-          <TableContainer
-            component={Paper}
-            elevation={0}
-            variant="outlined"
-            sx={{
-              borderRadius: 2,
-              overflow: 'hidden',
-              borderColor: 'rgba(224, 224, 224, 0.7)'
-            }}
-          >
-            <Table size="medium" sx={{ tableLayout: 'fixed' }}>
-              <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                  <TableCell
-                    width="20%"
-                    sx={{
-                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                      fontWeight: 500,
-                      padding: '12px 16px'
-                    }}
-                  >
-                    Device
-                  </TableCell>
-                  <TableCell
-                    colSpan={6}
-                    align="center"
-                    width="80%"
-                    sx={{
-                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                      fontWeight: 500,
-                      padding: '12px 16px'
-                    }}
-                  >
-                    Input Terminals
-                  </TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-                  {[1, 2, 3, 4, 5, 6].map(terminalIndex => {
-                    const hasTerminal = anyDeviceHasTerminal(terminalIndex);
-                    return (
-                      <TableCell
-                        key={terminalIndex}
-                        align="center"
-                        sx={{
-                          padding: '8px',
-                          borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
-                        }}
-                      >
-                        <Chip
-                          label={`Input ${terminalIndex}`}
-                          size="small"
-                          sx={{
-                            bgcolor: hasTerminal ? '#fbcd0b' : '#9e9e9e',
-                            color: '#ffffff',
-                            fontWeight: 500,
-                            padding: '0 2px'
-                          }}
-                        />
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {processedDevicesWithAutomation.map((device, deviceIndex) => (
-                  <TableRow
-                    key={device.deviceId}
-                    sx={{ 
-                      bgcolor: 'white',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => handleSelectDevice(device)}
-                  >
+        {/* 可折叠的内容区域 */}
+        <Collapse in={expanded}>
+          {!showDetailedView ? (
+            // 第一个视图：只显示 Input Terminals
+            <TableContainer
+              component={Box}
+              sx={{
+                width: '100%',
+                '& .MuiTable-root': {
+                  tableLayout: 'fixed',
+                  width: '100%'
+                }
+              }}
+            >
+              <Table size="medium">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                     <TableCell
-                      component="th"
-                      scope="row"
+                      width="20%"
                       sx={{
-                        padding: '16px',
-                        borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                        borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                        fontWeight: 500,
+                        padding: '12px 16px'
                       }}
                     >
-                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {device.name}
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
-                          >
-                            - {device.deviceId}
-                          </Typography>
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {device.appearanceShortname}
-                        </Typography>
-                      </Box>
+                      Device
                     </TableCell>
+                    <TableCell
+                      colSpan={6}
+                      align="center"
+                      width="80%"
+                      sx={{
+                        borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                        fontWeight: 500,
+                        padding: '12px 16px'
+                      }}
+                    >
+                      Input Terminals
+                    </TableCell>
+                  </TableRow>
 
-                    {[1, 2, 3, 4, 5, 6].map(terminalIndex => {
-                      const terminal = getTerminalInfo(device, terminalIndex);
+                  <TableRow>
+                    <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
+                    {[0, 1, 2, 3, 4, 5].map(terminalIndex => {
+                      const hasTerminal = anyDeviceHasTerminal(terminalIndex);
                       return (
                         <TableCell
                           key={terminalIndex}
                           align="center"
                           sx={{
                             padding: '8px',
-                            width: `${80 / 6}%`,
-                            height: '200px',
-                            borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                            borderBottom: '1px solid rgba(224, 224, 224, 0.3)'
                           }}
                         >
-                          {renderTerminalInfo(terminal)}
+                          <Chip
+                            label={`Input ${terminalIndex + 1}`}
+                            size="small"
+                            sx={{
+                              bgcolor: hasTerminal ? '#fbcd0b' : '#9e9e9e',
+                              color: '#ffffff',
+                              fontWeight: 500,
+                              padding: '0 2px'
+                            }}
+                          />
                         </TableCell>
                       );
                     })}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
+                </TableHead>
 
-        {/* 右侧自动化规则 - 占据 25% 宽度 */}
-        <Box sx={{ width: '25%' }}>
-          {selectedDevice && (
-            <Paper
-              elevation={0}
-              variant="outlined"
-              sx={{
-                borderRadius: 2,
-                overflow: 'hidden',
-                borderColor: 'rgba(224, 224, 224, 0.7)',
-                bgcolor: '#ffffff',
-                height: '369px', // 固定高度与表格匹配
-              }}
-            >
-              <Box sx={{
-                bgcolor: '#f5f5f5',
-                p: 1.5,
-                borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                  Automation Rules
-                </Typography>
+                <TableBody>
+                  {processedDevicesWithAutomation.map((device, deviceIndex) => (
+                    <TableRow
+                      key={device.deviceId}
+                      sx={{ 
+                        bgcolor: 'white',
+                        cursor: 'pointer',
+                        '&:last-child td': { border: 0 }
+                      }}
+                      onClick={() => handleSelectDevice(device)}
+                    >
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        sx={{
+                          padding: '16px',
+                          borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            {device.name}
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
+                            >
+                              - {device.deviceId}
+                            </Typography>
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {device.appearanceShortname}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+
+                      {[0, 1, 2, 3, 4, 5].map(terminalIndex => {
+                        const terminal = getTerminalInfo(device, terminalIndex);
+                        return (
+                          <TableCell
+                            key={terminalIndex}
+                            align="center"
+                            sx={{
+                              padding: '8px',
+                              width: `${80 / 6}%`,
+                              height: '200px',
+                              borderBottom: deviceIndex === processedDevicesWithAutomation.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
+                            }}
+                          >
+                            {renderTerminalInfo(terminal)}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            // 第二个视图：显示 Virtual Dry Contacts 和 Automation Rules
+            <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
+              {/* 左侧区域 - Virtual Dry Contacts */}
+              <Box sx={{ width: '50%' }}>
+                {selectedDevice && (
+                  <Paper
+                    elevation={0}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      borderColor: 'rgba(224, 224, 224, 0.7)',
+                      bgcolor: '#ffffff',
+                      height: '369px',
+                    }}
+                  >
+                    <Box sx={{
+                      bgcolor: '#f5f5f5',
+                      p: 1.5,
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                        Virtual Dry Contacts
+                      </Typography>
+                    </Box>
+                    <Box sx={{ height: 'calc(369px - 52px)' }}>
+                      <VirtualDryContacts
+                        device={selectedDevice}
+                      />
+                    </Box>
+                  </Paper>
+                )}
               </Box>
-              <Box sx={{ height: 'calc(369px - 52px)' }}> {/* 减去标题的高度 */}
-                <AutomationRules
-                  device={selectedDevice}
-                  deviceMap={deviceMap}
-                  groupMap={groupMap}
-                  sceneMap={sceneMap}
-                />
+
+              {/* 右侧区域 - Automation Rules */}
+              <Box sx={{ width: '50%' }}>
+                {selectedDevice && (
+                  <Paper
+                    elevation={0}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      borderColor: 'rgba(224, 224, 224, 0.7)',
+                      bgcolor: '#ffffff',
+                      height: '369px',
+                    }}
+                  >
+                    <Box sx={{
+                      bgcolor: '#f5f5f5',
+                      p: 1.5,
+                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                        Automation Rules
+                      </Typography>
+                    </Box>
+                    <Box sx={{ height: 'calc(369px - 52px)' }}>
+                      <AutomationRules
+                        device={selectedDevice}
+                        deviceMap={deviceMap}
+                        groupMap={groupMap}
+                        sceneMap={sceneMap}
+                        roomMap={roomMap}
+                      />
+                    </Box>
+                  </Paper>
+                )}
               </Box>
-            </Paper>
+            </Box>
           )}
-        </Box>
-      </Box>
+        </Collapse>
+      </Paper>
     </Box>
   );
 };

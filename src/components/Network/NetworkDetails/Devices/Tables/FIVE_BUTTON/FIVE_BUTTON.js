@@ -504,9 +504,9 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {device.name}
                           <Tooltip title={`Device ID: ${device.deviceId || ''} | DID: ${device.did || ''}`}>
-                            <Typography
-                              component="span"
-                              variant="body2"
+                          <Typography
+                            component="span"
+                            variant="body2"
                               sx={{
                                 color: '#95a5a6',
                                 ml: 0.5,
@@ -520,9 +520,9 @@ const FIVE_BUTTON = ({ devices, networkId }) => {
                                 verticalAlign: 'middle',
                                 display: 'inline-block'
                               }}
-                            >
+                          >
                               {`- ${device.deviceId.substring(0, 8)}...`}
-                            </Typography>
+                          </Typography>
                           </Tooltip>
                         </Typography>
                         <Typography variant="body2" color="text.secondary">

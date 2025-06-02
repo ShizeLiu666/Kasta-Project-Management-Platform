@@ -415,7 +415,7 @@ const RB02 = ({ devices, networkId }) => {
               <TableHead>
                 <TableRow>
                   <TableCell 
-                    width="30%" 
+                    width="25%" 
                     sx={{ 
                       borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
                       fontWeight: 'bold',
@@ -425,7 +425,7 @@ const RB02 = ({ devices, networkId }) => {
                     Device
                   </TableCell>
                   <TableCell 
-                    width="20%" 
+                    width="30%" 
                     align="center"
                     sx={{ 
                       borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
@@ -433,10 +433,10 @@ const RB02 = ({ devices, networkId }) => {
                       padding: '12px 16px'
                     }}
                   >
-                    Check Time
+                    Timer
                   </TableCell>
                   <TableCell 
-                    width="50%" 
+                    width="45%" 
                     align="center"
                     sx={{ 
                       borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
@@ -501,7 +501,7 @@ const RB02 = ({ devices, networkId }) => {
                         </Box>
                       </TableCell>
                       
-                      {/* Check Time 列 */}
+                      {/* Timer 列 */}
                       <TableCell 
                         align="center"
                         sx={{
@@ -509,8 +509,38 @@ const RB02 = ({ devices, networkId }) => {
                           borderBottom: deviceIndex === processedDevices.length - 1 ? 'none' : '1px solid rgba(224, 224, 224, 0.2)',
                         }}
                       >
-                        <Typography variant="body2">
-                          {device.specificAttributes?.checkTime || 'N/A'}
+                        <Typography 
+                          variant="body2"
+                          sx={{ 
+                            fontWeight: 500,
+                            color: binding?.hasTimer === 1 ? '#2c3e50' : '#666'
+                          }}
+                        >
+                          {binding ? (
+                            binding.hasTimer === 1 ? (
+                              binding.enable === 1 ? (
+                                <>
+                                  {`${String(binding.hour).padStart(2, '0')}:${String(binding.min).padStart(2, '0')}`}
+                                  <Typography
+                                    component="span"
+                                    sx={{
+                                      fontSize: '0.75rem',
+                                      color: '#95a5a6',
+                                      ml: 0.5
+                                    }}
+                                  >
+                                    ({binding.state === 1 ? 'On' : 'Off'})
+                                  </Typography>
+                                </>
+                              ) : (
+                                'Disabled'
+                              )
+                            ) : (
+                              'None'
+                            )
+                          ) : (
+                            'N/A'
+                          )}
                         </Typography>
                       </TableCell>
                       

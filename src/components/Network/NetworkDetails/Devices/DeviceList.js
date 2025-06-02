@@ -103,6 +103,21 @@ const DeviceList = ({ networkId }) => {
         }
       }
 
+      // 特殊处理 SIX_INPUT (单独处理时)
+      if (productType === 'SIX_INPUT') {
+        try {
+          const SixInputComponent = require('./Tables/SIX_INPUT/SIX_INPUT').default;
+          return (
+            <Box key={productType} sx={{ mb: 3 }}>
+              <SixInputComponent devices={devicesToRender} networkId={networkId} />
+            </Box>
+          );
+        } catch (err) {
+          console.error('Failed to load SIX_INPUT component:', err);
+          return null;
+        }
+      }
+
       // 特殊处理 FIVE_BUTTON
       if (productType === 'FIVE_BUTTON') {
         const DeviceComponent = require('./Tables/FIVE_BUTTON/FIVE_BUTTON').default;
@@ -132,7 +147,17 @@ const DeviceList = ({ networkId }) => {
   // 按 ProductType 分组设备 - 将 useMemo 移到条件渲染之前
   const devicesByProductType = useMemo(() => {
     return devices.reduce((acc, device) => {
-      const productType = PRODUCT_TYPE_MAP[device.productType];
+      let productType = PRODUCT_TYPE_MAP[device.productType];
+      
+      // 特殊处理：相同 productType 但不同 deviceType 的情况
+      if (device.productType === '5ozdgdrd') {
+        if (device.deviceType === 'INPUT6') {
+          productType = 'SIX_INPUT';
+        } else if (device.deviceType === 'OUTPUT4') {
+          productType = 'FOUR_OUTPUT';
+        }
+      }
+      
       if (productType) {
         if (!acc[productType]) {
           acc[productType] = [];

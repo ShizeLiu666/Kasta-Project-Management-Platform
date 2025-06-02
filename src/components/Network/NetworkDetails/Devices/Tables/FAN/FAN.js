@@ -87,10 +87,10 @@ const FanType = ({ devices }) => {
       format: (value) => {
         let label;
         switch (Number(value)) {
-          case 0: label = 'Close'; break;
-          case 1: label = 'Low'; break;
-          case 2: label = 'Medium'; break;
-          case 3: label = 'High'; break;
+          case 0: label = 'OFF'; break;
+          case 1: label = 'LOW'; break;
+          case 2: label = 'MEDIUM'; break;
+          case 3: label = 'HIGH'; break;
           default: label = '-';
         }
         

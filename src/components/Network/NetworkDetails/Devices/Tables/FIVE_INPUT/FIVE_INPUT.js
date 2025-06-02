@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useNetworkDevices, useNetworkGroups, useNetworkScenes } from '../../../../NetworkDetails/useNetworkQueries';
+import { useNetworkDevices, useNetworkGroups, useNetworkScenes, useNetworkRooms } from '../../../../NetworkDetails/useNetworkQueries';
 import { PRODUCT_TYPE_MAP } from '../../../../NetworkDetails/PRODUCT_TYPE_MAP';
 
 // 工具函数复用
@@ -80,12 +80,13 @@ const FIVE_INPUT = ({ devices, networkId }) => {
   const [expanded, setExpanded] = useState(true);
   const [processedDevices, setProcessedDevices] = useState([]);
 
-  // 获取所有设备和组的数据
+  // 获取所有设备、组、场景和房间的数据
   const { data: allDevices = [] } = useNetworkDevices(networkId);
   const { data: allGroups = [] } = useNetworkGroups(networkId);
   const { data: allScenes = [] } = useNetworkScenes(networkId);
+  const { data: allRooms = [] } = useNetworkRooms(networkId);
 
-  // 创建设备和组的映射
+  // 创建设备、组、场景和房间的映射
   const deviceMap = React.useMemo(() => {
     return allDevices.reduce((acc, device) => {
       acc[String(device.did)] = device.name;
@@ -107,16 +108,32 @@ const FIVE_INPUT = ({ devices, networkId }) => {
     }, {});
   }, [allScenes]);
 
+  const roomMap = React.useMemo(() => {
+    return allRooms.reduce((acc, room) => {
+      if (room && room.roomId && room.name) {
+        acc[room.roomId] = room.name;
+      }
+      if (room && room.rid && room.name) {
+        acc[room.rid] = room.name;
+      }
+      return acc;
+    }, {});
+  }, [allRooms]);
+
   // 获取绑定目标的名称
   const getBindingName = (binding) => {
     if (!binding) return '';
 
     switch (binding.bindType) {
-      case 0: // Device
+      case 1: // Device
         return deviceMap[String(binding.bindId)] || `Unknown Device`;
-      case 1: // Group
+      case 2: // Group
         return groupMap[binding.bindId] || `Unknown Group`;
-      case 2: // Scene
+      case 3: // Room
+        return roomMap[binding.bindId] || 
+               allRooms?.find(r => r.roomId === binding.bindId || r.rid === binding.bindId)?.name || 
+               `Unknown Room`;
+      case 4: // Scene
         return sceneMap[binding.bindId] || `Unknown Scene`;
       default:
         return `Unknown`;
@@ -186,14 +203,16 @@ const FIVE_INPUT = ({ devices, networkId }) => {
     // 根据绑定类型获取图标
     const getBindingIcon = () => {
       switch (binding.bindType) {
-        case 0: // Device
+        case 1: // Device
           const boundDevice = allDevices.find(device => 
             String(device.did) === String(binding.bindId)
           );
           return boundDevice ? getDeviceIcon(boundDevice.productType) : null;
-        case 1: // Group
+        case 2: // Group
           return require('../../../../../../assets/icons/NetworkOverview/Group.png');
-        case 2: // Scene
+        case 3: // Room
+          return require('../../../../../../assets/icons/NetworkOverview/Room.png');
+        case 4: // Scene
           return require('../../../../../../assets/icons/NetworkOverview/Scene.png');
         default:
           return null;
@@ -203,14 +222,16 @@ const FIVE_INPUT = ({ devices, networkId }) => {
     // 获取绑定类型显示名称
     const getBindingTypeName = () => {
       switch (binding.bindType) {
-        case 0:
+        case 1:
           const boundDevice = allDevices.find(device => 
             String(device.did) === String(binding.bindId)
           );
           return boundDevice ? getDeviceTypeFromProductType(boundDevice.productType) : 'DEVICE';
-        case 1:
-          return 'GROUP';
         case 2:
+          return 'GROUP';
+        case 3:
+          return 'ROOM';
+        case 4:
           return 'SCENE';
         default:
           return 'UNKNOWN';
@@ -468,7 +489,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
                 {/* 表头第二行 - 输入标签 */}
                 <TableRow>
                   <TableCell sx={{ padding: '8px 16px', borderBottom: '1px solid rgba(224, 224, 224, 0.3)' }}></TableCell>
-                  {[1, 2, 3, 4, 5].map(inputIndex => {
+                  {[0, 1, 2, 3, 4].map(inputIndex => {
                     const hasBinding = anyDeviceHasInputBinding(inputIndex);
                     
                     return (
@@ -481,7 +502,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
                         }}
                       >
                       <Chip 
-                        label={`Input ${inputIndex}`} 
+                        label={`Input ${inputIndex + 1}`} 
                         size="small" 
                         sx={{ 
                           bgcolor: hasBinding ? '#fbcd0b' : '#9e9e9e',
@@ -532,7 +553,7 @@ const FIVE_INPUT = ({ devices, networkId }) => {
                     </TableCell>
                     
                     {/* 输入绑定单元格 */}
-                    {[1, 2, 3, 4, 5].map(inputIndex => {
+                    {[0, 1, 2, 3, 4].map(inputIndex => {
                       const binding = getInputBinding(device, inputIndex);
                       
                       return (
