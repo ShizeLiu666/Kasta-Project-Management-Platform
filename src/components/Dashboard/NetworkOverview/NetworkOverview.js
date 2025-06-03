@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
 import GroupIconMUI from '@mui/icons-material/Group';
-import axiosInstance from '../../config';
-import { getToken } from '../auth/auth';
-// import NetworkIcon from '../../assets/icons/NetworkOverview/Network.png';
-import DeviceIcon from '../../assets/icons/NetworkOverview/Device.png';
-import GroupIcon from '../../assets/icons/NetworkOverview/Group.png';
-import SceneIcon from '../../assets/icons/NetworkOverview/Scene.png';
-import RoomIcon from '../../assets/icons/NetworkOverview/Room.png';
-import TimerIcon from '../../assets/icons/NetworkOverview/Timer.png';
-import ScheduleIcon from '../../assets/icons/NetworkOverview/Schedule.png';
+import axiosInstance from '../../../config';
+import { getToken } from '../../auth/auth';
+// import NetworkIcon from '../../../assets/icons/NetworkOverview/Network.png';
+import DeviceIcon from '../../../assets/icons/NetworkOverview/Device.png';
+import GroupIcon from '../../../assets/icons/NetworkOverview/Group.png';
+import SceneIcon from '../../../assets/icons/NetworkOverview/Scene.png';
+import RoomIcon from '../../../assets/icons/NetworkOverview/Room.png';
+import TimerIcon from '../../../assets/icons/NetworkOverview/Timer.png';
+import ScheduleIcon from '../../../assets/icons/NetworkOverview/Schedule.png';
 import './NetworkOverview.css'; // 添加 CSS 文件引用
 
 const NetworkOverview = () => {

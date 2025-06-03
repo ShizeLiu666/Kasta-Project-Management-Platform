@@ -3,17 +3,26 @@ import { Box, Typography, Tooltip } from '@mui/material';
 import { PRODUCT_TYPE_MAP } from '../PRODUCT_TYPE_MAP';
 
 // 工具函数 - 从产品类型获取设备类型
-const getDeviceTypeFromProductType = (productType) => {
+const getDeviceTypeFromProductType = (productType, deviceType) => {
+  // 特殊处理：相同 productType 但不同 deviceType 的情况
+  if (productType === '5ozdgdrd') {
+    if (deviceType === 'INPUT6') {
+      return 'SIX_INPUT';
+    } else if (deviceType === 'OUTPUT4') {
+      return 'FOUR_OUTPUT';
+    }
+  }
+  
   const entry = Object.entries(PRODUCT_TYPE_MAP).find(([key, value]) => key === productType);
   return entry ? entry[1] : null;
 };
 
 // 获取设备图标
-const getDeviceIcon = (productType) => {
+const getDeviceIcon = (productType, deviceType) => {
   try {
-    const deviceType = getDeviceTypeFromProductType(productType);
-    if (!deviceType) return null;
-    return require(`../../../../assets/icons/DeviceType/${deviceType}.png`);
+    const deviceTypeStr = getDeviceTypeFromProductType(productType, deviceType);
+    if (!deviceTypeStr) return null;
+    return require(`../../../../assets/icons/DeviceType/${deviceTypeStr}.png`);
   } catch (error) {
     return require(`../../../../assets/icons/DeviceType/UNKNOW_ICON.png`);
   }
@@ -66,8 +75,8 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 const SceneDeviceCard = ({ device }) => {
   // 使用 deviceInfo 中的信息
   const productType = device.deviceInfo?.productType || device.productType;
-  const deviceType = getDeviceTypeFromProductType(productType);
-  const iconSrc = getDeviceIcon(productType);
+  const deviceTypeStr = getDeviceTypeFromProductType(productType, device.deviceType);
+  const iconSrc = getDeviceIcon(productType, device.deviceType);
   const deviceName = device.deviceInfo?.name; // 使用完整设备信息中的名称
 
   return (
@@ -95,7 +104,7 @@ const SceneDeviceCard = ({ device }) => {
       >
         <img 
           src={iconSrc}
-          alt={deviceType || 'Device'}
+          alt={deviceTypeStr || 'Device'}
           style={{ 
             maxWidth: '100%', 
             maxHeight: '100%',
@@ -118,7 +127,7 @@ const SceneDeviceCard = ({ device }) => {
           mb: 1
         }}
       >
-        {formatDisplayText(deviceType) || 'Unknown Device'}
+        {formatDisplayText(deviceTypeStr) || 'Unknown Device'}
       </Typography>
       
       {/* 设备名称 */}

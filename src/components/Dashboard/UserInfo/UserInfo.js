@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import FolderIcon from '@mui/icons-material/Folder';
 import HomeIcon from '@mui/icons-material/Home';
-import defaultAvatar from '../../assets/images/users/normal_user.jpg';
-import { countryOptions } from '../Login/CountryCodeSelect';
-import axiosInstance from '../../config';
-import { getToken } from '../auth/auth';
+import defaultAvatar from '../../../assets/images/users/normal_user.jpg';
+import { countryOptions } from '../../Login/CountryCodeSelect';
+import axiosInstance from '../../../config';
+import { getToken } from '../../auth/auth';
 import './UserInfo.css';
 
 const UserInfo = ({ userDetails }) => {
-  const showProjects = userDetails.userType === 1 || userDetails.userType === 99999;
+  // 先定义所有的状态和hooks，避免条件性调用
   const [projectCount, setProjectCount] = useState(0);
   const [networkCount, setNetworkCount] = useState(0);
+  
+  // 为了避免错误，提供默认值
+  const safeUserDetails = userDetails || {};
+  const showProjects = safeUserDetails.userType === 1 || safeUserDetails.userType === 99999;
 
   // 获取项目数量
   const fetchProjectCount = async () => {
@@ -56,11 +60,14 @@ const UserInfo = ({ userDetails }) => {
   };
 
   useEffect(() => {
-    if (showProjects) {
-      fetchProjectCount();
+    // 只有当userDetails存在时才获取数据
+    if (userDetails) {
+      if (showProjects) {
+        fetchProjectCount();
+      }
+      fetchNetworkCount();
     }
-    fetchNetworkCount();
-  }, [showProjects]);
+  }, [showProjects, userDetails]);
 
   // 根据 countryCode 获取国家名称
   const getCountryName = (code) => {
@@ -68,6 +75,29 @@ const UserInfo = ({ userDetails }) => {
     const country = countryOptions.find(country => country.code === code);
     return country ? country.en : 'Not Set';
   };
+
+  // 如果没有userDetails，显示加载状态
+  if (!userDetails) {
+    return (
+      <div className="user-info-content">
+        <div className="user-info-header">
+          <div className="header-main">
+            <div className="avatar-wrapper-dashboard">
+              <img
+                src={defaultAvatar}
+                alt="Avatar"
+                className="avatar-image-dashboard"
+              />
+            </div>
+            <div className="header-text">
+              <h3 className="user-name">Loading...</h3>
+              <p className="user-role">Please wait</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-info-content">

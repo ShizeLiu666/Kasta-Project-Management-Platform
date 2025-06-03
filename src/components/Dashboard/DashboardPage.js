@@ -2,11 +2,11 @@ import React from 'react';
 import { Row, Col } from 'reactstrap';
 // import ComponentCard from '../CustomComponents/ComponentCard';
 import { getUserDetails } from '../../components/auth/auth';
-import UserInfo from './UserInfo';
-import './UserInfo.css';
-import ProductOverview from './ProductOverview';
-import NetworkOverview from './NetworkOverview';
-import NewsUpdates from './NewsUpdates';
+import UserInfo from './UserInfo/UserInfo';
+import './UserInfo/UserInfo.css';
+import ProductOverview from './ProductOverview/ProductOverview';
+import NetworkOverview from './NetworkOverview/NetworkOverview';
+import NewsUpdates from './News/NewsUpdates';
 import DashboardCarousel from './DashboardCarousel';
 import './DashboardPage.css';
 

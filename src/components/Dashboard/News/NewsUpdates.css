@@ -233,3 +233,49 @@
         width: 100%;
     }
 }
+
+/* 根据不同category的卡片样式微调 */
+
+/* Notification 类型卡片 */
+.news-item-notification.unread {
+    background-color: rgba(220, 53, 69, 0.03);
+    border-left-color: #dc3545;
+}
+
+.news-item-notification:hover {
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.15);
+}
+
+/* Bug Fix 类型卡片 - 绿色调 (成功/解决) */
+.news-item-bugfix.unread {
+    background-color: rgba(25, 135, 84, 0.04);
+    border-left-color: #198754;
+}
+
+.news-item-bugfix:hover {
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.18);
+}
+
+.news-item-bugfix .news-item-title {
+    color: #146c43;
+}
+
+/* Update 类型卡片 */
+.news-item-update.unread {
+    background-color: rgba(13, 110, 253, 0.03);
+    border-left-color: #0d6efd;
+}
+
+.news-item-update:hover {
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.15);
+}
+
+/* Feature 类型卡片 */
+.news-item-feature.unread {
+    background-color: rgba(25, 135, 84, 0.03);
+    border-left-color: #198754;
+}
+
+.news-item-feature:hover {
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.15);
+}

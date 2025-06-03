@@ -5,9 +5,8 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useNetworkScenes, useSceneDevices, useNetworkGroups } from '../useNetworkQueries';
+import { useNetworkScenes, useSceneDevices, useNetworkGroups, useGroupDevices } from '../useNetworkQueries';
 import SceneDeviceCard from './SceneDeviceCard';
-import SceneGroupCard from './SceneGroupCard';
 
 const SceneList = ({ networkId }) => {
   const { 
@@ -78,39 +77,38 @@ const SceneItem = ({ scene, networkId }) => {
     }, {});
   }, [allGroups]);
   
-  // 将场景项目分为设备和组
-  const itemStats = React.useMemo(() => {
-    return sceneItems.reduce((acc, item) => {
+  // 处理场景项目 - 区分直接绑定的设备和通过组绑定的设备
+  const processedItems = React.useMemo(() => {
+    const directDevices = [];
+    const groupsWithDevices = [];
+    
+    sceneItems.forEach(item => {
       if (item.entityType === 0) {
-        // 设备
+        // 直接绑定的设备
         const deviceInfo = {
           ...item,
           productType: item.productType,
           deviceId: item.deviceId,
-          name: item.deviceId, // 如果API没有返回name，我们暂时用deviceId代替
+          name: item.deviceId,
           specificAttributes: item.attributes || {}
         };
-        acc.devices.push(deviceInfo);
+        directDevices.push(deviceInfo);
       } else if (item.entityType === 1) {
-        // 组 - 使用groupsMap查找完整组信息
-        if (groupsMap[item.groupId]) {
-          const groupInfo = {
-            ...groupsMap[item.groupId],
-            attributes: item.attributes || {}
-          };
-          acc.groups.push(groupInfo);
-        } else {
-          // 如果在groupsMap中找不到，至少提供基本信息
-          const basicGroupInfo = {
-            groupId: item.groupId,
-            name: `Group ${item.groupId}`, // 临时名称
-            attributes: item.attributes || {}
-          };
-          acc.groups.push(basicGroupInfo);
+        // 通过组绑定 - 我们需要获取组内的设备
+        const groupInfo = groupsMap[item.groupId];
+        if (groupInfo) {
+          groupsWithDevices.push({
+            ...groupInfo,
+            sceneAttributes: item.attributes || {}
+          });
         }
       }
-      return acc;
-    }, { devices: [], groups: [] });
+    });
+    
+    return {
+      directDevices,
+      groupsWithDevices
+    };
   }, [sceneItems, groupsMap]);
 
   const isLoading = isLoadingSceneItems || isLoadingGroups;
@@ -164,6 +162,9 @@ const SceneItem = ({ scene, networkId }) => {
     );
   }
 
+  const totalDeviceCount = processedItems.directDevices.length;
+  const totalGroupCount = processedItems.groupsWithDevices.length;
+
   return (
     <Box sx={{ mb: 4 }}>
       <Paper 
@@ -215,9 +216,9 @@ const SceneItem = ({ scene, networkId }) => {
           
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Stack direction="row" spacing={1} sx={{ mr: 1 }}>
-              {itemStats.devices.length > 0 && (
+              {totalDeviceCount > 0 && (
                 <Chip 
-                  label={`Devices (${itemStats.devices.length})`}
+                  label={`Devices (${totalDeviceCount})`}
                   size="small"
                   sx={{ 
                     backgroundColor: 'rgba(251, 205, 11, 0.1)',
@@ -225,9 +226,9 @@ const SceneItem = ({ scene, networkId }) => {
                   }}
                 />
               )}
-              {itemStats.groups.length > 0 && (
+              {totalGroupCount > 0 && (
                 <Chip 
-                  label={`Groups (${itemStats.groups.length})`}
+                  label={`Groups (${totalGroupCount})`}
                   size="small"
                   sx={{ 
                     backgroundColor: 'rgba(0, 150, 136, 0.1)',
@@ -249,15 +250,15 @@ const SceneItem = ({ scene, networkId }) => {
         <Collapse in={expanded}>
           <Box sx={{ p: 2 }}>
             {/* 如果没有设备或组，显示空消息 */}
-            {!itemStats.devices.length && !itemStats.groups.length ? (
+            {!totalDeviceCount && !totalGroupCount ? (
               <Typography align="center" py={2} color="text.secondary">
                 No devices or groups in this scene
               </Typography>
             ) : (
               <Box>
-                {/* 设备区域 */}
-                {itemStats.devices.length > 0 && (
-                  <Box sx={{ mb: itemStats.groups.length > 0 ? 3 : 0 }}>
+                {/* 直接绑定的设备区域 */}
+                {processedItems.directDevices.length > 0 && (
+                  <Box sx={{ mb: processedItems.groupsWithDevices.length > 0 ? 3 : 0 }}>
                     <Typography 
                       variant="subtitle2" 
                       sx={{ 
@@ -268,10 +269,10 @@ const SceneItem = ({ scene, networkId }) => {
                         borderLeft: '3px solid #fbcd0b'
                       }}
                     >
-                      Devices
+                      Direct Devices
                     </Typography>
                     <Grid container spacing={2}>
-                      {itemStats.devices.map((device) => (
+                      {processedItems.directDevices.map((device) => (
                         <Grid item key={device.deviceId} xs={12} sm={6} md={3} lg={2}>
                           <SceneDeviceCard device={device} />
                         </Grid>
@@ -280,8 +281,8 @@ const SceneItem = ({ scene, networkId }) => {
                   </Box>
                 )}
                 
-                {/* 组区域 */}
-                {itemStats.groups.length > 0 && (
+                {/* 通过组绑定的设备区域 */}
+                {processedItems.groupsWithDevices.length > 0 && (
                   <Box>
                     <Typography 
                       variant="subtitle2" 
@@ -293,15 +294,15 @@ const SceneItem = ({ scene, networkId }) => {
                         borderLeft: '3px solid #009688'
                       }}
                     >
-                      Groups
+                      Groups & Devices
                     </Typography>
-                    <Grid container spacing={2}>
-                      {itemStats.groups.map((group) => (
-                        <Grid item key={group.groupId} xs={12} sm={6} md={3} lg={2}>
-                          <SceneGroupCard group={group} />
-                        </Grid>
-                      ))}
-                    </Grid>
+                    {processedItems.groupsWithDevices.map((group) => (
+                      <GroupWithDevices 
+                        key={group.groupId} 
+                        group={group} 
+                        networkId={networkId}
+                      />
+                    ))}
                   </Box>
                 )}
               </Box>
@@ -309,6 +310,53 @@ const SceneItem = ({ scene, networkId }) => {
           </Box>
         </Collapse>
       </Paper>
+    </Box>
+  );
+};
+
+// 新组件：显示组和组内设备
+const GroupWithDevices = ({ group, networkId }) => {
+  const { data: groupDevices = [], isLoading } = useGroupDevices(networkId, group.groupId);
+  
+  if (isLoading) {
+    return (
+      <Box sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
+        <Typography>Loading group devices...</Typography>
+      </Box>
+    );
+  }
+  
+  return (
+    <Box sx={{ mb: 2, p: 2 }}>
+      {/* 组标题 */}
+      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+        <img 
+          src={require('../../../../assets/icons/NetworkOverview/Group.png')}
+          alt="Group"
+          style={{ width: 24, height: 24, marginRight: 8 }}
+        />
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#009688' }}>
+          {group.name}
+          <Typography component="span" variant="caption" sx={{ ml: 1, color: '#95a5a6' }}>
+            ({groupDevices.length} device{groupDevices.length !== 1 ? 's' : ''})
+          </Typography>
+        </Typography>
+      </Box>
+      
+      {/* 组内设备 */}
+      {groupDevices.length > 0 ? (
+        <Grid container spacing={2}>
+          {groupDevices.map((device) => (
+            <Grid item key={device.deviceId} xs={12} sm={6} md={3} lg={2}>
+              <SceneDeviceCard device={device} />
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Typography variant="body2" color="text.secondary" align="center">
+          No devices in this group
+        </Typography>
+      )}
     </Box>
   );
 };
