@@ -3,15 +3,10 @@ import {
   Box,
   Typography,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Divider,
   Paper,
   Grid
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import ContactDialog from './ContactDialog';
 
 // 脉冲模式映射
 const PULSE_MODE_MAP = {
@@ -64,18 +59,18 @@ export const ContactCard = ({ device, onOpenDialog }) => {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      p: 1,
+      p: 0.5,
       overflow: 'hidden'
     }}>
       {/* 使用网格布局显示4个输出通道 */}
-      <Grid container spacing={0.5} sx={{ height: '100%' }}>
+      <Grid container spacing={0} sx={{ height: '100%' }}>
         {outputChannels.map(({ hole, contact }) => (
-          <Grid item xs={12} key={hole}>
+          <Grid item xs={12} key={hole} sx={{ mb: 0.4, '&:last-child': { mb: 0 } }}>
             <Paper
               elevation={0}
               sx={{ 
-                p: 1,
-                height: '68px',
+                p: 0.75,
+                height: '64px',
                 border: '1px solid #e0e0e0',
                 borderRadius: 1,
                 cursor: contact ? 'pointer' : 'default',
@@ -83,32 +78,34 @@ export const ContactCard = ({ device, onOpenDialog }) => {
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                '&:hover': contact ? { bgcolor: '#f1f3f4' } : {}
               }}
               onClick={() => contact && onOpenDialog(contact)}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.1 }}>
                   Output {hole + 1}
                 </Typography>
                 {contact && (
                   <Typography 
                     variant="body2" 
                     sx={{ 
-                      fontSize: '0.75rem', 
+                      fontSize: '0.72rem', 
                       color: '#4b5563', 
                       fontWeight: 400,
                       lineHeight: 1.1,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      mt: 0.2
                     }}
                   >
                     {contact.virtualName || 'Unnamed Contact'}
                   </Typography>
                 )}
                 {contact && (
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.625rem', lineHeight: 1 }}>
                     {PULSE_MODE_MAP[contact.pulseMode] || 'Unknown Mode'}
                   </Typography>
                 )}
@@ -120,13 +117,13 @@ export const ContactCard = ({ device, onOpenDialog }) => {
                   size="small" 
                   color={contact.onOff ? "success" : "error"}
                   sx={{ 
-                    height: 18, 
-                    minWidth: 35,
-                    '& .MuiChip-label': { px: 0.5, fontSize: '0.6rem' } 
+                    height: 16, 
+                    minWidth: 32,
+                    '& .MuiChip-label': { px: 0.4, fontSize: '0.58rem' } 
                   }}
                 />
               ) : (
-                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', fontStyle: 'italic' }}>
+                <Typography variant="caption" sx={{ fontSize: '0.625rem', color: 'text.secondary', fontStyle: 'italic' }}>
                   None
                 </Typography>
               )}
@@ -138,117 +135,8 @@ export const ContactCard = ({ device, onOpenDialog }) => {
   );
 };
 
-// 干接点详情对话框
-export const ContactDialog = ({ open, onClose, contact }) => {
-  if (!contact) return null;
-
-  return (
-    <Dialog 
-      open={open} 
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-    >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        bgcolor: '#f5f5f5',
-        borderBottom: '1px solid #e0e0e0'
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {contact.virtualName || `Output ${contact.hole + 1}`}
-          </Typography>
-          <Chip 
-            label={contact.onOff ? "ON" : "OFF"} 
-            color={contact.onOff ? "success" : "error"}
-            size="small"
-            sx={{ ml: 1 }}
-          />
-        </Box>
-        <IconButton onClick={onClose} size="small">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-      
-      <DialogContent sx={{ pt: 2, pb: 3 }}>
-        <Grid container spacing={2} sx={{ mt: 0.5 }}>
-          <Grid item xs={6}>
-            <Typography variant="caption" color="text.secondary">Output Position</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Output {contact.hole + 1}
-            </Typography>
-          </Grid>
-          
-          <Grid item xs={6}>
-            <Typography variant="caption" color="text.secondary">Status</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {contact.onOff ? "ON" : "OFF"}
-            </Typography>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Typography variant="caption" color="text.secondary">Pulse Mode</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {PULSE_MODE_MAP[contact.pulseMode] || 'Unknown'}
-            </Typography>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Typography variant="caption" color="text.secondary">Remote ID</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {contact.remoteId || 'None'}
-            </Typography>
-          </Grid>
-        </Grid>
-
-        <Divider sx={{ my: 2 }} />
-        
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            Connection Details
-          </Typography>
-          
-          <Box sx={{ 
-            border: '1px solid #e0e0e0',
-            borderRadius: 1,
-            p: 2,
-            bgcolor: '#f9f9f9'
-          }}>
-            <Grid container spacing={1}>
-              <Grid item xs={12}>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  Name: {contact.virtualName || 'Unnamed'}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="body2">
-                  Mode: {PULSE_MODE_MAP[contact.pulseMode]}
-                </Typography>
-              </Grid>
-              {contact.remoteId && (
-                <Grid item xs={12}>
-                  <Typography variant="body2">
-                    Connected to Remote Device: ID {contact.remoteId}
-                  </Typography>
-                </Grid>
-              )}
-              <Grid item xs={12}>
-                <Typography variant="caption" color="text.secondary">
-                  Last Modified: {contact.modifyDate ? new Date(contact.modifyDate).toLocaleString() : 'Unknown'}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        </Box>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 // 干接点管理器组件
-const VirtualDryContacts = ({ device }) => {
+const VirtualDryContacts = ({ device, networkId }) => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
 
@@ -272,6 +160,7 @@ const VirtualDryContacts = ({ device }) => {
         open={contactDialogOpen}
         onClose={handleCloseContactDialog}
         contact={selectedContact}
+        networkId={networkId}
       />
     </Box>
   );

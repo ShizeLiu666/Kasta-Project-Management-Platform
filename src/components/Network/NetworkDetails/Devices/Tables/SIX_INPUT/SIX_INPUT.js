@@ -12,7 +12,10 @@ import {
   Chip,
   Tooltip,
   IconButton,
-  Collapse
+  Collapse,
+  Select,
+  MenuItem,
+  FormControl
 } from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -198,11 +201,9 @@ const SIX_INPUT = ({ devices, networkId }) => {
     if (!binding) return '';
     
     switch (binding.bindType) {
-      case 0: // Device
+      case 1: // Device
         const deviceName = deviceMap[String(binding.bindId)];
         return deviceName || `Unknown Device (${binding.bindId})`;
-      case 1: // 未知类型，可能未使用
-        return `Unknown Type 1 (${binding.bindId})`;
       case 2: // Group
         const groupName = groupMap[binding.bindId];
         return groupName || `Unknown Group (${binding.bindId})`;
@@ -213,7 +214,7 @@ const SIX_INPUT = ({ devices, networkId }) => {
         const sceneName = sceneMap[binding.bindId];
         return sceneName || `Unknown Scene (${binding.bindId})`;
       default:
-        return `Unknown (${binding.bindId})`;
+        return `Unknown Type ${binding.bindType} (${binding.bindId})`;
     }
   }, [deviceMap, groupMap, sceneMap, roomMap]);
 
@@ -325,7 +326,7 @@ const SIX_INPUT = ({ devices, networkId }) => {
         {/* Binding Information */}
         {binding && (
           <>
-            {binding.bindType === 0 && boundDevice && deviceType && (
+            {binding.bindType === 1 && boundDevice && deviceType && (
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: 'column',
@@ -661,11 +662,35 @@ const SIX_INPUT = ({ devices, networkId }) => {
                 <TableBody>
                   {processedDevicesWithAutomation.map((device, deviceIndex) => (
                     <TableRow
-                      key={device.deviceId}
+                      key={device.did}
                       sx={{ 
-                        bgcolor: 'white',
+                        bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1)' : 'white !important',
                         cursor: 'pointer',
-                        '&:last-child td': { border: 0 }
+                        '&:last-child td': { border: 0 },
+                        '&:hover': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        },
+                        '&:active': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        },
+                        '&:focus': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        },
+                        '&.MuiTableRow-hover:hover': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        },
+                        '&.Mui-selected': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        },
+                        '&.Mui-selected:hover': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        },
+                        '&.MuiTableRow-root': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        },
+                        '&.MuiTableRow-root:hover': {
+                          bgcolor: selectedDevice?.did === device.did ? 'rgba(251, 205, 11, 0.1) !important' : 'white !important'
+                        }
                       }}
                       onClick={() => handleSelectDevice(device)}
                     >
@@ -685,7 +710,7 @@ const SIX_INPUT = ({ devices, networkId }) => {
                               variant="body2"
                               sx={{ color: '#95a5a6', ml: 0.5, fontWeight: 400 }}
                             >
-                              - {device.deviceId}
+                              - {device.did}
                             </Typography>
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -718,79 +743,201 @@ const SIX_INPUT = ({ devices, networkId }) => {
             </TableContainer>
           ) : (
             // 第二个视图：显示 Virtual Dry Contacts 和 Automation Rules
-            <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
-              {/* 左侧区域 - Virtual Dry Contacts */}
-              <Box sx={{ width: '50%' }}>
-                {selectedDevice && (
-                  <Paper
-                    elevation={0}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                      borderColor: 'rgba(224, 224, 224, 0.7)',
-                      bgcolor: '#ffffff',
-                      height: '369px',
-                    }}
-                  >
-                    <Box sx={{
-                      bgcolor: '#f5f5f5',
-                      p: 1.5,
-                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                        Virtual Dry Contacts
+            <Box>
+              {/* 设备选择器 */}
+              {processedDevicesWithAutomation.length > 1 && (
+                <Box sx={{ 
+                  p: 1.5, 
+                  borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                  bgcolor: '#f8f9fa',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5
+                }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>
+                    Device:
+                  </Typography>
+                  <FormControl size="small" sx={{ minWidth: 320, flex: 1 }}>
+                    <Select
+                      value={selectedDevice?.did || ''}
+                      onChange={(e) => {
+                        const device = processedDevicesWithAutomation.find(d => d.did === e.target.value);
+                        if (device) handleSelectDevice(device);
+                      }}
+                      sx={{
+                        bgcolor: 'white',
+                        height: '32px',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#fbcd0b'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#fbcd0b'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#fbcd0b'
+                        },
+                        '& .MuiSelect-select': {
+                          py: 0.5,
+                          fontSize: '0.875rem'
+                        }
+                      }}
+                    >
+                      {processedDevicesWithAutomation.map((device) => (
+                        <MenuItem key={device.did} value={device.did} disableRipple>
+                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>
+                            {device.name}
+                            <Typography 
+                              component="span" 
+                              sx={{ 
+                                color: '#95a5a6', 
+                                ml: 0.5, 
+                                fontWeight: 400,
+                                fontSize: '0.8rem'
+                              }}
+                            >
+                              - {device.did} | {device.appearanceShortname}
+                            </Typography>
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+              
+              <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
+                {/* 左侧区域 - Virtual Dry Contacts */}
+                <Box sx={{ width: '50%' }}>
+                  {selectedDevice ? (
+                    <Paper
+                      elevation={0}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        borderColor: 'rgba(224, 224, 224, 0.7)',
+                        bgcolor: '#ffffff',
+                        height: processedDevicesWithAutomation.length > 1 ? '327px' : '369px',
+                        maxHeight: processedDevicesWithAutomation.length > 1 ? '327px' : '369px'
+                      }}
+                    >
+                      <Box sx={{
+                        bgcolor: '#f5f5f5',
+                        p: 1.5,
+                        borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                          Virtual Dry Contacts
+                        </Typography>
+                        {processedDevicesWithAutomation.length === 1 && (
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                            {selectedDevice.name}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Box sx={{ 
+                        height: processedDevicesWithAutomation.length > 1 ? 'calc(327px - 52px)' : 'calc(369px - 52px)', 
+                        maxHeight: processedDevicesWithAutomation.length > 1 ? 'calc(327px - 52px)' : 'calc(369px - 52px)', 
+                        overflow: 'auto'
+                      }}>
+                        <VirtualDryContacts
+                          device={selectedDevice}
+                          networkId={networkId}
+                        />
+                      </Box>
+                    </Paper>
+                  ) : (
+                    <Paper
+                      elevation={0}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        borderColor: 'rgba(224, 224, 224, 0.7)',
+                        bgcolor: '#ffffff',
+                        height: processedDevicesWithAutomation.length > 1 ? '327px' : '369px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Typography color="text.secondary">
+                        Please select a device to view Virtual Dry Contacts
                       </Typography>
-                    </Box>
-                    <Box sx={{ height: 'calc(369px - 52px)' }}>
-                      <VirtualDryContacts
-                        device={selectedDevice}
-                      />
-                    </Box>
-                  </Paper>
-                )}
-              </Box>
+                    </Paper>
+                  )}
+                </Box>
 
-              {/* 右侧区域 - Automation Rules */}
-              <Box sx={{ width: '50%' }}>
-                {selectedDevice && (
-                  <Paper
-                    elevation={0}
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                      borderColor: 'rgba(224, 224, 224, 0.7)',
-                      bgcolor: '#ffffff',
-                      height: '369px',
-                    }}
-                  >
-                    <Box sx={{
-                      bgcolor: '#f5f5f5',
-                      p: 1.5,
-                      borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                        Automation Rules
+                {/* 右侧区域 - Automation Rules */}
+                <Box sx={{ width: '50%' }}>
+                  {selectedDevice ? (
+                    <Paper
+                      elevation={0}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        borderColor: 'rgba(224, 224, 224, 0.7)',
+                        bgcolor: '#ffffff',
+                        height: processedDevicesWithAutomation.length > 1 ? '327px' : '369px',
+                        maxHeight: processedDevicesWithAutomation.length > 1 ? '327px' : '369px'
+                      }}
+                    >
+                      <Box sx={{
+                        bgcolor: '#f5f5f5',
+                        p: 1.5,
+                        borderBottom: '1px solid rgba(224, 224, 224, 0.7)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                          Automation Rules
+                        </Typography>
+                        {processedDevicesWithAutomation.length === 1 && (
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                            {selectedDevice.name}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Box sx={{ 
+                        height: processedDevicesWithAutomation.length > 1 ? 'calc(327px - 52px)' : 'calc(369px - 52px)', 
+                        maxHeight: processedDevicesWithAutomation.length > 1 ? 'calc(327px - 52px)' : 'calc(369px - 52px)', 
+                        overflow: 'auto'
+                      }}>
+                        <AutomationRules
+                          device={selectedDevice}
+                          deviceMap={deviceMap}
+                          groupMap={groupMap}
+                          sceneMap={sceneMap}
+                          roomMap={roomMap}
+                        />
+                      </Box>
+                    </Paper>
+                  ) : (
+                    <Paper
+                      elevation={0}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        borderColor: 'rgba(224, 224, 224, 0.7)',
+                        bgcolor: '#ffffff',
+                        height: processedDevicesWithAutomation.length > 1 ? '327px' : '369px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Typography color="text.secondary">
+                        Please select a device to view Automation Rules
                       </Typography>
-                    </Box>
-                    <Box sx={{ height: 'calc(369px - 52px)' }}>
-                      <AutomationRules
-                        device={selectedDevice}
-                        deviceMap={deviceMap}
-                        groupMap={groupMap}
-                        sceneMap={sceneMap}
-                        roomMap={roomMap}
-                      />
-                    </Box>
-                  </Paper>
-                )}
+                    </Paper>
+                  )}
+                </Box>
               </Box>
             </Box>
           )}

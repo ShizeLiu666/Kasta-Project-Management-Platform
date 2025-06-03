@@ -99,7 +99,7 @@ export const useDevicesMap = (networkId) => {
   
   return React.useMemo(() => {
     return devices.reduce((acc, device) => {
-      acc[device.deviceId] = {
+      acc[device.did] = {
         name: device.name,
         type: device.type,
         productType: device.productType,
@@ -115,7 +115,7 @@ export const useGroupsMap = (networkId) => {
   
   return React.useMemo(() => {
     return groups.reduce((acc, group) => {
-      acc[group.groupId] = {
+      acc[group.gid] = {
         name: group.name,
         devices: group.devices || [],
         // 可以添加其他需要的组信息
@@ -130,7 +130,7 @@ export const useScenesMap = (networkId) => {
   
   return React.useMemo(() => {
     return scenes.reduce((acc, scene) => {
-      acc[scene.sceneId] = {
+      acc[scene.sid] = {
         name: scene.name,
         devices: scene.devices || [],
         // 可以添加其他需要的场景信息
@@ -173,7 +173,7 @@ export const useRoomsMap = (networkId) => {
   
   return React.useMemo(() => {
     return rooms.reduce((acc, room) => {
-      acc[room.roomId] = {
+      acc[room.rid] = {
         name: room.name,
         // 可以添加其他需要的房间信息
       };

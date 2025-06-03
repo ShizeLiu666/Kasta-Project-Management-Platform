@@ -97,9 +97,9 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
               key={index}
               onClick={() => onOpenDialog(rule)}
               sx={{ 
-                p: 1,
-                height: '68px', // 与 FOUR_OUTPUT VirtualDryContacts 的每个项目保持相同高度
-                mb: 0.5, // 与 VirtualDryContacts 的 spacing 保持一致
+                p: 0.75,
+                height: '64px', // 与 VirtualDryContacts 的高度保持一致
+                mb: 0.4, // 与 VirtualDryContacts 的间距保持一致
                 border: '1px solid #e0e0e0',
                 borderRadius: 1,
                 cursor: 'pointer',
@@ -108,23 +108,24 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                '&:hover': { bgcolor: '#f5f5f5' },
+                '&:hover': { bgcolor: '#f1f3f4' },
                 '&:last-child': { mb: 0 }
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.1 }}>
                   {rule.name || `Case ${rule.caseIdx}`}
                 </Typography>
                 <Typography 
                   variant="body2" 
                   color="text.secondary" 
                   sx={{ 
-                    fontSize: '0.75rem', 
+                    fontSize: '0.72rem', 
                     lineHeight: 1.1,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    mt: 0.2
                   }}
                 >
                   {rule.triggerList?.length || 0} trigger(s), {rule.actionList?.length || 0} action(s)
@@ -136,9 +137,9 @@ export const AutomationCard = ({ device, onOpenDialog }) => {
                 size="small" 
                 color={rule.state ? "success" : "default"}
                 sx={{ 
-                  height: 18, 
-                  minWidth: 35,
-                  '& .MuiChip-label': { px: 0.5, fontSize: '0.6rem' } 
+                  height: 16, 
+                  minWidth: 32,
+                  '& .MuiChip-label': { px: 0.4, fontSize: '0.58rem' } 
                 }}
               />
             </Box>
