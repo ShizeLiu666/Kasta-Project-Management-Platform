@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { Container } from "reactstrap";
 import './FullLayout.css';
+import ChatBot from "../components/CustomComponents/ChatBot";
 
 const FullLayout = () => {
   const [userType, setUserType] = useState(null);
@@ -45,6 +46,7 @@ const FullLayout = () => {
           </Container>
         </div>
       </div>
+      <ChatBot />
     </main>
   );
 };

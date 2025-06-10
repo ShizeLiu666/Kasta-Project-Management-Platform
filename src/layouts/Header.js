@@ -14,15 +14,12 @@ import '../assets/scss/loader/Header.css';
 import { getUserDetails } from '../components/auth/auth';
 import defaultAvatar from '../assets/images/users/normal_user.jpg';
 import CustomModal from '../components/CustomComponents/CustomModal';
-import FeedbackIcon from '@mui/icons-material/ContactSupport';
-import FeedbackModal from './FeedbackModal';
 
 const Header = ({ toggleSidebar }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(defaultAvatar);
   const navigate = useNavigate();
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   const updateAvatar = (userDetails) => {
     setAvatarSrc(userDetails?.headPic || defaultAvatar);
@@ -56,9 +53,6 @@ const Header = ({ toggleSidebar }) => {
     toggleSidebar();
   };
   const toggleLogoutModal = () => setLogoutModalOpen(!logoutModalOpen);
-  const toggleFeedbackModal = () => {
-    setFeedbackModalOpen(!feedbackModalOpen);
-  };
 
   const handleLogout = () => {
     // 保存 Remember Me 凭据
@@ -85,11 +79,6 @@ const Header = ({ toggleSidebar }) => {
     navigate('/admin/profile');
   };
 
-  const handleFeedbackSubmit = (feedbackData) => {
-    console.log('Feedback submitted:', feedbackData);
-    // TODO: 处理反馈提交逻辑
-  };
-
   return (
     <>
       <Navbar dark expand="md" className="fix-header header-background">
@@ -106,25 +95,6 @@ const Header = ({ toggleSidebar }) => {
           </Button>
         </div>
         <div className="ms-auto d-flex align-items-center">
-          <Button
-            color="link"
-            className="me-3"
-            onClick={toggleFeedbackModal}
-            style={{
-              color: '#ff4d4f',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              border: 'none',
-              transition: 'color 0.3s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.color = '#ff7875'}
-            onMouseOut={(e) => e.currentTarget.style.color = '#ff4d4f'}
-          >
-            <FeedbackIcon style={{ 
-              fontSize: '34px',
-            }} />
-          </Button>
           <Dropdown isOpen={dropdownOpen} toggle={toggle}>
             <DropdownToggle color="transparent" className="d-flex align-items-center">
               <img
@@ -157,12 +127,6 @@ const Header = ({ toggleSidebar }) => {
       >
         Are you sure you want to log out?
       </CustomModal>
-
-      <FeedbackModal
-        isOpen={feedbackModalOpen}
-        toggle={toggleFeedbackModal}
-        onSubmit={handleFeedbackSubmit}
-      />
     </>
   );
 };
