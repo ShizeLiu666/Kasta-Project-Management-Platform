@@ -39,7 +39,9 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 const SceneGroupCard = ({ group }) => {
   // 获取组图标
   const iconSrc = require('../../../../assets/icons/NetworkOverview/Group.png');
-  const groupId = group.groupId || group.id;
+  
+  // 获取组ID，支持多种可能的字段名
+  const groupId = group.groupId || group.gid || group.id || 'Unknown ID';
   
   return (
     <Box 
@@ -102,7 +104,7 @@ const SceneGroupCard = ({ group }) => {
           mb: 0.5
         }}
       >
-        <TruncatedText text={group.name} maxLength={15} />
+        <TruncatedText text={group.name || 'Unnamed Group'} maxLength={15} />
       </Typography>
       
       {/* 组ID */}
@@ -114,7 +116,7 @@ const SceneGroupCard = ({ group }) => {
           fontSize: '0.7rem'
         }}
       >
-        <TruncatedText text={groupId} maxLength={16} />
+        <TruncatedText text={`ID: ${groupId}`} maxLength={16} />
       </Typography>
     </Box>
   );

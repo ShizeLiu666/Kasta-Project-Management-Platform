@@ -99,12 +99,24 @@ export const useDevicesMap = (networkId) => {
   
   return React.useMemo(() => {
     return devices.reduce((acc, device) => {
-      acc[device.did] = {
+      const deviceData = {
         name: device.name,
         type: device.type,
         productType: device.productType,
-        // 可以添加其他需要的设备信息
+        deviceType: device.deviceType,
+        deviceId: device.deviceId,
+        did: device.did,
+        ...device
       };
+      
+      // 支持多种可能的ID字段作为键
+      if (device.did) {
+        acc[device.did] = deviceData;
+      }
+      if (device.deviceId && device.deviceId !== device.did) {
+        acc[device.deviceId] = deviceData;
+      }
+      
       return acc;
     }, {});
   }, [devices]);
@@ -223,7 +235,7 @@ export const useSceneDevices = (networkId, sceneId) => {
       // 使用设备映射来丰富数据
       return response.data.data.map(sceneDevice => ({
         ...sceneDevice,
-        deviceInfo: devicesMap[sceneDevice.deviceId] || null,
+        deviceInfo: devicesMap[sceneDevice.deviceId] || devicesMap[sceneDevice.did] || null,
       }));
     },
     staleTime: 30000,
@@ -258,7 +270,7 @@ export const useGroupDevices = (networkId, groupId) => {
       // 使用设备映射来丰富数据
       return response.data.data.map(device => ({
         ...device,
-        deviceInfo: devicesMap[device.deviceId] || null,
+        deviceInfo: devicesMap[device.deviceId] || devicesMap[device.did] || null,
       }));
     },
     staleTime: 30000,

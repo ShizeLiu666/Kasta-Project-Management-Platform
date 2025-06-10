@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useNetworkScenes, useSceneDevices, useNetworkGroups, useGroupDevices } from '../useNetworkQueries';
 import SceneDeviceCard from './SceneDeviceCard';
+import SceneGroupCard from './SceneGroupCard';
 
 const SceneList = ({ networkId }) => {
   const { 
@@ -65,7 +66,7 @@ const SceneList = ({ networkId }) => {
 const SceneItem = ({ scene, networkId }) => {
   const [expanded, setExpanded] = useState(true);
   
-  // 获取场景项目和网络中的所有组
+  // 获取场景项目和网络中的所有组 - useSceneDevices自动处理设备信息丰富
   const { data: sceneItems = [], isLoading: isLoadingSceneItems } = useSceneDevices(networkId, scene.sceneId);
   const { data: allGroups = [], isLoading: isLoadingGroups } = useNetworkGroups(networkId);
   
@@ -84,15 +85,15 @@ const SceneItem = ({ scene, networkId }) => {
     
     sceneItems.forEach(item => {
       if (item.entityType === 0) {
-        // 直接绑定的设备
-        const deviceInfo = {
+        // 直接绑定的设备 - useSceneDevices已经自动附加了deviceInfo
+        const processedDevice = {
           ...item,
-          productType: item.productType,
+          productType: item.productType || item.deviceInfo?.productType,
           deviceId: item.deviceId,
-          name: item.deviceId,
+          // deviceInfo已经由useSceneDevices自动附加
           specificAttributes: item.attributes || {}
         };
-        directDevices.push(deviceInfo);
+        directDevices.push(processedDevice);
       } else if (item.entityType === 1) {
         // 通过组绑定 - 我们需要获取组内的设备
         const groupInfo = groupsMap[item.groupId];
@@ -327,35 +328,60 @@ const GroupWithDevices = ({ group, networkId }) => {
   }
   
   return (
-    <Box sx={{ mb: 2, p: 2 }}>
-      {/* 组标题 */}
-      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-        <img 
-          src={require('../../../../assets/icons/NetworkOverview/Group.png')}
-          alt="Group"
-          style={{ width: 24, height: 24, marginRight: 8 }}
-        />
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#009688' }}>
-          {group.name}
-          <Typography component="span" variant="caption" sx={{ ml: 1, color: '#95a5a6' }}>
-            ({groupDevices.length} device{groupDevices.length !== 1 ? 's' : ''})
-          </Typography>
+    <Box sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#fafafa' }}>
+      {/* 组卡片和标题 */}
+      <Box sx={{ mb: 2 }}>
+        <Typography 
+          variant="subtitle2" 
+          sx={{ 
+            mb: 2, 
+            fontWeight: 600,
+            color: '#009688',
+            pl: 1,
+            borderLeft: '3px solid #009688'
+          }}
+        >
+          Group Binding
         </Typography>
+        
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={12} sm={6} md={3} lg={2}>
+            <SceneGroupCard group={group} />
+          </Grid>
+        </Grid>
       </Box>
       
       {/* 组内设备 */}
-      {groupDevices.length > 0 ? (
-        <Grid container spacing={2}>
-          {groupDevices.map((device) => (
-            <Grid item key={device.deviceId} xs={12} sm={6} md={3} lg={2}>
-              <SceneDeviceCard device={device} />
-            </Grid>
-          ))}
-        </Grid>
-      ) : (
-        <Typography variant="body2" color="text.secondary" align="center">
-          No devices in this group
-        </Typography>
+      {groupDevices.length > 0 && (
+        <Box>
+          <Typography 
+            variant="subtitle2" 
+            sx={{ 
+              mb: 2, 
+              fontWeight: 600,
+              color: '#fbcd0b',
+              pl: 1,
+              borderLeft: '3px solid #fbcd0b'
+            }}
+          >
+            Devices in Group ({groupDevices.length})
+          </Typography>
+          <Grid container spacing={2}>
+            {groupDevices.map((device) => (
+              <Grid item key={device.deviceId} xs={12} sm={6} md={3} lg={2}>
+                <SceneDeviceCard device={device} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+      
+      {groupDevices.length === 0 && (
+        <Box sx={{ textAlign: 'center', py: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            No devices in this group
+          </Typography>
+        </Box>
       )}
     </Box>
   );

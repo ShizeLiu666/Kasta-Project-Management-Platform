@@ -73,11 +73,14 @@ const TruncatedText = ({ text, maxLength = 20 }) => {
 };
 
 const SceneDeviceCard = ({ device }) => {
-  // 使用 deviceInfo 中的信息
+  // 获取设备信息，优先使用 deviceInfo，然后回退到原始设备数据
   const productType = device.deviceInfo?.productType || device.productType;
-  const deviceTypeStr = getDeviceTypeFromProductType(productType, device.deviceType);
-  const iconSrc = getDeviceIcon(productType, device.deviceType);
-  const deviceName = device.deviceInfo?.name; // 使用完整设备信息中的名称
+  const deviceType = device.deviceInfo?.deviceType || device.deviceType;
+  const deviceTypeStr = getDeviceTypeFromProductType(productType, deviceType);
+  const iconSrc = getDeviceIcon(productType, deviceType);
+  
+  // 获取设备名称，使用多种后备方案
+  const deviceName = device.deviceInfo?.name || device.name || `Device ${device.deviceId}`;
 
   return (
     <Box 
