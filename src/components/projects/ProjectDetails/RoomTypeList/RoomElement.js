@@ -59,16 +59,14 @@ const RoomElement = ({ roomType, onDelete, onEdit, onClick, userRole }) => {
             </Avatar>
             
             <Box flex={1}>
-              <Typography variant="h6" component="div" sx={{ 
-                fontWeight: 600,
-                color: 'text.primary',
-                fontSize: '1.15rem',
-                marginBottom: '4px'
-              }}>
-                {roomType.name}
-              </Typography>
-              
-              <Box display="flex" alignItems="center" gap={1.5} sx={{ mb: 1 }}>
+              <Box display="flex" alignItems="baseline" gap={1.2} sx={{ mb: 1 }}>
+                <Typography variant="h6" component="div" sx={{ 
+                  fontWeight: 600,
+                  color: 'text.primary',
+                  fontSize: '1.15rem'
+                }}>
+                  {roomType.name}
+                </Typography>
                 <Chip 
                   label={roomType.typeCode} 
                   size="small" 
@@ -76,7 +74,8 @@ const RoomElement = ({ roomType, onDelete, onEdit, onClick, userRole }) => {
                   variant="outlined"
                   sx={{ 
                     fontWeight: 500,
-                    fontSize: '0.75rem'
+                    fontSize: '0.75rem',
+                    alignSelf: 'baseline'
                   }}
                 />
               </Box>

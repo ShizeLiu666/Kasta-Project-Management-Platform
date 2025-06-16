@@ -3,7 +3,7 @@ import RoomElement from "./RoomElement";
 import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
-import { CircularProgress, Box, Typography } from "@mui/material";
+import { CircularProgress, Box, Typography, TablePagination } from "@mui/material";
 import FolderIcon from '@mui/icons-material/Folder';
 import CustomSearchBar from '../../../CustomComponents/CustomSearchBar';
 import { getToken } from '../../../auth/auth';
@@ -22,6 +22,8 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRoomTypes, setFilteredRoomTypes] = useState([]);
   const [validAuthCodes, setValidAuthCodes] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [alert, setAlert] = useState({
     isOpen: false,
     message: "",
@@ -104,9 +106,11 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   }, [fetchRoomTypes, loadAuthCodes]);
 
   const filterRoomTypes = (searchValue) => {
-    return roomTypes.filter((roomType) =>
+    const filtered = roomTypes.filter((roomType) =>
       roomType.name.toLowerCase().includes(searchValue.toLowerCase())
     );
+    setPage(0); // 重置到第一页
+    return filtered;
   };
 
   const handleRoomTypeCreated = async (newRoomType) => {
@@ -142,6 +146,22 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   const handleRoomTypeUpdated = async (updatedRoomType) => {
     await fetchRoomTypes();
     setEditModalOpen(false);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // 获取当前页的数据
+  const getCurrentPageData = () => {
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    return filteredRoomTypes.slice(startIndex, endIndex);
   };
 
   if (loading) {
@@ -226,22 +246,59 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
           </Typography>
         </Box>
       ) : (
-        <Box sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px"
-        }}>
-          {filteredRoomTypes.map((roomType) => (
-            <RoomElement
-              key={roomType.projectRoomId}
-              roomType={roomType}
-              onDelete={() => handleDeleteClick(roomType)}
-              onEdit={() => handleEditRoomType(roomType)}
-              onClick={() => handleRoomTypeClick(roomType)}
-              userRole={userRole}
+        <>
+          <Box sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            minHeight: "400px" // 保证分页器位置稳定
+          }}>
+            {getCurrentPageData().map((roomType) => (
+              <RoomElement
+                key={roomType.projectRoomId}
+                roomType={roomType}
+                onDelete={() => handleDeleteClick(roomType)}
+                onEdit={() => handleEditRoomType(roomType)}
+                onClick={() => handleRoomTypeClick(roomType)}
+                userRole={userRole}
+              />
+            ))}
+          </Box>
+          
+          {/* 分页器 */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            mt: 3,
+            backgroundColor: "#fafafa",
+            borderRadius: "8px",
+            border: "1px solid #e0e0e0"
+          }}>
+            <TablePagination
+              component="div"
+              count={filteredRoomTypes.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10]}
+              labelRowsPerPage="Items per page"
+              labelDisplayedRows={({ from, to, count }) =>
+                `${from}-${to} of ${count}`
+              }
+              sx={{
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                  margin: 0,
+                },
+                '& .MuiButtonBase-root': {
+                  '& .MuiTouchRipple-root': {
+                    display: 'none'
+                  }
+                }
+              }}
             />
-          ))}
-        </Box>
+          </Box>
+        </>
       )}
       
       {selectedRoomType && (

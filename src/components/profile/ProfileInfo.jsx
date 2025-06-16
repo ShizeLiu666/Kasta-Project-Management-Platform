@@ -10,8 +10,61 @@ import {
 } from 'reactstrap';
 import { Edit } from '@mui/icons-material';
 import FolderIcon from '@mui/icons-material/Folder';
+import Tooltip from '@mui/material/Tooltip';
 import defaultAvatar from '../../assets/images/users/normal_user.jpg';
 import './ProfileInfo.css';
+
+// 创建文本截断组件
+const TruncatedText = ({ text, maxLength = 20, className = '', style = {} }) => {
+  const truncatedText = text?.length > maxLength
+    ? `${text.substring(0, maxLength)}...`
+    : text || 'Not Set';
+
+  const needsTruncation = text?.length > maxLength;
+
+  if (!needsTruncation) {
+    return (
+      <span className={className} style={style}>
+        {text || 'Not Set'}
+      </span>
+    );
+  }
+
+  return (
+    <Tooltip
+      title={text || 'Not Set'}
+      placement="top"
+      arrow
+      sx={{
+        '& .MuiTooltip-tooltip': {
+          backgroundColor: '#333',
+          fontSize: '0.875rem',
+          padding: '8px 12px',
+          maxWidth: 'none',
+          wordBreak: 'break-all'
+        },
+        '& .MuiTooltip-arrow': {
+          color: '#333'
+        }
+      }}
+    >
+      <span
+        className={className}
+        style={{
+          ...style,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          display: 'inline-block',
+          maxWidth: '100%',
+          cursor: 'help'
+        }}
+      >
+        {truncatedText}
+      </span>
+    </Tooltip>
+  );
+};
 
 const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvatar }) => {
   const [userDetails, setUserDetails] = useState(initialUserDetails);
@@ -74,8 +127,16 @@ const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvat
               accept="image/*"
             />
           </div>
-          <CardTitle tag="h4" className="mt-3 mb-0">
-            {userDetails.username}
+          <CardTitle tag="h4" className="mt-3 mb-0" style={{ maxWidth: '100%' }}>
+            <TruncatedText 
+              text={userDetails.username} 
+              maxLength={25}
+              style={{ 
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: '#333'
+              }}
+            />
           </CardTitle>
           <span className="user-type-badge">
             {getUserTypeLabel()}
@@ -92,17 +153,35 @@ const ProfileInfo = ({ userDetails: initialUserDetails, projectCount, onEditAvat
         <div className="user-info-section mt-4">
           <div className="profile-info-item">
             <span className="profile-info-label">Nickname</span>
-            <span className="profile-info-value">{userDetails.nickName || 'Not Set'}</span>
+            <span className="profile-info-value" style={{ maxWidth: '100%' }}>
+              <TruncatedText 
+                text={userDetails.nickName} 
+                maxLength={30}
+                className="profile-info-value"
+              />
+            </span>
           </div>
           
           <div className="profile-info-item">
             <span className="profile-info-label">Email</span>
-            <span className="profile-info-value text-break">{userDetails.email}</span>
+            <span className="profile-info-value" style={{ maxWidth: '100%' }}>
+              <TruncatedText 
+                text={userDetails.email} 
+                maxLength={35}
+                className="profile-info-value text-break"
+              />
+            </span>
           </div>
           
           <div className="profile-info-item">
             <span className="profile-info-label">Country Code</span>
-            <span className="profile-info-value">{userDetails.countryCode || 'Not Set'}</span>
+            <span className="profile-info-value" style={{ maxWidth: '100%' }}>
+              <TruncatedText 
+                text={userDetails.countryCode} 
+                maxLength={20}
+                className="profile-info-value"
+              />
+            </span>
           </div>
         </div>
       </CardBody>

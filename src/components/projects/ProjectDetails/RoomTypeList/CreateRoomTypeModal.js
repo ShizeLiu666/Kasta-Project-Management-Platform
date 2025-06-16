@@ -92,7 +92,7 @@ const CreateRoomTypeModal = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    console.log('Form Data after handleChange:', formData);
+    // console.log('Form Data after handleChange:', formData);
     
     if (name === 'typeCode') {
       setIsTypeCodeManuallyEdited(true);
@@ -118,16 +118,16 @@ const CreateRoomTypeModal = ({
     } else if (newValue === null) {
       setFormData(prev => ({ ...prev, authorizationCode: '' }));
     }
-    console.log('Form Data after handleAuthCodeChange:', formData);
+    // console.log('Form Data after handleAuthCodeChange:', formData);
   };
 
   const isFormValid = () => {
-    console.log('Checking form validity:', {
-      name: formData.name,
-      typeCode: formData.typeCode,
-      authCode: formData.authorizationCode,
-      nameError
-    });
+    // console.log('Checking form validity:', {
+    //   name: formData.name,
+    //   typeCode: formData.typeCode,
+    //   authCode: formData.authorizationCode,
+    //   nameError
+    // });
     return formData.name && 
            formData.typeCode && 
            formData.authorizationCode && 
