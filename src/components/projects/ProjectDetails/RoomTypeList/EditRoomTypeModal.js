@@ -129,35 +129,104 @@ const EditRoomTypeModal = ({ isOpen, toggle, roomType, onRoomTypeUpdated }) => {
       submitButtonColor="#007bff"
       disabled={!isFormValid()}
     >
-      <Form>
-        <FormGroup>
-          <Label for="name">Room Type Name:</Label>
+      <Form style={{ padding: '8px 0' }}>
+        <FormGroup style={{ marginBottom: '24px' }}>
+          <Label for="name" style={{ 
+            fontWeight: 600, 
+            marginBottom: '8px',
+            color: '#333',
+            fontSize: '14px'
+          }}>
+            Room Type Name:
+          </Label>
           <Input
             type="text"
             name="name"
             id="name"
             value={formData.name}
             onChange={handleChange}
+            style={{
+              borderRadius: '8px',
+              border: '2px solid #e8e8e8',
+              padding: '12px 16px',
+              fontSize: '14px',
+              transition: 'border-color 0.2s ease-in-out',
+              fontFamily: 'inherit'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#007bff';
+              e.target.style.boxShadow = '0 0 0 3px rgba(0,123,255,0.1)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#e8e8e8';
+              e.target.style.boxShadow = 'none';
+            }}
           />
         </FormGroup>
-        <FormGroup>
-          <Label for="typeCode">Type Code:</Label>
+        <FormGroup style={{ marginBottom: '24px' }}>
+          <Label for="typeCode" style={{ 
+            fontWeight: 600, 
+            marginBottom: '8px',
+            color: '#333',
+            fontSize: '14px'
+          }}>
+            Type Code:
+          </Label>
           <Input
             type="text"
             name="typeCode"
             id="typeCode"
             value={formData.typeCode}
             onChange={handleChange}
+            style={{
+              borderRadius: '8px',
+              border: '2px solid #e8e8e8',
+              padding: '12px 16px',
+              fontSize: '14px',
+              transition: 'border-color 0.2s ease-in-out',
+              fontFamily: 'inherit'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#007bff';
+              e.target.style.boxShadow = '0 0 0 3px rgba(0,123,255,0.1)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#e8e8e8';
+              e.target.style.boxShadow = 'none';
+            }}
           />
         </FormGroup>
-        <FormGroup>
-          <Label for="des">Description:</Label>
+        <FormGroup style={{ marginBottom: '16px' }}>
+          <Label for="des" style={{ 
+            fontWeight: 600, 
+            marginBottom: '8px',
+            color: '#333',
+            fontSize: '14px'
+          }}>
+            Description:
+          </Label>
           <Input
             type="text"
             name="des"
             id="des"
             value={formData.des}
             onChange={handleChange}
+            style={{
+              borderRadius: '8px',
+              border: '2px solid #e8e8e8',
+              padding: '12px 16px',
+              fontSize: '14px',
+              transition: 'border-color 0.2s ease-in-out',
+              fontFamily: 'inherit'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#007bff';
+              e.target.style.boxShadow = '0 0 0 3px rgba(0,123,255,0.1)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#e8e8e8';
+              e.target.style.boxShadow = 'none';
+            }}
           />
         </FormGroup>
       </Form>

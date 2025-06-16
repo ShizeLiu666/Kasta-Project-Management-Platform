@@ -160,27 +160,36 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
         ) : (
           <TableContainer 
             component={Paper} 
+            elevation={0}
             sx={{ 
               boxShadow: 'none',
-              border: '1px solid #dee2e6',
-              borderRadius: '8px',
-              width: '100%',  // 固定容器宽度
+              border: '1px solid #f0f0f0',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              width: '100%',
               '& .MuiTable-root': {
-                tableLayout: 'fixed',  // 固定表格布局
+                tableLayout: 'fixed',
                 width: '100%'
               }
             }}
           >
             <Table>
               <TableHead>
-                <TableRow>
+                <TableRow sx={{ 
+                  backgroundColor: '#fafafa',
+                  '& .MuiTableCell-head': {
+                    border: 'none',
+                    borderBottom: '1px solid #f0f0f0'
+                  }
+                }}>
                   <TableCell 
                     sx={{ 
-                      width: '45%',  // 增加账户列宽度，因为现在包含了角色信息
+                      width: '45%',
                       fontWeight: 'bold',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
-                      textOverflow: 'ellipsis'
+                      textOverflow: 'ellipsis',
+                      padding: '16px 20px'
                     }}
                   >
                     Account
@@ -189,7 +198,8 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                     sx={{ 
                       width: '27.5%',
                       fontWeight: 'bold',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      padding: '16px 20px'
                     }}
                   >
                     Status
@@ -199,7 +209,8 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                       sx={{ 
                         width: '27.5%',
                         fontWeight: 'bold',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        padding: '16px 20px'
                       }}
                     >
                       Actions
@@ -213,10 +224,20 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                     key={index}
                     sx={{
                       '&:last-child td, &:last-child th': { border: 0 },
-                      '&:hover': { backgroundColor: '#f8f9fa' }
+                      '&:hover': { 
+                        backgroundColor: '#f8f9fa',
+                        transition: 'background-color 0.2s ease-in-out'
+                      },
+                      '& .MuiTableCell-body': {
+                        border: 'none',
+                        borderBottom: index === members.length - 1 ? 'none' : '1px solid #f5f5f5'
+                      }
                     }}
                   >
-                    <TableCell sx={{ width: '45%' }}>
+                    <TableCell sx={{ 
+                      width: '45%',
+                      padding: '16px 20px'
+                    }}>
                       <Box sx={{ 
                         display: 'flex', 
                         alignItems: 'center',
@@ -226,9 +247,10 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                         <Avatar
                           src={member.headPic || defaultAvatar}
                           sx={{ 
-                            width: 40,
-                            height: 40,
-                            flexShrink: 0
+                            width: 44,
+                            height: 44,
+                            flexShrink: 0,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                           }}
                           imgProps={{
                             onError: (e) => {
@@ -292,7 +314,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ padding: '16px 20px' }}>
                       <Typography 
                         variant="body2" 
                         sx={getStatusText(member.memberStatus)}
@@ -302,7 +324,7 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                     </TableCell>
                     
                     {userRole === 'OWNER' && (
-                      <TableCell>
+                      <TableCell sx={{ padding: '16px 20px' }}>
                         {member.role !== 'OWNER' && (
                           <CustomButton
                             type="remove"
@@ -314,11 +336,11 @@ const ProjectMembers = ({ projectId, userRole, onLeaveProject }) => {
                             color="#f62d51"
                             style={{
                               minWidth: 'auto',
-                              height: '24px',
-                              padding: '0 8px',
+                              height: '32px',
+                              padding: '0 12px',
                               fontSize: '0.8125rem',
                               fontWeight: 'normal',
-                              borderRadius: '4px',
+                              borderRadius: '6px',
                               marginLeft: '0',
                               marginRight: '0'
                             }}

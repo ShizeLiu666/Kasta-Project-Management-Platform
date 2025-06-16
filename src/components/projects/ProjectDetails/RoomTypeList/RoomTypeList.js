@@ -3,7 +3,8 @@ import RoomElement from "./RoomElement";
 import EditRoomTypeModal from "./EditRoomTypeModal";
 import DeleteRoomTypeModal from "./DeleteRoomTypeModal";
 import CreateRoomTypeModal from "./CreateRoomTypeModal";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Box, Typography } from "@mui/material";
+import FolderIcon from '@mui/icons-material/Folder';
 import CustomSearchBar from '../../../CustomComponents/CustomSearchBar';
 import { getToken } from '../../../auth/auth';
 import axiosInstance from '../../../../config'; 
@@ -144,11 +145,25 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
   };
 
   if (loading) {
-    return <CircularProgress />;
+    return (
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="300px"
+        flexDirection="column"
+        gap={2}
+      >
+        <CircularProgress size={40} />
+        <Typography variant="body2" color="text.secondary">
+          Loading room types...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div>
+    <Box sx={{ padding: '0 4px' }}>
       <CustomAlert
         isOpen={alert.isOpen}
         onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
@@ -157,12 +172,16 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
         autoHideDuration={alert.duration}
       />
       
-      <div style={{
+      <Box sx={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         width: "100%",
-        marginBottom: "10px",
+        marginBottom: "24px",
+        padding: "16px 20px",
+        backgroundColor: "#fafafa",
+        borderRadius: "12px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)"
       }}>
         <CustomSearchBar
           searchTerm={searchTerm}
@@ -182,18 +201,48 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
         >
           Create Room Type
         </CustomButton>
-      </div>
+      </Box>
 
-      {filteredRoomTypes.map((roomType) => (
-        <RoomElement
-          key={roomType.projectRoomId}
-          roomType={roomType}
-          onDelete={() => handleDeleteClick(roomType)}
-          onEdit={() => handleEditRoomType(roomType)}
-          onClick={() => handleRoomTypeClick(roomType)}
-          userRole={userRole}
-        />
-      ))}
+      {filteredRoomTypes.length === 0 ? (
+        <Box 
+          display="flex" 
+          flexDirection="column" 
+          alignItems="center" 
+          justifyContent="center"
+          minHeight="300px"
+          padding={4}
+          sx={{
+            backgroundColor: "#fafafa",
+            borderRadius: "12px",
+            border: "2px dashed #e0e0e0"
+          }}
+        >
+          <FolderIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No room types found
+          </Typography>
+          <Typography variant="body2" color="text.disabled" textAlign="center">
+            {searchTerm ? 'Try adjusting your search criteria' : 'Create your first room type to get started'}
+          </Typography>
+        </Box>
+      ) : (
+        <Box sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px"
+        }}>
+          {filteredRoomTypes.map((roomType) => (
+            <RoomElement
+              key={roomType.projectRoomId}
+              roomType={roomType}
+              onDelete={() => handleDeleteClick(roomType)}
+              onEdit={() => handleEditRoomType(roomType)}
+              onClick={() => handleRoomTypeClick(roomType)}
+              userRole={userRole}
+            />
+          ))}
+        </Box>
+      )}
       
       {selectedRoomType && (
         <>
@@ -220,7 +269,7 @@ const RoomTypeList = ({ projectId, projectName, onNavigate, userRole }) => {
         refreshAuthCodes={loadAuthCodes}
         existingRoomTypes={roomTypes}
       />
-    </div>
+    </Box>
   );
 };
 
