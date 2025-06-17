@@ -17,7 +17,7 @@ const captionStyle = {
   color: '#333'
 };
 
-export const renderConfigTables = (configData) => {
+export const renderConfigTables = (configData, options = {}) => {
   if (!configData) {
     return null;
   }
@@ -38,7 +38,11 @@ export const renderConfigTables = (configData) => {
 
   return (
     <div>
-      <DeviceTable devices={configData.devices} />
+      <DeviceTable 
+        devices={configData.devices} 
+        onDeviceRename={options.onDeviceRename}
+        onDownloadUpdatedConfig={options.onDownloadUpdatedConfig}
+      />
       {hasInputs && <InputModuleTable inputs={configData.inputs} />}
       {hasOutputs && <OutputModuleTable outputs={configData.outputs} />}
       {hasDryContacts && <DryContactTable dryContacts={configData.dryContacts} />}

@@ -11,11 +11,14 @@ import {
   Collapse,
   IconButton,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import EditIcon from '@mui/icons-material/Edit';
+import RenameDeviceModal from './RenameDeviceModal';
 
-const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
+const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle, onRename }) => {
   const [isTextTruncated, setIsTextTruncated] = useState(false);
   const textRef = useRef(null);
 
@@ -57,7 +60,7 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
         </TableCell>
         <TableCell 
           sx={{ 
-            width: '40%',
+            width: '35%',
             position: 'relative',
           }}
         >
@@ -87,11 +90,28 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
             </IconButton>
           )}
         </TableCell>
+        <TableCell sx={{ width: '10%' }}>
+          <Tooltip title="Rename Device">
+            <IconButton
+              size="small"
+              onClick={() => onRename(devices)}
+              sx={{
+                color: '#fbcd0b',
+                '&:hover': {
+                  color: '#e3b900',
+                  backgroundColor: 'rgba(251, 205, 11, 0.1)'
+                }
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
       </TableRow>
       {isTextTruncated && (
         <TableRow>
           <TableCell 
-            colSpan={3} 
+            colSpan={4} 
             sx={{ 
               py: 0,
               backgroundColor: '#fafafa',
@@ -115,9 +135,13 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle }) => {
   );
 };
 
-const DeviceTable = ({ devices }) => {
+const DeviceTable = ({ devices, onDeviceRename, onDownloadUpdatedConfig }) => {
   const [expandedTypes, setExpandedTypes] = React.useState(new Set());
   const [isTableExpanded, setIsTableExpanded] = useState(true);
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [selectedDevices, setSelectedDevices] = useState([]);
+  const [selectedDeviceType, setSelectedDeviceType] = useState('');
+  const [selectedDeviceModel, setSelectedDeviceModel] = useState('');
 
   const groupedDevices = useMemo(() => {
     return devices.reduce((acc, device) => {
@@ -144,6 +168,26 @@ const DeviceTable = ({ devices }) => {
       }
       return newSet;
     });
+  };
+
+  const handleRename = (devices) => {
+    setSelectedDevices(devices);
+    setSelectedDeviceType(devices[0].deviceType);
+    setSelectedDeviceModel(devices[0].appearanceShortname);
+    setRenameModalOpen(true);
+  };
+
+  const handleRenameModalClose = () => {
+    setRenameModalOpen(false);
+    setSelectedDevices([]);
+    setSelectedDeviceType('');
+    setSelectedDeviceModel('');
+  };
+
+  const handleRenameSave = (renamedDevices, newModel, downloadCallback) => {
+    if (onDeviceRename) {
+      onDeviceRename(renamedDevices, newModel, downloadCallback, selectedDeviceType, selectedDeviceModel);
+    }
   };
 
   return (
@@ -212,10 +256,20 @@ const DeviceTable = ({ devices }) => {
                   sx={{ 
                     fontWeight: 'bold', 
                     backgroundColor: '#f8f9fa',
-                    width: '40%'
+                    width: '35%'
                   }}
                 >
                   Device Names
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f8f9fa',
+                    width: '10%',
+                    textAlign: 'center'
+                  }}
+                >
+                  Rename
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -227,12 +281,24 @@ const DeviceTable = ({ devices }) => {
                   devices={group.devices}
                   isExpanded={expandedTypes.has(`${group.deviceType}_${group.appearanceShortname}`)}
                   onToggle={() => handleToggle(`${group.deviceType}_${group.appearanceShortname}`)}
+                  onRename={handleRename}
                 />
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Collapse>
+
+      <RenameDeviceModal
+        open={renameModalOpen}
+        onClose={handleRenameModalClose}
+        devices={selectedDevices}
+        allDevices={devices}
+        deviceType={selectedDeviceType}
+        deviceModel={selectedDeviceModel}
+        onSave={handleRenameSave}
+        onDownloadUpdatedConfig={onDownloadUpdatedConfig}
+      />
     </Box>
   );
 };

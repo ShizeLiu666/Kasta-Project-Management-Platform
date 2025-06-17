@@ -173,12 +173,157 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
     }
   };
 
+  const handleDownloadUpdatedConfig = (updatedConfig, roomName) => {
+    if (updatedConfig) {
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '_');
+      const jsonString = JSON.stringify(updatedConfig, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${roomName}_updated_${timestamp}.json`;
+      link.click();
+    }
+  };
+
   const handleUpdateAuthCode = () => {
     setUpdateAuthCodeModalOpen(true);
   };
 
   const handleUpdateAuthCodeSuccess = () => {
     fetchRoomDetail();
+  };
+
+  const handleDeviceRename = async (renamedDevices, newModel, downloadCallback, deviceType, originalModel) => {
+    try {
+      // Create a deep copy of the config to avoid mutations
+      const updatedConfig = JSON.parse(JSON.stringify(config));
+      
+      // Update device names and models in the main devices array
+      if (updatedConfig.devices) {
+        updatedConfig.devices = updatedConfig.devices.map(device => {
+          let updatedDevice = { ...device };
+          
+          // Update device name if changed
+          if (renamedDevices[device.deviceName]) {
+            updatedDevice.deviceName = renamedDevices[device.deviceName];
+          }
+          
+          // Update device model if changed (only for devices of the same type and original model)
+          if (newModel && device.deviceType === deviceType && device.appearanceShortname === originalModel) {
+            updatedDevice.appearanceShortname = newModel;
+          }
+          
+          return updatedDevice;
+        });
+      }
+
+      // Update device references in groups
+      if (updatedConfig.groups) {
+        updatedConfig.groups = updatedConfig.groups.map(group => ({
+          ...group,
+          devices: group.devices.map(device => {
+            let updatedGroupDevice = { ...device };
+            
+            // Update device name if changed
+            if (renamedDevices[device.deviceName]) {
+              updatedGroupDevice.deviceName = renamedDevices[device.deviceName];
+            }
+            
+            // Update device model if changed (only for devices of the same type and original model)
+            if (newModel && device.appearanceShortname === originalModel) {
+              updatedGroupDevice.appearanceShortname = newModel;
+            }
+            
+            return updatedGroupDevice;
+          })
+        }));
+      }
+
+      // Update device references in scenes
+      if (updatedConfig.scenes) {
+        updatedConfig.scenes = updatedConfig.scenes.map(scene => ({
+          ...scene,
+          contents: scene.contents.map(content => {
+            if (renamedDevices[content.name]) {
+              return {
+                ...content,
+                name: renamedDevices[content.name]
+              };
+            }
+            return content;
+          })
+        }));
+      }
+
+      // Update device references in remote controls
+      if (updatedConfig.remoteControls) {
+        updatedConfig.remoteControls = updatedConfig.remoteControls.map(remote => ({
+          ...remote,
+          links: remote.links.map(link => {
+            // Check if this is a device link (linkType === 1 means device)
+            if (link.linkType === 1 && renamedDevices[link.linkName]) {
+              return {
+                ...link,
+                linkName: renamedDevices[link.linkName]
+              };
+            }
+            return link;
+          })
+        }));
+      }
+
+      // Update device references in inputs
+      if (updatedConfig.inputs) {
+        updatedConfig.inputs = updatedConfig.inputs.map(input => {
+          if (renamedDevices[input.deviceName]) {
+            return {
+              ...input,
+              deviceName: renamedDevices[input.deviceName]
+            };
+          }
+          return input;
+        });
+      }
+
+      // Update device references in outputs
+      if (updatedConfig.outputs) {
+        updatedConfig.outputs = updatedConfig.outputs.map(output => {
+          if (renamedDevices[output.deviceName]) {
+            return {
+              ...output,
+              deviceName: renamedDevices[output.deviceName]
+            };
+          }
+          return output;
+        });
+      }
+
+      // Update device references in dry contacts
+      if (updatedConfig.dryContacts) {
+        updatedConfig.dryContacts = updatedConfig.dryContacts.map(dryContact => {
+          if (renamedDevices[dryContact.deviceName]) {
+            return {
+              ...dryContact,
+              deviceName: renamedDevices[dryContact.deviceName]
+            };
+          }
+          return dryContact;
+        });
+      }
+
+      // Save the updated configuration
+      await submitJson(updatedConfig, true);
+      
+      // Download the updated configuration if callback is provided
+      if (downloadCallback) {
+        downloadCallback(updatedConfig, roomTypeName);
+      }
+      
+      showAlert("Device renamed successfully", "success");
+    } catch (error) {
+      showAlert("Failed to rename devices", "error");
+      console.error("Error renaming devices:", error);
+    }
   };
 
   const getUsageColor = (remaining, total) => {
@@ -337,7 +482,10 @@ const RoomConfigList = ({ roomTypeName, projectRoomId, userRole }) => {
             ) : (
               <>
                 {config && Object.keys(config).length > 0 && (
-                  renderConfigTables(config)
+                  renderConfigTables(config, {
+                    onDeviceRename: handleDeviceRename,
+                    onDownloadUpdatedConfig: handleDownloadUpdatedConfig
+                  })
                 )}
               </>
             )}
