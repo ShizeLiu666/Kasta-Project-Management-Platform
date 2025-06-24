@@ -1,10 +1,54 @@
+/**
+ * 场景验证模块 (Scenes.js)
+ * 
+ * 验证逻辑概述：
+ * 1. 场景名称验证：
+ *    - 检查场景名称格式和唯一性
+ *    - 确保场景名称不与组名冲突
+ *    - 验证场景名称符合命名规范
+ * 2. 设备类型特定验证：
+ *    - 继电器类型：支持ON/OFF操作，单设备或组控
+ *    - 调光器类型：支持ON/OFF/调光百分比操作
+ *    - 风扇类型：支持风扇+灯光组合控制，包含速度设置
+ *    - 窗帘类型：支持OPEN/CLOSE操作
+ *    - 干接点类型：支持特殊动作验证（1SEC、6SEC、9SEC、REVERS）
+ *    - 电源插座类型：支持单路/双路插座控制
+ * 3. 操作格式验证：
+ *    - 使用正则表达式验证操作指令格式
+ *    - 支持单设备和多设备组控
+ *    - 验证操作参数范围（如调光百分比、风扇速度）
+ * 4. 设备类型一致性验证：
+ *    - 确保同一指令中的设备类型一致
+ *    - 处理特殊情况（如调光器和继电器混合）
+ * 5. 空场景检查：确保每个场景至少包含一个控制指令
+ * 
+ * 输入格式：
+ * NAME: 场景名称
+ * CONTROL CONTENT
+ * 设备名称1 操作指令
+ * 设备名称2, 设备名称3 操作指令
+ * ...
+ * 
+ * 支持的操作格式示例：
+ * - 继电器：Light1 ON, Light2 OFF
+ * - 调光器：Dimmer1 ON +50%
+ * - 风扇：Fan1 ON RELAY OFF SPEED 1
+ * - 窗帘：Curtain1 OPEN
+ * - 插座：Socket1 ON OFF (双路插座)
+ * 
+ * 输出：
+ * - errors: 验证错误数组
+ * - registeredSceneNames: 已注册的场景名称集合
+ */
+
+// 电源操作常量定义
 const POWER_OPERATIONS = {
     ON: "ON",
     OFF: "OFF",
     UNSELECT: "UNSELECT"
 };
 
-//! Check for 'NAME' without a colon
+// 检查行是否以 NAME: 开头
 function checkNamePrefix(line, errors) {
   if (!line.startsWith("NAME:")) {
     errors.push(
@@ -15,9 +59,9 @@ function checkNamePrefix(line, errors) {
   return true;
 }
 
-//! Validate the scene name
+// 验证场景名称有效性
 function validateSceneName(sceneName, errors, registeredSceneNames, registeredGroupNames) {
-  //! Check if the scene name is empty
+  // 检查场景名称是否为空
   if (!sceneName) {
     errors.push(
       `KASTA SCENE: The line with 'NAME:' is missing a scene name. Please enter a valid scene name.`
@@ -25,7 +69,7 @@ function validateSceneName(sceneName, errors, registeredSceneNames, registeredGr
     return false;
   }
 
-  //! Check for disallowed special characters in the scene name, allowing spaces
+  // 检查场景名称中的非法特殊字符，允许空格
   if (/[^a-zA-Z0-9_ ]/.test(sceneName)) {
     errors.push(
       `KASTA SCENE: The scene name '${sceneName}' contains special characters. Only letters, numbers, underscores, and spaces are allowed.`
@@ -33,13 +77,13 @@ function validateSceneName(sceneName, errors, registeredSceneNames, registeredGr
     return false;
   }
 
-  // 检查重复的 Scene Name
+  // 检查重复的场景名称
   if (registeredSceneNames.has(sceneName)) {
     errors.push(`KASTA SCENE: The scene name '${sceneName}' is duplicated. Each scene name must be unique.`);
     return false;
   }
 
-  // 新增：检查场景名是否与组名冲突
+  // 检查场景名是否与组名冲突
   if (registeredGroupNames.has(sceneName)) {
     errors.push(`KASTA SCENE: The scene name '${sceneName}' conflicts with an existing group name. Scene names must be different from group names.`);
     return false;
@@ -49,7 +93,7 @@ function validateSceneName(sceneName, errors, registeredSceneNames, registeredGr
   return true;
 }
 
-//! Validate Relay Type operations using regex
+// 使用正则表达式验证继电器类型操作
 function validateRelayTypeOperations(names, operation, errors, sceneName) {
   const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
   const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
@@ -74,7 +118,7 @@ function validateRelayTypeOperations(names, operation, errors, sceneName) {
   }
 }
 
-//! Validate Dimmer Type operations using regex
+// 使用正则表达式验证调光器类型操作
 function validateDimmerTypeOperations(names, operation, errors, sceneName) {
   const singleOnPattern = /^[a-zA-Z0-9_]+ ON$/i;
   const singleOffPattern = /^[a-zA-Z0-9_]+ OFF$/i;
@@ -115,7 +159,7 @@ function validateDimmerTypeOperations(names, operation, errors, sceneName) {
   }
 }
 
-//! Validate Fan Type operations using regex
+// 使用正则表达式验证风扇类型操作
 function validateFanTypeOperations(parts, errors, sceneName) {
   const deviceName = parts[0];
 
@@ -172,7 +216,7 @@ function validateFanTypeOperations(parts, errors, sceneName) {
   }
 }
 
-//! Validate Curtain Type operations using regex
+// 使用正则表达式验证窗帘类型操作
 function validateCurtainTypeOperations(names, operation, errors, sceneName) {
   // 检查分隔符
   const originalString = names.join(", ") + " " + operation;
@@ -213,14 +257,14 @@ function validateCurtainTypeOperations(names, operation, errors, sceneName) {
   }
 }
 
-//! Validate PowerPoint Type operations using regex
+// 使用正则表达式验证电源插座类型操作
 function validatePowerPointTypeOperations(
   parts,
   errors,
   sceneName,
   deviceNameToType
 ) {
-  // 找到第一个操作符（ON, OFF, UNSELECT之前的部分作为设备名
+  // 找到第一个操作符（ON, OFF, UNSELECT之前的部分作为设备名）
   const deviceNames = [];
   let operationIndex = -1;
 
@@ -311,7 +355,7 @@ function validatePowerPointTypeOperations(
   }
 }
 
-//! Validate Dry Contact Type operations using regex
+// 使用正则表达式验证干接点类型操作
 function validateDryContactTypeOperations(names, operation, errors, sceneName, dryContactSpecialActions) {
     console.log("Scenes - Validating Dry Contact Operation:", {
         names,
@@ -390,7 +434,7 @@ function validateDryContactTypeOperations(names, operation, errors, sceneName, d
     }
 }
 
-//! Validate the consistency of device types within a line in a scene
+// 验证场景中一行内设备类型的一致性
 function validateSceneDevicesInLine(
   parts,
   errors,
@@ -436,12 +480,12 @@ function validateSceneDevicesInLine(
     }
   }
 
-  // Step 1 & 2: Identify devices and operation
+  // 步骤1和2：识别设备和操作
   let deviceNameProvided = false;
   let operationParts = [];
   let i = 0;
 
-  // 添加 currentDeviceType 变量
+  // 添加当前设备类型变量
   let currentDeviceType = null;
 
   while (i < parts.length) {
@@ -525,7 +569,7 @@ function validateSceneDevicesInLine(
 
   operation = operationParts.join(" ");
 
-  // Step 3: Validate the existence and type of each device
+  // 步骤3：验证每个设备的存在性和类型
   deviceNames.forEach((names) => {
     const typesInBatch = new Set();
 
@@ -549,13 +593,13 @@ function validateSceneDevicesInLine(
       }
     });
 
-    // Step 4: Validate mixed types in the same batch
+    // 步骤4：验证同一批次中的混合类型
     const simplifiedTypesInBatch = new Set(
       [...typesInBatch].map((type) => type.split(" ")[0])
     );
 
     const instruction = parts.join(" ");
-    // Allow PowerPoint Types to be treated in a special case
+    // 允许PowerPoint类型在特殊情况下处理
     if (simplifiedTypesInBatch.size > 1) {
       const containsDimmerAndRelay =
         simplifiedTypesInBatch.has("Dimmer") &&
@@ -573,7 +617,7 @@ function validateSceneDevicesInLine(
     }
   });
 
-  // Step 5: If there are no recognized devices, skip further checks
+  // 步骤5：如果没有识别的设备，跳过进一步检查
   if (deviceNames.flat().length === 0) {
     errors.push(
       `KASTA SCENE [${sceneName}]: No recognized devices found in the instruction.`
@@ -581,7 +625,7 @@ function validateSceneDevicesInLine(
     return;
   }
 
-  // Step 6: Validate operations based on device type using regex
+  // 步骤6：基于设备类型使用正则表达式验证操作
   const checkDeviceType = (deviceType, baseType) =>
     deviceType.startsWith(baseType);
 
@@ -645,7 +689,7 @@ function validateSceneDevicesInLine(
   }
 }
 
-//! Validate all scenes in the provided data
+// 验证提供数据中的所有场景
 export function validateScenes(
   sceneDataArray, 
   deviceNameToType, 
@@ -678,7 +722,7 @@ export function validateScenes(
       if (!validateSceneName(currentSceneName, errors, registeredSceneNames, registeredGroupNames))
         return;
       
-      // 重置控制容标志
+      // 重置控制内容标志
       hasControlContent = false;
     } else if (currentSceneName && line) {
       const parts = line.split(/\s+/);

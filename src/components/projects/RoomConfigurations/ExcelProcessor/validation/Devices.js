@@ -1,3 +1,31 @@
+/**
+ * 设备验证模块 (Devices.js)
+ * 
+ * 验证逻辑概述：
+ * 1. 格式验证：检查设备定义是否使用正确的 "NAME:" 前缀格式
+ * 2. 设备型号验证：
+ *    - 验证设备型号是否在预定义的 AllDeviceTypes 中存在
+ *    - 检查设备型号名称是否符合命名规范（字母、数字、下划线、连字符）
+ * 3. 设备名称验证：
+ *    - 确保设备名称唯一性（不能重复）
+ *    - 检查设备名称长度（1-20字符）
+ *    - 验证设备名称不能与设备型号相同
+ *    - 确保设备名称符合命名规范（字母、数字、下划线、连字符，不能包含空格）
+ * 4. 实例验证：确保每个定义的设备型号至少有一个设备实例
+ * 5. 依赖关系建立：构建设备名称到设备类型的映射关系，供其他模块使用
+ * 
+ * 输入格式：
+ * NAME: 设备型号
+ * 设备名称1
+ * 设备名称2
+ * ...
+ * 
+ * 输出：
+ * - errors: 验证错误数组
+ * - deviceNameToType: 设备名称到设备类型的映射
+ * - registeredDeviceNames: 已注册的设备名称集合
+ */
+
 import { AllDeviceTypes } from "../ExcelProcessor";
 
 // 常量定义
@@ -11,6 +39,7 @@ const createError = (message) => `${KASTA_DEVICE_ERROR} ${message}`;
 
 const isValidName = (name) => VALID_NAME_REGEX.test(name);
 
+// 检查行是否以 NAME: 开头
 function checkNamePrefix(line, errors) {
   if (!line.startsWith(NAME_PREFIX)) {
     errors.push(createError(`The line '${line}' is missing a colon after 'NAME'. It should be formatted as 'NAME:'.`));
@@ -19,6 +48,7 @@ function checkNamePrefix(line, errors) {
   return true;
 }
 
+// 验证设备型号有效性
 function validateDeviceModel(deviceModel, errors) {
   if (!deviceModel) {
     errors.push(createError("The line with 'NAME:' is missing a device model. Please enter a valid device model."));
@@ -33,6 +63,7 @@ function validateDeviceModel(deviceModel, errors) {
   return true;
 }
 
+// 检查可能缺少NAME:前缀的设备型号
 function checkMissingNamePrefix(line, errors) {
   const checkModel = (model) => {
     if (model === line) {
@@ -54,7 +85,7 @@ function checkMissingNamePrefix(line, errors) {
   return true;
 }
 
-// 新增：获取所有设备型号的函数
+// 获取所有设备型号的函数
 function getAllModelNames() {
   const allModels = [];
   
@@ -79,6 +110,7 @@ function getAllModelNames() {
 // 缓存所有设备型号
 const ALL_MODEL_NAMES = getAllModelNames();
 
+// 验证设备名称有效性
 function validateDeviceName(line, errors, registeredDeviceNames) {
   // console.log("Line:", line);
   // 首先检查是否与任何设备型号冲突
@@ -112,6 +144,7 @@ function validateDeviceName(line, errors, registeredDeviceNames) {
   return true;
 }
 
+// 根据设备型号查找对应的设备类型
 function findDeviceType(currentDeviceModel) {
   for (const [deviceType, models] of Object.entries(AllDeviceTypes)) {
     if (Array.isArray(models) && models.includes(currentDeviceModel)) {
@@ -127,6 +160,7 @@ function findDeviceType(currentDeviceModel) {
   return { type: null, exists: false };
 }
 
+// 主验证函数
 export function validateDevices(deviceDataArray) {
   const errors = [];
   let deviceNameToType = {};
@@ -134,11 +168,12 @@ export function validateDevices(deviceDataArray) {
   let currentDeviceType = null;
   let currentDeviceModel = null;
   let hasCurrentModel = false;  // 标记是否有当前有效的设备型号
-  let hasDeviceInstance = false;  // 新增：标记当前型号是否有设备实例
+  let hasDeviceInstance = false;  // 标记当前型号是否有设备实例
 
   deviceDataArray.forEach((line, index) => {
     line = line.trim();
 
+    // 跳过数量和括号行
     if (line.startsWith(QTY_PREFIX) || line.includes("(")) return;
 
     if (line.startsWith(NAME_PREFIX)) {
@@ -150,7 +185,7 @@ export function validateDevices(deviceDataArray) {
       // 重置设备实例标记
       hasDeviceInstance = false;
       
-      // 情况1和2：NAME开头的行
+      // 处理NAME:开头的行
       if (!checkNamePrefix(line, errors)) return;
       currentDeviceModel = line.substring(NAME_PREFIX.length).trim();
       if (!validateDeviceModel(currentDeviceModel, errors)) {
@@ -170,7 +205,7 @@ export function validateDevices(deviceDataArray) {
       hasCurrentModel = true;
       deviceNameToType[currentDeviceModel] = currentDeviceType;
     } else {
-      // 情况3：设备名称行
+      // 处理设备名称行
       if (!checkMissingNamePrefix(line, errors)) return;
       
       // 检查是否有当前有效的设备型号

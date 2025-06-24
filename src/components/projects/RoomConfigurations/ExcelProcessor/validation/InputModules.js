@@ -1,8 +1,44 @@
-// 定义常量
-const VALID_ACTIONS = ['TOGGLE', 'MOMENTARY'];
-const MAX_CHANNELS = 5;  // 只支持 5 Input Module
+/**
+ * 输入模块验证模块 (InputModules.js)
+ * 
+ * 验证逻辑概述：
+ * 1. 模块名称验证：
+ *    - 验证模块名称是否在已注册设备中存在
+ *    - 确保模块名称唯一性（不能重复使用）
+ *    - 检查设备类型是否为"5 Input Module"类型
+ * 2. 通道配置验证：
+ *    - 验证通道编号格式（如 "1: ACTION"）
+ *    - 检查通道编号是否在有效范围内（1-5）
+ *    - 确保同一模块内通道编号不重复
+ * 3. 动作类型验证：
+ *    - 验证动作是否在预定义列表中（TOGGLE、MOMENTARY）
+ *    - 确保每个通道都配置了正确的动作类型
+ * 4. 格式完整性验证：
+ *    - 检查模块定义格式（NAME: 模块名）
+ *    - 验证通道配置格式（通道号: 动作类型）
+ *    - 确保配置顺序正确（先定义模块，再配置通道）
+ * 
+ * 输入格式：
+ * NAME: 输入模块名称
+ * 1: 动作类型 (TOGGLE/MOMENTARY)
+ * 2: 动作类型
+ * ...
+ * 5: 动作类型
+ * 
+ * 动作类型说明：
+ * - TOGGLE: 切换模式（按下切换状态）
+ * - MOMENTARY: 瞬时模式（按下时激活，松开时恢复）
+ * 
+ * 输出：
+ * - errors: 验证错误数组
+ */
 
-// 检查名称前缀
+// 定义有效动作类型常量
+const VALID_ACTIONS = ['TOGGLE', 'MOMENTARY'];
+// 最大通道数（只支持5 Input Module）
+const MAX_CHANNELS = 5;
+
+// 检查名称前缀格式
 function checkNamePrefix(line, errors) {
     if (!line.startsWith("NAME:")) {
         errors.push(
@@ -48,7 +84,7 @@ function validateInputModuleName(moduleName, errors, deviceNameToType, registere
     return true;
 }
 
-// 检查命令格式
+// 检查通道配置命令格式
 function checkCommandFormat(line, errors, currentModuleName) {
     const match = line.match(/^(\d+):\s*(\w+)$/);
     
@@ -88,7 +124,7 @@ export function validateInputModules(inputsDataArray, deviceNameToType, register
     inputsDataArray.forEach((line, index) => {
         line = line.trim();
 
-        // 新增：检查第一行是否以数字开头（直接配置通道）
+        // 检查第一行是否以数字开头（直接配置通道）
         if (index === 0 && /^\d+:/.test(line)) {
             errors.push(
                 `INPUT MODULE: Please define the input module name using 'NAME:' before configuring channels.`
@@ -113,7 +149,7 @@ export function validateInputModules(inputsDataArray, deviceNameToType, register
                 return;
             }
         } else if (!currentModuleName && line.trim()) {
-            // 新增：如果没有当前模块名但尝试配置通道
+            // 如果没有当前模块名但尝试配置通道
             if (/^\d+:/.test(line)) {
                 errors.push(
                     `INPUT MODULE: Cannot configure channel '${line}' without first defining a module name using 'NAME:'.`

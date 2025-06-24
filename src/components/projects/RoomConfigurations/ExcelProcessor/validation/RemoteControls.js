@@ -1,3 +1,48 @@
+/**
+ * 遥控器验证模块 (RemoteControls.js)
+ * 
+ * 验证逻辑概述：
+ * 1. 遥控器型号验证：
+ *    - 验证遥控器名称是否在已注册设备中存在
+ *    - 根据设备型号确定可用按键数量
+ *    - 支持多种遥控器类型（1-6按键面板、输入模块、输出模块）
+ * 2. 按键绑定验证：
+ *    - 验证按键编号格式（如 "1: target_name"）
+ *    - 检查按键编号是否在有效范围内
+ *    - 确保按键编号不重复
+ * 3. 目标验证：
+ *    - 验证绑定目标是否存在（设备、组、场景）
+ *    - 检查目标类型的操作兼容性
+ *    - 验证特殊设备的操作参数
+ * 4. 操作参数验证：
+ *    - 风扇类型：支持FAN、LAMP、WHOLE操作
+ *    - 窗帘类型：支持OPEN、CLOSE、WHOLE操作
+ *    - 双路插座：支持LEFT、RIGHT、WHOLE操作
+ *    - 输出模块：支持FIRST、SECOND、THIRD、FOURTH、WHOLE操作
+ * 5. 特殊限制检查：
+ *    - 输入模块不能作为遥控器绑定目标
+ *    - 组和场景不支持操作参数
+ *    - 继电器和调光器不支持特殊操作
+ * 
+ * 输入格式：
+ * NAME: 遥控器设备名称
+ * LINK
+ * 1: 目标名称 [- 操作参数]
+ * 2: 目标名称 [- 操作参数]
+ * ...
+ * 
+ * 支持的绑定格式示例：
+ * - 设备绑定：1: Light1
+ * - 组绑定：2: LivingRoomLights
+ * - 场景绑定：3: MovieTime
+ * - 特殊操作：4: Fan1 - FAN
+ * - 输出模块：5: OutputModule1 - FIRST
+ * 
+ * 输出：
+ * - errors: 验证错误数组
+ */
+
+// 设备型号到按键数量的映射表
 const deviceModelToKeyCount = {
     "1 Push Panel": 1,
     "2 Push Panel": 2,
@@ -8,9 +53,11 @@ const deviceModelToKeyCount = {
     "5 Input Module": 5,
 };
 
+// 输入模块类型和动作定义（暂未使用）
 // const INPUT_MODULE_TYPES = ["5 Input Module", "6 Input Module"];
 // const INPUT_MODULE_ACTIONS = ["TOGGLE", "MOMENTARY"];
 
+// 检查行是否以 NAME: 开头
 function checkNamePrefix(line, errors) {
     if (!line.startsWith("NAME:")) {
         errors.push(
@@ -21,6 +68,7 @@ function checkNamePrefix(line, errors) {
     return true;
 }
 
+// 验证遥控器名称有效性
 function validateRemoteControlName(remoteControlName, errors, registeredRemoteControlNames) {
     if (!remoteControlName) {
         errors.push(
@@ -40,6 +88,7 @@ function validateRemoteControlName(remoteControlName, errors, registeredRemoteCo
     return true;
 }
 
+// 根据设备名称获取按键数量
 function getKeyCountFromDeviceName(deviceName, deviceNameToType) {
     const deviceType = deviceNameToType[deviceName];
     if (!deviceType) {
@@ -59,6 +108,7 @@ function getKeyCountFromDeviceName(deviceName, deviceNameToType) {
     return null;
 }
 
+// 检查按键绑定命令格式
 function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount) {
     const match = line.match(/^(\d+):\s+(.+)$/);
     if (!match) {
@@ -79,6 +129,7 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
     return match;
 }
 
+// 已注释的设备命令验证函数（保留用于参考）
 // function validateDeviceCommand(command, errors, currentRemoteControlName, registeredDeviceNames, deviceNameToType) {
 //     const deviceMatch = command.match(/^DEVICE\s+(\S+)(?:\s+-\s+(\S+))?$/);
 //     if (!deviceMatch) {
@@ -133,6 +184,7 @@ function checkCommandFormat(line, errors, currentRemoteControlName, maxKeyCount)
 //     return true;
 // }
 
+// 验证绑定目标（设备、组、场景）
 function validateTarget(
     command, 
     errors, 
@@ -173,7 +225,7 @@ function validateTarget(
             return false;
         }
 
-        // 检查是否是 Input Module
+        // 检查是否是输入模块
         if (deviceType === "5 Input Module") {
             errors.push(
                 `Remote Control '${currentRemoteControlName}': Cannot bind 5 Input Module '${targetName}' as a target device.`
@@ -223,7 +275,7 @@ function validateTarget(
 
                 default:
                     if (deviceType.includes("Dimmer Type") || deviceType.includes("Relay Type")) {
-                        // Dimmer Type 和 Relay Type 不支持特殊操作
+                        // 调光器类型和继电器类型不支持特殊操作
                         errors.push(
                             `Remote Control '${currentRemoteControlName}': Device '${targetName}' of type '${deviceType}' does not support operations.`
                         );
@@ -256,6 +308,7 @@ function validateTarget(
     }
 }
 
+// 主验证函数
 export function validateRemoteControls(
     remoteControlDataArray, 
     deviceNameToType, 

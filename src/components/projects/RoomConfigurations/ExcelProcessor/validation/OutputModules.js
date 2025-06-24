@@ -1,8 +1,50 @@
-// 定义常量
+/**
+ * 输出模块验证模块 (OutputModules.js)
+ * 
+ * 验证逻辑概述：
+ * 1. 模块名称验证：
+ *    - 验证模块名称是否在已注册设备中存在
+ *    - 确保模块名称唯一性（不能重复使用）
+ *    - 检查设备类型是否为"4 Output Module"类型
+ * 2. 通道配置验证：
+ *    - 验证通道编号格式（如 "1: OUTPUT_NAME" 或 "1: OUTPUT_NAME - ACTION"）
+ *    - 检查通道编号是否在有效范围内（1-4）
+ *    - 确保同一模块内通道编号不重复
+ * 3. 输出名称验证：
+ *    - 验证输出名称不包含空格
+ *    - 确保输出名称格式正确
+ * 4. 动作类型验证：
+ *    - 验证动作是否在预定义列表中（NORMAL、1SEC、6SEC、9SEC、REVERSE）
+ *    - 支持可选的动作参数配置
+ * 5. 格式完整性验证：
+ *    - 检查模块定义格式（NAME: 模块名）
+ *    - 验证通道配置格式（通道号: 输出名称 [- 动作]）
+ *    - 确保配置顺序正确（先定义模块，再配置通道）
+ * 
+ * 输入格式：
+ * NAME: 输出模块名称
+ * 1: 输出名称 [- 动作类型]
+ * 2: 输出名称 [- 动作类型]
+ * ...
+ * 4: 输出名称 [- 动作类型]
+ * 
+ * 动作类型说明：
+ * - NORMAL: 标准输出（默认）
+ * - 1SEC: 1秒延时输出
+ * - 6SEC: 6秒延时输出
+ * - 9SEC: 9秒延时输出
+ * - REVERSE: 反向输出
+ * 
+ * 输出：
+ * - errors: 验证错误数组
+ */
+
+// 定义有效动作类型常量
 const VALID_ACTIONS = ['NORMAL', '1SEC', '6SEC', '9SEC', 'REVERSE'];
+// 最大通道数（4 Output Module）
 const MAX_CHANNELS = 4;
 
-// 检查名称前缀
+// 检查名称前缀格式
 function checkNamePrefix(line, errors) {
     if (!line.startsWith("NAME:")) {
         errors.push(
@@ -48,7 +90,7 @@ function validateOutputModuleName(moduleName, errors, deviceNameToType, register
     return true;
 }
 
-// 检查命令格式
+// 检查通道配置命令格式
 function checkCommandFormat(line, errors, currentModuleName) {
     const match = line.match(/^(\d+):\s*(.*)$/);
     
@@ -81,7 +123,7 @@ function checkCommandFormat(line, errors, currentModuleName) {
     return match;
 }
 
-// 验证输出命令
+// 验证输出命令格式和内容
 function validateOutputCommand(command, errors, currentModuleName) {
     if (command.includes(' - ')) {
         const commandMatch = command.match(/^([^\s]+)\s+-\s+(\S+)$/);
@@ -132,7 +174,7 @@ export function validateOutputModules(outputsDataArray, deviceNameToType, regist
     outputsDataArray.forEach((line, index) => {
         line = line.trim();
 
-        // 新增：检查第一行是否以数字开头（直接配置通道）
+        // 检查第一行是否以数字开头（直接配置通道）
         if (index === 0 && /^\d+:/.test(line)) {
             errors.push(
                 `OUTPUT MODULE: Please define the output module name using 'NAME:' before configuring channels.`
@@ -157,7 +199,7 @@ export function validateOutputModules(outputsDataArray, deviceNameToType, regist
                 return;
             }
         } else if (!currentModuleName && line.trim()) {
-            // 新增：如果没有当前模块名但尝试配置通道
+            // 如果没有当前模块名但尝试配置通道
             if (/^\d+:/.test(line)) {
                 errors.push(
                     `OUTPUT MODULE: Cannot configure channel '${line}' without first defining a module name using 'NAME:'.`

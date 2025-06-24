@@ -1,7 +1,46 @@
-// 定义常量
+/**
+ * 干接点模块验证模块 (DryContactModules.js)
+ * 
+ * 验证逻辑概述：
+ * 1. 模块名称验证：
+ *    - 验证模块名称是否在已注册设备中存在
+ *    - 确保模块名称唯一性（不能重复使用）
+ *    - 检查设备类型是否为"Dry Contact"类型
+ * 2. 动作类型验证：
+ *    - 验证动作是否在预定义列表中（NORMAL、1SEC、6SEC、9SEC、REVERSE）
+ *    - 确保每个模块都配置了动作类型
+ *    - 记录特殊动作设备用于后续模块使用
+ * 3. 格式完整性验证：
+ *    - 检查模块定义格式（NAME: 模块名）
+ *    - 确保模块名后紧跟动作配置
+ *    - 验证配置的完整性（无遗漏模块）
+ * 4. 特殊动作追踪：
+ *    - 识别并记录非NORMAL动作的设备
+ *    - 为场景验证模块提供特殊动作设备映射
+ * 
+ * 输入格式：
+ * NAME: 干接点模块名称
+ * 动作类型 (NORMAL/1SEC/6SEC/9SEC/REVERSE)
+ * NAME: 另一个模块名称
+ * 动作类型
+ * ...
+ * 
+ * 动作类型说明：
+ * - NORMAL: 标准开关动作
+ * - 1SEC: 1秒延时动作
+ * - 6SEC: 6秒延时动作  
+ * - 9SEC: 9秒延时动作
+ * - REVERSE: 反向动作
+ * 
+ * 输出：
+ * - errors: 验证错误数组
+ * - specialActionDevices: 特殊动作设备映射（Map对象）
+ */
+
+// 定义有效动作类型常量
 const VALID_ACTIONS = ['NORMAL', '1SEC', '6SEC', '9SEC', 'REVERSE'];
 
-// 检查名称前缀
+// 检查名称前缀格式
 function checkNamePrefix(line, errors) {
     if (!line.startsWith("NAME:")) {
         errors.push(
@@ -47,7 +86,7 @@ function validateDryContactName(moduleName, errors, deviceNameToType, registered
     return true;
 }
 
-// 验证动作类型
+// 验证动作类型有效性
 function validateAction(action, errors, currentModuleName) {
     if (!VALID_ACTIONS.includes(action)) {
         errors.push(
@@ -69,7 +108,7 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
     dryContactsDataArray.forEach((line, index) => {
         line = line.trim();
 
-        // 新增：检查第一行是否直接配置动作
+        // 检查第一行是否直接配置动作
         if (index === 0 && VALID_ACTIONS.includes(line)) {
             errors.push(
                 `DRY CONTACT MODULE: Please define the module name using 'NAME:' before configuring its action.`
@@ -93,7 +132,7 @@ export function validateDryContactModules(dryContactsDataArray, deviceNameToType
             }
             expectingAction = true;
         } else if (!currentModuleName && line.trim()) {
-            // 新增：如果没有当前模块名但尝试配置动作
+            // 如果没有当前模块名但尝试配置动作
             if (VALID_ACTIONS.includes(line)) {
                 errors.push(
                     `DRY CONTACT MODULE: Cannot configure action '${line}' without first defining a module name using 'NAME:'.`
