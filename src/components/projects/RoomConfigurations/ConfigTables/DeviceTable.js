@@ -11,11 +11,11 @@ import {
   Collapse,
   IconButton,
   Typography,
-  Tooltip,
+  // Tooltip,
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import EditIcon from '@mui/icons-material/Edit';
+// import EditIcon from '@mui/icons-material/Edit';
 import RenameDeviceModal from './RenameDeviceModal';
 
 const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle, onRename }) => {
@@ -60,7 +60,7 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle, onRename }) 
         </TableCell>
         <TableCell 
           sx={{ 
-            width: '35%',
+            width: '40%',
             position: 'relative',
           }}
         >
@@ -90,28 +90,11 @@ const DeviceTypeRow = ({ deviceType, devices, isExpanded, onToggle, onRename }) 
             </IconButton>
           )}
         </TableCell>
-        <TableCell sx={{ width: '10%' }}>
-          <Tooltip title="Rename Device">
-            <IconButton
-              size="small"
-              onClick={() => onRename(devices)}
-              sx={{
-                color: '#fbcd0b',
-                '&:hover': {
-                  color: '#e3b900',
-                  backgroundColor: 'rgba(251, 205, 11, 0.1)'
-                }
-              }}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </TableCell>
       </TableRow>
       {isTextTruncated && (
         <TableRow>
           <TableCell 
-            colSpan={4} 
+            colSpan={3} 
             sx={{ 
               py: 0,
               backgroundColor: '#fafafa',
@@ -256,20 +239,10 @@ const DeviceTable = ({ devices, onDeviceRename, onDownloadUpdatedConfig }) => {
                   sx={{ 
                     fontWeight: 'bold', 
                     backgroundColor: '#f8f9fa',
-                    width: '35%'
+                    width: '40%'
                   }}
                 >
                   Device Names
-                </TableCell>
-                <TableCell 
-                  sx={{ 
-                    fontWeight: 'bold', 
-                    backgroundColor: '#f8f9fa',
-                    width: '10%',
-                    textAlign: 'center'
-                  }}
-                >
-                  Rename
                 </TableCell>
               </TableRow>
             </TableHead>
